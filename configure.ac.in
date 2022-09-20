@@ -1,0 +1,157 @@
+dnl
+dnl Copyright (c) 2022
+dnl         The Xfce development team. All rights reserved.
+dnl
+dnl libxfce4windowing -- utilities for handling different windowing environments
+dnl
+
+dnl version info
+m4_define([libxfce4windowing_verinfo], [0:0:0])
+m4_define([libxfce4windowing_version_api], [2])
+m4_define([libxfce4windowing_version_major], [4])
+m4_define([libxfce4windowing_version_minor], [17])
+m4_define([libxfce4windowing_version_micro], [7])
+m4_define([libxfce4windowing_version_nano], []) dnl leave this empty to have no nano version
+m4_define([libxfce4windowing_version_build], [@REVISION@])
+m4_define([libxfce4windowing_version_tag], [git])
+m4_define([libxfce4windowing_version], [libxfce4windowing_version_major().libxfce4windowing_version_minor().libxfce4windowing_version_micro()ifelse(libxfce4windowing_version_nano(), [], [], [.libxfce4windowing_version_nano()])ifelse(libxfce4windowing_version_tag(), [git], [libxfce4windowing_version_tag()-libxfce4windowing_version_build()], [libxfce4windowing_version_tag()])])
+
+dnl minimum required versions
+m4_define([glib_minimum_version], [2.50.0])
+m4_define([gdk_minimum_version], [3.22.0])
+m4_define([wnck_minimum_version], [3.14])
+m4_define([intltool_minimum_version], [0.31])
+
+dnl init autoconf
+AC_INIT([libxfce4windowing], [libxfce4windowing_version], [https://gitlab.xfce.org/kelnos/libxfce4windowing])
+AC_PREREQ([2.69])
+
+dnl init automake
+AM_INIT_AUTOMAKE([1.11 dist-bzip2 tar-ustar no-dist-gzip foreign])
+AC_CONFIG_HEADERS([config.h])
+AM_MAINTAINER_MODE()
+AM_SILENT_RULES([yes])
+
+dnl check for UNIX variants
+AC_USE_SYSTEM_EXTENSIONS
+
+dnl check for basic programs
+AC_PROG_CC()
+LT_PATH_LD([])
+AM_PROG_CC_C_O()
+AC_PROG_INSTALL()
+IT_PROG_INTLTOOL([intltool_minimum_version], [no-xml])
+
+dnl prepare libtool
+LT_PREREQ([2.4])
+LT_INIT([disable-static])
+
+dnl version info
+LIBXFCE4WINDOWING_VERINFO=libxfce4windowing_verinfo()
+LIBXFCE4WINDOWING_VERSION_API=libxfce4windowing_version_api()
+LIBXFCE4WINDOWING_VERSION_MAJOR=libxfce4windowing_version_major()
+LIBXFCE4WINDOWING_VERSION_MINOR=libxfce4windowing_version_minor()
+LIBXFCE4WINDOWING_VERSION_MICRO=libxfce4windowing_version_micro()
+AC_SUBST([LIBXFCE4WINDOWING_VERINFO])
+AC_SUBST([LIBXFCE4WINDOWING_VERSION_API])
+AC_SUBST([LIBXFCE4WINDOWING_VERSION_MAJOR])
+AC_SUBST([LIBXFCE4WINDOWING_VERSION_MINOR])
+AC_SUBST([LIBXFCE4WINDOWING_VERSION_MICRO])
+
+dnl check for standard header files
+AC_CHECK_HEADERS([ctype.h errno.h fcntl.h math.h pwd.h signal.h \
+                  string.h sys/param.h sys/stat.h  \
+                  sys/types.h time.h \
+                  unistd.h])
+dnl Check for i18n support
+XDT_I18N([@LINGUAS@])
+
+dnl required
+XDT_CHECK_PACKAGE([GOBJECT], [gobject-2.0], [glib_minimum_version])
+XDT_CHECK_PACKAGE([GDK], [gdk-3.0], [gdk_minimum_version])
+
+XDT_CHECK_OPTIONAL_PACKAGE([GDK_X11], [gdk-x11-3.0], [gdk_minimum_version],
+                           [gdk-x11], [X11 backend for GDK])
+XDT_CHECK_OPTIONAL_PACKAGE([LIBWNCK], [libwnck-3.0], [wnck_minimum_version],
+                           [libwnck], [X11 WNCK library])
+
+if test x"$GDK_X11_FOUND" = x"yes" -a x"$LIBWNCK_FOUND" = x"yes"; then
+    enable_x11="yes"
+    AC_DEFINE([ENABLE_X11], [1], [Set if X11 support is enabled])
+else
+    enable_x11="no"
+fi
+AM_CONDITIONAL([X11_ENABLED], [test x"$enable_x11" = x"yes"])
+
+XDT_CHECK_OPTIONAL_PACKAGE([GDK_WAYLAND], [gdk-wayland-3.0], [gdk_minimum_version],
+                           [gdk-wayland], [Wayland backend for GDK])
+XDT_CHECK_OPTIONAL_PACKAGE([WAYLAND_SCANNER], [wayland-scanner], [1.15],
+                           [wayland-scanner], [Wayland protocol code generator])
+XDT_CHECK_OPTIONAL_PACKAGE([WAYLAND_CLIENT], [wayland-client], [1.15],
+                           [wayland-client], [Wayland client library])
+
+if test x"$GDK_WAYLAND_FOUND" = x"yes" -a x"$WAYLAND_SCANNER_FOUND" = x"yes" -a x"$WAYLAND_CLIENT_FOUND" = x"yes"; then
+    enable_wayland="yes"
+    AC_DEFINE([ENABLE_WAYLAND], [1], [Set if Wayland support is enabled])
+else
+    enable_wayland="no"
+fi
+AM_CONDITIONAL([WAYLAND_ENABLED], [test x"$enable_wayland" = x"yes"])
+
+dnl check for debugging support
+XDT_FEATURE_DEBUG()
+XDT_FEATURE_LINKER_OPTS()
+
+dnl ****************************************
+dnl *** Check for ELF visibility support ***
+dnl ****************************************
+AC_ARG_ENABLE([visibility],
+              AS_HELP_STRING([--disable-visibility],
+                             [Do not use ELF visibility attributes]),
+              [enable_visibility=$enableval], [enable_visibility=yes])
+have_gnuc_visibility=no
+if test "x$enable_visibility" != "xno"; then
+  XDT_SUPPORTED_FLAGS([xdt_vis_test_cflags], [-Wall -Werror -Wno-unused-parameter])
+  saved_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS $xdt_vis_test_cflags"
+  AC_MSG_CHECKING([whether $CC supports the GNUC visibility attribute])
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE(
+  [
+    void test_default (void);
+    void test_hidden (void);
+    void __attribute__ ((visibility("default"))) test_default (void) {}
+    void __attribute__ ((visibility("hidden"))) test_hidden (void) {}
+    int main (int argc, char **argv) {
+      test_default ();
+      test_hidden ();
+      return 0;
+    }
+  ])],
+  [
+    have_gnuc_visibility=yes
+    AC_MSG_RESULT([yes])
+  ],
+  [
+    AC_MSG_RESULT([no])
+  ])
+  CFLAGS="$saved_CFLAGS"
+fi
+if test "x$have_gnuc_visibility" = "xyes"; then
+  CPPFLAGS="$CPPFLAGS -DHAVE_GNUC_VISIBILITY"
+fi
+AM_CONDITIONAL([HAVE_GNUC_VISIBILITY], [test "x$have_gnuc_visibility" = "xyes"])
+
+AC_CONFIG_FILES([
+Makefile
+libxfce4windowing/Makefile
+libxfce4windowing/libxfce4windowing.pc
+libxfce4windowing/protocols/Makefile
+po/Makefile.in
+])
+AC_OUTPUT
+
+echo
+echo "Build Configuration:"
+echo "* X11 support:               $enable_x11"
+echo "* Wayland support:           $enable_wayland"
+echo
