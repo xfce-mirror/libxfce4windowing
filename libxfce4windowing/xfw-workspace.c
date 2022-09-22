@@ -50,8 +50,9 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                     G_SIGNAL_RUN_LAST,
                                                     G_STRUCT_OFFSET(XfwWorkspaceIface, state_changed),
                                                     NULL, NULL,
-                                                    g_cclosure_marshal_VOID__VOID,
-                                                    G_TYPE_NONE, 0);
+                                                    g_cclosure_marshal_VOID__UINT,
+                                                    G_TYPE_NONE, 1,
+                                                    G_TYPE_UINT);
 
     g_object_interface_install_property(iface,
                                         g_param_spec_string("id",

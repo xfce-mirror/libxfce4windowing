@@ -17,8 +17,8 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __LIBXFCE4WINDOWING_PRIVATE_H__
-#define __LIBXFCE4WINDOWING_PRIVATE_H__
+#ifndef __XFW_WORKSPACE_GROUP_DUMMY_H__
+#define __XFW_WORKSPACE_GROUP_DUMMY_H__
 
 #if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
 #error "Only libxfce4windowing.h can be included directly"
@@ -28,26 +28,24 @@
 
 G_BEGIN_DECLS
 
-enum {
-    WORKSPACE_MANAGER_PROP_SCREEN = 0x1000,
+#define XFW_TYPE_WORKSPACE_GROUP_DUMMY           (xfw_workspace_group_dummy_get_type())
+#define XFW_WORKSPACE_GROUP_DUMMY(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_GROUP_DUMMY, XfwWorkspaceGroupDummy))
+#define XFW_IS_WORKSPACE_GROUP_DUMMY(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_GROUP_DUMMY))
+
+typedef struct _XfwWorkspaceGroupDummy XfwWorkspaceGroupDummy;
+typedef struct _XfwWorkspaceGroupDummyPrivate XfwWorkspaceGroupDummyPrivate;
+typedef struct _XfwWorkspaceGroupDummyClass XfwWorkspaceGroupDummyClass;
+
+struct _XfwWorkspaceGroupDummy {
+    GObject parent;
+    /*< private >*/
+    XfwWorkspaceGroupDummyPrivate *priv;
 };
 
-enum {
-    WORKSPACE_GROUP_PROP_SCREEN = 0x2000,
-    WORKSPACE_GROUP_PROP_WORKSPACES,
-    WORKSPACE_GROUP_PROP_MONITORS,
+struct _XfwWorkspaceGroupDummyClass {
+    GObjectClass parent_class;
 };
 
-enum {
-    WORKSPACE_PROP_ID = 0x3000,
-    WORKSPACE_PROP_NAME,
-    WORKSPACE_PROP_STATE,
-};
+GType xfw_workspace_group_dummy_get_type(void) G_GNUC_CONST;
 
-void _xfw_workspace_manager_install_properties(GObjectClass *gklass);
-void _xfw_workspace_group_install_properties(GObjectClass *gklass);
-void _xfw_workspace_install_properties(GObjectClass *gklass);
-
-G_END_DECLS
-
-#endif  /* __LIBXFCE4WINDOWING_PRIVATE_H__ */
+#endif  /* __XFW_WORKSPACE_GROUP_DUMMY_H__ */

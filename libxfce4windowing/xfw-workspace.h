@@ -51,7 +51,7 @@ struct _XfwWorkspaceIface {
 
     /* Signals */
     void (*name_changed)(XfwWorkspace *workspace);
-    void (*state_changed)(XfwWorkspace *workspace);
+    void (*state_changed)(XfwWorkspace *workspace, XfwWorkspaceState old_state);
 
     /* Virtual Table */
     const gchar *(*get_id)(XfwWorkspace *workspace);

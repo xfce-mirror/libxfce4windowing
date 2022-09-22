@@ -22,17 +22,23 @@
 #include <gdk/gdkx.h>
 #include <libwnck/libwnck.h>
 
+#include "libxfce4windowing-private.h"
 #include "xfw-workspace-manager-dummy.h"
 #include "xfw-workspace-dummy.h"
+#include "xfw-workspace-group-dummy.h"
 #include "xfw-workspace-manager.h"
 
 struct _XfwWorkspaceManagerDummyPrivate {
+    GdkScreen *screen;
+    GList *groups;
     GList *workspaces;
 };
 
 static void xfw_workspace_manager_dummy_manager_init(XfwWorkspaceManagerIface *iface);
+static void xfw_workspace_manager_dummy_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
+static void xfw_workspace_manager_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_dummy_dispose(GObject *obj);
-static GList *xfw_workspace_manager_dummy_list_workspaces(XfwWorkspaceManager *manager);
+static GList *xfw_workspace_manager_dummy_list_workspace_groups(XfwWorkspaceManager *manager);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerDummy, xfw_workspace_manager_dummy, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceManagerDummy)
@@ -42,30 +48,70 @@ G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerDummy, xfw_workspace_manager_dummy, G
 static void
 xfw_workspace_manager_dummy_class_init(XfwWorkspaceManagerDummyClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
+    gklass->set_property = xfw_workspace_manager_dummy_set_property;
+    gklass->get_property = xfw_workspace_manager_dummy_get_property;
     gklass->dispose = xfw_workspace_manager_dummy_dispose;
+    _xfw_workspace_manager_install_properties(gklass);
 }
 
 static void
 xfw_workspace_manager_dummy_manager_init(XfwWorkspaceManagerIface *iface) {
-    iface->list_workspaces = xfw_workspace_manager_dummy_list_workspaces;
+    iface->list_workspace_groups = xfw_workspace_manager_dummy_list_workspace_groups;
 }
 
 static void
 xfw_workspace_manager_dummy_init(XfwWorkspaceManagerDummy *manager) {
     manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY, NULL));
+    manager->priv->groups = g_list_append(NULL,
+                                          g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
+                                                       "screen", manager->priv->screen,
+                                                       NULL));
+}
+
+static void
+xfw_workspace_manager_dummy_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec) {
+    XfwWorkspaceManagerDummy *manager = XFW_WORKSPACE_MANAGER_DUMMY(obj);
+
+    switch (prop_id) {
+        case WORKSPACE_MANAGER_PROP_SCREEN:
+            manager->priv->screen = g_value_get_object(value);
+            break;
+
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
+            break;
+    }
+}
+
+static void
+xfw_workspace_manager_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec) {
+    XfwWorkspaceManagerDummy *manager = XFW_WORKSPACE_MANAGER_DUMMY(obj);
+
+    switch (prop_id) {
+        case WORKSPACE_MANAGER_PROP_SCREEN:
+            g_value_set_object(value, manager->priv->screen);
+            break;
+
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
+            break;
+    }
 }
 
 static void
 xfw_workspace_manager_dummy_dispose(GObject *obj) {
-    g_list_free(XFW_WORKSPACE_MANAGER_DUMMY(obj)->priv->workspaces);
+    g_list_free_full(XFW_WORKSPACE_MANAGER_DUMMY(obj)->priv->groups, g_object_unref);
+    g_list_free_full(XFW_WORKSPACE_MANAGER_DUMMY(obj)->priv->workspaces, g_object_unref);
 }
 
 static GList *
-xfw_workspace_manager_dummy_list_workspaces(XfwWorkspaceManager *manager) {
-    return XFW_WORKSPACE_MANAGER_DUMMY(manager)->priv->workspaces;
+xfw_workspace_manager_dummy_list_workspace_groups(XfwWorkspaceManager *manager) {
+    return XFW_WORKSPACE_MANAGER_DUMMY(manager)->priv->groups;
 }
 
 XfwWorkspaceManager *
 _xfw_workspace_manager_dummy_new(GdkScreen *screen) {
-    return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_DUMMY, NULL);
+    return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_DUMMY,
+                        "screen", screen,
+                        NULL);
 }

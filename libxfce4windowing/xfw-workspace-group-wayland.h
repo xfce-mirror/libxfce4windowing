@@ -17,8 +17,8 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __XFW_WORKSPACE_WAYLAND_H__
-#define __XFW_WORKSPACE_WAYLAND_H__
+#ifndef __XFW_WORKSPACE_GROUP_WAYLAND_H__
+#define __XFW_WORKSPACE_GROUP_WAYLAND_H__
 
 #if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
 #error "Only libxfce4windowing.h can be included directly"
@@ -26,31 +26,30 @@
 
 #include <glib-object.h>
 
-#include "protocols/ext-workspace-v1-20220919-client.h"
-
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_WAYLAND           (xfw_workspace_wayland_get_type())
-#define XFW_WORKSPACE_WAYLAND(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_WAYLAND, XfwWorkspaceWayland))
-#define XFW_IS_WORKSPACE_WAYLAND(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_WAYLAND))
+#define XFW_TYPE_WORKSPACE_GROUP_WAYLAND           (xfw_workspace_group_wayland_get_type())
+#define XFW_WORKSPACE_GROUP_WAYLAND(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_GROUP_WAYLAND, XfwWorkspaceGroupWayland))
+#define XFW_IS_WORKSPACE_GROUP_WAYLAND(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_GROUP_WAYLAND))
 
-typedef struct _XfwWorkspaceWayland XfwWorkspaceWayland;
-typedef struct _XfwWorkspaceWaylandPrivate XfwWorkspaceWaylandPrivate;
-typedef struct _XfwWorkspaceWaylandClass XfwWorkspaceWaylandClass;
+typedef struct _XfwWorkspaceGroupWayland XfwWorkspaceGroupWayland;
+typedef struct _XfwWorkspaceGroupWaylandPrivate XfwWorkspaceGroupWaylandPrivate;
+typedef struct _XfwWorkspaceGroupWaylandClass XfwWorkspaceGroupWaylandClass;
 
-struct _XfwWorkspaceWayland {
+struct _XfwWorkspaceGroupWayland {
     GObject parent;
+
     /*< private >*/
-    XfwWorkspaceWaylandPrivate *priv;
+    XfwWorkspaceGroupWaylandPrivate *priv;
 };
 
-struct _XfwWorkspaceWaylandClass {
+struct _XfwWorkspaceGroupWaylandClass {
     GObjectClass parent_class;
 
     /* Signals */
-    void (*destroyed)(XfwWorkspaceWayland *workspace);
+    void (*destroyed)(XfwWorkspaceGroupWayland *group);
 };
 
-GType xfw_workspace_wayland_get_type(void) G_GNUC_CONST;
+GType xfw_workspace_group_wayland_get_type(void) G_GNUC_CONST;
 
-#endif  /* __XFW_WORKSPACE_WAYLAND_H__ */
+#endif  /* __XFW_WORKSPACE_GROUP_WAYLAND_H__ */

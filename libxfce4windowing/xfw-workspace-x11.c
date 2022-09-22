@@ -33,11 +33,14 @@ struct _XfwWorkspaceX11Private {
 static void xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface);
 static void xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
+static void xfw_workspace_x11_dispose(GObject *obj);
 static const gchar *xfw_workspace_x11_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_x11_get_name(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_x11_get_state(XfwWorkspace *workspace);
 static void xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error);
 static void xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error);
+
+static void name_changed(WnckWorkspace *wnck_workspace, XfwWorkspaceX11 *workspace);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceX11, xfw_workspace_x11, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceX11)
@@ -49,7 +52,13 @@ xfw_workspace_x11_class_init(XfwWorkspaceX11Class *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
     gklass->set_property = xfw_workspace_x11_set_property;
     gklass->get_property = xfw_workspace_x11_get_property;
+    gklass->dispose = xfw_workspace_x11_dispose;
     _xfw_workspace_install_properties(gklass);
+}
+
+static void
+xfw_workspace_x11_init(XfwWorkspaceX11 *workspace) {
+    g_signal_connect(workspace->priv->wnck_workspace, "name-changed", (GCallback)name_changed, workspace);
 }
 
 static void
@@ -88,8 +97,9 @@ xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GPara
 }
 
 static void
-xfw_workspace_x11_init(XfwWorkspaceX11 *workspace) {
-
+xfw_workspace_x11_dispose(GObject *obj) {
+    XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(obj);
+    g_signal_handlers_disconnect_by_func(workspace->priv->wnck_workspace, name_changed, workspace);
 }
 
 static void
@@ -137,4 +147,11 @@ xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error) {
     } else if (error != NULL) {
         *error = g_error_new_literal(XFW_ERROR, 0, "Cannot remove workspace as it is the only one left");
     }
+}
+
+static void
+name_changed(WnckWorkspace *wnck_workspace, XfwWorkspaceX11 *workspace) {
+    g_object_notify(G_OBJECT(workspace), "id");
+    g_object_notify(G_OBJECT(workspace), "name");
+    g_signal_emit_by_name(workspace, "name-changed");
 }

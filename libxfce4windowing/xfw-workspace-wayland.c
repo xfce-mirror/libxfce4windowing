@@ -35,9 +35,17 @@ struct _XfwWorkspaceWaylandPrivate {
 };
 
 enum {
+    SIGNAL_DESTROYED,
+
+    N_SIGNALS,
+};
+
+enum {
     PROP0,
     PROP_HANDLE,
 };
+
+static guint workspace_signals[N_SIGNALS] = { 0, };
 
 static void xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface);
 static void xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
@@ -49,6 +57,20 @@ static XfwWorkspaceState xfw_workspace_wayland_get_state(XfwWorkspace *workspace
 static void xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error);
 static void xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
 
+static void workspace_name(void *data, struct ext_workspace_handle_v1 *workspace, const char *name);
+static void workspace_coordinates(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *coordinates);
+static void workspace_state(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *state);
+static void workspace_capabilities(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *capabilities);
+static void workspace_removed(void *data, struct ext_workspace_handle_v1 *workspace);
+
+static const struct ext_workspace_handle_v1_listener workspace_listener = {
+    .name = workspace_name,
+    .coordinates = workspace_coordinates,
+    .state = workspace_state,
+    .capabilities = workspace_capabilities,
+    .removed = workspace_removed,
+};
+
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceWayland, xfw_workspace_wayland, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceWayland)
                         G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
@@ -58,6 +80,18 @@ static void
 xfw_workspace_wayland_class_init(XfwWorkspaceWaylandClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->set_property = xfw_workspace_wayland_set_property;
+    gklass->get_property = xfw_workspace_wayland_get_property;
+    gklass->dispose = xfw_workspace_wayland_dispose;
+
+    workspace_signals[SIGNAL_DESTROYED] = g_signal_new("destroyed",
+                                                       XFW_TYPE_WORKSPACE_WAYLAND,
+                                                       G_SIGNAL_RUN_LAST,
+                                                       G_STRUCT_OFFSET(XfwWorkspaceWaylandClass, destroyed),
+                                                       NULL, NULL,
+                                                       g_cclosure_marshal_VOID__VOID,
+                                                       G_TYPE_NONE, 0);
+
     g_object_class_install_property(gklass,
                                     PROP_HANDLE,
                                     g_param_spec_pointer("handle",
@@ -65,15 +99,12 @@ xfw_workspace_wayland_class_init(XfwWorkspaceWaylandClass *klass) {
                                                          "handle",
                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     _xfw_workspace_install_properties(gklass);
-
-    gklass->set_property = xfw_workspace_wayland_set_property;
-    gklass->get_property = xfw_workspace_wayland_get_property;
-    gklass->dispose = xfw_workspace_wayland_dispose;
 }
 
 static void
 xfw_workspace_wayland_init(XfwWorkspaceWayland *workspace) {
     workspace->priv->id = g_strdup_printf("%u", wl_proxy_get_id((struct wl_proxy *)workspace->priv->handle));
+    ext_workspace_handle_v1_add_listener(workspace->priv->handle, &workspace_listener, workspace);
 }
 
 static void
@@ -140,6 +171,7 @@ xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, G
 static void
 xfw_workspace_wayland_dispose(GObject *obj) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(obj);
+    ext_workspace_handle_v1_destroy(workspace->priv->handle);
     g_free(workspace->priv->id);
     g_free(workspace->priv->name);
 }
@@ -167,4 +199,55 @@ xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error) {
 static void
 xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error) {
     ext_workspace_handle_v1_remove(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle);
+}
+
+static void
+workspace_name(void *data, struct ext_workspace_handle_v1 *wl_workspace, const char *name) {
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
+    g_object_set(workspace, "name", name, NULL);
+    g_signal_emit_by_name(workspace, "name-changed");
+}
+
+static void
+workspace_coordinates(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *coordinates)
+{
+
+}
+
+static void
+workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct wl_array *wl_state) {
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
+    XfwWorkspaceState old_state = workspace->priv->state;
+    XfwWorkspaceState state = XFW_WORKSPACE_STATE_NONE;
+    enum ext_workspace_handle_v1_state *item;
+
+    wl_array_for_each(item, wl_state) {
+        switch (*item) {
+            case EXT_WORKSPACE_HANDLE_V1_STATE_ACTIVE:
+                state |= XFW_WORKSPACE_STATE_ACTIVE;
+                break;
+            case EXT_WORKSPACE_HANDLE_V1_STATE_URGENT:
+                state |= XFW_WORKSPACE_STATE_URGENT;
+                break;
+            case EXT_WORKSPACE_HANDLE_V1_STATE_HIDDEN:
+                state |= XFW_WORKSPACE_STATE_HIDDEN;
+                break;
+            default:
+                g_warning("Unrecognized workspace state %d", *item);
+                break;
+        }
+    }
+    g_object_set(workspace, "state", state, NULL);
+    g_signal_emit_by_name(workspace, "state-changed", old_state);
+}
+
+static void
+workspace_capabilities(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *capabilities) {
+
+}
+
+static void
+workspace_removed(void *data, struct ext_workspace_handle_v1 *wl_workspace) {
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
+    g_signal_emit(workspace, workspace_signals[SIGNAL_DESTROYED], 0);
 }

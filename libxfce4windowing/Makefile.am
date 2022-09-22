@@ -9,6 +9,7 @@ libxfce4windowing_includedir = $(includedir)/xfce4/libxfce4windowing
 libxfce4windowing_headers = \
 	libxfce4windowing.h \
 	xfw-util.h \
+	xfw-workspace-group.h \
 	xfw-workspace-manager.h \
 	xfw-workspace.h
 
@@ -22,6 +23,8 @@ libxfce4windowing_x11_sources = \
 	xfw-workspace-x11.h
 
 libxfce4windowing_wayland_sources = \
+	xfw-workspace-group-wayland.c \
+	xfw-workspace-group-wayland.h \
 	xfw-workspace-manager-wayland.c \
 	xfw-workspace-manager-wayland.h \
 	xfw-workspace-wayland.c \
@@ -33,6 +36,9 @@ libxfce4windowing_la_SOURCES = \
 	xfw-util.c \
 	xfw-workspace-dummy.c \
 	xfw-workspace-dummy.h \
+	xfw-workspace-group-dummy.c \
+	xfw-workspace-group-dummy.h \
+	xfw-workspace-group.c \
 	xfw-workspace-manager-dummy.c \
 	xfw-workspace-manager-dummy.h \
 	xfw-workspace-manager.c \

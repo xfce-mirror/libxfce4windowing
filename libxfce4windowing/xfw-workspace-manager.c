@@ -21,6 +21,7 @@
 
 #include <gdk/gdk.h>
 
+#include "libxfce4windowing-private.h"
 #include "xfw-workspace-manager.h"
 #include "xfw-workspace-manager-dummy.h"
 #ifdef ENABLE_WAYLAND
@@ -31,15 +32,6 @@
 #endif
 #include "xfw-util.h"
 
-enum {
-    WORKSPACE_ADDED = 0,
-    WORKSPACE_ACTIVATED,
-    WORKSPACE_REMOVED,
-
-    LAST_SIGNAL,
-};
-
-static guint manager_signals[LAST_SIGNAL] = { 0, };
 static GHashTable *managers = NULL;
 
 typedef struct _XfwWorkspaceManagerIface XfwWorkspaceManagerInterface;
@@ -51,30 +43,29 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
         managers = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
     }
 
-    manager_signals[WORKSPACE_ADDED] = g_signal_new("workspace-added",
-                                                    XFW_TYPE_WORKSPACE_MANAGER,
-                                                    G_SIGNAL_RUN_LAST,
-                                                    G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_added),
-                                                    NULL, NULL,
-                                                    g_cclosure_marshal_VOID__OBJECT,
-                                                    G_TYPE_NONE, 1,
-                                                    XFW_TYPE_WORKSPACE);
-    manager_signals[WORKSPACE_ACTIVATED] = g_signal_new("workspace-activated",
-                                                        XFW_TYPE_WORKSPACE_MANAGER,
-                                                        G_SIGNAL_RUN_LAST,
-                                                        G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_added),
-                                                        NULL, NULL,
-                                                        g_cclosure_marshal_VOID__OBJECT,
-                                                        G_TYPE_NONE, 1,
-                                                        XFW_TYPE_WORKSPACE);
-    manager_signals[WORKSPACE_REMOVED] = g_signal_new("workspace-removed",
-                                                      XFW_TYPE_WORKSPACE_MANAGER,
-                                                      G_SIGNAL_RUN_LAST,
-                                                      G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_added),
-                                                      NULL, NULL,
-                                                      g_cclosure_marshal_VOID__OBJECT,
-                                                      G_TYPE_NONE, 1,
-                                                      XFW_TYPE_WORKSPACE);
+    g_signal_new("workspace-group-added",
+                 XFW_TYPE_WORKSPACE_MANAGER,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_group_added),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_WORKSPACE_GROUP);
+    g_signal_new("workspace-group-removed",
+                 XFW_TYPE_WORKSPACE_MANAGER,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_group_added),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_WORKSPACE_GROUP);
+
+    g_object_interface_install_property(iface,
+                                        g_param_spec_object("screen",
+                                                            "screen",
+                                                            "screen",
+                                                            GDK_TYPE_SCREEN,
+                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 }
 
 static void
@@ -120,9 +111,14 @@ xfw_workspace_manager_get(GdkScreen *screen) {
 }
 
 GList *
-xfw_workspace_manager_list_workspaces(XfwWorkspaceManager *manager) {
+xfw_workspace_manager_list_workspace_groups(XfwWorkspaceManager *manager) {
     XfwWorkspaceManagerIface *iface;
     g_return_val_if_fail(XFW_IS_WORKSPACE_MANAGER(manager), NULL);
     iface = XFW_WORKSPACE_MANAGER_GET_IFACE(manager);
-    return (*iface->list_workspaces)(manager);
+    return (*iface->list_workspace_groups)(manager);
+}
+
+void
+_xfw_workspace_manager_install_properties(GObjectClass *gklass) {
+    g_object_class_override_property(gklass, WORKSPACE_MANAGER_PROP_SCREEN, "screen");
 }

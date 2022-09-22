@@ -23,6 +23,7 @@
 #define __LIBXFCE4WINDOWING_H_INSIDE__
 
 #include <xfw-util.h>
+#include <xfw-workspace-group.h>
 #include <xfw-workspace-manager.h>
 #include <xfw-workspace.h>
 

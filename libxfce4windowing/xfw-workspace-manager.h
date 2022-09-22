@@ -27,7 +27,7 @@
 #include <glib-object.h>
 #include <gdk/gdk.h>
 
-#include "xfw-workspace.h"
+#include "xfw-workspace-group.h"
 
 G_BEGIN_DECLS
 
@@ -48,20 +48,18 @@ struct _XfwWorkspaceManagerIface {
     /*< public >*/
 
     /* Signals */
-    void (*workspace_added)(XfwWorkspaceManager *manager,
-                            XfwWorkspace *workspace);
-    void (*workspace_activated)(XfwWorkspaceManager *manager,
-                                XfwWorkspace *workspace);
-    void (*workspace_removed)(XfwWorkspaceManager *manager,
-                              XfwWorkspace *workspace);
+    void (*workspace_group_added)(XfwWorkspaceManager *manager,
+                                  XfwWorkspaceGroup *group);
+    void (*workspace_group_removed)(XfwWorkspaceManager *manager,
+                                    XfwWorkspaceGroup *group);
 
     /* Virtual Table */
-    GList *(*list_workspaces)(XfwWorkspaceManager *manager);
+    GList *(*list_workspace_groups)(XfwWorkspaceManager *);
 };
 
 XfwWorkspaceManager *xfw_workspace_manager_get(GdkScreen *screen);
 
-GList *xfw_workspace_manager_list_workspaces(XfwWorkspaceManager *manager);
+GList *xfw_workspace_manager_list_workspace_groups(XfwWorkspaceManager *manager);
 
 G_END_DECLS
 
