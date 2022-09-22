@@ -26,6 +26,11 @@
 #include "xfw-workspace-x11.h"
 #include "xfw-workspace.h"
 
+enum {
+    PROP0,
+    PROP_WNCK_WORKSPACE,
+};
+
 struct _XfwWorkspaceX11Private {
     WnckWorkspace *wnck_workspace;
 };
@@ -51,9 +56,18 @@ G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceX11, xfw_workspace_x11, G_TYPE_OBJECT,
 static void
 xfw_workspace_x11_class_init(XfwWorkspaceX11Class *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
+
     gklass->set_property = xfw_workspace_x11_set_property;
     gklass->get_property = xfw_workspace_x11_get_property;
     gklass->dispose = xfw_workspace_x11_dispose;
+
+    g_object_class_install_property(gklass,
+                                    PROP_WNCK_WORKSPACE,
+                                    g_param_spec_object("wnck-workspace",
+                                                        "wnck-workspace",
+                                                        "wnck-workspace",
+                                                        WNCK_TYPE_WORKSPACE,
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     _xfw_workspace_install_properties(gklass);
 }
 
@@ -64,7 +78,13 @@ xfw_workspace_x11_init(XfwWorkspaceX11 *workspace) {
 
 static void
 xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec) {
+    XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(obj);
+
     switch (prop_id) {
+        case PROP_WNCK_WORKSPACE:
+            workspace->priv->wnck_workspace = g_value_get_object(value);
+            break;
+
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
         case WORKSPACE_PROP_STATE:
@@ -79,7 +99,12 @@ xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value,
 static void
 xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec) {
     XfwWorkspace *workspace = XFW_WORKSPACE(obj);
+
     switch (prop_id) {
+        case PROP_WNCK_WORKSPACE:
+            g_value_set_object(value, XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
+            break;
+
         case WORKSPACE_PROP_ID:
             g_value_set_string(value, xfw_workspace_x11_get_id(workspace));
             break;
