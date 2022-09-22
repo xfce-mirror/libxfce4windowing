@@ -85,6 +85,14 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                              G_PARAM_READABLE));
 }
 
+guint
+xfw_workspace_group_get_workspace_count(XfwWorkspaceGroup *group) {
+    XfwWorkspaceGroupIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE_GROUP(group), 0);
+    iface = XFW_WORKSPACE_GROUP_GET_IFACE(group);
+    return (*iface->get_workspace_count)(group);
+}
+
 GList *
 xfw_workspace_group_list_workspaces(XfwWorkspaceGroup *group) {
     XfwWorkspaceGroupIface *iface;

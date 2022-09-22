@@ -57,11 +57,13 @@ struct _XfwWorkspaceGroupIface {
     void (*monitors_changed)(XfwWorkspaceGroup *group);
 
     /* Virtual Table */
+    guint (*get_workspace_count)(XfwWorkspaceGroup *group);
     GList *(*list_workspaces)(XfwWorkspaceGroup *group);
     XfwWorkspace *(*get_active_workspace)(XfwWorkspaceGroup *group);
     GList *(*get_monitors)(XfwWorkspaceGroup *group);
 };
 
+guint xfw_workspace_group_get_workspace_count(XfwWorkspaceGroup *group);
 GList *xfw_workspace_group_list_workspaces(XfwWorkspaceGroup *group);
 XfwWorkspace *xfw_workspace_group_get_active_workspace(XfwWorkspaceGroup *group);
 GList *xfw_workspace_group_get_monitors(XfwWorkspaceGroup *group);

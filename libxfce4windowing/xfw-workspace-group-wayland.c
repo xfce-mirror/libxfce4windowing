@@ -55,6 +55,7 @@ static void xfw_workspace_group_wayland_workspace_init(XfwWorkspaceGroupIface *i
 static void xfw_workspace_group_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_wayland_dispose(GObject *obj);
+static guint xfw_workspace_group_wayland_get_workspace_count(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_wayland_list_workspaces(XfwWorkspaceGroup *group);
 static XfwWorkspace *xfw_workspace_group_wayland_get_active_workspace(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_wayland_get_monitors(XfwWorkspaceGroup *group);
@@ -174,9 +175,15 @@ xfw_workspace_group_wayland_dispose(GObject *obj) {
 
 static void
 xfw_workspace_group_wayland_workspace_init(XfwWorkspaceGroupIface *iface) {
+    iface->get_workspace_count = xfw_workspace_group_wayland_get_workspace_count;
     iface->list_workspaces = xfw_workspace_group_wayland_list_workspaces;
     iface->get_active_workspace = xfw_workspace_group_wayland_get_active_workspace;
     iface->get_monitors = xfw_workspace_group_wayland_get_monitors;
+}
+
+static guint
+xfw_workspace_group_wayland_get_workspace_count(XfwWorkspaceGroup *group) {
+    return g_list_length(XFW_WORKSPACE_GROUP_WAYLAND(group)->priv->workspaces);
 }
 
 static GList *
