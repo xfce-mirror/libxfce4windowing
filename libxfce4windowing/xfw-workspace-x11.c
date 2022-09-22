@@ -37,6 +37,7 @@ static void xfw_workspace_x11_dispose(GObject *obj);
 static const gchar *xfw_workspace_x11_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_x11_get_name(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_x11_get_state(XfwWorkspace *workspace);
+static guint xfw_workspace_x11_get_number(XfwWorkspace *workspace);
 static void xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error);
 static void xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error);
 
@@ -67,6 +68,7 @@ xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value,
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
         case WORKSPACE_PROP_STATE:
+        case WORKSPACE_PROP_NUMBER:
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -87,7 +89,11 @@ xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GPara
             break;
 
         case WORKSPACE_PROP_STATE:
-            g_value_set_uint(value, xfw_workspace_get_state(workspace));
+            g_value_set_uint(value, xfw_workspace_x11_get_state(workspace));
+            break;
+
+        case WORKSPACE_PROP_NUMBER:
+            g_value_set_uint(value, xfw_workspace_x11_get_number(workspace));
             break;
 
         default:
@@ -107,6 +113,7 @@ xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_id = xfw_workspace_x11_get_id;
     iface->get_name = xfw_workspace_x11_get_name;
     iface->get_state = xfw_workspace_x11_get_state;
+    iface->get_number = xfw_workspace_x11_get_number;
     iface->activate = xfw_workspace_x11_activate;
     iface->remove = xfw_workspace_x11_remove;
 }
@@ -129,6 +136,11 @@ xfw_workspace_x11_get_state(XfwWorkspace *workspace) {
         state |= XFW_WORKSPACE_STATE_ACTIVE;
     }
     return state;
+}
+
+static guint
+xfw_workspace_x11_get_number(XfwWorkspace *workspace) {
+    return wnck_workspace_get_number(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
 }
 
 static void

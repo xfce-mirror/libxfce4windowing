@@ -32,6 +32,7 @@ static void xfw_workspace_dummy_get_property(GObject *obj, guint prop_id, GValue
 static const gchar *xfw_workspace_dummy_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_dummy_get_name(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_dummy_get_state(XfwWorkspace *workspace);
+static guint xfw_workspace_dummy_get_number(XfwWorkspace *workspace);
 static void xfw_workspace_dummy_activate(XfwWorkspace *workspace, GError **error);
 static void xfw_workspace_dummy_remove(XfwWorkspace *workspace, GError **error);
 
@@ -57,6 +58,7 @@ xfw_workspace_dummy_set_property(GObject *obj, guint prop_id, const GValue *valu
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
         case WORKSPACE_PROP_STATE:
+        case WORKSPACE_PROP_NUMBER:
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -67,6 +69,7 @@ xfw_workspace_dummy_set_property(GObject *obj, guint prop_id, const GValue *valu
 static void
 xfw_workspace_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec) {
     XfwWorkspace *workspace = XFW_WORKSPACE(obj);
+
     switch (prop_id) {
         case WORKSPACE_PROP_ID:
             g_value_set_string(value, xfw_workspace_dummy_get_id(workspace));
@@ -77,7 +80,11 @@ xfw_workspace_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GPa
             break;
 
         case WORKSPACE_PROP_STATE:
-            g_value_set_uint(value, xfw_workspace_get_state(workspace));
+            g_value_set_uint(value, xfw_workspace_dummy_get_state(workspace));
+            break;
+
+        case WORKSPACE_PROP_NUMBER:
+            g_value_set_uint(value, xfw_workspace_dummy_get_number(workspace));
             break;
 
         default:
@@ -91,6 +98,7 @@ xfw_workspace_dummy_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_id = xfw_workspace_dummy_get_id;
     iface->get_name = xfw_workspace_dummy_get_name;
     iface->get_state = xfw_workspace_dummy_get_state;
+    iface->get_number = xfw_workspace_get_number;
     iface->activate = xfw_workspace_dummy_activate;
     iface->remove = xfw_workspace_dummy_remove;
 }
@@ -108,6 +116,11 @@ xfw_workspace_dummy_get_name(XfwWorkspace *workspace) {
 static XfwWorkspaceState
 xfw_workspace_dummy_get_state(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_STATE_ACTIVE;
+}
+
+static guint
+xfw_workspace_dummy_get_number(XfwWorkspace *workspace) {
+    return 0;
 }
 
 static void

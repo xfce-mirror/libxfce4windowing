@@ -19,6 +19,8 @@
 
 #include "config.h"
 
+#include <limits.h>
+
 #include <glib/gi18n-lib.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkwayland.h>
@@ -224,9 +226,27 @@ workspace_state_changed(XfwWorkspace *workspace, XfwWorkspaceState old_state, Xf
 
 static void
 workspace_destroyed(XfwWorkspace *workspace, XfwWorkspaceGroupWayland *group) {
+    guint old_number = UINT_MAX;
+    GList *l;
+
     g_signal_handlers_disconnect_by_func(workspace, workspace_state_changed, group);
     g_signal_handlers_disconnect_by_func(workspace, workspace_destroyed, group);
-    group->priv->workspaces = g_list_remove(group->priv->workspaces, workspace);
+
+    l = group->priv->workspaces;
+    while (l != NULL) {
+        XfwWorkspace *cur_workspace = XFW_WORKSPACE(l->data);
+        guint cur_number = xfw_workspace_get_number(cur_workspace);
+        l = l->next;
+
+        if (cur_workspace == workspace) {
+            old_number = cur_number;
+            group->priv->workspaces = g_list_remove_link(group->priv->workspaces, l);
+            g_list_free_1(l);
+        } else if (old_number < cur_number) {
+            _xfw_workspace_wayland_set_number(XFW_WORKSPACE_WAYLAND(cur_workspace), cur_number - 1);
+        }
+    }
+
     g_signal_emit_by_name(group, "workspace-removed", workspace);
     g_object_unref(workspace);
 }
@@ -234,7 +254,10 @@ workspace_destroyed(XfwWorkspace *workspace, XfwWorkspaceGroupWayland *group) {
 static void
 group_workspace(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct ext_workspace_handle_v1 *wl_workspace) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
-    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_WAYLAND, "handle", wl_workspace, NULL));
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_WAYLAND,
+                                                                        "handle", wl_workspace,
+                                                                        NULL));
+    _xfw_workspace_wayland_set_number(workspace, g_list_length(group->priv->workspaces));
     g_hash_table_insert(group->priv->wl_workspaces, wl_workspace, workspace);
     group->priv->workspaces = g_list_append(group->priv->workspaces, workspace);
     g_signal_connect(workspace, "state-changed", (GCallback)workspace_state_changed, group);

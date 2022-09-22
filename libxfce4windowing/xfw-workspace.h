@@ -57,6 +57,7 @@ struct _XfwWorkspaceIface {
     const gchar *(*get_id)(XfwWorkspace *workspace);
     const gchar *(*get_name)(XfwWorkspace *workspace);
     XfwWorkspaceState (*get_state)(XfwWorkspace *workspace);
+    guint (*get_number)(XfwWorkspace *workspace);
     void (*activate)(XfwWorkspace *workspace, GError **error);
     void (*remove)(XfwWorkspace *workspace, GError **error);
 };
@@ -66,6 +67,7 @@ GType xfw_workspace_get_type(void) G_GNUC_CONST;
 const gchar *xfw_workspace_get_id(XfwWorkspace *workspace);
 const gchar *xfw_workspace_get_name(XfwWorkspace *workspace);
 XfwWorkspaceState xfw_workspace_get_state(XfwWorkspace *workspace);
+guint xfw_workspace_get_number(XfwWorkspace *workspace);
 
 void xfw_workspace_activate(XfwWorkspace *workspace, GError **error);
 void xfw_workspace_remove(XfwWorkspace *workspace, GError **error);

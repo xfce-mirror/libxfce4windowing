@@ -32,6 +32,7 @@ struct _XfwWorkspaceWaylandPrivate {
     gchar *id;
     gchar *name;
     XfwWorkspaceState state;
+    guint number;
 };
 
 enum {
@@ -54,6 +55,7 @@ static void xfw_workspace_wayland_dispose(GObject *obj);
 static const gchar *xfw_workspace_wayland_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_wayland_get_name(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_wayland_get_state(XfwWorkspace *workspace);
+static guint xfw_workspace_wayland_get_number(XfwWorkspace *workspace);
 static void xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error);
 static void xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
 
@@ -112,6 +114,7 @@ xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_id = xfw_workspace_wayland_get_id;
     iface->get_name = xfw_workspace_wayland_get_name;
     iface->get_state = xfw_workspace_wayland_get_state;
+    iface->get_number = xfw_workspace_wayland_get_number;
     iface->activate = xfw_workspace_wayland_activate;
     iface->remove = xfw_workspace_wayland_remove;
 }
@@ -134,6 +137,9 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
 
         case WORKSPACE_PROP_STATE:
             workspace->priv->state = g_value_get_uint(value);
+            break;
+
+        case WORKSPACE_PROP_NUMBER:
             break;
 
         default:
@@ -189,6 +195,11 @@ xfw_workspace_wayland_get_name(XfwWorkspace *workspace) {
 static XfwWorkspaceState
 xfw_workspace_wayland_get_state(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_WAYLAND(workspace)->priv->state;
+}
+
+static guint
+xfw_workspace_wayland_get_number(XfwWorkspace *workspace) {
+    return XFW_WORKSPACE_WAYLAND(workspace)->priv->number;
 }
 
 static void
@@ -250,4 +261,12 @@ static void
 workspace_removed(void *data, struct ext_workspace_handle_v1 *wl_workspace) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
     g_signal_emit(workspace, workspace_signals[SIGNAL_DESTROYED], 0);
+}
+
+void
+_xfw_workspace_wayland_set_number(XfwWorkspaceWayland *workspace, guint number) {
+    if (number != workspace->priv->number) {
+        workspace->priv->number = number;
+        g_object_notify(G_OBJECT(workspace), "number");
+    }
 }

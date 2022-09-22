@@ -42,6 +42,7 @@ enum {
     WORKSPACE_PROP_ID = 0x3000,
     WORKSPACE_PROP_NAME,
     WORKSPACE_PROP_STATE,
+    WORKSPACE_PROP_NUMBER,
 };
 
 void _xfw_workspace_manager_install_properties(GObjectClass *gklass);

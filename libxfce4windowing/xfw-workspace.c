@@ -72,6 +72,12 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                           "state",
                                                           0, UINT_MAX, XFW_WORKSPACE_STATE_NONE,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_interface_install_property(iface,
+                                        g_param_spec_uint("number",
+                                                          "number",
+                                                          "number",
+                                                          0, UINT_MAX, 0,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 }
 
 const gchar *
@@ -98,6 +104,14 @@ xfw_workspace_get_state(XfwWorkspace *workspace) {
     return (*iface->get_state)(workspace);
 }
 
+guint
+xfw_workspace_get_number(XfwWorkspace *workspace) {
+    XfwWorkspaceIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), 0);
+    iface = XFW_WORKSPACE_GET_IFACE(workspace);
+    return (*iface->get_number)(workspace);
+}
+
 void
 xfw_workspace_activate(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceIface *iface;
@@ -119,4 +133,5 @@ _xfw_workspace_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_PROP_ID, "id");
     g_object_class_override_property(gklass, WORKSPACE_PROP_NAME, "name");
     g_object_class_override_property(gklass, WORKSPACE_PROP_STATE, "state");
+    g_object_class_override_property(gklass, WORKSPACE_PROP_NUMBER, "number");
 }
