@@ -59,7 +59,7 @@ struct _XfwWorkspaceManagerIface {
     GList *(*list_workspaces)(XfwWorkspaceManager *manager);
 };
 
-XfwWorkspaceManager *xfw_workspace_manager_create(GdkScreen *screen);
+XfwWorkspaceManager *xfw_workspace_manager_get(GdkScreen *screen);
 
 GList *xfw_workspace_manager_list_workspaces(XfwWorkspaceManager *manager);
 

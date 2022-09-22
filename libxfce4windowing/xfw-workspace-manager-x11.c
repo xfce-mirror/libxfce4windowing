@@ -164,3 +164,10 @@ workspace_destroyed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorksp
         g_object_unref(workspace);
     }
 }
+
+XfwWorkspaceManager *
+_xfw_workspace_manager_x11_new(GdkScreen *screen) {
+    return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_X11,
+                        "screen", screen,
+                        NULL);
+}

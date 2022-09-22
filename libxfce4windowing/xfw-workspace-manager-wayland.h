@@ -26,6 +26,8 @@
 
 #include <gdk/gdk.h>
 
+#include "xfw-workspace-manager.h"
+
 G_BEGIN_DECLS
 
 #define XFW_TYPE_WORKSPACE_MANAGER_WAYLAND (xfw_workspace_manager_wayland_get_type())
@@ -47,7 +49,7 @@ struct _XfwWorkspaceManagerWaylandClass {
 
 GType xfw_workspace_manager_wayland_get_type() G_GNUC_CONST;
 
-XfwWorkspaceManagerWayland *_xfw_workspace_manager_wayland_get(void);
+XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(GdkScreen *screen);
 
 G_END_DECLS
 

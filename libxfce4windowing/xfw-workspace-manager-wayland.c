@@ -31,12 +31,6 @@
 #include "xfw-workspace-wayland.h"
 #include "xfw-workspace-manager.h"
 
-struct _XfwWorkspaceManagerWaylandPrivate {
-    GList *groups;
-    GList *workspaces;
-    GHashTable *wl_workspaces;
-};
-
 typedef struct {
     struct wl_registry *wl_registry;
     struct ext_workspace_manager_v1 *ext_workspace_manager_v1;
@@ -46,6 +40,12 @@ typedef struct {
 #endif
 } WaylandSetup;
 
+struct _XfwWorkspaceManagerWaylandPrivate {
+    WaylandSetup *wl_setup;
+    GList *groups;
+    GList *workspaces;
+    GHashTable *wl_workspaces;
+};
 
 static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
 static void registry_global_remove(void *data, struct wl_registry *registry, uint32_t id);
@@ -70,9 +70,6 @@ static void xfw_workspace_manager_wayland_dispose(GObject *obj);
 static void xfw_workspace_manager_wayland_manager_init(XfwWorkspaceManagerIface *iface);
 static GList *xfw_workspace_manager_wayland_list_workspaces(XfwWorkspaceManager *manager);
 
-
-static WaylandSetup *wl_setup = NULL;
-static XfwWorkspaceManagerWayland *singleton = NULL;
 
 static const struct wl_registry_listener registry_listener = {
     .global = registry_global,
@@ -126,6 +123,7 @@ static void
 xfw_workspace_manager_wayland_dispose(GObject *obj) {
     XfwWorkspaceManagerWayland *manager = XFW_WORKSPACE_MANAGER_WAYLAND(obj);
     XfwWorkspaceManagerWaylandPrivate *priv = manager->priv;
+
     for (GList *l = priv->workspaces; l != NULL; l = l->next) {
         struct ext_workspace_handle_v1 *handle = NULL;
         g_object_get(l->data, "handle", &handle, NULL);
@@ -135,10 +133,14 @@ xfw_workspace_manager_wayland_dispose(GObject *obj) {
     }
     g_list_free(priv->workspaces);
     g_hash_table_destroy(priv->wl_workspaces);
+
     for (GList *l = priv->groups; l != NULL; l = l->next) {
         ext_workspace_group_handle_v1_destroy((struct ext_workspace_group_handle_v1 *)l->data);
     }
     g_list_free(priv->groups);
+
+    ext_workspace_manager_v1_destroy(priv->wl_setup->ext_workspace_manager_v1);
+    g_free(priv->wl_setup);
 }
 
 static GList *
@@ -149,25 +151,25 @@ xfw_workspace_manager_wayland_list_workspaces(XfwWorkspaceManager *manager) {
 
 static void
 registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version) {
-    WaylandSetup *setup = (WaylandSetup *)data;
+    WaylandSetup *wl_setup = (WaylandSetup *)data;
 
     if (strcmp(interface, ext_workspace_manager_v1_interface.name) == 0) {
-        setup->ext_workspace_manager_v1 = wl_registry_bind(setup->wl_registry,
-                                                           id,
-                                                           &ext_workspace_manager_v1_interface,
-                                                           MIN((uint32_t)ext_workspace_manager_v1_interface.version, version));
+        wl_setup->ext_workspace_manager_v1 = wl_registry_bind(wl_setup->wl_registry,
+                                                              id,
+                                                              &ext_workspace_manager_v1_interface,
+                                                              MIN((uint32_t)ext_workspace_manager_v1_interface.version, version));
     }
 #if 0
     else if (strcmp(interface, ext_workspace_group_handle_v1_interface.name) == 0) {
-        setup->ext_workspace_group_handle_v1 = wl_registry_bind(setup->wl_registry,
-                                                                id,
-                                                                &ext_workspace_group_handle_v1_interface,
-                                                                MIN((uint32_t)ext_workspace_group_handle_v1_interface.version, version));
+        wl_setup->ext_workspace_group_handle_v1 = wl_registry_bind(wl_setup->wl_registry,
+                                                                   id,
+                                                                   &ext_workspace_group_handle_v1_interface,
+                                                                   MIN((uint32_t)ext_workspace_group_handle_v1_interface.version, version));
     } else if (strcmp(interface, ext_workspace_handle_v1_interface.name) == 0) {
-        setup->ext_workspace_handle_v1 = wl_registry_bind(setup->wl_registry,
-                                                          id,
-                                                          &ext_workspace_handle_v1_interface,
-                                                          MIN((uint32_t)ext_workspace_handle_v1_interface.version, version));
+        wl_setup->ext_workspace_handle_v1 = wl_registry_bind(wl_setup->wl_registry,
+                                                             id,
+                                                             &ext_workspace_handle_v1_interface,
+                                                             MIN((uint32_t)ext_workspace_handle_v1_interface.version, version));
     }
 #endif
 }
@@ -291,43 +293,42 @@ workspace_removed(void *data, struct ext_workspace_handle_v1 *wl_workspace) {
     ext_workspace_handle_v1_destroy(wl_workspace);
 }
 
-XfwWorkspaceManagerWayland *
-_xfw_workspace_manager_wayland_get(void) {
-    if (wl_setup == NULL) {
-        GdkDisplay *gdk_display;
-        struct wl_display *wl_display;
+XfwWorkspaceManager *
+_xfw_workspace_manager_wayland_new(GdkScreen *screen) {
+    GdkDisplay *gdk_display;
+    struct wl_display *wl_display;
+    WaylandSetup *wl_setup;
 
-        wl_setup = g_new0(WaylandSetup, 1);
+    gdk_display = gdk_screen_get_display(screen);
+    wl_display = gdk_wayland_display_get_wl_display(GDK_WAYLAND_DISPLAY(gdk_display));
+    wl_setup = g_new0(WaylandSetup, 1);
+    wl_setup->wl_registry = wl_display_get_registry(wl_display);
+    wl_registry_add_listener(wl_setup->wl_registry, &registry_listener, wl_setup);
+    wl_display_roundtrip(wl_display);
 
-        gdk_display = gdk_display_get_default();
-        wl_display = gdk_wayland_display_get_wl_display(GDK_WAYLAND_DISPLAY(gdk_display));
-        wl_setup->wl_registry = wl_display_get_registry(wl_display);
-        wl_registry_add_listener(wl_setup->wl_registry, &registry_listener, wl_setup);
-        wl_display_roundtrip(wl_display);
-
-        if (wl_setup->ext_workspace_manager_v1 == NULL) {
-            g_warning("Your compositor does not support the ext_workspace_manager_v1 protocol");
-        }
-#if 0
-        if (wl_setup->ext_workspace_group_handle_v1 == NULL) {
-            g_warning("Your compositor does not support the ext_workspace_group_handle_v1 protocol");
-        }
-        if (wl_setup->ext_workspace_handle_v1 == NULL) {
-            g_warning("Your compositor does not support the ext_workspace_handle_v1 protocol");
-        }
-#endif
+    if (wl_setup->ext_workspace_manager_v1 == NULL) {
+        g_warning("Your compositor does not support the ext_workspace_manager_v1 protocol");
     }
+#if 0
+    if (wl_setup->ext_workspace_group_handle_v1 == NULL) {
+        g_warning("Your compositor does not support the ext_workspace_group_handle_v1 protocol");
+    }
+    if (wl_setup->ext_workspace_handle_v1 == NULL) {
+        g_warning("Your compositor does not support the ext_workspace_handle_v1 protocol");
+    }
+#endif
 
-    if (singleton == NULL
-        && wl_setup->ext_workspace_manager_v1 != NULL
+    if (wl_setup->ext_workspace_manager_v1 != NULL
 #if 0
         && wl_setup->ext_workspace_group_handle_v1 != NULL
         && wl_setup->ext_workspace_handle_v1 != NULL
 #endif
     ) {
-        singleton = XFW_WORKSPACE_MANAGER_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_MANAGER_WAYLAND, NULL));
-        ext_workspace_manager_v1_add_listener(wl_setup->ext_workspace_manager_v1, &manager_listener, singleton);
+        XfwWorkspaceManagerWayland *manager = XFW_WORKSPACE_MANAGER_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_MANAGER_WAYLAND, NULL));
+        manager->priv->wl_setup = wl_setup;
+        ext_workspace_manager_v1_add_listener(wl_setup->ext_workspace_manager_v1, &manager_listener, manager);
+        return XFW_WORKSPACE_MANAGER(manager);
+    } else {
+        return NULL;
     }
-
-    return singleton;
 }

@@ -40,12 +40,17 @@ enum {
 };
 
 static guint manager_signals[LAST_SIGNAL] = { 0, };
+static GHashTable *managers = NULL;
 
 typedef struct _XfwWorkspaceManagerIface XfwWorkspaceManagerInterface;
 G_DEFINE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, G_TYPE_OBJECT)
 
 static void
 xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
+    if (managers == NULL) {
+        managers = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
+    }
+
     manager_signals[WORKSPACE_ADDED] = g_signal_new("workspace-added",
                                                     XFW_TYPE_WORKSPACE_MANAGER,
                                                     G_SIGNAL_RUN_LAST,
@@ -72,26 +77,46 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
                                                       XFW_TYPE_WORKSPACE);
 }
 
+static void
+screen_destroyed(gpointer data, GObject *screen) {
+    g_hash_table_remove(managers, screen);
+}
+
+static void
+manager_destroyed(gpointer screen, GObject *manager) {
+    g_hash_table_remove(managers, screen);
+}
+
 XfwWorkspaceManager *
-xfw_workspace_manager_create(GdkScreen *screen) {
+xfw_workspace_manager_get(GdkScreen *screen) {
+    XfwWorkspaceManager *manager = g_hash_table_lookup(managers, screen);
+
+    if (manager == NULL) {
 #ifdef ENABLE_X11
-    if (xfw_windowing_get() == XFW_WINDOWING_X11) {
-        return XFW_WORKSPACE_MANAGER(g_object_new(XFW_TYPE_WORKSPACE_MANAGER_X11, "screen", screen, NULL));
-    } else
+        if (xfw_windowing_get() == XFW_WINDOWING_X11) {
+            manager = _xfw_workspace_manager_x11_new(screen);
+        } else
 #endif
 #ifdef ENABLE_WAYLAND
-    if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND) {
-        XfwWorkspaceManagerWayland *manager = _xfw_workspace_manager_wayland_get();
-        if (manager != NULL) {
-            return XFW_WORKSPACE_MANAGER(g_object_ref(manager));
-        } else {
-            return XFW_WORKSPACE_MANAGER(g_object_ref(_xfw_workspace_manager_dummy_get()));
-        }
-    } else
+        if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND) {
+            manager = _xfw_workspace_manager_wayland_new(screen);
+            if (manager == NULL) {
+                manager = _xfw_workspace_manager_dummy_new(screen);
+            }
+        } else
 #endif
-    {
-        return XFW_WORKSPACE_MANAGER(g_object_ref(_xfw_workspace_manager_dummy_get()));
+        {
+            manager = _xfw_workspace_manager_dummy_new(screen);
+        }
+
+        g_hash_table_insert(managers, screen, manager);
+        g_object_weak_ref(G_OBJECT(screen), screen_destroyed, NULL);
+        g_object_weak_ref(G_OBJECT(manager), manager_destroyed, screen);
+    } else {
+        g_object_ref(manager);
     }
+
+    return manager;
 }
 
 GList *

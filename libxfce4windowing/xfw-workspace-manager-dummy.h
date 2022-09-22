@@ -26,16 +26,22 @@
 
 #include <gdk/gdk.h>
 
+#include "xfw-workspace-manager.h"
+
 G_BEGIN_DECLS
 
 #define XFW_TYPE_WORKSPACE_MANAGER_DUMMY (xfw_workspace_manager_dummy_get_type())
 #define XFW_WORKSPACE_MANAGER_DUMMY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_MANAGER_DUMMY, XfwWorkspaceManagerDummy))
 
 typedef struct _XfwWorkspaceManagerDummy XfwWorkspaceManagerDummy;
+typedef struct _XfwWorkspaceManagerDummyPrivate XfwWorkspaceManagerDummyPrivate;
 typedef struct _XfwWorkspaceManagerDummyClass XfwWorkspaceManagerDummyClass;
 
 struct _XfwWorkspaceManagerDummy {
     GObject parent;
+
+    /*< private >*/
+    XfwWorkspaceManagerDummyPrivate *priv;
 };
 
 struct _XfwWorkspaceManagerDummyClass {
@@ -44,7 +50,7 @@ struct _XfwWorkspaceManagerDummyClass {
 
 GType xfw_workspace_manager_dummy_get_type() G_GNUC_CONST;
 
-XfwWorkspaceManagerDummy *_xfw_workspace_manager_dummy_get(void);
+XfwWorkspaceManager *_xfw_workspace_manager_dummy_new(GdkScreen *screen);
 
 G_END_DECLS
 

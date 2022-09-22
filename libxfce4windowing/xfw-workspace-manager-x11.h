@@ -26,6 +26,8 @@
 
 #include <gdk/gdk.h>
 
+#include "xfw-workspace-manager.h"
+
 G_BEGIN_DECLS
 
 #define XFW_TYPE_WORKSPACE_MANAGER_X11 (xfw_workspace_manager_x11_get_type())
@@ -46,6 +48,8 @@ struct _XfwWorkspaceManagerX11Class {
 };
 
 GType xfw_workspace_manager_x11_get_type() G_GNUC_CONST;
+
+XfwWorkspaceManager * _xfw_workspace_manager_x11_new(GdkScreen *screen);
 
 G_END_DECLS
 

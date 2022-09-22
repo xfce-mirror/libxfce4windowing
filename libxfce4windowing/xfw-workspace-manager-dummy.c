@@ -26,19 +26,23 @@
 #include "xfw-workspace-dummy.h"
 #include "xfw-workspace-manager.h"
 
-XfwWorkspaceManagerDummy *singleton = NULL;
-GList *singleton_workspaces = NULL;
+struct _XfwWorkspaceManagerDummyPrivate {
+    GList *workspaces;
+};
 
 static void xfw_workspace_manager_dummy_manager_init(XfwWorkspaceManagerIface *iface);
+static void xfw_workspace_manager_dummy_dispose(GObject *obj);
 static GList *xfw_workspace_manager_dummy_list_workspaces(XfwWorkspaceManager *manager);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerDummy, xfw_workspace_manager_dummy, G_TYPE_OBJECT,
+                        G_ADD_PRIVATE(XfwWorkspaceManagerDummy)
                         G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_MANAGER,
                                               xfw_workspace_manager_dummy_manager_init))
 
 static void
 xfw_workspace_manager_dummy_class_init(XfwWorkspaceManagerDummyClass *klass) {
-
+    GObjectClass *gklass = G_OBJECT_CLASS(klass);
+    gklass->dispose = xfw_workspace_manager_dummy_dispose;
 }
 
 static void
@@ -48,19 +52,20 @@ xfw_workspace_manager_dummy_manager_init(XfwWorkspaceManagerIface *iface) {
 
 static void
 xfw_workspace_manager_dummy_init(XfwWorkspaceManagerDummy *manager) {
-    if (singleton_workspaces == NULL) {
-        singleton_workspaces = g_list_append(singleton_workspaces, g_object_new(XFW_TYPE_WORKSPACE_DUMMY, NULL));
-    }
+    manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY, NULL));
+}
+
+static void
+xfw_workspace_manager_dummy_dispose(GObject *obj) {
+    g_list_free(XFW_WORKSPACE_MANAGER_DUMMY(obj)->priv->workspaces);
 }
 
 static GList *
 xfw_workspace_manager_dummy_list_workspaces(XfwWorkspaceManager *manager) {
-    return singleton_workspaces;
+    return XFW_WORKSPACE_MANAGER_DUMMY(manager)->priv->workspaces;
 }
 
-XfwWorkspaceManagerDummy *_xfw_workspace_manager_dummy_get(void) {
-    if (singleton == NULL) {
-        singleton = XFW_WORKSPACE_MANAGER_DUMMY(g_object_new(XFW_TYPE_WORKSPACE_MANAGER_DUMMY, NULL));
-    }
-    return singleton;
+XfwWorkspaceManager *
+_xfw_workspace_manager_dummy_new(GdkScreen *screen) {
+    return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_DUMMY, NULL);
 }
