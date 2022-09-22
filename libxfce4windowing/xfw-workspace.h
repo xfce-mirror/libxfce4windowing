@@ -33,6 +33,8 @@ G_BEGIN_DECLS
 #define XFW_IS_WORKSPACE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE))
 #define XFW_WORKSPACE_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE((obj), XFW_TYPE_WORKSPACE, XfwWorkspaceIface))
 
+#define XFW_TYPE_WORKSPACE_STATE     (xfw_workspace_state_get_type())
+
 typedef struct _XfwWorkspace XfwWorkspace;
 typedef struct _XfwWorkspaceIface XfwWorkspaceIface;
 
@@ -63,6 +65,7 @@ struct _XfwWorkspaceIface {
 };
 
 GType xfw_workspace_get_type(void) G_GNUC_CONST;
+GType xfw_workspace_state_get_type(void) G_GNUC_CONST;
 
 const gchar *xfw_workspace_get_id(XfwWorkspace *workspace);
 const gchar *xfw_workspace_get_name(XfwWorkspace *workspace);

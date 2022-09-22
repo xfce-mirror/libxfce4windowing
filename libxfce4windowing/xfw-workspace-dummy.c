@@ -80,7 +80,7 @@ xfw_workspace_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GPa
             break;
 
         case WORKSPACE_PROP_STATE:
-            g_value_set_uint(value, xfw_workspace_dummy_get_state(workspace));
+            g_value_set_flags(value, xfw_workspace_dummy_get_state(workspace));
             break;
 
         case WORKSPACE_PROP_NUMBER:

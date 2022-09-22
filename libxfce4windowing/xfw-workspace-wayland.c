@@ -136,7 +136,7 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
             break;
 
         case WORKSPACE_PROP_STATE:
-            workspace->priv->state = g_value_get_uint(value);
+            workspace->priv->state = g_value_get_flags(value);
             break;
 
         case WORKSPACE_PROP_NUMBER:
@@ -165,7 +165,7 @@ xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, G
             break;
 
         case WORKSPACE_PROP_STATE:
-            g_value_set_uint(value, workspace->priv->state);
+            g_value_set_flags(value, workspace->priv->state);
             break;
 
         default:

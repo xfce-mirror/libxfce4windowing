@@ -36,6 +36,12 @@ static guint workspace_signals[LAST_SIGNAL] = { 0, };
 typedef struct _XfwWorkspaceIface XfwWorkspaceInterface;
 G_DEFINE_INTERFACE(XfwWorkspace, xfw_workspace, G_TYPE_OBJECT)
 
+G_DEFINE_FLAGS_TYPE(XfwWorkspaceState, xfw_workspace_state,
+    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_NONE, "none"),
+    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_ACTIVE, "active"),
+    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_URGENT, "urgent"),
+    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_HIDDEN, "hidden"))
+
 static void
 xfw_workspace_default_init(XfwWorkspaceIface *iface) {
     workspace_signals[NAME_CHANGED] = g_signal_new("name-changed",
@@ -50,9 +56,9 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                     G_SIGNAL_RUN_LAST,
                                                     G_STRUCT_OFFSET(XfwWorkspaceIface, state_changed),
                                                     NULL, NULL,
-                                                    g_cclosure_marshal_VOID__UINT,
+                                                    g_cclosure_marshal_VOID__FLAGS,
                                                     G_TYPE_NONE, 1,
-                                                    G_TYPE_UINT);
+                                                    XFW_TYPE_WORKSPACE_STATE);
 
     g_object_interface_install_property(iface,
                                         g_param_spec_string("id",
@@ -67,10 +73,11 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                             "",
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_interface_install_property(iface,
-                                        g_param_spec_uint("state",
+                                        g_param_spec_flags("state",
                                                           "state",
                                                           "state",
-                                                          0, UINT_MAX, XFW_WORKSPACE_STATE_NONE,
+                                                          XFW_TYPE_WORKSPACE_STATE,
+                                                          XFW_WORKSPACE_STATE_NONE,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_interface_install_property(iface,
                                         g_param_spec_uint("number",
