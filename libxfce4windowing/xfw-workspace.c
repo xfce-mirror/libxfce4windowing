@@ -24,15 +24,6 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace.h"
 
-enum {
-    NAME_CHANGED,
-    STATE_CHANGED,
-
-    LAST_SIGNAL
-};
-
-static guint workspace_signals[LAST_SIGNAL] = { 0, };
-
 typedef struct _XfwWorkspaceIface XfwWorkspaceInterface;
 G_DEFINE_INTERFACE(XfwWorkspace, xfw_workspace, G_TYPE_OBJECT)
 
@@ -44,21 +35,21 @@ G_DEFINE_FLAGS_TYPE(XfwWorkspaceState, xfw_workspace_state,
 
 static void
 xfw_workspace_default_init(XfwWorkspaceIface *iface) {
-    workspace_signals[NAME_CHANGED] = g_signal_new("name-changed",
-                                                   XFW_TYPE_WORKSPACE,
-                                                   G_SIGNAL_RUN_LAST,
-                                                   G_STRUCT_OFFSET(XfwWorkspaceIface, name_changed),
-                                                   NULL, NULL,
-                                                   g_cclosure_marshal_VOID__VOID,
-                                                   G_TYPE_NONE, 0);
-    workspace_signals[STATE_CHANGED] = g_signal_new("state-changed",
-                                                    XFW_TYPE_WORKSPACE,
-                                                    G_SIGNAL_RUN_LAST,
-                                                    G_STRUCT_OFFSET(XfwWorkspaceIface, state_changed),
-                                                    NULL, NULL,
-                                                    g_cclosure_marshal_VOID__FLAGS,
-                                                    G_TYPE_NONE, 1,
-                                                    XFW_TYPE_WORKSPACE_STATE);
+    g_signal_new("name-changed",
+                 XFW_TYPE_WORKSPACE,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceIface, name_changed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__VOID,
+                 G_TYPE_NONE, 0);
+    g_signal_new("state-changed",
+                 XFW_TYPE_WORKSPACE,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceIface, state_changed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__FLAGS,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_WORKSPACE_STATE);
 
     g_object_interface_install_property(iface,
                                         g_param_spec_string("id",
