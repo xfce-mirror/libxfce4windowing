@@ -34,7 +34,6 @@ struct _XfwWorkspaceManagerX11Private {
     GList *groups;
     GList *workspaces;
     GHashTable *wnck_workspaces;
-    XfwWorkspaceX11 *active_workspace;
 };
 
 static void xfw_workspace_manager_x11_manager_init(XfwWorkspaceManagerIface *iface);
@@ -83,9 +82,9 @@ xfw_workspace_manager_x11_init(XfwWorkspaceManagerX11 *manager) {
     active_wnck_workspace = wnck_screen_get_active_workspace(priv->wnck_screen);
     wnck_workspaces = wnck_screen_get_workspaces(priv->wnck_screen);
     for (GList *l = wnck_workspaces; l != NULL; l = l->next) {
-        XfwWorkspaceX11 *workspace = g_object_new(XFW_TYPE_WORKSPACE_X11, "wnck-workspace", l->data, NULL);
+        XfwWorkspace *workspace = g_object_new(XFW_TYPE_WORKSPACE_X11, "wnck-workspace", l->data, NULL);
         if (active_wnck_workspace == l->data) {
-            priv->active_workspace = workspace;
+            _xfw_workspace_group_dummy_set_active_workspace(XFW_WORKSPACE_GROUP_DUMMY(priv->groups->data), workspace);
         }
         priv->workspaces = g_list_prepend(priv->workspaces, workspace);
         g_hash_table_insert(priv->wnck_workspaces, g_object_ref(l->data), workspace);
@@ -149,9 +148,9 @@ static void
 active_workspace_changed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorkspaceManagerX11 *manager) {
     XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(g_hash_table_lookup(manager->priv->wnck_workspaces, wnck_workspace));
     if (workspace != NULL) {
-        XfwWorkspaceX11 *old_active_workspace = manager->priv->active_workspace;
+        XfwWorkspaceGroup *group = XFW_WORKSPACE_GROUP(manager->priv->groups->data);
+        XfwWorkspace *old_active_workspace = xfw_workspace_group_get_active_workspace(group);
 
-        manager->priv->active_workspace = workspace;
         if (old_active_workspace != NULL) {
             g_object_notify(G_OBJECT(old_active_workspace), "state");
             g_signal_emit_by_name(old_active_workspace, "state-changed", XFW_WORKSPACE_STATE_ACTIVE);
@@ -159,7 +158,7 @@ active_workspace_changed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwW
 
         g_object_notify(G_OBJECT(workspace), "state");
         g_signal_emit_by_name(workspace, "state-changed", XFW_WORKSPACE_STATE_NONE);
-        g_signal_emit_by_name(manager, "workspace-activated", workspace);
+        _xfw_workspace_group_dummy_set_active_workspace(XFW_WORKSPACE_GROUP_DUMMY(group), XFW_WORKSPACE(workspace));
     }
 }
 
@@ -188,11 +187,12 @@ workspace_destroyed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorksp
     XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(g_hash_table_lookup(manager->priv->wnck_workspaces, wnck_workspace));
     if (workspace != NULL) {
         GValue value = G_VALUE_INIT;
+        XfwWorkspaceGroup *group = XFW_WORKSPACE_GROUP(manager->priv->groups->data);
 
         g_object_ref(workspace);
 
-        if (workspace == manager->priv->active_workspace) {
-            manager->priv->active_workspace = NULL;
+        if (XFW_WORKSPACE(workspace) == xfw_workspace_group_get_active_workspace(group)) {
+            _xfw_workspace_group_dummy_set_active_workspace(XFW_WORKSPACE_GROUP_DUMMY(group), XFW_WORKSPACE(workspace));
         }
 
         g_hash_table_remove(manager->priv->wnck_workspaces, wnck_workspace);
@@ -201,7 +201,7 @@ workspace_destroyed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorksp
         g_value_set_pointer(&value, manager->priv->workspaces);
         g_object_set_property(G_OBJECT(manager->priv->groups->data), "workspaces", &value);
 
-        g_signal_emit_by_name(manager->priv->groups->data, "workspace-removed", workspace);
+        g_signal_emit_by_name(group, "workspace-removed", workspace);
 
         g_object_unref(workspace);
     }

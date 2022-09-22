@@ -73,6 +73,12 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                              "workspaces",
                                                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     g_object_interface_install_property(iface,
+                                        g_param_spec_object("active-workspace",
+                                                            "active-workspace",
+                                                            "active-workspace",
+                                                            XFW_TYPE_WORKSPACE,
+                                                            G_PARAM_READABLE));
+    g_object_interface_install_property(iface,
                                         g_param_spec_pointer("monitors",
                                                              "monitors",
                                                              "monitors",
@@ -87,6 +93,14 @@ xfw_workspace_group_list_workspaces(XfwWorkspaceGroup *group) {
     return (*iface->list_workspaces)(group);
 }
 
+XfwWorkspace *
+xfw_workspace_group_get_active_workspace(XfwWorkspaceGroup *group) {
+    XfwWorkspaceGroupIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE_GROUP(group), NULL);
+    iface = XFW_WORKSPACE_GROUP_GET_IFACE(group);
+    return (*iface->get_active_workspace)(group);
+}
+
 GList *
 xfw_workspace_group_get_monitors(XfwWorkspaceGroup *group) {
     XfwWorkspaceGroupIface *iface;
@@ -99,5 +113,6 @@ void
 _xfw_workspace_group_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_SCREEN, "screen");
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_WORKSPACES, "workspaces");
+    g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE, "active-workspace");
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_MONITORS, "monitors");
 }

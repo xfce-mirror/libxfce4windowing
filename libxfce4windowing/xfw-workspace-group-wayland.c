@@ -44,6 +44,7 @@ struct _XfwWorkspaceGroupWaylandPrivate {
     GdkScreen *screen;
     struct ext_workspace_group_handle_v1 *handle;
     GList *workspaces;
+    XfwWorkspace *active_workspace;
     GHashTable *wl_workspaces;
     GList *monitors;
 };
@@ -55,6 +56,7 @@ static void xfw_workspace_group_wayland_set_property(GObject *obj, guint prop_id
 static void xfw_workspace_group_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_wayland_dispose(GObject *obj);
 static GList *xfw_workspace_group_wayland_list_workspaces(XfwWorkspaceGroup *group);
+static XfwWorkspace *xfw_workspace_group_wayland_get_active_workspace(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_wayland_get_monitors(XfwWorkspaceGroup *group);
 
 static void group_capabilities(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_array *capabilities);
@@ -117,6 +119,7 @@ xfw_workspace_group_wayland_set_property(GObject *obj, guint prop_id, const GVal
             g_warning("XfwWorkspaceGroupWayland should never have its 'workspaces' property set externally");
             break;
 
+        case WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE:
         case WORKSPACE_GROUP_PROP_MONITORS:
             break;
 
@@ -137,6 +140,10 @@ xfw_workspace_group_wayland_get_property(GObject *obj, guint prop_id, GValue *va
 
         case WORKSPACE_GROUP_PROP_WORKSPACES:
             g_value_set_pointer(value, group->priv->workspaces);
+            break;
+
+        case WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE:
+            g_value_set_object(value, group->priv->active_workspace);
             break;
 
         case WORKSPACE_GROUP_PROP_MONITORS:
@@ -168,12 +175,18 @@ xfw_workspace_group_wayland_dispose(GObject *obj) {
 static void
 xfw_workspace_group_wayland_workspace_init(XfwWorkspaceGroupIface *iface) {
     iface->list_workspaces = xfw_workspace_group_wayland_list_workspaces;
+    iface->get_active_workspace = xfw_workspace_group_wayland_get_active_workspace;
     iface->get_monitors = xfw_workspace_group_wayland_get_monitors;
 }
 
 static GList *
 xfw_workspace_group_wayland_list_workspaces(XfwWorkspaceGroup *group) {
     return XFW_WORKSPACE_GROUP_WAYLAND(group)->priv->workspaces;
+}
+
+static XfwWorkspace *
+xfw_workspace_group_wayland_get_active_workspace(XfwWorkspaceGroup *group) {
+    return XFW_WORKSPACE_GROUP_WAYLAND(group)->priv->active_workspace;
 }
 
 static GList *
@@ -220,6 +233,8 @@ static void
 workspace_state_changed(XfwWorkspace *workspace, XfwWorkspaceState old_state, XfwWorkspaceGroupWayland *group) {
     XfwWorkspaceState state = xfw_workspace_get_state(workspace);
     if ((old_state & XFW_WORKSPACE_STATE_ACTIVE) != XFW_WORKSPACE_STATE_ACTIVE && (state & XFW_WORKSPACE_STATE_ACTIVE) == XFW_WORKSPACE_STATE_ACTIVE) {
+        group->priv->active_workspace = workspace;
+        g_object_notify(G_OBJECT(group), "active-workspace");
         g_signal_emit_by_name(group, "workspace-activated", workspace);
     }
 }

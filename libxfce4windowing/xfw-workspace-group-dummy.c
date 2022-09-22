@@ -32,6 +32,7 @@ struct _XfwWorkspaceGroupDummyPrivate {
     GdkScreen *screen;
     GList *workspaces;
     GList *monitors;
+    XfwWorkspace *active_workspace;
 };
 
 static void xfw_workspace_group_dummy_workspace_init(XfwWorkspaceGroupIface *iface);
@@ -39,6 +40,7 @@ static void xfw_workspace_group_dummy_set_property(GObject *obj, guint prop_id, 
 static void xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_dummy_dispose(GObject *obj);
 static GList *xfw_workspace_group_dummy_list_workspaces(XfwWorkspaceGroup *group);
+static XfwWorkspace *xfw_workspace_group_dummy_get_active_workspace(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_dummy_get_monitors(XfwWorkspaceGroup *group);
 
 static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
@@ -84,6 +86,7 @@ xfw_workspace_group_dummy_set_property(GObject *obj, guint prop_id, const GValue
             g_list_free(group->priv->workspaces);
             group->priv->workspaces = g_list_copy(g_value_get_pointer(value));
 
+        case WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE:
         case WORKSPACE_GROUP_PROP_MONITORS:
             break;
 
@@ -104,6 +107,10 @@ xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *valu
 
         case WORKSPACE_GROUP_PROP_WORKSPACES:
             g_value_set_pointer(value, group->priv->workspaces);
+            break;
+
+        case WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE:
+            g_value_set_object(value, group->priv->active_workspace);
             break;
 
         case WORKSPACE_GROUP_PROP_MONITORS:
@@ -132,12 +139,18 @@ xfw_workspace_group_dummy_dispose(GObject *obj) {
 static void
 xfw_workspace_group_dummy_workspace_init(XfwWorkspaceGroupIface *iface) {
     iface->list_workspaces = xfw_workspace_group_dummy_list_workspaces;
+    iface->get_active_workspace = xfw_workspace_group_dummy_get_active_workspace;
     iface->get_monitors = xfw_workspace_group_dummy_get_monitors;
 }
 
 static GList *
 xfw_workspace_group_dummy_list_workspaces(XfwWorkspaceGroup *group) {
     return XFW_WORKSPACE_GROUP_DUMMY(group)->priv->workspaces;
+}
+
+static XfwWorkspace *
+xfw_workspace_group_dummy_get_active_workspace(XfwWorkspaceGroup *group) {
+    return XFW_WORKSPACE_GROUP_DUMMY(group)->priv->active_workspace;
 }
 
 static GList *
@@ -160,4 +173,13 @@ static void
 monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group) {
     group->priv->monitors = g_list_remove(group->priv->monitors, monitor);
     g_signal_emit_by_name(group, "monitors-changed");
+}
+
+void
+_xfw_workspace_group_dummy_set_active_workspace(XfwWorkspaceGroupDummy *group, XfwWorkspace *workspace) {
+    if (workspace != group->priv->active_workspace) {
+        group->priv->active_workspace = workspace;
+        g_object_notify(G_OBJECT(group), "active-workspace");
+        g_signal_emit_by_name(group, "workspace-activated", workspace);
+    }
 }

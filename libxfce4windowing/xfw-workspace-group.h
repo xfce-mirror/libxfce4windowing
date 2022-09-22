@@ -58,10 +58,12 @@ struct _XfwWorkspaceGroupIface {
 
     /* Virtual Table */
     GList *(*list_workspaces)(XfwWorkspaceGroup *group);
+    XfwWorkspace *(*get_active_workspace)(XfwWorkspaceGroup *group);
     GList *(*get_monitors)(XfwWorkspaceGroup *group);
 };
 
 GList *xfw_workspace_group_list_workspaces(XfwWorkspaceGroup *group);
+XfwWorkspace *xfw_workspace_group_get_active_workspace(XfwWorkspaceGroup *group);
 GList *xfw_workspace_group_get_monitors(XfwWorkspaceGroup *group);
 
 G_END_DECLS
