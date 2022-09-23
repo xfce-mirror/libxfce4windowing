@@ -24,7 +24,10 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <glib.h>
+#include <gdk/gdk.h>
+#ifdef GDK_WINDOWING_X11
+#include <gdk/gdkx.h>
+#endif
 
 #define XFW_ERROR (xfw_error_quark())
 
@@ -39,9 +42,39 @@ typedef enum {
     XFW_WINDOWING_WAYLAND = 2
 } XfwWindowing;
 
+GQuark xfw_error_quark(void);
+
 XfwWindowing xfw_windowing_get(void);
 
-GQuark xfw_error_quark(void);
+static inline void
+xfw_windowing_error_trap_push(GdkDisplay *display) {
+#ifdef GDK_WINDOWING_X11
+    if (xfw_windowing_get() == XFW_WINDOWING_X11) {
+        gdk_x11_display_error_trap_push(display);
+    }
+#endif  /* GDK_WINDOWING_X11 */
+}
+
+static inline gint
+xfw_windowing_error_trap_pop(GdkDisplay *display) {
+#ifdef GDK_WINDOWING_X11
+    if (xfw_windowing_get() == XFW_WINDOWING_X11) {
+        return gdk_x11_display_error_trap_pop(display);
+    } else
+#endif  /* GDK_WINDOWING_X11 */
+    {
+        return 0;
+    }
+}
+
+static inline void
+xfw_windowing_error_trap_pop_ignored(GdkDisplay *display) {
+#ifdef GDK_WINDOWING_X11
+    if (xfw_windowing_get() == XFW_WINDOWING_X11) {
+        gdk_x11_display_error_trap_pop_ignored(display);
+    }
+#endif  /* GDK_WINDOWING_X11 */
+}
 
 G_END_DECLS
 
