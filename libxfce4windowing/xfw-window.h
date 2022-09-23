@@ -71,8 +71,8 @@ struct _XfwWindowIface {
     XfwWindowState (*get_state)(XfwWindow *window);
     XfwWorkspace *(*get_workspace)(XfwWindow *window);
 
-    void (*activate)(XfwWindow *window, GError **error);
-    void (*close)(XfwWindow *window, GError **error);
+    void (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
+    void (*close)(XfwWindow *window, guint64 event_timestamp, GError **error);
     void (*set_minimized)(XfwWindow *window, gboolean is_minimized, GError **error);
     void (*set_maximized)(XfwWindow *window, gboolean is_maximized, GError **error);
     void (*set_fullscreen)(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -90,8 +90,8 @@ GdkPixbuf *xfw_window_get_icon(XfwWindow *window);
 XfwWindowState xfw_window_get_state(XfwWindow *window);
 XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);
 
-void xfw_window_activate(XfwWindow *window, GError **error);
-void xfw_window_close(XfwWindow *window, GError **error);
+void xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
+void xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 
 void xfw_window_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 void xfw_window_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);

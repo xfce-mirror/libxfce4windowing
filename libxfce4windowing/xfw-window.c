@@ -152,19 +152,19 @@ xfw_window_get_workspace(XfwWindow *window) {
 }
 
 void
-xfw_window_activate(XfwWindow *window, GError **error) {
+xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error) {
     XfwWindowIface *iface;
     g_return_if_fail(XFW_IS_WINDOW(window));
     iface = XFW_WINDOW_GET_IFACE(window);
-    return (*iface->activate)(window, error);
+    return (*iface->activate)(window, event_timestamp, error);
 }
 
 void
-xfw_window_close(XfwWindow *window, GError **error) {
+xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
     XfwWindowIface *iface;
     g_return_if_fail(XFW_IS_WINDOW(window));
     iface = XFW_WINDOW_GET_IFACE(window);
-    return (*iface->close)(window, error);
+    return (*iface->close)(window, event_timestamp, error);
 }
 
 #define STATE_SETTER(state) \

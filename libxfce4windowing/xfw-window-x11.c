@@ -48,8 +48,8 @@ static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
-static void xfw_window_x11_activate(XfwWindow *window, GError **error);
-static void xfw_window_x11_close(XfwWindow *window, GError **error);
+static void xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
+static void xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 static void xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static void xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
 static void xfw_window_x11_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -256,15 +256,15 @@ xfw_window_x11_get_workspace(XfwWindow *window) {
 }
 
 static void
-xfw_window_x11_activate(XfwWindow *window, GError **error) {
+xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
-    wnck_window_activate(priv->wnck_window, GDK_CURRENT_TIME);
+    wnck_window_activate(priv->wnck_window, (guint32)event_timestamp);
 }
 
 static void
-xfw_window_x11_close(XfwWindow *window, GError **error) {
+xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
-    wnck_window_close(priv->wnck_window, GDK_CURRENT_TIME);
+    wnck_window_close(priv->wnck_window, (guint32)event_timestamp);
 }
 
 static void

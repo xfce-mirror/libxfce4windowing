@@ -52,8 +52,8 @@ static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_wayland_get_state(XfwWindow *window);
 static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
-static void xfw_window_wayland_activate(XfwWindow *window, GError **error);
-static void xfw_window_wayland_close(XfwWindow *window, GError **error);
+static void xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
+static void xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 static void xfw_window_wayland_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static void xfw_window_wayland_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
 static void xfw_window_wayland_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -230,13 +230,13 @@ xfw_window_wayland_get_workspace(XfwWindow *window) {
 }
 
 static void
-xfw_window_wayland_activate(XfwWindow *window, GError **error) {
+xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error) {
     // FIXME: make sure NULL for seat means "compositor picks what seat", and doesn't crash or fail
     zwlr_foreign_toplevel_handle_v1_activate(XFW_WINDOW_WAYLAND(window)->priv->handle, NULL);
 }
 
 static void
-xfw_window_wayland_close(XfwWindow *window, GError **error) {
+xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
     zwlr_foreign_toplevel_handle_v1_close(XFW_WINDOW_WAYLAND(window)->priv->handle);
 }
 
