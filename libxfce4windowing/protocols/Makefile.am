@@ -14,7 +14,7 @@ libwayland_protocols_la_CFLAGS = \
 	$(WAYLAND_CLIENT_CFLAGS)
 
 libwayland_protocols_la_LDFLAGS = \
-	-no-undefined
+	-Wl,-no-undefined
 
 libwayland_protocols_la_LIBADD = \
 	$(WAYLAND_CLIENT_LIBS)
