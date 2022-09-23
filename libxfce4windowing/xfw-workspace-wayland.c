@@ -238,10 +238,18 @@ workspace_name(void *data, struct ext_workspace_handle_v1 *wl_workspace, const c
 }
 
 static void
-workspace_coordinates(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *coordinates)
-{
+workspace_coordinates(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *coordinates) {
 
 }
+
+static const struct {
+    enum ext_workspace_handle_v1_state wl_state;
+    XfwWorkspaceState state_bit;
+} state_converters[] = {
+    { EXT_WORKSPACE_HANDLE_V1_STATE_ACTIVE, XFW_WORKSPACE_STATE_ACTIVE },
+    { EXT_WORKSPACE_HANDLE_V1_STATE_URGENT, XFW_WORKSPACE_STATE_URGENT },
+    { EXT_WORKSPACE_HANDLE_V1_STATE_HIDDEN, XFW_WORKSPACE_STATE_HIDDEN },
+};
 
 static void
 workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct wl_array *wl_state) {
@@ -251,22 +259,15 @@ workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct
     enum ext_workspace_handle_v1_state *item;
 
     wl_array_for_each(item, wl_state) {
-        switch (*item) {
-            case EXT_WORKSPACE_HANDLE_V1_STATE_ACTIVE:
-                state |= XFW_WORKSPACE_STATE_ACTIVE;
+        for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
+            if (state_converters[i].wl_state == *item) {
+                state |= state_converters[i].state_bit;
                 break;
-            case EXT_WORKSPACE_HANDLE_V1_STATE_URGENT:
-                state |= XFW_WORKSPACE_STATE_URGENT;
-                break;
-            case EXT_WORKSPACE_HANDLE_V1_STATE_HIDDEN:
-                state |= XFW_WORKSPACE_STATE_HIDDEN;
-                break;
-            default:
-                g_warning("Unrecognized workspace state %d", *item);
-                break;
+            }
         }
     }
-    g_object_set(workspace, "state", state, NULL);
+    workspace->priv->state = state;
+    g_object_notify(G_OBJECT(workspace), "state");
     g_signal_emit_by_name(workspace, "state-changed", old_state);
     if ((old_state & XFW_WORKSPACE_STATE_ACTIVE) == 0 && (state & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
         _xfw_workspace_group_wayland_set_active_workspace(workspace->priv->group, XFW_WORKSPACE(workspace));
