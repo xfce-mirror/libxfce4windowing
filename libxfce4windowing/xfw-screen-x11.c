@@ -213,6 +213,7 @@ window_closed(WnckScreen *wnck_screen, WnckWindow *wnck_window, XfwScreenX11 *sc
             screen->priv->active_window = NULL;
         }
 
+        g_signal_emit_by_name(window, "closed");
         g_signal_emit_by_name(screen, "window-closed", window);
         g_signal_emit_by_name(screen, "window-stacking-changed", screen);
 
