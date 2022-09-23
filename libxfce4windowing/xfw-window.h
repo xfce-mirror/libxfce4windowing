@@ -58,7 +58,7 @@ struct _XfwWindowIface {
     /*< public >*/
 
     /* Signals */
-    void (*title_changed)(XfwWindow *window);
+    void (*name_changed)(XfwWindow *window);
     void (*icon_changed)(XfwWindow *window);
     void (*state_changed)(XfwWindow *window, XfwWindowState old_state);
     void (*workspace_changed)(XfwWindow* window, XfwWorkspace *old_workspace);
@@ -66,7 +66,7 @@ struct _XfwWindowIface {
 
     /* Virtual Table */
     guint64 (*get_id)(XfwWindow *window);
-    const gchar *(*get_title)(XfwWindow *window);
+    const gchar *(*get_name)(XfwWindow *window);
     GdkPixbuf *(*get_icon)(XfwWindow *window);
     XfwWindowState (*get_state)(XfwWindow *window);
     XfwWorkspace *(*get_workspace)(XfwWindow *window);
@@ -85,7 +85,7 @@ GType xfw_window_get_type(void) G_GNUC_CONST;
 GType xfw_window_state_get_type(void) G_GNUC_CONST;
 
 guint64 xfw_window_get_id(XfwWindow *window);
-const gchar *xfw_window_get_title(XfwWindow *window);
+const gchar *xfw_window_get_name(XfwWindow *window);
 GdkPixbuf *xfw_window_get_icon(XfwWindow *window);
 XfwWindowState xfw_window_get_state(XfwWindow *window);
 XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);

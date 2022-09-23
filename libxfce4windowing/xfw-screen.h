@@ -46,7 +46,7 @@ struct _XfwScreenIface {
     /*< public >*/
 
     /* Signals */
-    void (*window_created)(XfwScreen *screen, XfwWindow *window);
+    void (*window_opened)(XfwScreen *screen, XfwWindow *window);
     void (*active_window_changed)(XfwScreen *screen, XfwWindow *previous_active_window);
     void (*window_stacking_changed)(XfwScreen *screen);
     void (*window_closed)(XfwScreen *screen, XfwWindow *window);

@@ -48,10 +48,10 @@ struct _XfwWorkspaceManagerIface {
     /*< public >*/
 
     /* Signals */
-    void (*workspace_group_added)(XfwWorkspaceManager *manager,
-                                  XfwWorkspaceGroup *group);
-    void (*workspace_group_removed)(XfwWorkspaceManager *manager,
+    void (*workspace_group_created)(XfwWorkspaceManager *manager,
                                     XfwWorkspaceGroup *group);
+    void (*workspace_group_destroyed)(XfwWorkspaceManager *manager,
+                                      XfwWorkspaceGroup *group);
 
     /* Virtual Table */
     GList *(*list_workspace_groups)(XfwWorkspaceManager *);

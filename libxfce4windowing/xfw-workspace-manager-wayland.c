@@ -192,7 +192,7 @@ static void
 group_destroyed(XfwWorkspaceGroupWayland *group, XfwWorkspaceManagerWayland *manager) {
     g_signal_handlers_disconnect_by_func(group, group_destroyed, manager);
     manager->priv->groups = g_list_remove(manager->priv->groups, group);
-    g_signal_emit_by_name(manager, "workspace-group-removed", group);
+    g_signal_emit_by_name(manager, "workspace-group-destroyed", group);
     g_object_unref(group);
 }
 
@@ -205,6 +205,7 @@ manager_workspace_group(void *data, struct ext_workspace_manager_v1 *manager, st
                                                    NULL);
     wmanager->priv->groups = g_list_append(wmanager->priv->groups, group);
     g_signal_connect(group, "destroyed", (GCallback)group_destroyed, wmanager);
+    g_signal_emit_by_name(wmanager, "workspace-group-created", group);
 }
 
 static void

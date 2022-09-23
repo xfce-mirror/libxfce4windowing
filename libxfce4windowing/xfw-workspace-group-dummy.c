@@ -185,8 +185,9 @@ monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy
 void
 _xfw_workspace_group_dummy_set_active_workspace(XfwWorkspaceGroupDummy *group, XfwWorkspace *workspace) {
     if (workspace != group->priv->active_workspace) {
+        XfwWorkspace *old_workspace = group->priv->active_workspace;
         group->priv->active_workspace = workspace;
         g_object_notify(G_OBJECT(group), "active-workspace");
-        g_signal_emit_by_name(group, "workspace-activated", workspace);
+        g_signal_emit_by_name(group, "active-workspace-changed", old_workspace);
     }
 }

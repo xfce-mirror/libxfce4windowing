@@ -179,7 +179,7 @@ workspace_created(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorkspac
     g_value_set_pointer(&value, manager->priv->workspaces);
     g_object_set_property(G_OBJECT(manager->priv->groups->data), "workspaces", &value);
 
-    g_signal_emit_by_name(manager->priv->groups->data, "workspace-added", workspace);
+    g_signal_emit_by_name(manager->priv->groups->data, "workspace-created", workspace);
 }
 
 static void
@@ -201,7 +201,7 @@ workspace_destroyed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorksp
         g_value_set_pointer(&value, manager->priv->workspaces);
         g_object_set_property(G_OBJECT(manager->priv->groups->data), "workspaces", &value);
 
-        g_signal_emit_by_name(group, "workspace-removed", workspace);
+        g_signal_emit_by_name(group, "workspace-destroyed", workspace);
 
         g_object_unref(workspace);
     }

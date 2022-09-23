@@ -40,10 +40,10 @@ G_DEFINE_FLAGS_TYPE(XfwWindowState, xfw_window_state,
 
 static void
 xfw_window_default_init(XfwWindowIface *iface) {
-    g_signal_new("title-changed",
+    g_signal_new("name-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwWindowIface, title_changed),
+                 G_STRUCT_OFFSET(XfwWindowIface, name_changed),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
@@ -85,9 +85,9 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                             0, UINT64_MAX, 0,
                                                             G_PARAM_READABLE));
     g_object_interface_install_property(iface,
-                                        g_param_spec_string("title",
-                                                            "title",
-                                                            "title",
+                                        g_param_spec_string("name",
+                                                            "name",
+                                                            "name",
                                                             "",
                                                             G_PARAM_READABLE));
     g_object_interface_install_property(iface,
@@ -120,11 +120,11 @@ xfw_window_get_id(XfwWindow *window) {
 }
 
 const gchar *
-xfw_window_get_title(XfwWindow *window) {
+xfw_window_get_name(XfwWindow *window) {
     XfwWindowIface *iface;
     g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
     iface = XFW_WINDOW_GET_IFACE(window);
-    return (*iface->get_title)(window);
+    return (*iface->get_name)(window);
 }
 
 GdkPixbuf *
@@ -205,7 +205,7 @@ STATE_GETTER(pinned, PINNED)
 void
 _xfw_window_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WINDOW_PROP_ID, "id");
-    g_object_class_override_property(gklass, WINDOW_PROP_TITLE, "title");
+    g_object_class_override_property(gklass, WINDOW_PROP_NAME, "name");
     g_object_class_override_property(gklass, WINDOW_PROP_ICON, "icon");
     g_object_class_override_property(gklass, WINDOW_PROP_STATE, "state");
     g_object_class_override_property(gklass, WINDOW_PROP_WORKSPACE, "workspace");

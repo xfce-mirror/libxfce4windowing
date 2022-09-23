@@ -258,7 +258,7 @@ workspace_destroyed(XfwWorkspace *workspace, XfwWorkspaceGroupWayland *group) {
         }
     }
 
-    g_signal_emit_by_name(group, "workspace-removed", workspace);
+    g_signal_emit_by_name(group, "workspace-destroyed", workspace);
     g_object_unref(workspace);
 }
 
@@ -272,7 +272,7 @@ group_workspace(void *data, struct ext_workspace_group_handle_v1 *wl_group, stru
     g_hash_table_insert(group->priv->wl_workspaces, wl_workspace, workspace);
     group->priv->workspaces = g_list_append(group->priv->workspaces, workspace);
     g_signal_connect(workspace, "destroyed", (GCallback)workspace_destroyed, group);
-    g_signal_emit_by_name(group, "workspace-added", workspace);
+    g_signal_emit_by_name(group, "workspace-created", workspace);
 }
 
 static void
@@ -311,8 +311,9 @@ monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupWayla
 void
 _xfw_workspace_group_wayland_set_active_workspace(XfwWorkspaceGroupWayland *group, XfwWorkspace *workspace) {
     if (group->priv->active_workspace != workspace) {
+        XfwWorkspace *old_workspace = group->priv->active_workspace;
         group->priv->active_workspace = workspace;
         g_object_notify(G_OBJECT(group), "active-workspace");
-        g_signal_emit_by_name(group, "active-workspace-changed", workspace);
+        g_signal_emit_by_name(group, "active-workspace-changed", old_workspace);
     }
 }

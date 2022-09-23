@@ -48,12 +48,12 @@ struct _XfwWorkspaceGroupIface {
     /*< public >*/
 
     /* Signals */
-    void (*workspace_added)(XfwWorkspaceGroup *group,
-                            XfwWorkspace *workspace);
-    void (*workspace_activated)(XfwWorkspaceGroup *group,
-                                XfwWorkspace *workspace);
-    void (*workspace_removed)(XfwWorkspaceGroup *group,
+    void (*workspace_created)(XfwWorkspaceGroup *group,
                               XfwWorkspace *workspace);
+    void (*active_workspace_changed)(XfwWorkspaceGroup *group,
+                                     XfwWorkspace *previously_active_workspace);
+    void (*workspace_destroyed)(XfwWorkspaceGroup *group,
+                                XfwWorkspace *workspace);
     void (*monitors_changed)(XfwWorkspaceGroup *group);
 
     /* Virtual Table */

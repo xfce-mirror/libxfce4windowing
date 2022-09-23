@@ -43,18 +43,18 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
         managers = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
     }
 
-    g_signal_new("workspace-group-added",
+    g_signal_new("workspace-group-created",
                  XFW_TYPE_WORKSPACE_MANAGER,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_group_added),
+                 G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_group_created),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE_GROUP);
-    g_signal_new("workspace-group-removed",
+    g_signal_new("workspace-group-destroyed",
                  XFW_TYPE_WORKSPACE_MANAGER,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_group_added),
+                 G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_group_created),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,

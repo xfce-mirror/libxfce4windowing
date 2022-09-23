@@ -39,7 +39,7 @@ struct _XfwWindowWaylandPrivate {
     gboolean created_emitted;
 
     guint64 id;
-    gchar *title;
+    gchar *name;
     XfwWindowState state;
 };
 
@@ -48,7 +48,7 @@ static void xfw_window_wayland_set_property(GObject *obj, guint prop_id, const G
 static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_window_wayland_dispose(GObject *obj);
 static guint64 xfw_window_wayland_get_id(XfwWindow *window);
-static const gchar *xfw_window_wayland_get_title(XfwWindow *window);
+static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_wayland_get_state(XfwWindow *window);
 static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
@@ -129,7 +129,7 @@ xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value
             break;
 
         case WINDOW_PROP_ID:
-        case WINDOW_PROP_TITLE:
+        case WINDOW_PROP_NAME:
         case WINDOW_PROP_ICON:
         case WINDOW_PROP_STATE:
         case WINDOW_PROP_WORKSPACE:
@@ -158,8 +158,8 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
             g_value_set_uint64(value, xfw_window_wayland_get_id(window));
             break;
 
-        case WINDOW_PROP_TITLE:
-            g_value_set_string(value, xfw_window_wayland_get_title(window));
+        case WINDOW_PROP_NAME:
+            g_value_set_string(value, xfw_window_wayland_get_name(window));
             break;
 
         case WINDOW_PROP_ICON:
@@ -189,7 +189,7 @@ xfw_window_wayland_dispose(GObject *obj) {
 static void
 xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->get_id = xfw_window_wayland_get_id;
-    iface->get_title = xfw_window_wayland_get_title;
+    iface->get_name = xfw_window_wayland_get_name;
     iface->get_icon = xfw_window_wayland_get_icon;
     iface->get_state = xfw_window_wayland_get_state;
     iface->get_workspace = xfw_window_wayland_get_workspace;
@@ -209,8 +209,8 @@ xfw_window_wayland_get_id(XfwWindow *window) {
 }
 
 static const gchar *
-xfw_window_wayland_get_title(XfwWindow *window) {
-    return XFW_WINDOW_WAYLAND(window)->priv->title;
+xfw_window_wayland_get_name(XfwWindow *window) {
+    return XFW_WINDOW_WAYLAND(window)->priv->name;
 }
 
 static GdkPixbuf *
@@ -299,9 +299,9 @@ toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
 static void
 toplevel_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *title) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
-    g_free(window->priv->title);
-    window->priv->title = g_strdup(title);
-    g_object_notify(G_OBJECT(window), "title");
+    g_free(window->priv->name);
+    window->priv->name = g_strdup(title);
+    g_object_notify(G_OBJECT(window), "name");
 }
 
 static const struct {
@@ -364,7 +364,7 @@ toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
     if (!window->priv->created_emitted) {
         window->priv->created_emitted = TRUE;
-        g_signal_emit_by_name(window->priv->screen, "window-created", window);
+        g_signal_emit_by_name(window->priv->screen, "window-opened", window);
     }
 }
 

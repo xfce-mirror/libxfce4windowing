@@ -29,26 +29,26 @@ G_DEFINE_INTERFACE(XfwWorkspaceGroup, xfw_workspace_group, G_TYPE_OBJECT)
 
 static void
 xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
-    g_signal_new("workspace-added",
+    g_signal_new("workspace-created",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, workspace_added),
+                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, workspace_created),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE);
-    g_signal_new("workspace-activated",
+    g_signal_new("active-workspace-changed",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, workspace_added),
+                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, active_workspace_changed),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE);
-    g_signal_new("workspace-removed",
+    g_signal_new("workspace-destroyed",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, workspace_added),
+                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, workspace_destroyed),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,

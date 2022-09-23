@@ -35,10 +35,10 @@ G_DEFINE_INTERFACE(XfwScreen, xfw_screen, G_TYPE_OBJECT)
 
 static void
 xfw_screen_default_init(XfwScreenIface *iface) {
-    g_signal_new("window-created",
+    g_signal_new("window-opened",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwScreenIface, window_created),
+                 G_STRUCT_OFFSET(XfwScreenIface, window_opened),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,

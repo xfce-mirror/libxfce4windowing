@@ -194,7 +194,7 @@ window_opened(WnckScreen *wnck_screen, WnckWindow *wnck_window, XfwScreenX11 *sc
     g_hash_table_insert(screen->priv->wnck_windows, wnck_window, window);
     // FIXME: window-stacking-changed signal will fire out of order
     window_stacking_changed(screen->priv->wnck_screen, screen);
-    g_signal_emit_by_name(screen, "window-created", window);
+    g_signal_emit_by_name(screen, "window-opened", window);
 }
 
 static void

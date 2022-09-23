@@ -44,7 +44,7 @@ static void xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValu
 static void xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_window_x11_dispose(GObject *obj);
 static guint64 xfw_window_x11_get_id(XfwWindow *window);
-static const gchar *xfw_window_x11_get_title(XfwWindow *window);
+static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
@@ -116,7 +116,7 @@ xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GP
             break;
 
         case WINDOW_PROP_ID:
-        case WINDOW_PROP_TITLE:
+        case WINDOW_PROP_NAME:
         case WINDOW_PROP_ICON:
         case WINDOW_PROP_STATE:
         case WINDOW_PROP_WORKSPACE:
@@ -145,8 +145,8 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
             g_value_set_uint64(value, xfw_window_x11_get_id(window));
             break;
 
-        case WINDOW_PROP_TITLE:
-            g_value_set_string(value, xfw_window_x11_get_title(window));
+        case WINDOW_PROP_NAME:
+            g_value_set_string(value, xfw_window_x11_get_name(window));
             break;
 
         case WINDOW_PROP_ICON:
@@ -179,7 +179,7 @@ xfw_window_x11_dispose(GObject *obj) {
 static void
 xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_id = xfw_window_x11_get_id;
-    iface->get_title = xfw_window_x11_get_title;
+    iface->get_name = xfw_window_x11_get_name;
     iface->get_icon = xfw_window_x11_get_icon;
     iface->get_state = xfw_window_x11_get_state;
     iface->get_workspace = xfw_window_x11_get_workspace;
@@ -199,7 +199,7 @@ xfw_window_x11_get_id(XfwWindow *window) {
 }
 
 static const gchar *
-xfw_window_x11_get_title(XfwWindow *window) {
+xfw_window_x11_get_name(XfwWindow *window) {
     return wnck_window_get_name(XFW_WINDOW_X11(window)->priv->wnck_window);
 }
 
@@ -314,8 +314,8 @@ xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error)
 
 static void
 name_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
-    g_object_notify(G_OBJECT(window), "title");
-    g_signal_emit_by_name(window, "title-changed");
+    g_object_notify(G_OBJECT(window), "name");
+    g_signal_emit_by_name(window, "name-changed");
 }
 
 static void
