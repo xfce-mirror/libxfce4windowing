@@ -30,6 +30,9 @@
 
 G_BEGIN_DECLS
 
+/* fwd decl */
+typedef struct _XfwScreen XfwScreen;
+
 #define XFW_TYPE_WINDOW           (xfw_window_get_type())
 #define XFW_WINDOW(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WINDOW, XfwWindow))
 #define XFW_IS_WINDOW(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WINDOW))
@@ -69,6 +72,7 @@ struct _XfwWindowIface {
     const gchar *(*get_name)(XfwWindow *window);
     GdkPixbuf *(*get_icon)(XfwWindow *window);
     XfwWindowState (*get_state)(XfwWindow *window);
+    XfwScreen *(*get_screen)(XfwWindow *window);
     XfwWorkspace *(*get_workspace)(XfwWindow *window);
 
     void (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
@@ -88,6 +92,7 @@ guint64 xfw_window_get_id(XfwWindow *window);
 const gchar *xfw_window_get_name(XfwWindow *window);
 GdkPixbuf *xfw_window_get_icon(XfwWindow *window);
 XfwWindowState xfw_window_get_state(XfwWindow *window);
+XfwScreen *xfw_window_get_screen(XfwWindow *window);
 XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);
 
 void xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error);

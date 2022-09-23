@@ -29,12 +29,11 @@
 
 enum {
     PROP0,
-    PROP_SCREEN,
     PROP_HANDLE,
 };
 
 struct _XfwWindowWaylandPrivate {
-    XfwScreenWayland *screen;
+    XfwScreen *screen;
     struct zwlr_foreign_toplevel_handle_v1 *handle;
     gboolean created_emitted;
 
@@ -51,6 +50,7 @@ static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_wayland_get_state(XfwWindow *window);
+static XfwScreen *xfw_window_wayland_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
 static void xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 static void xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error);
@@ -95,13 +95,6 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
     gklass->dispose = xfw_window_wayland_dispose;
 
     g_object_class_install_property(gklass,
-                                    PROP_SCREEN,
-                                    g_param_spec_object("screen",
-                                                        "screen",
-                                                        "screen",
-                                                        XFW_TYPE_SCREEN_WAYLAND,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
-    g_object_class_install_property(gklass,
                                     PROP_HANDLE,
                                     g_param_spec_pointer("hanndle",
                                                          "handle",
@@ -120,12 +113,12 @@ xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
 
     switch (prop_id) {
-        case PROP_SCREEN:
-            window->priv->screen = g_value_get_object(value);
-            break;
-
         case PROP_HANDLE:
             window->priv->handle = g_value_get_pointer(value);
+            break;
+
+        case WINDOW_PROP_SCREEN:
+            window->priv->screen = g_value_get_object(value);
             break;
 
         case WINDOW_PROP_ID:
@@ -146,12 +139,12 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
     XfwWindow *window = XFW_WINDOW(obj);
 
     switch (prop_id) {
-        case PROP_SCREEN:
-            g_value_set_object(value, XFW_WINDOW_WAYLAND(window)->priv->screen);
-            break;
-
         case PROP_HANDLE:
             g_value_set_pointer(value, XFW_WINDOW_WAYLAND(window)->priv->handle);
+            break;
+
+        case WINDOW_PROP_SCREEN:
+            g_value_set_object(value, xfw_window_wayland_get_screen(window));
             break;
 
         case WINDOW_PROP_ID:
@@ -192,6 +185,7 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->get_name = xfw_window_wayland_get_name;
     iface->get_icon = xfw_window_wayland_get_icon;
     iface->get_state = xfw_window_wayland_get_state;
+    iface->get_screen = xfw_window_wayland_get_screen;
     iface->get_workspace = xfw_window_wayland_get_workspace;
     iface->activate = xfw_window_wayland_activate;
     iface->close = xfw_window_wayland_close;
@@ -221,6 +215,11 @@ xfw_window_wayland_get_icon(XfwWindow *window) {
 static XfwWindowState
 xfw_window_wayland_get_state(XfwWindow *window) {
     return XFW_WINDOW_WAYLAND(window)->priv->state;
+}
+
+static XfwScreen *
+xfw_window_wayland_get_screen(XfwWindow *window) {
+    return XFW_WINDOW_WAYLAND(window)->priv->screen;
 }
 
 static XfwWorkspace *
@@ -336,7 +335,7 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
     g_object_notify(G_OBJECT(window), "state");
     g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
     if ((old_state & XFW_WINDOW_STATE_ACTIVE) == 0 && (new_state & XFW_WINDOW_STATE_ACTIVE) != 0) {
-        _xfw_screen_wayland_set_active_window(window->priv->screen, XFW_WINDOW(window));
+        _xfw_screen_wayland_set_active_window(XFW_SCREEN_WAYLAND(window->priv->screen), XFW_WINDOW(window));
     }
 }
 

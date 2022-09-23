@@ -23,18 +23,18 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-screen-x11.h"
+#include "xfw-screen.h"
 #include "xfw-util.h"
 #include "xfw-window-x11.h"
 #include "xfw-window.h"
 
 enum {
     PROP0,
-    PROP_SCREEN,
     PROP_WNCK_WINDOW,
 };
 
 struct _XfwWindowX11Private {
-    XfwScreenX11 *screen;
+    XfwScreen *screen;
     WnckWindow *wnck_window;
     XfwWindowState state;
 };
@@ -47,6 +47,7 @@ static guint64 xfw_window_x11_get_id(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
+static XfwScreen *xfw_window_x11_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
 static void xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 static void xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
@@ -78,13 +79,6 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     gklass->dispose = xfw_window_x11_dispose;
 
     g_object_class_install_property(gklass,
-                                    PROP_SCREEN,
-                                    g_param_spec_object("screen",
-                                                        "screen",
-                                                        "screen",
-                                                        XFW_TYPE_SCREEN_X11,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
-    g_object_class_install_property(gklass,
                                     PROP_WNCK_WINDOW,
                                     g_param_spec_object("wnck-window",
                                                         "wnck-window",
@@ -109,12 +103,12 @@ xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GP
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
 
     switch (prop_id) {
-        case PROP_SCREEN:
-            window->priv->screen = g_value_get_object(value);
-            break;
-
         case PROP_WNCK_WINDOW:
             window->priv->wnck_window = g_value_get_object(value);
+            break;
+
+        case WINDOW_PROP_SCREEN:
+            window->priv->screen = g_value_get_object(value);
             break;
 
         case WINDOW_PROP_ID:
@@ -135,12 +129,12 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
     XfwWindow *window = XFW_WINDOW(obj);
 
     switch (prop_id) {
-        case PROP_SCREEN:
-            g_value_set_object(value, XFW_WINDOW_X11(window)->priv->screen);
-            break;
-
         case PROP_WNCK_WINDOW:
             g_value_set_object(value, XFW_WINDOW_X11(window)->priv->wnck_window);
+            break;
+
+        case WINDOW_PROP_SCREEN:
+            g_value_set_object(value, xfw_window_x11_get_screen(window));
             break;
 
         case WINDOW_PROP_ID:
@@ -184,6 +178,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_name = xfw_window_x11_get_name;
     iface->get_icon = xfw_window_x11_get_icon;
     iface->get_state = xfw_window_x11_get_state;
+    iface->get_screen = xfw_window_x11_get_screen;
     iface->get_workspace = xfw_window_x11_get_workspace;
     iface->activate = xfw_window_x11_activate;
     iface->close = xfw_window_x11_close;
@@ -226,12 +221,17 @@ xfw_window_x11_get_state(XfwWindow *window) {
     return XFW_WINDOW_X11(window)->priv->state;
 }
 
+static XfwScreen *
+xfw_window_x11_get_screen(XfwWindow *window) {
+    return XFW_WINDOW_X11(window)->priv->screen;
+}
+
 static XfwWorkspace *
 xfw_window_x11_get_workspace(XfwWindow *window) {
     XfwWindowX11 *xwindow = XFW_WINDOW_X11(window);
     WnckWorkspace *workspace = wnck_window_get_workspace(xwindow->priv->wnck_window);
     if (workspace != NULL) {
-        return _xfw_screen_x11_workspace_for_wnck_workspace(xwindow->priv->screen, workspace);
+        return _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(xwindow->priv->screen), workspace);
     } else {
         return NULL;
     }

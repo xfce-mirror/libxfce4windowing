@@ -24,6 +24,7 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-marshal.h"
+#include "xfw-screen.h"
 #include "xfw-window.h"
 
 typedef struct _XfwWindowIface XfwWindowInterface;
@@ -80,6 +81,12 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
 
+    g_object_interface_install_property(iface,
+                                        g_param_spec_object("screen",
+                                                            "screen",
+                                                            "screen",
+                                                            XFW_TYPE_SCREEN,
+                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     g_object_interface_install_property(iface,
                                         g_param_spec_uint64("id",
                                                             "id",
@@ -145,6 +152,14 @@ xfw_window_get_state(XfwWindow *window) {
     return (*iface->get_state)(window);
 }
 
+XfwScreen *
+xfw_window_get_screen(XfwWindow *window) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->get_screen)(window);
+}
+
 XfwWorkspace *
 xfw_window_get_workspace(XfwWindow *window) {
     XfwWindowIface *iface;
@@ -206,6 +221,7 @@ STATE_GETTER(pinned, PINNED)
 
 void
 _xfw_window_install_properties(GObjectClass *gklass) {
+    g_object_class_override_property(gklass, WINDOW_PROP_SCREEN, "screen");
     g_object_class_override_property(gklass, WINDOW_PROP_ID, "id");
     g_object_class_override_property(gklass, WINDOW_PROP_NAME, "name");
     g_object_class_override_property(gklass, WINDOW_PROP_ICON, "icon");
