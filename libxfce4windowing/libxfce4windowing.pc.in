@@ -8,4 +8,4 @@ Description: X11/Wayland windowing utility library for Xfce
 Requires:
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -lxfce4windowing
-Cflags: -I${includedir}/xfce4/libxfce4windowing
+Cflags: -I${includedir}/xfce4
