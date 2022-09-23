@@ -318,22 +318,24 @@ static void
 toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_array *wl_state) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
     XfwWindowState old_state = window->priv->state;
-    XfwWindowState state = XFW_WINDOW_STATE_NONE;
+    XfwWindowState new_state = XFW_WINDOW_STATE_NONE;
     enum zwlr_foreign_toplevel_handle_v1_state *item;
+    XfwWindowState changed_mask;
 
     wl_array_for_each(item, wl_state) {
         for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
             if (state_converters[i].wl_state == *item) {
-                state |= state_converters[i].state_bit;
+                new_state |= state_converters[i].state_bit;
                 break;
             }
         }
     }
-    window->priv->state = state;
+    changed_mask = old_state ^ new_state;
+    window->priv->state = new_state;
 
     g_object_notify(G_OBJECT(window), "state");
-    g_signal_emit_by_name(window, "state-changed", old_state);
-    if ((old_state & XFW_WINDOW_STATE_ACTIVE) == 0 && (state & XFW_WINDOW_STATE_ACTIVE) != 0) {
+    g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
+    if ((old_state & XFW_WINDOW_STATE_ACTIVE) == 0 && (new_state & XFW_WINDOW_STATE_ACTIVE) != 0) {
         _xfw_screen_wayland_set_active_window(window->priv->screen, XFW_WINDOW(window));
     }
 }

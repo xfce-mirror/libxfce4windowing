@@ -60,7 +60,7 @@ struct _XfwWindowIface {
     /* Signals */
     void (*name_changed)(XfwWindow *window);
     void (*icon_changed)(XfwWindow *window);
-    void (*state_changed)(XfwWindow *window, XfwWindowState old_state);
+    void (*state_changed)(XfwWindow *window, XfwWindowState changed_mask, XfwWindowState new_state);
     void (*workspace_changed)(XfwWindow* window, XfwWorkspace *old_workspace);
     void (*closed)(XfwWindow *window);
 

@@ -36,7 +36,7 @@ enum {
 struct _XfwWindowX11Private {
     XfwScreenX11 *screen;
     WnckWindow *wnck_window;
-    XfwWindowState last_state;
+    XfwWindowState state;
 };
 
 static void xfw_window_x11_window_init(XfwWindowIface *iface);
@@ -61,6 +61,8 @@ static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void state_changed(WnckWindow *wnck_window, WnckWindowState changed_mask, WnckWindowState new_state, XfwWindowX11 *window);
 static void workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
+
+static XfwWindowState convert_state(WnckWindow *wnck_window, WnckWindowState wnck_state);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWindowX11, xfw_window_x11, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWindowX11)
@@ -94,7 +96,7 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
 
 static void
 xfw_window_x11_init(XfwWindowX11 *window) {
-    window->priv->last_state = xfw_window_x11_get_state(XFW_WINDOW(window));
+    window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
 
     g_signal_connect(window->priv->wnck_window, "name-changed", (GCallback)name_changed, window);
     g_signal_connect(window->priv->wnck_window, "icon-changed", (GCallback)icon_changed, window);
@@ -219,29 +221,9 @@ xfw_window_x11_get_icon(XfwWindow *window) {
     }
 }
 
-static const struct {
-    gboolean (*tester)(WnckWindow *window);
-    XfwWindowState state_bit;
-} state_converters[] = {
-    { wnck_window_is_active, XFW_WINDOW_STATE_ACTIVE },
-    { wnck_window_is_minimized, XFW_WINDOW_STATE_MINIMIZED },
-    { wnck_window_is_maximized, XFW_WINDOW_STATE_MAXIMIZED },
-    { wnck_window_is_fullscreen, XFW_WINDOW_STATE_FULLSCREEN },
-    { wnck_window_is_skip_pager, XFW_WINDOW_STATE_SKIP_PAGER },
-    { wnck_window_is_skip_tasklist, XFW_WINDOW_STATE_SKIP_TASKLIST },
-    { wnck_window_is_pinned, XFW_WINDOW_STATE_PINNED },
-};
-
 static XfwWindowState
 xfw_window_x11_get_state(XfwWindow *window) {
-    XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
-    XfwWindowState state = XFW_WINDOW_STATE_NONE;
-    for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
-        if ((*state_converters[i].tester)(priv->wnck_window)) {
-            state |= state_converters[i].state_bit;
-        }
-    }
-    return state;
+    return XFW_WINDOW_X11(window)->priv->state;
 }
 
 static XfwWorkspace *
@@ -325,15 +307,44 @@ icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
 }
 
 static void
-state_changed(WnckWindow *wnck_window, WnckWindowState changed_mask, WnckWindowState new_state, XfwWindowX11 *window) {
-    XfwWindowState old_state = window->priv->last_state;
-    window->priv->last_state = xfw_window_x11_get_state(XFW_WINDOW(window));
+state_changed(WnckWindow *wnck_window, WnckWindowState wnck_changed_mask, WnckWindowState wnck_new_state, XfwWindowX11 *window) {
+    XfwWindowState old_state = window->priv->state;
+    XfwWindowState new_state = convert_state(wnck_window, wnck_new_state);
+    XfwWindowState changed_mask = old_state ^ new_state;
+    window->priv->state = new_state;
+
     g_object_notify(G_OBJECT(window), "state");
-    g_signal_emit_by_name(window, "state-changed", old_state);
+    g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
 }
 
 static void
 workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     g_object_notify(G_OBJECT(window), "workspace");
     g_signal_emit_by_name(window, "workspace-changed");
+}
+
+static const struct {
+    WnckWindowState wnck_state_bits;
+    XfwWindowState state_bit;
+} state_converters[] = {
+    { WNCK_WINDOW_STATE_MINIMIZED, XFW_WINDOW_STATE_MINIMIZED },
+    { WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY, XFW_WINDOW_STATE_MAXIMIZED },
+    { WNCK_WINDOW_STATE_FULLSCREEN, XFW_WINDOW_STATE_FULLSCREEN },
+    { WNCK_WINDOW_STATE_SKIP_PAGER, XFW_WINDOW_STATE_SKIP_PAGER },
+    { WNCK_WINDOW_STATE_SKIP_TASKLIST, XFW_WINDOW_STATE_SKIP_TASKLIST },
+    { WNCK_WINDOW_STATE_STICKY, XFW_WINDOW_STATE_PINNED },
+};
+
+static XfwWindowState
+convert_state(WnckWindow *wnck_window, WnckWindowState wnck_state) {
+    XfwWindowState state = XFW_WINDOW_STATE_NONE;
+    for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
+        if ((wnck_state & state_converters[i].wnck_state_bits) != 0) {
+            state |= state_converters[i].state_bit;
+        }
+    }
+    if (wnck_window_is_active(wnck_window)) {
+        state |= XFW_WINDOW_STATE_ACTIVE;
+    }
+    return state;
 }

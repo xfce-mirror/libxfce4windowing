@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include "libxfce4windowing-private.h"
+#include "xfw-marshal.h"
 #include "xfw-window.h"
 
 typedef struct _XfwWindowIface XfwWindowInterface;
@@ -59,8 +60,9 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  G_SIGNAL_RUN_LAST,
                  G_STRUCT_OFFSET(XfwWindowIface, state_changed),
                  NULL, NULL,
-                 g_cclosure_marshal_VOID__FLAGS,
-                 G_TYPE_NONE, 1,
+                 xfw_marshal_VOID__FLAGS_FLAGS,
+                 G_TYPE_NONE, 2,
+                 XFW_TYPE_WINDOW_STATE,
                  XFW_TYPE_WINDOW_STATE);
     g_signal_new("workspace-changed",
                  XFW_TYPE_WINDOW,

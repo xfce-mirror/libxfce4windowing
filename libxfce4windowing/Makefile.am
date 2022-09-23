@@ -18,6 +18,10 @@ libxfce4windowing_headers = \
 libxfce4windowing_include_HEADERS = \
 	$(libxfce4windowing_headers)
 
+libxfce4windowing_built_sources = \
+	xfw-marshal.c \
+	xfw-marshal.h
+
 libxfce4windowing_x11_sources = \
 	xfw-screen-x11.c \
 	xfw-screen-x11.h \
@@ -42,6 +46,7 @@ libxfce4windowing_wayland_sources = \
 
 libxfce4windowing_la_SOURCES = \
 	$(libxfce4windowing_headers) \
+	$(libxfce4windowing_built_sources) \
 	libxfce4windowing-private.h \
 	xfw-screen.c \
 	xfw-util.c \
@@ -97,3 +102,23 @@ endif
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = \
 	libxfce4windowing.pc
+
+EXTRA_DIST = \
+	xfw-marshal.list
+
+if MAINTAINER_MODE
+
+xfw-marshal.h: xfw-marshal.list Makefile
+	$(AM_V_GEN) glib-genmarshal --prefix=xfw_marshal --internal --header $< > $@
+
+xfw-marshal.c: xfw-marshal.list Makefile
+	$(AM_V_GEN) echo '#include "xfw-marshal.h"' > $@
+	$(AM_V_GET) glib-genmarshal --prefix=xfw_marshal --body $< >> $@
+
+DISTCLEANFILES = \
+	$(libxfce4windowing_built_sources)
+
+BUILT_SOURCES = \
+	$(libxfce4windowing_built_sources)
+
+endif
