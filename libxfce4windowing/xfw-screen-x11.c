@@ -19,6 +19,8 @@
 
 #include "config.h"
 
+#include <gdk/gdkx.h>
+
 #include <libwnck/libwnck.h>
 
 #include "libxfce4windowing-private.h"
@@ -47,6 +49,7 @@ static void xfw_screen_x11_screen_init(XfwScreenIface *iface);
 static void xfw_screen_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_screen_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_screen_x11_dispose(GObject *obj);
+static gint xfw_screen_x11_get_number(XfwScreen *screen);
 static XfwWorkspaceManager *xfw_screen_x11_get_workspace_manager(XfwScreen *screen);
 static GList *xfw_screen_x11_get_windows(XfwScreen *screen);
 static GList *xfw_screen_x11_get_windows_stacked(XfwScreen *screen);
@@ -162,10 +165,15 @@ xfw_screen_x11_dispose(GObject *obj) {
 
 static void
 xfw_screen_x11_screen_init(XfwScreenIface *iface) {
+    iface->get_number = xfw_screen_x11_get_number;
     iface->get_workspace_manager = xfw_screen_x11_get_workspace_manager;
     iface->get_windows = xfw_screen_x11_get_windows;
     iface->get_windows_stacked = xfw_screen_x11_get_windows_stacked;
     iface->get_active_window = xfw_screen_x11_get_active_window;
+}
+
+static gint xfw_screen_x11_get_number(XfwScreen *screen) {
+    return gdk_x11_screen_get_screen_number(XFW_SCREEN_X11(screen)->priv->gdk_screen);
 }
 
 static XfwWorkspaceManager *

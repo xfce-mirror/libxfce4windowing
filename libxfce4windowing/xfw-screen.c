@@ -88,6 +88,14 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                                                             G_PARAM_READABLE));
 }
 
+gint
+xfw_screen_get_number(XfwScreen *screen) {
+    XfwScreenIface *iface;
+    g_return_val_if_fail(XFW_IS_SCREEN(screen), 0);
+    iface = XFW_SCREEN_GET_IFACE(screen);
+    return (*iface->get_number)(screen);
+}
+
 XfwWorkspaceManager *
 xfw_screen_get_workspace_manager(XfwScreen *screen) {
     XfwScreenIface *iface;

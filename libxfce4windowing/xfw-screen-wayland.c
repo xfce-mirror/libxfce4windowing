@@ -47,6 +47,7 @@ static void xfw_screen_wayland_screen_init(XfwScreenIface *iface);
 static void xfw_screen_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_screen_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_screen_wayland_dispose(GObject *obj);
+static gint xfw_screen_wayland_get_number(XfwScreen *screen);
 static XfwWorkspaceManager *xfw_screen_wayland_get_workspace_manager(XfwScreen *screen);
 static GList *xfw_screen_wayland_get_windows(XfwScreen *screen);
 static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen);
@@ -161,10 +162,16 @@ xfw_screen_wayland_dispose(GObject *obj) {
 
 static void
 xfw_screen_wayland_screen_init(XfwScreenIface *iface) {
+    iface->get_number = xfw_screen_wayland_get_number;
     iface->get_workspace_manager = xfw_screen_wayland_get_workspace_manager;
     iface->get_windows = xfw_screen_wayland_get_windows;
     iface->get_windows_stacked = xfw_screen_wayland_get_windows_stacked;
     iface->get_active_window = xfw_screen_wayland_get_active_window;
+}
+
+static gint
+xfw_screen_wayland_get_number(XfwScreen *screen) {
+    return 0;
 }
 
 static XfwWorkspaceManager *
