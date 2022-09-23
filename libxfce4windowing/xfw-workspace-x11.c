@@ -32,6 +32,7 @@ enum {
 };
 
 struct _XfwWorkspaceX11Private {
+    XfwWorkspaceGroup *group;
     WnckWorkspace *wnck_workspace;
 };
 
@@ -43,6 +44,7 @@ static const gchar *xfw_workspace_x11_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_x11_get_name(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_x11_get_state(XfwWorkspace *workspace);
 static guint xfw_workspace_x11_get_number(XfwWorkspace *workspace);
+static XfwWorkspaceGroup *xfw_workspace_x11_get_workspace_group(XfwWorkspace *workspace);
 static void xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error);
 static void xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error);
 
@@ -85,6 +87,10 @@ xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value,
             workspace->priv->wnck_workspace = g_value_get_object(value);
             break;
 
+        case WORKSPACE_PROP_GROUP:
+            workspace->priv->group = g_value_get_object(value);
+            break;
+
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
         case WORKSPACE_PROP_STATE:
@@ -103,6 +109,10 @@ xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GPara
     switch (prop_id) {
         case PROP_WNCK_WORKSPACE:
             g_value_set_object(value, XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
+            break;
+
+        case WORKSPACE_PROP_GROUP:
+            g_value_set_object(value, xfw_workspace_x11_get_workspace_group(workspace));
             break;
 
         case WORKSPACE_PROP_ID:
@@ -139,6 +149,7 @@ xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_name = xfw_workspace_x11_get_name;
     iface->get_state = xfw_workspace_x11_get_state;
     iface->get_number = xfw_workspace_x11_get_number;
+    iface->get_workspace_group = xfw_workspace_x11_get_workspace_group;
     iface->activate = xfw_workspace_x11_activate;
     iface->remove = xfw_workspace_x11_remove;
 }
@@ -166,6 +177,11 @@ xfw_workspace_x11_get_state(XfwWorkspace *workspace) {
 static guint
 xfw_workspace_x11_get_number(XfwWorkspace *workspace) {
     return wnck_workspace_get_number(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
+}
+
+static XfwWorkspaceGroup *
+xfw_workspace_x11_get_workspace_group(XfwWorkspace *workspace) {
+    return XFW_WORKSPACE_X11(workspace)->priv->group;
 }
 
 static void

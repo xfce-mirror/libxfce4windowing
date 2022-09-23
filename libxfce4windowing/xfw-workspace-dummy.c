@@ -26,6 +26,10 @@
 #include "xfw-workspace-dummy.h"
 #include "xfw-workspace.h"
 
+struct _XfwWorkspaceDummyPrivate {
+    XfwWorkspaceGroup *group;
+};
+
 static void xfw_workspace_dummy_workspace_init(XfwWorkspaceIface *iface);
 static void xfw_workspace_dummy_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
@@ -33,10 +37,12 @@ static const gchar *xfw_workspace_dummy_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_dummy_get_name(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_dummy_get_state(XfwWorkspace *workspace);
 static guint xfw_workspace_dummy_get_number(XfwWorkspace *workspace);
+static XfwWorkspaceGroup *xfw_workspace_dummy_get_workspace_group(XfwWorkspace *workspace);
 static void xfw_workspace_dummy_activate(XfwWorkspace *workspace, GError **error);
 static void xfw_workspace_dummy_remove(XfwWorkspace *workspace, GError **error);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceDummy, xfw_workspace_dummy, G_TYPE_OBJECT,
+                        G_ADD_PRIVATE(XfwWorkspaceDummy)
                         G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
                                               xfw_workspace_dummy_workspace_init))
 
@@ -54,7 +60,13 @@ xfw_workspace_dummy_init(XfwWorkspaceDummy *workspace) {
 
 static void
 xfw_workspace_dummy_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec) {
+    XfwWorkspaceDummy *workspace = XFW_WORKSPACE_DUMMY(obj);
+
     switch (prop_id) {
+        case WORKSPACE_PROP_GROUP:
+            workspace->priv->group = g_value_get_object(value);
+            break;
+
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
         case WORKSPACE_PROP_STATE:
@@ -71,6 +83,10 @@ xfw_workspace_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GPa
     XfwWorkspace *workspace = XFW_WORKSPACE(obj);
 
     switch (prop_id) {
+        case WORKSPACE_PROP_GROUP:
+            g_value_set_object(value, XFW_WORKSPACE_DUMMY(workspace)->priv->group);
+            break;
+
         case WORKSPACE_PROP_ID:
             g_value_set_string(value, xfw_workspace_dummy_get_id(workspace));
             break;
@@ -98,7 +114,8 @@ xfw_workspace_dummy_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_id = xfw_workspace_dummy_get_id;
     iface->get_name = xfw_workspace_dummy_get_name;
     iface->get_state = xfw_workspace_dummy_get_state;
-    iface->get_number = xfw_workspace_get_number;
+    iface->get_number = xfw_workspace_dummy_get_number;
+    iface->get_workspace_group = xfw_workspace_dummy_get_workspace_group;
     iface->activate = xfw_workspace_dummy_activate;
     iface->remove = xfw_workspace_dummy_remove;
 }
@@ -121,6 +138,11 @@ xfw_workspace_dummy_get_state(XfwWorkspace *workspace) {
 static guint
 xfw_workspace_dummy_get_number(XfwWorkspace *workspace) {
     return 0;
+}
+
+static XfwWorkspaceGroup *
+xfw_workspace_dummy_get_workspace_group(XfwWorkspace *workspace) {
+    return XFW_WORKSPACE_DUMMY(workspace)->priv->group;
 }
 
 static void

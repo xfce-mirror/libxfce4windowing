@@ -70,6 +70,7 @@ xfw_workspace_manager_x11_manager_init(XfwWorkspaceManagerIface *iface) {
 static void
 xfw_workspace_manager_x11_init(XfwWorkspaceManagerX11 *manager) {
     XfwWorkspaceManagerX11Private *priv = manager->priv;
+    XfwWorkspaceGroup *group;
     GList *wnck_workspaces;
     WnckWorkspace *active_wnck_workspace;
 
@@ -78,11 +79,20 @@ xfw_workspace_manager_x11_init(XfwWorkspaceManagerX11 *manager) {
     g_signal_connect(priv->wnck_screen, "workspace-created", (GCallback)workspace_created, manager);
     g_signal_connect(priv->wnck_screen, "workspace-destroyed", (GCallback)workspace_destroyed, manager);
 
+    group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
+                         "screen", priv->screen,
+                         "workspaces", priv->workspaces,
+                         NULL);
+    priv->groups = g_list_append(NULL, group);
+
     priv->wnck_workspaces = g_hash_table_new_full(g_direct_hash, g_direct_equal, g_object_unref, g_object_unref);
     active_wnck_workspace = wnck_screen_get_active_workspace(priv->wnck_screen);
     wnck_workspaces = wnck_screen_get_workspaces(priv->wnck_screen);
     for (GList *l = wnck_workspaces; l != NULL; l = l->next) {
-        XfwWorkspace *workspace = g_object_new(XFW_TYPE_WORKSPACE_X11, "wnck-workspace", l->data, NULL);
+        XfwWorkspace *workspace = g_object_new(XFW_TYPE_WORKSPACE_X11,
+                                               "group", group,
+                                               "wnck-workspace", l->data,
+                                               NULL);
         if (active_wnck_workspace == l->data) {
             _xfw_workspace_group_dummy_set_active_workspace(XFW_WORKSPACE_GROUP_DUMMY(priv->groups->data), workspace);
         }
@@ -90,11 +100,6 @@ xfw_workspace_manager_x11_init(XfwWorkspaceManagerX11 *manager) {
         g_hash_table_insert(priv->wnck_workspaces, g_object_ref(l->data), workspace);
     }
 
-    priv->groups = g_list_append(NULL,
-                                 g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
-                                              "screen", priv->screen,
-                                              "workspaces", priv->workspaces,
-                                              NULL));
 }
 
 static void
@@ -164,7 +169,10 @@ active_workspace_changed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwW
 
 static void
 workspace_created(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorkspaceManagerX11 *manager) {
-    XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(g_object_new(XFW_TYPE_WORKSPACE_X11, "wnck-workspace", wnck_workspace, NULL));
+    XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(g_object_new(XFW_TYPE_WORKSPACE_X11,
+                                                                "group", manager->priv->groups->data,
+                                                                "wnck-workspace", wnck_workspace,
+                                                                NULL));
     int n_workspaces = wnck_screen_get_workspace_count(screen);
     GValue value = G_VALUE_INIT;
 

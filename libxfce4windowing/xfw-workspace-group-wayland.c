@@ -266,6 +266,7 @@ static void
 group_workspace(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct ext_workspace_handle_v1 *wl_workspace) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_WAYLAND,
+                                                                        "group", group,
                                                                         "handle", wl_workspace,
                                                                         NULL));
     _xfw_workspace_wayland_set_number(workspace, g_list_length(group->priv->workspaces));

@@ -33,10 +33,13 @@ G_BEGIN_DECLS
 #define XFW_IS_WORKSPACE_DUMMY(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_DUMMY))
 
 typedef struct _XfwWorkspaceDummy XfwWorkspaceDummy;
+typedef struct _XfwWorkspaceDummyPrivate XfwWorkspaceDummyPrivate;
 typedef struct _XfwWorkspaceDummyClass XfwWorkspaceDummyClass;
 
 struct _XfwWorkspaceDummy {
     GObject parent;
+    /*< private >*/
+    XfwWorkspaceDummyPrivate *priv;
 };
 
 struct _XfwWorkspaceDummyClass {

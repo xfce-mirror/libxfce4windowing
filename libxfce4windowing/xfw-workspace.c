@@ -23,6 +23,7 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-window.h"
+#include "xfw-workspace-group.h"
 #include "xfw-workspace.h"
 
 typedef struct _XfwWorkspaceIface XfwWorkspaceInterface;
@@ -52,6 +53,12 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE_STATE);
 
+    g_object_interface_install_property(iface,
+                                        g_param_spec_object("group",
+                                                            "group",
+                                                            "group",
+                                                            XFW_TYPE_WORKSPACE_GROUP,
+                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     g_object_interface_install_property(iface,
                                         g_param_spec_string("id",
                                                             "id",
@@ -111,6 +118,14 @@ xfw_workspace_get_number(XfwWorkspace *workspace) {
     return (*iface->get_number)(workspace);
 }
 
+XfwWorkspaceGroup *
+xfw_workspace_get_workspace_group(XfwWorkspace *workspace) {
+    XfwWorkspaceIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), NULL);
+    iface = XFW_WORKSPACE_GET_IFACE(workspace);
+    return (*iface->get_workspace_group)(workspace);
+}
+
 void
 xfw_workspace_activate(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceIface *iface;
@@ -129,6 +144,7 @@ xfw_workspace_remove(XfwWorkspace *workspace, GError **error) {
 
 void
 _xfw_workspace_install_properties(GObjectClass *gklass) {
+    g_object_class_override_property(gklass, WORKSPACE_PROP_GROUP, "group");
     g_object_class_override_property(gklass, WORKSPACE_PROP_ID, "id");
     g_object_class_override_property(gklass, WORKSPACE_PROP_NAME, "name");
     g_object_class_override_property(gklass, WORKSPACE_PROP_STATE, "state");

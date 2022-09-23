@@ -28,6 +28,9 @@
 
 G_BEGIN_DECLS
 
+/* fwd decl */
+typedef struct _XfwWorkspaceGroup XfwWorkspaceGroup;
+
 #define XFW_TYPE_WORKSPACE           (xfw_workspace_get_type())
 #define XFW_WORKSPACE(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE, XfwWorkspace))
 #define XFW_IS_WORKSPACE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE))
@@ -60,6 +63,7 @@ struct _XfwWorkspaceIface {
     const gchar *(*get_name)(XfwWorkspace *workspace);
     XfwWorkspaceState (*get_state)(XfwWorkspace *workspace);
     guint (*get_number)(XfwWorkspace *workspace);
+    XfwWorkspaceGroup *(*get_workspace_group)(XfwWorkspace *workspace);
 
     void (*activate)(XfwWorkspace *workspace, GError **error);
     void (*remove)(XfwWorkspace *workspace, GError **error);
@@ -72,6 +76,7 @@ const gchar *xfw_workspace_get_id(XfwWorkspace *workspace);
 const gchar *xfw_workspace_get_name(XfwWorkspace *workspace);
 XfwWorkspaceState xfw_workspace_get_state(XfwWorkspace *workspace);
 guint xfw_workspace_get_number(XfwWorkspace *workspace);
+XfwWorkspaceGroup *xfw_workspace_get_workspace_group(XfwWorkspace *workspace);
 
 void xfw_workspace_activate(XfwWorkspace *workspace, GError **error);
 void xfw_workspace_remove(XfwWorkspace *workspace, GError **error);

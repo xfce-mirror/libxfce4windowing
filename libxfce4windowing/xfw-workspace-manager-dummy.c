@@ -61,11 +61,13 @@ xfw_workspace_manager_dummy_manager_init(XfwWorkspaceManagerIface *iface) {
 
 static void
 xfw_workspace_manager_dummy_init(XfwWorkspaceManagerDummy *manager) {
-    manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY, NULL));
-    manager->priv->groups = g_list_append(NULL,
-                                          g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
-                                                       "screen", manager->priv->screen,
-                                                       NULL));
+    XfwWorkspaceGroup *group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
+                                            "screen", manager->priv->screen,
+                                            NULL);
+    manager->priv->groups = g_list_append(NULL, group);
+    manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY,
+                                                                 "group", group,
+                                                                 NULL));
 }
 
 static void
