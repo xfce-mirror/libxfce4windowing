@@ -8,7 +8,9 @@ lib_LTLIBRARIES = libxfce4windowing.la
 libxfce4windowing_includedir = $(includedir)/xfce4/libxfce4windowing
 libxfce4windowing_headers = \
 	libxfce4windowing.h \
+	xfw-screen.h \
 	xfw-util.h \
+	xfw-window.h \
 	xfw-workspace-group.h \
 	xfw-workspace-manager.h \
 	xfw-workspace.h
@@ -17,6 +19,10 @@ libxfce4windowing_include_HEADERS = \
 	$(libxfce4windowing_headers)
 
 libxfce4windowing_x11_sources = \
+	xfw-screen-x11.c \
+	xfw-screen-x11.h \
+	xfw-window-x11.c \
+	xfw-window-x11.h \
 	xfw-workspace-manager-x11.c \
 	xfw-workspace-manager-x11.h \
 	xfw-workspace-x11.c \
@@ -33,7 +39,9 @@ libxfce4windowing_wayland_sources = \
 libxfce4windowing_la_SOURCES = \
 	$(libxfce4windowing_headers) \
 	libxfce4windowing-private.h \
+	xfw-screen.c \
 	xfw-util.c \
+	xfw-window.c \
 	xfw-workspace-dummy.c \
 	xfw-workspace-dummy.h \
 	xfw-workspace-group-dummy.c \

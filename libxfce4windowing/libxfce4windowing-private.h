@@ -29,26 +29,42 @@
 G_BEGIN_DECLS
 
 enum {
-    WORKSPACE_MANAGER_PROP_SCREEN = 0x1000,
+    SCREEN_PROP_SCREEN = 0x1000,
+    SCREEN_PROP_WORKSPACE_MANAGER,
+    SCREEN_PROP_ACTIVE_WINDOW,
 };
 
 enum {
-    WORKSPACE_GROUP_PROP_SCREEN = 0x2000,
+    WORKSPACE_MANAGER_PROP_SCREEN = 0x2000,
+};
+
+enum {
+    WORKSPACE_GROUP_PROP_SCREEN = 0x3000,
     WORKSPACE_GROUP_PROP_WORKSPACES,
     WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE,
     WORKSPACE_GROUP_PROP_MONITORS,
 };
 
 enum {
-    WORKSPACE_PROP_ID = 0x3000,
+    WORKSPACE_PROP_ID = 0x4000,
     WORKSPACE_PROP_NAME,
     WORKSPACE_PROP_STATE,
     WORKSPACE_PROP_NUMBER,
 };
 
+enum {
+    WINDOW_PROP_ID = 0x5000,
+    WINDOW_PROP_TITLE,
+    WINDOW_PROP_ICON,
+    WINDOW_PROP_STATE,
+    WINDOW_PROP_WORKSPACE,
+};
+
+void _xfw_screen_install_properties(GObjectClass *gklass);
 void _xfw_workspace_manager_install_properties(GObjectClass *gklass);
 void _xfw_workspace_group_install_properties(GObjectClass *gklass);
 void _xfw_workspace_install_properties(GObjectClass *gklass);
+void _xfw_window_install_properties(GObjectClass *gklass);
 
 G_END_DECLS
 

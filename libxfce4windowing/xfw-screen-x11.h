@@ -17,42 +17,40 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __XFW_WORKSPACE_MANAGER_X11_H__
-#define __XFW_WORKSPACE_MANAGER_X11_H__
+#ifndef __XFW_SCREEN_X11_H__
+#define __XFW_SCREEN_X11_H__
 
 #if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <gdk/gdk.h>
+#include <glib-object.h>
 #include <libwnck/libwnck.h>
 
-#include "xfw-workspace-manager.h"
+#include "xfw-workspace.h"
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_MANAGER_X11 (xfw_workspace_manager_x11_get_type())
-#define XFW_WORKSPACE_MANAGER_X11(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_MANAGER_X11, XfwWorkspaceManagerX11))
+#define XFW_TYPE_SCREEN_X11           (xfw_screen_x11_get_type())
+#define XFW_SCREEN_X11(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_SCREEN_X11, XfwScreenX11))
+#define XFW_IS_SCREEN_X11(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_SCREEN_X11))
 
-typedef struct _XfwWorkspaceManagerX11 XfwWorkspaceManagerX11;
-typedef struct _XfwWorkspaceManagerX11Private XfwWorkspaceManagerX11Private;
-typedef struct _XfwWorkspaceManagerX11Class XfwWorkspaceManagerX11Class;
+typedef struct _XfwScreenX11 XfwScreenX11;
+typedef struct _XfwScreenX11Private XfwScreenX11Private;
+typedef struct _XfwScreenX11Class XfwScreenX11Class;
 
-struct _XfwWorkspaceManagerX11 {
+struct _XfwScreenX11 {
     GObject parent;
     /*< private >*/
-    XfwWorkspaceManagerX11Private *priv;
+    XfwScreenX11Private *priv;
 };
 
-struct _XfwWorkspaceManagerX11Class {
+struct _XfwScreenX11Class {
     GObjectClass parent_class;
 };
 
-GType xfw_workspace_manager_x11_get_type() G_GNUC_CONST;
+GType xfw_screen_x11_get_type(void) G_GNUC_CONST;
 
-XfwWorkspaceManager *_xfw_workspace_manager_x11_new(GdkScreen *screen);
-XfwWorkspace *_xfw_workspace_manager_x11_workspace_for_wnck_workspace(XfwWorkspaceManagerX11 *manager, WnckWorkspace *wnck_workspace);
+XfwWorkspace *_xfw_screen_x11_workspace_for_wnck_workspace(XfwScreenX11 *screen, WnckWorkspace *wnck_workspace);
 
-G_END_DECLS
-
-#endif  /* __XFW_WORKSPACE_MANAGER_X11_H__ */
+#endif  /* __XFW_SCREEN_X11_H__ */

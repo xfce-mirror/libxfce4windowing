@@ -22,6 +22,7 @@
 #include <limits.h>
 
 #include "libxfce4windowing-private.h"
+#include "xfw-window.h"
 #include "xfw-workspace.h"
 
 typedef struct _XfwWorkspaceIface XfwWorkspaceInterface;

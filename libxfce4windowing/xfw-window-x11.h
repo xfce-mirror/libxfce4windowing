@@ -17,42 +17,35 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __XFW_WORKSPACE_MANAGER_X11_H__
-#define __XFW_WORKSPACE_MANAGER_X11_H__
+#ifndef __XFW_WINDOW_X11_H__
+#define __XFW_WINDOW_X11_H__
 
 #if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <gdk/gdk.h>
-#include <libwnck/libwnck.h>
-
-#include "xfw-workspace-manager.h"
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_MANAGER_X11 (xfw_workspace_manager_x11_get_type())
-#define XFW_WORKSPACE_MANAGER_X11(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_MANAGER_X11, XfwWorkspaceManagerX11))
+#define XFW_TYPE_WINDOW_X11           (xfw_window_x11_get_type())
+#define XFW_WINDOW_X11(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WINDOW_X11, XfwWindowX11))
+#define XFW_IS_WINDOW_X11(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WINDOW_X11))
 
-typedef struct _XfwWorkspaceManagerX11 XfwWorkspaceManagerX11;
-typedef struct _XfwWorkspaceManagerX11Private XfwWorkspaceManagerX11Private;
-typedef struct _XfwWorkspaceManagerX11Class XfwWorkspaceManagerX11Class;
+typedef struct _XfwWindowX11 XfwWindowX11;
+typedef struct _XfwWindowX11Private XfwWindowX11Private;
+typedef struct _XfwWindowX11Class XfwWindowX11Class;
 
-struct _XfwWorkspaceManagerX11 {
+struct _XfwWindowX11 {
     GObject parent;
     /*< private >*/
-    XfwWorkspaceManagerX11Private *priv;
+    XfwWindowX11Private *priv;
 };
 
-struct _XfwWorkspaceManagerX11Class {
+struct _XfwWindowX11Class {
     GObjectClass parent_class;
 };
 
-GType xfw_workspace_manager_x11_get_type() G_GNUC_CONST;
+GType xfw_window_x11_get_type(void) G_GNUC_CONST;
 
-XfwWorkspaceManager *_xfw_workspace_manager_x11_new(GdkScreen *screen);
-XfwWorkspace *_xfw_workspace_manager_x11_workspace_for_wnck_workspace(XfwWorkspaceManagerX11 *manager, WnckWorkspace *wnck_workspace);
-
-G_END_DECLS
-
-#endif  /* __XFW_WORKSPACE_MANAGER_X11_H__ */
+#endif  /* __XFW_WINDOW_X11_H__ */

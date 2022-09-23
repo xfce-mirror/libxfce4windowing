@@ -60,6 +60,7 @@ struct _XfwWorkspaceIface {
     const gchar *(*get_name)(XfwWorkspace *workspace);
     XfwWorkspaceState (*get_state)(XfwWorkspace *workspace);
     guint (*get_number)(XfwWorkspace *workspace);
+
     void (*activate)(XfwWorkspace *workspace, GError **error);
     void (*remove)(XfwWorkspace *workspace, GError **error);
 };

@@ -213,3 +213,8 @@ _xfw_workspace_manager_x11_new(GdkScreen *screen) {
                         "screen", screen,
                         NULL);
 }
+
+XfwWorkspace *
+_xfw_workspace_manager_x11_workspace_for_wnck_workspace(XfwWorkspaceManagerX11 *manager, WnckWorkspace *wnck_workspace) {
+    return g_hash_table_lookup(manager->priv->wnck_workspaces, wnck_workspace);
+}
