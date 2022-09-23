@@ -50,6 +50,7 @@ struct _XfwWorkspaceGroupDummyClass {
 
 GType xfw_workspace_group_dummy_get_type(void) G_GNUC_CONST;
 
+void _xfw_workspace_group_dummy_set_workspaces(XfwWorkspaceGroupDummy *group, GList *workspaces);
 void _xfw_workspace_group_dummy_set_active_workspace(XfwWorkspaceGroupDummy *group, XfwWorkspace *workspace);
 
 #endif  /* __XFW_WORKSPACE_GROUP_DUMMY_H__ */

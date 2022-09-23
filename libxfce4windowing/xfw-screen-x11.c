@@ -30,11 +30,6 @@
 #include "xfw-window-x11.h"
 #include "xfw-workspace-manager-x11.h"
 
-enum {
-    PROP0,
-    PROP_WNCK_SCREEN,
-};
-
 struct _XfwScreenX11Private {
     GdkScreen *gdk_screen;
     WnckScreen *wnck_screen;
@@ -46,6 +41,7 @@ struct _XfwScreenX11Private {
 };
 
 static void xfw_screen_x11_screen_init(XfwScreenIface *iface);
+static void xfw_screen_x11_constructed(GObject *obj);
 static void xfw_screen_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_screen_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_screen_x11_dispose(GObject *obj);
@@ -69,22 +65,24 @@ static void
 xfw_screen_x11_class_init(XfwScreenX11Class *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->constructed = xfw_screen_x11_constructed;
     gklass->set_property = xfw_screen_x11_set_property;
     gklass->get_property = xfw_screen_x11_get_property;
     gklass->dispose = xfw_screen_x11_dispose;
 
-    g_object_class_install_property(gklass,
-                                    PROP_WNCK_SCREEN,
-                                    g_param_spec_object("wnck-screen",
-                                                        "wnck-screen",
-                                                        "wnck-screen",
-                                                        WNCK_TYPE_SCREEN,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     _xfw_screen_install_properties(gklass);
 }
 
 static void
 xfw_screen_x11_init(XfwScreenX11 *screen) {
+    screen->priv = xfw_screen_x11_get_instance_private(screen);
+}
+
+static void
+xfw_screen_x11_constructed(GObject *obj) {
+    XfwScreenX11 *screen = XFW_SCREEN_X11(obj);
+
+    screen->priv->wnck_screen = wnck_screen_get(gdk_x11_screen_get_screen_number(screen->priv->gdk_screen));
     screen->priv->workspace_manager = _xfw_workspace_manager_x11_new(screen->priv->gdk_screen);
     screen->priv->wnck_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
 
@@ -111,10 +109,6 @@ xfw_screen_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GP
     XfwScreenX11 *screen = XFW_SCREEN_X11(obj);
 
     switch (prop_id) {
-        case PROP_WNCK_SCREEN:
-            screen->priv->wnck_screen = g_value_get_object(value);
-            break;
-
         case SCREEN_PROP_SCREEN:
             screen->priv->gdk_screen = g_value_get_object(value);
             break;
@@ -130,10 +124,6 @@ xfw_screen_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
     XfwScreenX11 *screen = XFW_SCREEN_X11(obj);
 
     switch (prop_id) {
-        case PROP_WNCK_SCREEN:
-            g_value_set_object(value, screen->priv->wnck_screen);
-            break;
-
         case SCREEN_PROP_SCREEN:
             g_value_set_object(value, screen->priv->gdk_screen);
             break;
@@ -250,7 +240,7 @@ window_stacking_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen) {
         }
     }
     screen->priv->windows_stacked = g_list_reverse(screen->priv->windows_stacked);
-    g_signal_emit_by_name(screen, "window-stacking-changed", screen);
+    g_signal_emit_by_name(screen, "window-stacking-changed");
 }
 
 XfwWorkspace *

@@ -40,6 +40,7 @@ struct _XfwWindowX11Private {
 };
 
 static void xfw_window_x11_window_init(XfwWindowIface *iface);
+static void xfw_window_x11_constructed(GObject *obj);
 static void xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_window_x11_dispose(GObject *obj);
@@ -74,6 +75,7 @@ static void
 xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->constructed = xfw_window_x11_constructed;
     gklass->set_property = xfw_window_x11_set_property;
     gklass->get_property = xfw_window_x11_get_property;
     gklass->dispose = xfw_window_x11_dispose;
@@ -90,6 +92,12 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
 
 static void
 xfw_window_x11_init(XfwWindowX11 *window) {
+    window->priv = xfw_window_x11_get_instance_private(window);
+}
+
+static void xfw_window_x11_constructed(GObject *obj) {
+    XfwWindowX11 *window = XFW_WINDOW_X11(obj);
+
     window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
 
     g_signal_connect(window->priv->wnck_window, "name-changed", (GCallback)name_changed, window);

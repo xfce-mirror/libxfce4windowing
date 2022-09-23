@@ -43,6 +43,7 @@ struct _XfwWindowWaylandPrivate {
 };
 
 static void xfw_window_wayland_window_init(XfwWindowIface *iface);
+static void xfw_window_wayland_constructed(GObject *obj);
 static void xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_window_wayland_dispose(GObject *obj);
@@ -90,6 +91,7 @@ static void
 xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->constructed = xfw_window_wayland_constructed;
     gklass->set_property = xfw_window_wayland_set_property;
     gklass->get_property = xfw_window_wayland_get_property;
     gklass->dispose = xfw_window_wayland_dispose;
@@ -105,6 +107,12 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
 
 static void
 xfw_window_wayland_init(XfwWindowWayland *window) {
+    window->priv = xfw_window_wayland_get_instance_private(window);
+}
+
+static void
+xfw_window_wayland_constructed(GObject *obj) {
+    XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
     zwlr_foreign_toplevel_handle_v1_add_listener(window->priv->handle, &toplevel_handle_listener, window);
 }
 

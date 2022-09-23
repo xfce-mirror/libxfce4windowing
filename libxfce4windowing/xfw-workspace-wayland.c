@@ -51,6 +51,7 @@ enum {
 static guint workspace_signals[N_SIGNALS] = { 0, };
 
 static void xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface);
+static void xfw_workspace_wayland_constructed(GObject *obj);
 static void xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_wayland_dispose(GObject *obj);
@@ -85,6 +86,7 @@ static void
 xfw_workspace_wayland_class_init(XfwWorkspaceWaylandClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->constructed = xfw_workspace_wayland_constructed;
     gklass->set_property = xfw_workspace_wayland_set_property;
     gklass->get_property = xfw_workspace_wayland_get_property;
     gklass->dispose = xfw_workspace_wayland_dispose;
@@ -108,6 +110,12 @@ xfw_workspace_wayland_class_init(XfwWorkspaceWaylandClass *klass) {
 
 static void
 xfw_workspace_wayland_init(XfwWorkspaceWayland *workspace) {
+    workspace->priv = xfw_workspace_wayland_get_instance_private(workspace);
+}
+
+static void
+xfw_workspace_wayland_constructed(GObject *obj) {
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(obj);
     workspace->priv->id = g_strdup_printf("%u", wl_proxy_get_id((struct wl_proxy *)workspace->priv->handle));
     ext_workspace_handle_v1_add_listener(workspace->priv->handle, &workspace_listener, workspace);
 }

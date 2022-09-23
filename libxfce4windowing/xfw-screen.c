@@ -56,9 +56,8 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                  G_SIGNAL_RUN_LAST,
                  G_STRUCT_OFFSET(XfwScreenIface, window_stacking_changed),
                  NULL, NULL,
-                 g_cclosure_marshal_VOID__OBJECT,
-                 G_TYPE_NONE, 1,
-                 XFW_TYPE_WINDOW);
+                 g_cclosure_marshal_VOID__VOID,
+                 G_TYPE_NONE, 0);
     g_signal_new("window-closed",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,

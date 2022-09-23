@@ -55,7 +55,7 @@ xfw_workspace_dummy_class_init(XfwWorkspaceDummyClass *klass) {
 
 static void
 xfw_workspace_dummy_init(XfwWorkspaceDummy *workspace) {
-
+    workspace->priv = xfw_workspace_dummy_get_instance_private(workspace);
 }
 
 static void

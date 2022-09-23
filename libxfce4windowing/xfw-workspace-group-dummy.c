@@ -35,7 +35,8 @@ struct _XfwWorkspaceGroupDummyPrivate {
     XfwWorkspace *active_workspace;
 };
 
-static void xfw_workspace_group_dummy_workspace_init(XfwWorkspaceGroupIface *iface);
+static void xfw_workspace_group_dummy_workspace_group_init(XfwWorkspaceGroupIface *iface);
+static void xfw_workspace_group_dummy_constructed(GObject *obj);
 static void xfw_workspace_group_dummy_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_dummy_dispose(GObject *obj);
@@ -48,13 +49,15 @@ static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspace
 static void monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceGroupDummy, xfw_workspace_group_dummy, G_TYPE_OBJECT,
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
-                                              xfw_workspace_group_dummy_workspace_init))
+                        G_ADD_PRIVATE(XfwWorkspaceGroupDummy)
+                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_GROUP,
+                                              xfw_workspace_group_dummy_workspace_group_init))
 
 static void
 xfw_workspace_group_dummy_class_init(XfwWorkspaceGroupDummyClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->constructed = xfw_workspace_group_dummy_constructed;
     gklass->set_property = xfw_workspace_group_dummy_set_property;
     gklass->get_property = xfw_workspace_group_dummy_get_property;
     gklass->dispose = xfw_workspace_group_dummy_dispose;
@@ -64,6 +67,12 @@ xfw_workspace_group_dummy_class_init(XfwWorkspaceGroupDummyClass *klass) {
 
 static void
 xfw_workspace_group_dummy_init(XfwWorkspaceGroupDummy *group) {
+    group->priv = xfw_workspace_group_dummy_get_instance_private(group);
+}
+
+static void
+xfw_workspace_group_dummy_constructed(GObject *obj) {
+    XfwWorkspaceGroupDummy *group = XFW_WORKSPACE_GROUP_DUMMY(obj);
     GdkDisplay *display = gdk_screen_get_display(group->priv->screen);
     int n_monitors = gdk_display_get_n_monitors(display);
     for (int i = 0; i < n_monitors; ++i) {
@@ -79,14 +88,11 @@ xfw_workspace_group_dummy_set_property(GObject *obj, guint prop_id, const GValue
     XfwWorkspaceGroupDummy *group = XFW_WORKSPACE_GROUP_DUMMY(obj);
 
     switch (prop_id) {
-        case WORKSPACE_MANAGER_PROP_SCREEN:
+        case WORKSPACE_GROUP_PROP_SCREEN:
             group->priv->screen = g_value_get_object(value);
             break;
 
         case WORKSPACE_GROUP_PROP_WORKSPACES:
-            g_list_free(group->priv->workspaces);
-            group->priv->workspaces = g_list_copy(g_value_get_pointer(value));
-
         case WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE:
         case WORKSPACE_GROUP_PROP_MONITORS:
             break;
@@ -138,7 +144,7 @@ xfw_workspace_group_dummy_dispose(GObject *obj) {
 }
 
 static void
-xfw_workspace_group_dummy_workspace_init(XfwWorkspaceGroupIface *iface) {
+xfw_workspace_group_dummy_workspace_group_init(XfwWorkspaceGroupIface *iface) {
     iface->get_workspace_count = xfw_workspace_group_dummy_get_workspace_count;
     iface->list_workspaces = xfw_workspace_group_dummy_list_workspaces;
     iface->get_active_workspace = xfw_workspace_group_dummy_get_active_workspace;
@@ -180,6 +186,15 @@ static void
 monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group) {
     group->priv->monitors = g_list_remove(group->priv->monitors, monitor);
     g_signal_emit_by_name(group, "monitors-changed");
+}
+
+
+void
+_xfw_workspace_group_dummy_set_workspaces(XfwWorkspaceGroupDummy *group, GList *workspaces) {
+    if (group->priv->workspaces != NULL) {
+        g_list_free(group->priv->workspaces);
+    }
+    group->priv->workspaces = g_list_copy(workspaces);
 }
 
 void

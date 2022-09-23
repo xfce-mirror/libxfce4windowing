@@ -44,6 +44,7 @@ struct _XfwScreenWaylandPrivate {
 };
 
 static void xfw_screen_wayland_screen_init(XfwScreenIface *iface);
+static void xfw_screen_wayland_constructed(GObject *obj);
 static void xfw_screen_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_screen_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_screen_wayland_dispose(GObject *obj);
@@ -77,6 +78,7 @@ static void
 xfw_screen_wayland_class_init(XfwScreenWaylandClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->constructed = xfw_screen_wayland_constructed;
     gklass->set_property = xfw_screen_wayland_set_property;
     gklass->get_property = xfw_screen_wayland_get_property;
     gklass->dispose = xfw_screen_wayland_dispose;
@@ -86,6 +88,11 @@ xfw_screen_wayland_class_init(XfwScreenWaylandClass *klass) {
 
 static void
 xfw_screen_wayland_init(XfwScreenWayland *screen) {
+    screen->priv = xfw_screen_wayland_get_instance_private(screen);
+}
+
+static void xfw_screen_wayland_constructed(GObject *obj) {
+    XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(obj);
     GdkDisplay *gdk_display;
     struct wl_display *wl_display;
 

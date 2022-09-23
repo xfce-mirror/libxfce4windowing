@@ -37,6 +37,7 @@ struct _XfwWorkspaceX11Private {
 };
 
 static void xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface);
+static void xfw_workspace_x11_constructed(GObject *obj);
 static void xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_x11_dispose(GObject *obj);
@@ -59,6 +60,7 @@ static void
 xfw_workspace_x11_class_init(XfwWorkspaceX11Class *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->constructed = xfw_workspace_x11_constructed;
     gklass->set_property = xfw_workspace_x11_set_property;
     gklass->get_property = xfw_workspace_x11_get_property;
     gklass->dispose = xfw_workspace_x11_dispose;
@@ -75,6 +77,12 @@ xfw_workspace_x11_class_init(XfwWorkspaceX11Class *klass) {
 
 static void
 xfw_workspace_x11_init(XfwWorkspaceX11 *workspace) {
+    workspace->priv = xfw_workspace_x11_get_instance_private(workspace);
+}
+
+static void
+xfw_workspace_x11_constructed(GObject *obj) {
+    XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(obj);
     g_signal_connect(workspace->priv->wnck_workspace, "name-changed", (GCallback)name_changed, workspace);
 }
 

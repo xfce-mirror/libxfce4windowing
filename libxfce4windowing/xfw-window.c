@@ -113,7 +113,7 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                           XFW_WINDOW_STATE_NONE,
                                                           G_PARAM_READABLE));
     g_object_interface_install_property(iface,
-                                        g_param_spec_object("worksapce",
+                                        g_param_spec_object("workspace",
                                                             "workspace",
                                                             "workspace",
                                                             XFW_TYPE_WORKSPACE,

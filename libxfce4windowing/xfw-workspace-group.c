@@ -71,7 +71,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                         g_param_spec_pointer("workspaces",
                                                              "workspaces",
                                                              "workspaces",
-                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                             G_PARAM_READABLE));
     g_object_interface_install_property(iface,
                                         g_param_spec_object("active-workspace",
                                                             "active-workspace",

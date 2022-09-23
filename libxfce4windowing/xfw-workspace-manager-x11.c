@@ -37,6 +37,7 @@ struct _XfwWorkspaceManagerX11Private {
 };
 
 static void xfw_workspace_manager_x11_manager_init(XfwWorkspaceManagerIface *iface);
+static void xfw_workspace_manager_x11_constructed(GObject *obj);
 static void xfw_workspace_manager_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_x11_dispose(GObject *obj);
@@ -55,6 +56,7 @@ static void
 xfw_workspace_manager_x11_class_init(XfwWorkspaceManagerX11Class *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->constructed = xfw_workspace_manager_x11_constructed;
     gklass->set_property = xfw_workspace_manager_x11_set_property;
     gklass->get_property = xfw_workspace_manager_x11_get_property;
     gklass->dispose = xfw_workspace_manager_x11_dispose;
@@ -69,8 +71,14 @@ xfw_workspace_manager_x11_manager_init(XfwWorkspaceManagerIface *iface) {
 
 static void
 xfw_workspace_manager_x11_init(XfwWorkspaceManagerX11 *manager) {
+    manager->priv = xfw_workspace_manager_x11_get_instance_private(manager);
+}
+
+static void
+xfw_workspace_manager_x11_constructed(GObject *obj) {
+    XfwWorkspaceManagerX11 *manager = XFW_WORKSPACE_MANAGER_X11(obj);
     XfwWorkspaceManagerX11Private *priv = manager->priv;
-    XfwWorkspaceGroup *group;
+    XfwWorkspaceGroupDummy *group;
     GList *wnck_workspaces;
     WnckWorkspace *active_wnck_workspace;
 
@@ -81,7 +89,6 @@ xfw_workspace_manager_x11_init(XfwWorkspaceManagerX11 *manager) {
 
     group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
                          "screen", priv->screen,
-                         "workspaces", priv->workspaces,
                          NULL);
     priv->groups = g_list_append(NULL, group);
 
@@ -96,10 +103,10 @@ xfw_workspace_manager_x11_init(XfwWorkspaceManagerX11 *manager) {
         if (active_wnck_workspace == l->data) {
             _xfw_workspace_group_dummy_set_active_workspace(XFW_WORKSPACE_GROUP_DUMMY(priv->groups->data), workspace);
         }
-        priv->workspaces = g_list_prepend(priv->workspaces, workspace);
+        priv->workspaces = g_list_append(priv->workspaces, workspace);
         g_hash_table_insert(priv->wnck_workspaces, g_object_ref(l->data), workspace);
     }
-
+    _xfw_workspace_group_dummy_set_workspaces(group, priv->workspaces);
 }
 
 static void
@@ -174,7 +181,6 @@ workspace_created(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorkspac
                                                                 "wnck-workspace", wnck_workspace,
                                                                 NULL));
     int n_workspaces = wnck_screen_get_workspace_count(screen);
-    GValue value = G_VALUE_INIT;
 
     g_hash_table_insert(manager->priv->wnck_workspaces, wnck_workspace, workspace);
     for (int i = 0; i < n_workspaces; ++i) {
@@ -184,9 +190,7 @@ workspace_created(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorkspac
         }
     }
 
-    g_value_set_pointer(&value, manager->priv->workspaces);
-    g_object_set_property(G_OBJECT(manager->priv->groups->data), "workspaces", &value);
-
+    _xfw_workspace_group_dummy_set_workspaces(XFW_WORKSPACE_GROUP_DUMMY(manager->priv->groups->data), manager->priv->workspaces);
     g_signal_emit_by_name(manager->priv->groups->data, "workspace-created", workspace);
 }
 
@@ -194,7 +198,6 @@ static void
 workspace_destroyed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorkspaceManagerX11 *manager) {
     XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(g_hash_table_lookup(manager->priv->wnck_workspaces, wnck_workspace));
     if (workspace != NULL) {
-        GValue value = G_VALUE_INIT;
         XfwWorkspaceGroup *group = XFW_WORKSPACE_GROUP(manager->priv->groups->data);
 
         g_object_ref(workspace);
@@ -206,9 +209,7 @@ workspace_destroyed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorksp
         g_hash_table_remove(manager->priv->wnck_workspaces, wnck_workspace);
         manager->priv->workspaces = g_list_remove(manager->priv->workspaces, workspace);
 
-        g_value_set_pointer(&value, manager->priv->workspaces);
-        g_object_set_property(G_OBJECT(manager->priv->groups->data), "workspaces", &value);
-
+        _xfw_workspace_group_dummy_set_workspaces(XFW_WORKSPACE_GROUP_DUMMY(manager->priv->groups->data), manager->priv->workspaces);
         g_signal_emit_by_name(group, "workspace-destroyed", workspace);
 
         g_object_unref(workspace);

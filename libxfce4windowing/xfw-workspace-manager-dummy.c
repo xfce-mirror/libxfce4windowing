@@ -35,6 +35,7 @@ struct _XfwWorkspaceManagerDummyPrivate {
 };
 
 static void xfw_workspace_manager_dummy_manager_init(XfwWorkspaceManagerIface *iface);
+static void xfw_workspace_manager_dummy_constructed(GObject *obj);
 static void xfw_workspace_manager_dummy_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_dummy_dispose(GObject *obj);
@@ -48,6 +49,7 @@ G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerDummy, xfw_workspace_manager_dummy, G
 static void
 xfw_workspace_manager_dummy_class_init(XfwWorkspaceManagerDummyClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
+    gklass->constructed = xfw_workspace_manager_dummy_constructed;
     gklass->set_property = xfw_workspace_manager_dummy_set_property;
     gklass->get_property = xfw_workspace_manager_dummy_get_property;
     gklass->dispose = xfw_workspace_manager_dummy_dispose;
@@ -61,9 +63,19 @@ xfw_workspace_manager_dummy_manager_init(XfwWorkspaceManagerIface *iface) {
 
 static void
 xfw_workspace_manager_dummy_init(XfwWorkspaceManagerDummy *manager) {
-    XfwWorkspaceGroup *group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
-                                            "screen", manager->priv->screen,
-                                            NULL);
+    manager->priv = xfw_workspace_manager_dummy_get_instance_private(manager);
+}
+
+static void
+xfw_workspace_manager_dummy_constructed(GObject *obj) {
+    XfwWorkspaceManagerDummy *manager = XFW_WORKSPACE_MANAGER_DUMMY(obj);
+    XfwWorkspaceGroup *group;
+
+    manager->priv = xfw_workspace_manager_dummy_get_instance_private(manager);
+
+    group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
+                         "screen", manager->priv->screen,
+                         NULL);
     manager->priv->groups = g_list_append(NULL, group);
     manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY,
                                                                  "group", group,

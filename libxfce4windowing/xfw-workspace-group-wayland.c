@@ -51,7 +51,8 @@ struct _XfwWorkspaceGroupWaylandPrivate {
 
 static guint group_signals[N_SIGNALS]  = { 0, };
 
-static void xfw_workspace_group_wayland_workspace_init(XfwWorkspaceGroupIface *iface);
+static void xfw_workspace_group_wayland_workspace_group_init(XfwWorkspaceGroupIface *iface);
+static void xfw_workspace_group_wayland_constructed(GObject *obj);
 static void xfw_workspace_group_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_wayland_dispose(GObject *obj);
@@ -78,13 +79,14 @@ static const struct ext_workspace_group_handle_v1_listener group_listener = {
 };
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceGroupWayland, xfw_workspace_group_wayland, G_TYPE_OBJECT,
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
-                                              xfw_workspace_group_wayland_workspace_init))
+                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_GROUP,
+                                              xfw_workspace_group_wayland_workspace_group_init))
 
 static void
 xfw_workspace_group_wayland_class_init(XfwWorkspaceGroupWaylandClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
 
+    gklass->constructed = xfw_workspace_group_wayland_constructed;
     gklass->set_property = xfw_workspace_group_wayland_set_property;
     gklass->get_property = xfw_workspace_group_wayland_get_property;
     gklass->dispose = xfw_workspace_group_wayland_dispose;
@@ -102,8 +104,13 @@ xfw_workspace_group_wayland_class_init(XfwWorkspaceGroupWaylandClass *klass) {
 
 static void
 xfw_workspace_group_wayland_init(XfwWorkspaceGroupWayland *group) {
-    group->priv->wl_workspaces = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
+    group->priv = xfw_workspace_group_wayland_get_instance_private(group);
+}
 
+static void
+xfw_workspace_group_wayland_constructed(GObject *obj) {
+    XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
+    group->priv->wl_workspaces = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
     ext_workspace_group_handle_v1_add_listener(group->priv->handle, &group_listener, group);
 }
 
@@ -112,7 +119,7 @@ xfw_workspace_group_wayland_set_property(GObject *obj, guint prop_id, const GVal
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
 
     switch (prop_id) {
-        case WORKSPACE_MANAGER_PROP_SCREEN:
+        case WORKSPACE_GROUP_PROP_SCREEN:
             group->priv->screen = g_value_get_object(value);
             break;
 
@@ -174,7 +181,7 @@ xfw_workspace_group_wayland_dispose(GObject *obj) {
 }
 
 static void
-xfw_workspace_group_wayland_workspace_init(XfwWorkspaceGroupIface *iface) {
+xfw_workspace_group_wayland_workspace_group_init(XfwWorkspaceGroupIface *iface) {
     iface->get_workspace_count = xfw_workspace_group_wayland_get_workspace_count;
     iface->list_workspaces = xfw_workspace_group_wayland_list_workspaces;
     iface->get_active_workspace = xfw_workspace_group_wayland_get_active_workspace;
