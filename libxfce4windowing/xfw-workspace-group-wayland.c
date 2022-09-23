@@ -319,3 +319,12 @@ monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupWayla
     group->priv->monitors = g_list_remove(group->priv->monitors, monitor);
     g_signal_emit_by_name(group, "monitors-changed");
 }
+
+void
+_xfw_workspace_group_wayland_set_active_workspace(XfwWorkspaceGroupWayland *group, XfwWorkspace *workspace) {
+    if (group->priv->active_workspace != workspace) {
+        group->priv->active_workspace = workspace;
+        g_object_notify(G_OBJECT(group), "active-workspace");
+        g_signal_emit_by_name(group, "active-workspace-changed", workspace);
+    }
+}

@@ -24,10 +24,12 @@
 #include "libxfce4windowing-private.h"
 #include "protocols/ext-workspace-v1-20220919-client.h"
 #include "xfw-util.h"
+#include "xfw-workspace-group-wayland.h"
 #include "xfw-workspace-wayland.h"
 #include "xfw-workspace.h"
 
 struct _XfwWorkspaceWaylandPrivate {
+    XfwWorkspaceGroupWayland *group;
     struct ext_workspace_handle_v1 *handle;
     gchar *id;
     gchar *name;
@@ -43,6 +45,7 @@ enum {
 
 enum {
     PROP0,
+    PROP_GROUP,
     PROP_HANDLE,
 };
 
@@ -95,6 +98,13 @@ xfw_workspace_wayland_class_init(XfwWorkspaceWaylandClass *klass) {
                                                        G_TYPE_NONE, 0);
 
     g_object_class_install_property(gklass,
+                                    PROP_GROUP,
+                                    g_param_spec_object("group",
+                                                        "group",
+                                                        "group",
+                                                        XFW_TYPE_WORKSPACE_GROUP_WAYLAND,
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+    g_object_class_install_property(gklass,
                                     PROP_HANDLE,
                                     g_param_spec_pointer("handle",
                                                          "handle",
@@ -123,6 +133,10 @@ static void
 xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(obj);
     switch (prop_id) {
+        case PROP_GROUP:
+            workspace->priv->group = g_value_get_object(value);
+            break;
+
         case PROP_HANDLE:
             workspace->priv->handle = g_value_get_pointer(value);
             break;
@@ -152,6 +166,10 @@ static void
 xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(obj);
     switch (prop_id) {
+        case PROP_GROUP:
+            g_value_set_object(value, workspace->priv->group);
+            break;
+
         case PROP_HANDLE:
             g_value_set_pointer(value, workspace->priv->handle);
             break;
@@ -250,6 +268,9 @@ workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct
     }
     g_object_set(workspace, "state", state, NULL);
     g_signal_emit_by_name(workspace, "state-changed", old_state);
+    if ((old_state & XFW_WORKSPACE_STATE_ACTIVE) == 0 && (state & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
+        _xfw_workspace_group_wayland_set_active_workspace(workspace->priv->group, XFW_WORKSPACE(workspace));
+    }
 }
 
 static void
