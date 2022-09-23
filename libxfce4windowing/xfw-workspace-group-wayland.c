@@ -237,21 +237,10 @@ group_output_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, s
 }
 
 static void
-workspace_state_changed(XfwWorkspace *workspace, XfwWorkspaceState old_state, XfwWorkspaceGroupWayland *group) {
-    XfwWorkspaceState state = xfw_workspace_get_state(workspace);
-    if ((old_state & XFW_WORKSPACE_STATE_ACTIVE) != XFW_WORKSPACE_STATE_ACTIVE && (state & XFW_WORKSPACE_STATE_ACTIVE) == XFW_WORKSPACE_STATE_ACTIVE) {
-        group->priv->active_workspace = workspace;
-        g_object_notify(G_OBJECT(group), "active-workspace");
-        g_signal_emit_by_name(group, "workspace-activated", workspace);
-    }
-}
-
-static void
 workspace_destroyed(XfwWorkspace *workspace, XfwWorkspaceGroupWayland *group) {
     guint old_number = UINT_MAX;
     GList *l;
 
-    g_signal_handlers_disconnect_by_func(workspace, workspace_state_changed, group);
     g_signal_handlers_disconnect_by_func(workspace, workspace_destroyed, group);
 
     l = group->priv->workspaces;
@@ -282,7 +271,6 @@ group_workspace(void *data, struct ext_workspace_group_handle_v1 *wl_group, stru
     _xfw_workspace_wayland_set_number(workspace, g_list_length(group->priv->workspaces));
     g_hash_table_insert(group->priv->wl_workspaces, wl_workspace, workspace);
     group->priv->workspaces = g_list_append(group->priv->workspaces, workspace);
-    g_signal_connect(workspace, "state-changed", (GCallback)workspace_state_changed, group);
     g_signal_connect(workspace, "destroyed", (GCallback)workspace_destroyed, group);
     g_signal_emit_by_name(group, "workspace-added", workspace);
 }
