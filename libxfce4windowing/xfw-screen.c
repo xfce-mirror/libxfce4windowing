@@ -22,7 +22,7 @@
 #include <limits.h>
 
 #include "libxfce4windowing-private.h"
-//#include "xfw-screen-wayland.h"
+#include "xfw-screen-wayland.h"
 #include "xfw-screen-x11.h"
 #include "xfw-screen.h"
 #include "xfw-util.h"
@@ -139,10 +139,9 @@ xfw_screen_get(GdkScreen *gdk_screen) {
 #endif  /* ENABLE_X11 */
 #ifdef ENABLE_WAYLAND
         if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND) {
-            g_critical("Wayland screen backend unimplemented");
-//            screen = g_object_new(XFW_TYPE_SCREEN_WAYLAND,
-//                                  "screen", gdk_screen,
-//                                  NULL);
+            screen = g_object_new(XFW_TYPE_SCREEN_WAYLAND,
+                                  "screen", gdk_screen,
+                                  NULL);
         } else
 #endif
         {

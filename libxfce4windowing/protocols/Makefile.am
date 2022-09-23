@@ -5,7 +5,9 @@ noinst_LTLIBRARIES = \
 
 libwayland_protocols_built_sources = \
 	ext-workspace-v1-20220919.c \
-	ext-workspace-v1-20220919-client.h
+	ext-workspace-v1-20220919-client.h \
+	wlr-foreign-toplevel-management-unstable-v1.c \
+	wlr-foreign-toplevel-management-unstable-v1-client.h
 
 libwayland_protocols_la_SOURCES = \
 	$(libwayland_protocols_built_sources)
@@ -36,4 +38,5 @@ BUILT_SOURCES = \
 endif
 
 EXTRA_DIST = \
-	ext-workspace-v1-20220919.xml
+	ext-workspace-v1-20220919.xml \
+	wlr-foreign-toplevel-management-unstable-v1.xml

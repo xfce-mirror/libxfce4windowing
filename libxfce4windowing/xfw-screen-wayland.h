@@ -17,32 +17,39 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __XFW_UTIL_H__
-#define __XFW_UTIL_H__
+#ifndef __XFW_SCREEN_WAYLAND_H__
+#define __XFW_SCREEN_WAYLAND_H__
 
 #if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <glib.h>
+#include <glib-object.h>
 
-#define XFW_ERROR (xfw_error_quark())
-
-typedef enum _XfwErrorCode {
-    XFW_ERROR_UNSUPPORTED = 0,
-} XfwErrorCode;
+#include "xfw-window.h"
 
 G_BEGIN_DECLS
 
-typedef enum {
-    XFW_WINDOWING_X11 = 1,
-    XFW_WINDOWING_WAYLAND = 2
-} XfwWindowing;
+#define XFW_TYPE_SCREEN_WAYLAND           (xfw_screen_wayland_get_type())
+#define XFW_SCREEN_WAYLAND(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_SCREEN_WAYLAND, XfwScreenWayland))
+#define XFW_IS_SCREEN_WAYLAND(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_SCREEN_WAYLAND))
 
-XfwWindowing xfw_windowing_get(void);
+typedef struct _XfwScreenWayland XfwScreenWayland;
+typedef struct _XfwScreenWaylandPrivate XfwScreenWaylandPrivate;
+typedef struct _XfwScreenWaylandClass XfwScreenWaylandClass;
 
-GQuark xfw_error_quark(void);
+struct _XfwScreenWayland {
+    GObject parent;
+    /*< private >*/
+    XfwScreenWaylandPrivate *priv;
+};
 
-G_END_DECLS
+struct _XfwScreenWaylandClass {
+    GObjectClass parent_class;
+};
 
-#endif  /* __XFW_UTIL_H__ */
+GType xfw_screen_wayland_get_type(void) G_GNUC_CONST;
+
+void _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *window);
+
+#endif  /* __XFW_SCREEN_WAYLAND_H__ */

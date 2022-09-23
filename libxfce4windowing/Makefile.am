@@ -29,6 +29,10 @@ libxfce4windowing_x11_sources = \
 	xfw-workspace-x11.h
 
 libxfce4windowing_wayland_sources = \
+	xfw-screen-wayland.c \
+	xfw-screen-wayland.h \
+	xfw-window-wayland.c \
+	xfw-window-wayland.h \
 	xfw-workspace-group-wayland.c \
 	xfw-workspace-group-wayland.h \
 	xfw-workspace-manager-wayland.c \
