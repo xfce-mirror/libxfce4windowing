@@ -40,6 +40,17 @@ G_DEFINE_FLAGS_TYPE(XfwWindowState, xfw_window_state,
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_STATE_SKIP_TASKLIST, "skip-tasklist"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_STATE_PINNED, "pinned"))
 
+G_DEFINE_FLAGS_TYPE(XfwWindowCapabilities, xfw_window_capabilities,
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_NONE, "none"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE, "can-minimize"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE, "can-maximize"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN, "can-fullscreen"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_PIN, "can-pin"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE, "can-unminimize"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE, "can-unmaximize"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN, "can-unfullscreen"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNPIN, "can-unpin"))
+
 static void
 xfw_window_default_init(XfwWindowIface *iface) {
     g_signal_new("name-changed",
@@ -65,6 +76,15 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  G_TYPE_NONE, 2,
                  XFW_TYPE_WINDOW_STATE,
                  XFW_TYPE_WINDOW_STATE);
+    g_signal_new("capabilities-changed",
+                 XFW_TYPE_WINDOW,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWindowIface, capabilities_changed),
+                 NULL, NULL,
+                 xfw_marshal_VOID__FLAGS_FLAGS,
+                 G_TYPE_NONE, 2,
+                 XFW_TYPE_WINDOW_CAPABILITIES,
+                 XFW_TYPE_WINDOW_CAPABILITIES);
     g_signal_new("geometry-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -119,6 +139,13 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                           XFW_WINDOW_STATE_NONE,
                                                           G_PARAM_READABLE));
     g_object_interface_install_property(iface,
+                                        g_param_spec_flags("capabilities",
+                                                           "capabilities",
+                                                           "capabilities",
+                                                           XFW_TYPE_WINDOW_CAPABILITIES,
+                                                           XFW_WINDOW_CAPABILITIES_NONE,
+                                                           G_PARAM_READABLE));
+    g_object_interface_install_property(iface,
                                         g_param_spec_object("workspace",
                                                             "workspace",
                                                             "workspace",
@@ -156,6 +183,14 @@ xfw_window_get_state(XfwWindow *window) {
     g_return_val_if_fail(XFW_IS_WINDOW(window), XFW_WINDOW_STATE_NONE);
     iface = XFW_WINDOW_GET_IFACE(window);
     return (*iface->get_state)(window);
+}
+
+XfwWindowCapabilities
+xfw_window_get_capabilities(XfwWindow *window) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), XFW_WINDOW_CAPABILITIES_NONE);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->get_capabilities)(window);
 }
 
 GdkRectangle *
@@ -240,5 +275,6 @@ _xfw_window_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WINDOW_PROP_NAME, "name");
     g_object_class_override_property(gklass, WINDOW_PROP_ICON, "icon");
     g_object_class_override_property(gklass, WINDOW_PROP_STATE, "state");
+    g_object_class_override_property(gklass, WINDOW_PROP_CAPABILITIES, "capabilities");
     g_object_class_override_property(gklass, WINDOW_PROP_WORKSPACE, "workspace");
 }

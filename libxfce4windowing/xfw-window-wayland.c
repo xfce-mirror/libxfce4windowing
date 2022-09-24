@@ -40,6 +40,7 @@ struct _XfwWindowWaylandPrivate {
     guint64 id;
     gchar *name;
     XfwWindowState state;
+    XfwWindowCapabilities capabilities;
     GdkRectangle geometry;  // unfortunately unsupported
 };
 
@@ -52,6 +53,7 @@ static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_wayland_get_state(XfwWindow *window);
+static XfwWindowCapabilities xfw_window_wayland_get_capabilities(XfwWindow *window);
 static GdkRectangle *xfw_window_wayland_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_wayland_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
@@ -135,6 +137,7 @@ xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value
         case WINDOW_PROP_NAME:
         case WINDOW_PROP_ICON:
         case WINDOW_PROP_STATE:
+        case WINDOW_PROP_CAPABILITIES:
         case WINDOW_PROP_WORKSPACE:
             break;
 
@@ -173,6 +176,10 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
             g_value_set_flags(value, xfw_window_wayland_get_state(window));
             break;
 
+        case WINDOW_PROP_CAPABILITIES:
+            g_value_set_flags(value, xfw_window_wayland_get_capabilities(window));
+            break;
+
         case WINDOW_PROP_WORKSPACE:
             g_value_set_object(value, xfw_window_wayland_get_workspace(window));
             break;
@@ -195,6 +202,7 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->get_name = xfw_window_wayland_get_name;
     iface->get_icon = xfw_window_wayland_get_icon;
     iface->get_state = xfw_window_wayland_get_state;
+    iface->get_capabilities = xfw_window_wayland_get_capabilities;
     iface->get_geometry = xfw_window_wayland_get_geometry;
     iface->get_screen = xfw_window_wayland_get_screen;
     iface->get_workspace = xfw_window_wayland_get_workspace;
@@ -226,6 +234,11 @@ xfw_window_wayland_get_icon(XfwWindow *window) {
 static XfwWindowState
 xfw_window_wayland_get_state(XfwWindow *window) {
     return XFW_WINDOW_WAYLAND(window)->priv->state;
+}
+
+static XfwWindowCapabilities
+xfw_window_wayland_get_capabilities(XfwWindow *window) {
+    return XFW_WINDOW_WAYLAND(window)->priv->capabilities;
 }
 
 static GdkRectangle *
@@ -329,6 +342,16 @@ static const struct {
     { ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_FULLSCREEN, XFW_WINDOW_STATE_FULLSCREEN },
 };
 
+static const struct {
+    XfwWindowState state_bit;
+    XfwWindowCapabilities capabilities_bit_if_present;
+    XfwWindowCapabilities capabilities_bit_if_absent;
+} capabilities_converters[] = {
+    { XFW_WINDOW_STATE_MINIMIZED, XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE, XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE },
+    { XFW_WINDOW_STATE_MAXIMIZED, XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE, XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE },
+    { XFW_WINDOW_STATE_FULLSCREEN, XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN, XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN },
+};
+
 static void
 toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_array *wl_state) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
@@ -336,6 +359,9 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
     XfwWindowState new_state = XFW_WINDOW_STATE_NONE;
     enum zwlr_foreign_toplevel_handle_v1_state *item;
     XfwWindowState changed_mask;
+    XfwWindowCapabilities old_capabilities = window->priv->capabilities;
+    XfwWindowCapabilities capapbilities_changed_mask;
+    XfwWindowCapabilities new_capabilities = XFW_WINDOW_CAPABILITIES_NONE;
 
     wl_array_for_each(item, wl_state) {
         for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
@@ -350,6 +376,21 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
 
     g_object_notify(G_OBJECT(window), "state");
     g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
+
+    for (size_t i = 0; i < sizeof(capabilities_converters) / sizeof(*capabilities_converters); ++i) {
+        if ((new_state & capabilities_converters[i].state_bit) != 0) {
+            new_capabilities |= capabilities_converters[i].capabilities_bit_if_present;
+        } else {
+            new_capabilities |= capabilities_converters[i].capabilities_bit_if_absent;
+        }
+    }
+    capapbilities_changed_mask = old_capabilities ^ new_capabilities;
+    if (capapbilities_changed_mask != 0) {
+        window->priv->capabilities = new_capabilities;
+        g_object_notify(G_OBJECT(window), "capabilities");
+        g_signal_emit_by_name(window, "capabilities-changed", capapbilities_changed_mask, new_capabilities);
+    }
+
     if ((old_state & XFW_WINDOW_STATE_ACTIVE) == 0 && (new_state & XFW_WINDOW_STATE_ACTIVE) != 0) {
         _xfw_screen_wayland_set_active_window(XFW_SCREEN_WAYLAND(window->priv->screen), XFW_WINDOW(window));
     }

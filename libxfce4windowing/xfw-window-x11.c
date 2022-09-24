@@ -37,6 +37,7 @@ struct _XfwWindowX11Private {
     XfwScreen *screen;
     WnckWindow *wnck_window;
     XfwWindowState state;
+    XfwWindowCapabilities capabilities;
     GdkRectangle geometry;
 };
 
@@ -49,6 +50,7 @@ static guint64 xfw_window_x11_get_id(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
+static XfwWindowCapabilities xfw_window_x11_get_capabilities(XfwWindow *window);
 static GdkRectangle *xfw_window_x11_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_x11_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
@@ -64,10 +66,12 @@ static void xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GEr
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void state_changed(WnckWindow *wnck_window, WnckWindowState changed_mask, WnckWindowState new_state, XfwWindowX11 *window);
+static void actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, WnckWindowActions wnck_new_actions, XfwWindowX11 *window);
 static void geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 
 static XfwWindowState convert_state(WnckWindow *wnck_window, WnckWindowState wnck_state);
+static XfwWindowCapabilities convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWindowX11, xfw_window_x11, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWindowX11)
@@ -102,10 +106,12 @@ static void xfw_window_x11_constructed(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
 
     window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
+    window->priv->capabilities = convert_capabilities(window->priv->wnck_window, wnck_window_get_actions(window->priv->wnck_window));
 
     g_signal_connect(window->priv->wnck_window, "name-changed", (GCallback)name_changed, window);
     g_signal_connect(window->priv->wnck_window, "icon-changed", (GCallback)icon_changed, window);
     g_signal_connect(window->priv->wnck_window, "state-changed", (GCallback)state_changed, window);
+    g_signal_connect(window->priv->wnck_window, "actions-changed", (GCallback)actions_changed, window);
     g_signal_connect(window->priv->wnck_window, "geometry-changed", (GCallback)geometry_changed, window);
     g_signal_connect(window->priv->wnck_window, "workspace-changed", (GCallback)workspace_changed, window);
 }
@@ -127,6 +133,7 @@ xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GP
         case WINDOW_PROP_NAME:
         case WINDOW_PROP_ICON:
         case WINDOW_PROP_STATE:
+        case WINDOW_PROP_CAPABILITIES:
         case WINDOW_PROP_WORKSPACE:
             break;
 
@@ -165,6 +172,10 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
             g_value_set_flags(value, xfw_window_x11_get_state(window));
             break;
 
+        case WINDOW_PROP_CAPABILITIES:
+            g_value_set_flags(value, xfw_window_x11_get_capabilities(window));
+            break;
+
         case WINDOW_PROP_WORKSPACE:
             g_value_set_object(value, xfw_window_x11_get_workspace(window));
             break;
@@ -181,6 +192,7 @@ xfw_window_x11_dispose(GObject *obj) {
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, name_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, icon_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, state_changed, window);
+    g_signal_handlers_disconnect_by_func(window->priv->wnck_window, actions_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 }
@@ -191,6 +203,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_name = xfw_window_x11_get_name;
     iface->get_icon = xfw_window_x11_get_icon;
     iface->get_state = xfw_window_x11_get_state;
+    iface->get_capabilities = xfw_window_x11_get_capabilities;
     iface->get_geometry = xfw_window_x11_get_geometry;
     iface->get_screen = xfw_window_x11_get_screen;
     iface->get_workspace = xfw_window_x11_get_workspace;
@@ -233,6 +246,11 @@ xfw_window_x11_get_icon(XfwWindow *window) {
 static XfwWindowState
 xfw_window_x11_get_state(XfwWindow *window) {
     return XFW_WINDOW_X11(window)->priv->state;
+}
+
+static XfwWindowCapabilities
+xfw_window_x11_get_capabilities(XfwWindow *window) {
+    return XFW_WINDOW_X11(window)->priv->capabilities;
 }
 
 static GdkRectangle *
@@ -337,6 +355,17 @@ state_changed(WnckWindow *wnck_window, WnckWindowState wnck_changed_mask, WnckWi
 }
 
 static void
+actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, WnckWindowActions wnck_new_actions, XfwWindowX11 *window) {
+    XfwWindowCapabilities old_capabilities = window->priv->capabilities;
+    XfwWindowCapabilities new_capabilities = convert_capabilities(wnck_window, wnck_new_actions);
+    XfwWindowCapabilities changed_mask = old_capabilities ^ new_capabilities;
+    window->priv->capabilities = new_capabilities;
+
+    g_object_notify(G_OBJECT(window), "capabilities");
+    g_signal_emit_by_name(window, "capabilities-changed", changed_mask, new_capabilities);
+}
+
+static void
 geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     wnck_window_get_geometry(wnck_window,
                              &window->priv->geometry.x, &window->priv->geometry.y,
@@ -374,4 +403,46 @@ convert_state(WnckWindow *wnck_window, WnckWindowState wnck_state) {
         state |= XFW_WINDOW_STATE_ACTIVE;
     }
     return state;
+}
+
+static const struct {
+    // Action bits we need to find in actions in order to enable capabilities_bits
+    WnckWindowActions wnck_actions_bits;
+    // State bits from the window state that we...
+    WnckWindowState wnck_state_bits;
+    // ... need or do not need to find in order to enable capabilities_bit
+    gboolean need_wnck_state_bits_present;
+    XfwWindowCapabilities capabilities_bit;
+} capabilities_converters[] = {
+    { WNCK_WINDOW_ACTION_MINIMIZE, WNCK_WINDOW_STATE_MINIMIZED, FALSE, XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE },
+    { WNCK_WINDOW_ACTION_MAXIMIZE, WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY, FALSE, XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE },
+    { WNCK_WINDOW_ACTION_FULLSCREEN, WNCK_WINDOW_STATE_FULLSCREEN, FALSE, XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN },
+    { WNCK_WINDOW_ACTION_STICK | WNCK_WINDOW_ACTION_CHANGE_WORKSPACE, WNCK_WINDOW_STATE_STICKY, FALSE,  XFW_WINDOW_CAPABILITIES_CAN_PIN },
+    { WNCK_WINDOW_ACTION_UNMINIMIZE, WNCK_WINDOW_STATE_MINIMIZED, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE },
+    { WNCK_WINDOW_ACTION_UNMAXIMIZE, WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE },
+    { WNCK_WINDOW_ACTION_FULLSCREEN, WNCK_WINDOW_STATE_FULLSCREEN, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN },
+    { WNCK_WINDOW_ACTION_UNSTICK | WNCK_WINDOW_ACTION_CHANGE_WORKSPACE, WNCK_WINDOW_STATE_STICKY, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNPIN },
+};
+static XfwWindowCapabilities
+convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions)
+{
+    WnckWindowState wnck_state = wnck_window_get_state(wnck_window);
+    XfwWindowCapabilities capabilities = XFW_WINDOW_CAPABILITIES_NONE;
+    for (size_t i = 0; i < sizeof(capabilities_converters) / sizeof(*capabilities_converters); ++i) {
+        if ((wnck_actions & capabilities_converters[i].wnck_actions_bits) != 0) {
+            if ((
+                    capabilities_converters[i].need_wnck_state_bits_present
+                    && (wnck_state & capabilities_converters[i].wnck_state_bits) != 0
+                )
+                ||
+                (
+                    !capabilities_converters[i].need_wnck_state_bits_present
+                    && (wnck_state & capabilities_converters[i].wnck_state_bits) == 0
+                )
+            ) {
+                capabilities |= capabilities_converters[i].capabilities_bit;
+            }
+        }
+    }
+    return capabilities;
 }
