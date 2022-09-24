@@ -30,6 +30,7 @@
 
 struct _XfwWorkspaceGroupDummyPrivate {
     GdkScreen *screen;
+    XfwWorkspaceManager *workspace_manager;
     GList *workspaces;
     GList *monitors;
     XfwWorkspace *active_workspace;
@@ -44,6 +45,7 @@ static guint xfw_workspace_group_dummy_get_workspace_count(XfwWorkspaceGroup *gr
 static GList *xfw_workspace_group_dummy_list_workspaces(XfwWorkspaceGroup *group);
 static XfwWorkspace *xfw_workspace_group_dummy_get_active_workspace(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_dummy_get_monitors(XfwWorkspaceGroup *group);
+static XfwWorkspaceManager *xfw_workspace_group_dummy_get_workspace_manager(XfwWorkspaceGroup *group);
 
 static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
 static void monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
@@ -92,6 +94,10 @@ xfw_workspace_group_dummy_set_property(GObject *obj, guint prop_id, const GValue
             group->priv->screen = g_value_get_object(value);
             break;
 
+        case WORKSPACE_GROUP_PROP_WORKSPACE_MANAGER:
+            group->priv->workspace_manager = g_value_get_object(value);
+            break;
+
         case WORKSPACE_GROUP_PROP_WORKSPACES:
         case WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE:
         case WORKSPACE_GROUP_PROP_MONITORS:
@@ -110,6 +116,10 @@ xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *valu
     switch (prop_id) {
         case WORKSPACE_GROUP_PROP_SCREEN:
             g_value_set_object(value, group->priv->screen);
+            break;
+
+        case WORKSPACE_GROUP_PROP_WORKSPACE_MANAGER:
+            g_value_set_object(value, group->priv->workspace_manager);
             break;
 
         case WORKSPACE_GROUP_PROP_WORKSPACES:
@@ -149,6 +159,7 @@ xfw_workspace_group_dummy_workspace_group_init(XfwWorkspaceGroupIface *iface) {
     iface->list_workspaces = xfw_workspace_group_dummy_list_workspaces;
     iface->get_active_workspace = xfw_workspace_group_dummy_get_active_workspace;
     iface->get_monitors = xfw_workspace_group_dummy_get_monitors;
+    iface->get_workspace_manager = xfw_workspace_group_dummy_get_workspace_manager;
 }
 
 static guint
@@ -169,6 +180,11 @@ xfw_workspace_group_dummy_get_active_workspace(XfwWorkspaceGroup *group) {
 static GList *
 xfw_workspace_group_dummy_get_monitors(XfwWorkspaceGroup *group) {
     return XFW_WORKSPACE_GROUP_DUMMY(group)->priv->monitors;
+}
+
+static XfwWorkspaceManager *
+xfw_workspace_group_dummy_get_workspace_manager(XfwWorkspaceGroup *group) {
+    return XFW_WORKSPACE_GROUP_DUMMY(group)->priv->workspace_manager;
 }
 
 static void

@@ -23,6 +23,7 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-group.h"
+#include "xfw-workspace-manager.h"
 
 typedef struct _XfwWorkspaceGroupIface XfwWorkspaceGroupInterface;
 G_DEFINE_INTERFACE(XfwWorkspaceGroup, xfw_workspace_group, G_TYPE_OBJECT)
@@ -66,6 +67,12 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                             "screen",
                                                             "screen",
                                                             GDK_TYPE_SCREEN,
+                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+    g_object_interface_install_property(iface,
+                                        g_param_spec_object("workspace-manager",
+                                                            "workspace-manager",
+                                                            "workspace-manager",
+                                                            XFW_TYPE_WORKSPACE_MANAGER,
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     g_object_interface_install_property(iface,
                                         g_param_spec_pointer("workspaces",
@@ -117,9 +124,18 @@ xfw_workspace_group_get_monitors(XfwWorkspaceGroup *group) {
     return (*iface->get_monitors)(group);
 }
 
+XfwWorkspaceManager *
+xfw_workspace_group_get_workspace_manager(XfwWorkspaceGroup *group) {
+    XfwWorkspaceGroupIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE_GROUP(group), NULL);
+    iface = XFW_WORKSPACE_GROUP_GET_IFACE(group);
+    return (*iface->get_workspace_manager)(group);
+}
+
 void
 _xfw_workspace_group_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_SCREEN, "screen");
+    g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_WORKSPACE_MANAGER, "workspace-manager");
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_WORKSPACES, "workspaces");
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE, "active-workspace");
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_MONITORS, "monitors");

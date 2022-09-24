@@ -29,6 +29,9 @@
 
 #include "xfw-workspace.h"
 
+/* fwd decl */
+typedef struct _XfwWorkspaceManager XfwWorkspaceManager;
+
 G_BEGIN_DECLS
 
 #define XFW_TYPE_WORKSPACE_GROUP           (xfw_workspace_group_get_type())
@@ -61,12 +64,14 @@ struct _XfwWorkspaceGroupIface {
     GList *(*list_workspaces)(XfwWorkspaceGroup *group);
     XfwWorkspace *(*get_active_workspace)(XfwWorkspaceGroup *group);
     GList *(*get_monitors)(XfwWorkspaceGroup *group);
+    XfwWorkspaceManager *(*get_workspace_manager)(XfwWorkspaceGroup *group);
 };
 
 guint xfw_workspace_group_get_workspace_count(XfwWorkspaceGroup *group);
 GList *xfw_workspace_group_list_workspaces(XfwWorkspaceGroup *group);
 XfwWorkspace *xfw_workspace_group_get_active_workspace(XfwWorkspaceGroup *group);
 GList *xfw_workspace_group_get_monitors(XfwWorkspaceGroup *group);
+XfwWorkspaceManager * xfw_workspace_group_get_workspace_manager(XfwWorkspaceGroup *group);
 
 G_END_DECLS
 
