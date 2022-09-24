@@ -23,26 +23,12 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-manager.h"
-#include "xfw-workspace-manager-dummy.h"
-#ifdef ENABLE_WAYLAND
-#include "xfw-workspace-manager-wayland.h"
-#endif
-#ifdef ENABLE_X11
-#include "xfw-workspace-manager-x11.h"
-#endif
-#include "xfw-util.h"
-
-static GHashTable *managers = NULL;
 
 typedef struct _XfwWorkspaceManagerIface XfwWorkspaceManagerInterface;
 G_DEFINE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, G_TYPE_OBJECT)
 
 static void
 xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
-    if (managers == NULL) {
-        managers = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
-    }
-
     g_signal_new("workspace-group-created",
                  XFW_TYPE_WORKSPACE_MANAGER,
                  G_SIGNAL_RUN_LAST,
@@ -66,48 +52,6 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
                                                             "screen",
                                                             GDK_TYPE_SCREEN,
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
-}
-
-static void
-screen_destroyed(gpointer data, GObject *screen) {
-    g_hash_table_remove(managers, screen);
-}
-
-static void
-manager_destroyed(gpointer screen, GObject *manager) {
-    g_hash_table_remove(managers, screen);
-}
-
-XfwWorkspaceManager *
-xfw_workspace_manager_get(GdkScreen *screen) {
-    XfwWorkspaceManager *manager = g_hash_table_lookup(managers, screen);
-
-    if (manager == NULL) {
-#ifdef ENABLE_X11
-        if (xfw_windowing_get() == XFW_WINDOWING_X11) {
-            manager = _xfw_workspace_manager_x11_new(screen);
-        } else
-#endif
-#ifdef ENABLE_WAYLAND
-        if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND) {
-            manager = _xfw_workspace_manager_wayland_new(screen);
-            if (manager == NULL) {
-                manager = _xfw_workspace_manager_dummy_new(screen);
-            }
-        } else
-#endif
-        {
-            manager = _xfw_workspace_manager_dummy_new(screen);
-        }
-
-        g_hash_table_insert(managers, screen, manager);
-        g_object_weak_ref(G_OBJECT(screen), screen_destroyed, NULL);
-        g_object_weak_ref(G_OBJECT(manager), manager_destroyed, screen);
-    } else {
-        g_object_ref(manager);
-    }
-
-    return manager;
 }
 
 GList *
