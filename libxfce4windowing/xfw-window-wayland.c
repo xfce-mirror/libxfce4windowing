@@ -40,6 +40,7 @@ struct _XfwWindowWaylandPrivate {
     guint64 id;
     gchar *name;
     XfwWindowState state;
+    GdkRectangle geometry;  // unfortunately unsupported
 };
 
 static void xfw_window_wayland_window_init(XfwWindowIface *iface);
@@ -51,6 +52,7 @@ static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_wayland_get_state(XfwWindow *window);
+static GdkRectangle *xfw_window_wayland_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_wayland_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
 static void xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
@@ -193,6 +195,7 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->get_name = xfw_window_wayland_get_name;
     iface->get_icon = xfw_window_wayland_get_icon;
     iface->get_state = xfw_window_wayland_get_state;
+    iface->get_geometry = xfw_window_wayland_get_geometry;
     iface->get_screen = xfw_window_wayland_get_screen;
     iface->get_workspace = xfw_window_wayland_get_workspace;
     iface->activate = xfw_window_wayland_activate;
@@ -223,6 +226,12 @@ xfw_window_wayland_get_icon(XfwWindow *window) {
 static XfwWindowState
 xfw_window_wayland_get_state(XfwWindow *window) {
     return XFW_WINDOW_WAYLAND(window)->priv->state;
+}
+
+static GdkRectangle *
+xfw_window_wayland_get_geometry(XfwWindow *window) {
+    g_warning("xfw_window_get_geometry() unsupported on Wayland");
+    return &XFW_WINDOW_WAYLAND(window)->priv->geometry;
 }
 
 static XfwScreen *

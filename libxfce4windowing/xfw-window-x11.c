@@ -37,6 +37,7 @@ struct _XfwWindowX11Private {
     XfwScreen *screen;
     WnckWindow *wnck_window;
     XfwWindowState state;
+    GdkRectangle geometry;
 };
 
 static void xfw_window_x11_window_init(XfwWindowIface *iface);
@@ -48,6 +49,7 @@ static guint64 xfw_window_x11_get_id(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
+static GdkRectangle *xfw_window_x11_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_x11_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
 static void xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
@@ -62,6 +64,7 @@ static void xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GEr
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void state_changed(WnckWindow *wnck_window, WnckWindowState changed_mask, WnckWindowState new_state, XfwWindowX11 *window);
+static void geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 
 static XfwWindowState convert_state(WnckWindow *wnck_window, WnckWindowState wnck_state);
@@ -103,6 +106,7 @@ static void xfw_window_x11_constructed(GObject *obj) {
     g_signal_connect(window->priv->wnck_window, "name-changed", (GCallback)name_changed, window);
     g_signal_connect(window->priv->wnck_window, "icon-changed", (GCallback)icon_changed, window);
     g_signal_connect(window->priv->wnck_window, "state-changed", (GCallback)state_changed, window);
+    g_signal_connect(window->priv->wnck_window, "geometry-changed", (GCallback)geometry_changed, window);
     g_signal_connect(window->priv->wnck_window, "workspace-changed", (GCallback)workspace_changed, window);
 }
 
@@ -177,6 +181,7 @@ xfw_window_x11_dispose(GObject *obj) {
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, name_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, icon_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, state_changed, window);
+    g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 }
 
@@ -186,6 +191,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_name = xfw_window_x11_get_name;
     iface->get_icon = xfw_window_x11_get_icon;
     iface->get_state = xfw_window_x11_get_state;
+    iface->get_geometry = xfw_window_x11_get_geometry;
     iface->get_screen = xfw_window_x11_get_screen;
     iface->get_workspace = xfw_window_x11_get_workspace;
     iface->activate = xfw_window_x11_activate;
@@ -227,6 +233,11 @@ xfw_window_x11_get_icon(XfwWindow *window) {
 static XfwWindowState
 xfw_window_x11_get_state(XfwWindow *window) {
     return XFW_WINDOW_X11(window)->priv->state;
+}
+
+static GdkRectangle *
+xfw_window_x11_get_geometry(XfwWindow *window) {
+    return &XFW_WINDOW_X11(window)->priv->geometry;
 }
 
 static XfwScreen *
@@ -323,6 +334,14 @@ state_changed(WnckWindow *wnck_window, WnckWindowState wnck_changed_mask, WnckWi
 
     g_object_notify(G_OBJECT(window), "state");
     g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
+}
+
+static void
+geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
+    wnck_window_get_geometry(wnck_window,
+                             &window->priv->geometry.x, &window->priv->geometry.y,
+                             &window->priv->geometry.width, &window->priv->geometry.height);
+    g_signal_emit_by_name(window, "geometry-changed");
 }
 
 static void

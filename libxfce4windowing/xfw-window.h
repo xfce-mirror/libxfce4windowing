@@ -24,7 +24,7 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
 
 #include "xfw-workspace.h"
 
@@ -64,6 +64,7 @@ struct _XfwWindowIface {
     void (*name_changed)(XfwWindow *window);
     void (*icon_changed)(XfwWindow *window);
     void (*state_changed)(XfwWindow *window, XfwWindowState changed_mask, XfwWindowState new_state);
+    void (*geometry_changed)(XfwWindow *window);
     void (*workspace_changed)(XfwWindow* window, XfwWorkspace *old_workspace);
     void (*closed)(XfwWindow *window);
 
@@ -72,6 +73,7 @@ struct _XfwWindowIface {
     const gchar *(*get_name)(XfwWindow *window);
     GdkPixbuf *(*get_icon)(XfwWindow *window);
     XfwWindowState (*get_state)(XfwWindow *window);
+    GdkRectangle *(*get_geometry)(XfwWindow *window);
     XfwScreen *(*get_screen)(XfwWindow *window);
     XfwWorkspace *(*get_workspace)(XfwWindow *window);
 
@@ -92,6 +94,7 @@ guint64 xfw_window_get_id(XfwWindow *window);
 const gchar *xfw_window_get_name(XfwWindow *window);
 GdkPixbuf *xfw_window_get_icon(XfwWindow *window);
 XfwWindowState xfw_window_get_state(XfwWindow *window);
+GdkRectangle *xfw_window_get_geometry(XfwWindow *window);
 XfwScreen *xfw_window_get_screen(XfwWindow *window);
 XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);
 

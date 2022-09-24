@@ -65,6 +65,13 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  G_TYPE_NONE, 2,
                  XFW_TYPE_WINDOW_STATE,
                  XFW_TYPE_WINDOW_STATE);
+    g_signal_new("geometry-changed",
+                 XFW_TYPE_WINDOW,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWindowIface, geometry_changed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__VOID,
+                 G_TYPE_NONE, 0);
     g_signal_new("workspace-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -150,6 +157,14 @@ xfw_window_get_state(XfwWindow *window) {
     g_return_val_if_fail(XFW_IS_WINDOW(window), XFW_WINDOW_STATE_NONE);
     iface = XFW_WINDOW_GET_IFACE(window);
     return (*iface->get_state)(window);
+}
+
+GdkRectangle *
+xfw_window_get_geometry(XfwWindow *window) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->get_geometry)(window);
 }
 
 XfwScreen *
