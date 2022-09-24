@@ -30,8 +30,9 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_MANAGER_DUMMY (xfw_workspace_manager_dummy_get_type())
-#define XFW_WORKSPACE_MANAGER_DUMMY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_MANAGER_DUMMY, XfwWorkspaceManagerDummy))
+#define XFW_TYPE_WORKSPACE_MANAGER_DUMMY    (xfw_workspace_manager_dummy_get_type())
+#define XFW_WORKSPACE_MANAGER_DUMMY(obj)    (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_MANAGER_DUMMY, XfwWorkspaceManagerDummy))
+#define XFW_IS_WORKSPACE_MANAGER_DUMMY(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_MANAGER_DUMMY))
 
 typedef struct _XfwWorkspaceManagerDummy XfwWorkspaceManagerDummy;
 typedef struct _XfwWorkspaceManagerDummyPrivate XfwWorkspaceManagerDummyPrivate;

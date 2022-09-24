@@ -259,3 +259,13 @@ _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *windo
         g_signal_emit_by_name(screen, "active-window-changed", window);
     }
 }
+XfwWorkspace *
+_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window) {
+    if (XFW_IS_WORKSPACE_MANAGER_DUMMY(screen->priv->workspace_manager)) {
+        XfwWorkspaceGroup *group = XFW_WORKSPACE_GROUP(xfw_workspace_manager_list_workspace_groups(screen->priv->workspace_manager)->data);
+        return XFW_WORKSPACE(xfw_workspace_group_list_workspaces(group)->data);
+    } else {
+        g_message("Window<->Workspace association is not available on Wayland");
+        return NULL;
+    }
+}

@@ -69,7 +69,7 @@ xfw_workspace_manager_dummy_init(XfwWorkspaceManagerDummy *manager) {
 static void
 xfw_workspace_manager_dummy_constructed(GObject *obj) {
     XfwWorkspaceManagerDummy *manager = XFW_WORKSPACE_MANAGER_DUMMY(obj);
-    XfwWorkspaceGroup *group;
+    XfwWorkspaceGroupDummy *group;
 
     manager->priv = xfw_workspace_manager_dummy_get_instance_private(manager);
 
@@ -80,6 +80,8 @@ xfw_workspace_manager_dummy_constructed(GObject *obj) {
     manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY,
                                                                  "group", group,
                                                                  NULL));
+    _xfw_workspace_group_dummy_set_workspaces(group, manager->priv->workspaces);
+    _xfw_workspace_group_dummy_set_active_workspace(group, XFW_WORKSPACE(manager->priv->workspaces->data));
 }
 
 static void

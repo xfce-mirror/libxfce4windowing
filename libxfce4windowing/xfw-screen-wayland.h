@@ -27,6 +27,7 @@
 #include <glib-object.h>
 
 #include "xfw-window.h"
+#include "xfw-workspace.h"
 
 G_BEGIN_DECLS
 
@@ -51,5 +52,6 @@ struct _XfwScreenWaylandClass {
 GType xfw_screen_wayland_get_type(void) G_GNUC_CONST;
 
 void _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *window);
+XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window);
 
 #endif  /* __XFW_SCREEN_WAYLAND_H__ */

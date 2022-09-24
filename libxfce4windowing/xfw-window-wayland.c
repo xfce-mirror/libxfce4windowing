@@ -241,8 +241,7 @@ xfw_window_wayland_get_screen(XfwWindow *window) {
 
 static XfwWorkspace *
 xfw_window_wayland_get_workspace(XfwWindow *window) {
-    g_message("Window<->Workspace association is not available on Wayland");
-    return NULL;
+    return _xfw_screen_wayland_get_window_workspace(XFW_SCREEN_WAYLAND(XFW_WINDOW_WAYLAND(window)->priv->screen), window);
 }
 
 static void
