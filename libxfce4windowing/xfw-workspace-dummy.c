@@ -51,6 +51,7 @@ xfw_workspace_dummy_class_init(XfwWorkspaceDummyClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
     gklass->set_property = xfw_workspace_dummy_set_property;
     gklass->get_property = xfw_workspace_dummy_get_property;
+    _xfw_workspace_install_properties(gklass);
 }
 
 static void
