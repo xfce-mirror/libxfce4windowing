@@ -100,7 +100,7 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
 
     g_object_class_install_property(gklass,
                                     PROP_HANDLE,
-                                    g_param_spec_pointer("hanndle",
+                                    g_param_spec_pointer("handle",
                                                          "handle",
                                                          "handle",
                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
