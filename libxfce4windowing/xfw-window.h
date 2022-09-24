@@ -65,7 +65,7 @@ struct _XfwWindowIface {
     void (*icon_changed)(XfwWindow *window);
     void (*state_changed)(XfwWindow *window, XfwWindowState changed_mask, XfwWindowState new_state);
     void (*geometry_changed)(XfwWindow *window);
-    void (*workspace_changed)(XfwWindow* window, XfwWorkspace *old_workspace);
+    void (*workspace_changed)(XfwWindow *window);
     void (*closed)(XfwWindow *window);
 
     /* Virtual Table */

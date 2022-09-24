@@ -77,9 +77,8 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  G_SIGNAL_RUN_LAST,
                  G_STRUCT_OFFSET(XfwWindowIface, state_changed),
                  NULL, NULL,
-                 g_cclosure_marshal_VOID__OBJECT,
-                 G_TYPE_NONE, 1,
-                 XFW_TYPE_WORKSPACE);
+                 g_cclosure_marshal_VOID__VOID,
+                 G_TYPE_NONE, 0);
     g_signal_new("closed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
