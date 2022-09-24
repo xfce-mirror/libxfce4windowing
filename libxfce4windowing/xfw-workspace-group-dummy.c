@@ -28,7 +28,14 @@
 #include "xfw-workspace-group.h"
 #include "xfw-workspace.h"
 
+enum {
+    PROP0,
+    PROP_CREATE_WORKSPACE_FUNC,
+};
+
 struct _XfwWorkspaceGroupDummyPrivate {
+    XfwCreateWorkspaceFunc create_workspace_func;
+    gboolean allows_create_workspace;
     GdkScreen *screen;
     XfwWorkspaceManager *workspace_manager;
     GList *workspaces;
@@ -41,11 +48,13 @@ static void xfw_workspace_group_dummy_constructed(GObject *obj);
 static void xfw_workspace_group_dummy_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_dummy_dispose(GObject *obj);
+static XfwWorkspaceGroupCapabilities xfw_workspace_group_dummy_get_capabilities(XfwWorkspaceGroup *group);
 static guint xfw_workspace_group_dummy_get_workspace_count(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_dummy_list_workspaces(XfwWorkspaceGroup *group);
 static XfwWorkspace *xfw_workspace_group_dummy_get_active_workspace(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_dummy_get_monitors(XfwWorkspaceGroup *group);
 static XfwWorkspaceManager *xfw_workspace_group_dummy_get_workspace_manager(XfwWorkspaceGroup *group);
+static gboolean xfw_workspace_group_dummy_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 
 static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
 static void monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
@@ -64,6 +73,12 @@ xfw_workspace_group_dummy_class_init(XfwWorkspaceGroupDummyClass *klass) {
     gklass->get_property = xfw_workspace_group_dummy_get_property;
     gklass->dispose = xfw_workspace_group_dummy_dispose;
 
+    g_object_class_install_property(gklass,
+                                    PROP_CREATE_WORKSPACE_FUNC,
+                                    g_param_spec_pointer("create-workspace-func",
+                                                         "create-workspace-func",
+                                                         "create-workspace-func",
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     _xfw_workspace_group_install_properties(gklass);
 }
 
@@ -90,6 +105,10 @@ xfw_workspace_group_dummy_set_property(GObject *obj, guint prop_id, const GValue
     XfwWorkspaceGroupDummy *group = XFW_WORKSPACE_GROUP_DUMMY(obj);
 
     switch (prop_id) {
+        case PROP_CREATE_WORKSPACE_FUNC:
+            group->priv->create_workspace_func = g_value_get_pointer(value);
+            break;
+
         case WORKSPACE_GROUP_PROP_SCREEN:
             group->priv->screen = g_value_get_object(value);
             break;
@@ -114,6 +133,10 @@ xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *valu
     XfwWorkspaceGroupDummy *group = XFW_WORKSPACE_GROUP_DUMMY(obj);
 
     switch (prop_id) {
+        case PROP_CREATE_WORKSPACE_FUNC:
+            g_value_set_pointer(value, group->priv->create_workspace_func);
+            break;
+
         case WORKSPACE_GROUP_PROP_SCREEN:
             g_value_set_object(value, group->priv->screen);
             break;
@@ -155,11 +178,20 @@ xfw_workspace_group_dummy_dispose(GObject *obj) {
 
 static void
 xfw_workspace_group_dummy_workspace_group_init(XfwWorkspaceGroupIface *iface) {
+    iface->get_capabilities = xfw_workspace_group_dummy_get_capabilities;
     iface->get_workspace_count = xfw_workspace_group_dummy_get_workspace_count;
     iface->list_workspaces = xfw_workspace_group_dummy_list_workspaces;
     iface->get_active_workspace = xfw_workspace_group_dummy_get_active_workspace;
     iface->get_monitors = xfw_workspace_group_dummy_get_monitors;
     iface->get_workspace_manager = xfw_workspace_group_dummy_get_workspace_manager;
+    iface->create_workspace = xfw_workspace_group_dummy_create_workspace;
+}
+
+static XfwWorkspaceGroupCapabilities
+xfw_workspace_group_dummy_get_capabilities(XfwWorkspaceGroup *group) {
+    return XFW_WORKSPACE_GROUP_DUMMY(group)->priv->create_workspace_func != NULL
+        ? XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE
+        : XFW_WORKSPACE_GROUP_CAPABILITIES_NONE;
 }
 
 static guint
@@ -187,6 +219,19 @@ xfw_workspace_group_dummy_get_workspace_manager(XfwWorkspaceGroup *group) {
     return XFW_WORKSPACE_GROUP_DUMMY(group)->priv->workspace_manager;
 }
 
+static gboolean
+xfw_workspace_group_dummy_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error) {
+    XfwWorkspaceGroupDummy *dgroup = XFW_WORKSPACE_GROUP_DUMMY(group);
+    if (dgroup->priv->create_workspace_func != NULL) {
+        return (*dgroup->priv->create_workspace_func)(group, name, error);
+    } else {
+        if (error) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace group does not support creating new workspaces");
+        }
+        return FALSE;
+    }
+}
+
 static void
 monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group) {
     int n_monitors = gdk_display_get_n_monitors(display);
@@ -203,7 +248,6 @@ monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy
     group->priv->monitors = g_list_remove(group->priv->monitors, monitor);
     g_signal_emit_by_name(group, "monitors-changed");
 }
-
 
 void
 _xfw_workspace_group_dummy_set_workspaces(XfwWorkspaceGroupDummy *group, GList *workspaces) {

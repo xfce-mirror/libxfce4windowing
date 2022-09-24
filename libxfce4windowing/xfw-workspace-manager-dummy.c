@@ -75,6 +75,7 @@ xfw_workspace_manager_dummy_constructed(GObject *obj) {
 
     group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
                          "screen", manager->priv->screen,
+                         "create-workspace-func", NULL,
                          NULL);
     manager->priv->groups = g_list_append(NULL, group);
     manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY,

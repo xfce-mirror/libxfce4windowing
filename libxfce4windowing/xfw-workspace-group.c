@@ -22,14 +22,28 @@
 #include <gdk/gdk.h>
 
 #include "libxfce4windowing-private.h"
+#include "xfw-marshal.h"
 #include "xfw-workspace-group.h"
 #include "xfw-workspace-manager.h"
 
 typedef struct _XfwWorkspaceGroupIface XfwWorkspaceGroupInterface;
 G_DEFINE_INTERFACE(XfwWorkspaceGroup, xfw_workspace_group, G_TYPE_OBJECT)
 
+G_DEFINE_FLAGS_TYPE(XfwWorkspaceGroupCapabilities, xfw_workspace_group_capabilities,
+                    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_GROUP_CAPABILITIES_NONE, "none"),
+                    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE, "create-workspace"));
+
 static void
 xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
+    g_signal_new("capabilities-changed",
+                 XFW_TYPE_WORKSPACE_GROUP,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, capabilities_changed),
+                 NULL, NULL,
+                 xfw_marshal_VOID__FLAGS_FLAGS,
+                 G_TYPE_NONE, 2,
+                 XFW_TYPE_WORKSPACE_GROUP_CAPABILITIES,
+                 XFW_TYPE_WORKSPACE_GROUP_CAPABILITIES);
     g_signal_new("workspace-created",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
@@ -92,6 +106,14 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                              G_PARAM_READABLE));
 }
 
+XfwWorkspaceGroupCapabilities
+xfw_workspace_group_get_capabilities(XfwWorkspaceGroup *group) {
+    XfwWorkspaceGroupIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE_GROUP(group), XFW_WORKSPACE_GROUP_CAPABILITIES_NONE);
+    iface = XFW_WORKSPACE_GROUP_GET_IFACE(group);
+    return (*iface->get_capabilities)(group);
+}
+
 guint
 xfw_workspace_group_get_workspace_count(XfwWorkspaceGroup *group) {
     XfwWorkspaceGroupIface *iface;
@@ -130,6 +152,14 @@ xfw_workspace_group_get_workspace_manager(XfwWorkspaceGroup *group) {
     g_return_val_if_fail(XFW_IS_WORKSPACE_GROUP(group), NULL);
     iface = XFW_WORKSPACE_GROUP_GET_IFACE(group);
     return (*iface->get_workspace_manager)(group);
+}
+
+gboolean
+xfw_workspace_group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error) {
+    XfwWorkspaceGroupIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE_GROUP(group), FALSE);
+    iface = XFW_WORKSPACE_GROUP_GET_IFACE(group);
+    return (*iface->create_workspace)(group, name, error);
 }
 
 void

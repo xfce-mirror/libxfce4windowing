@@ -44,6 +44,7 @@ struct _XfwWorkspaceGroupWaylandPrivate {
     GdkScreen *screen;
     XfwWorkspaceManager *workspace_manager;
     struct ext_workspace_group_handle_v1 *handle;
+    XfwWorkspaceGroupCapabilities capabilities;
     GList *workspaces;
     XfwWorkspace *active_workspace;
     GHashTable *wl_workspaces;
@@ -57,11 +58,13 @@ static void xfw_workspace_group_wayland_constructed(GObject *obj);
 static void xfw_workspace_group_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_wayland_dispose(GObject *obj);
+static XfwWorkspaceGroupCapabilities xfw_workspace_group_wayland_get_capabilities(XfwWorkspaceGroup *group);
 static guint xfw_workspace_group_wayland_get_workspace_count(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_wayland_list_workspaces(XfwWorkspaceGroup *group);
 static XfwWorkspace *xfw_workspace_group_wayland_get_active_workspace(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_wayland_get_monitors(XfwWorkspaceGroup *group);
 static XfwWorkspaceManager * xfw_workspace_group_wayland_get_workspace_manager(XfwWorkspaceGroup *group);
+static gboolean xfw_workspace_group_wayland_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 
 static void group_capabilities(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_array *capabilities);
 static void group_output_enter(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_output *output);
@@ -189,11 +192,18 @@ xfw_workspace_group_wayland_dispose(GObject *obj) {
 
 static void
 xfw_workspace_group_wayland_workspace_group_init(XfwWorkspaceGroupIface *iface) {
+    iface->get_capabilities = xfw_workspace_group_wayland_get_capabilities;
     iface->get_workspace_count = xfw_workspace_group_wayland_get_workspace_count;
     iface->list_workspaces = xfw_workspace_group_wayland_list_workspaces;
     iface->get_active_workspace = xfw_workspace_group_wayland_get_active_workspace;
     iface->get_monitors = xfw_workspace_group_wayland_get_monitors;
     iface->get_workspace_manager = xfw_workspace_group_wayland_get_workspace_manager;
+    iface->create_workspace = xfw_workspace_group_wayland_create_workspace;
+}
+
+static XfwWorkspaceGroupCapabilities
+xfw_workspace_group_wayland_get_capabilities(XfwWorkspaceGroup *group) {
+    return XFW_WORKSPACE_GROUP_WAYLAND(group)->priv->capabilities;
 }
 
 static guint
@@ -221,9 +231,40 @@ xfw_workspace_group_wayland_get_workspace_manager(XfwWorkspaceGroup *group) {
     return XFW_WORKSPACE_GROUP_WAYLAND(group)->priv->workspace_manager;
 }
 
-static void
-group_capabilities(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_array *capabilities) {
+static gboolean
+xfw_workspace_group_wayland_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error) {
+    XfwWorkspaceGroupWayland *wgroup = XFW_WORKSPACE_GROUP_WAYLAND(group);
+    if ((wgroup->priv->capabilities & XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE) != 0) {
+        ext_workspace_group_handle_v1_create_workspace(wgroup->priv->handle, name);
+        return TRUE;
+    } else {
+        if (error) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace group does not support creating new workspaces");
+        }
+        return FALSE;
+    }
+}
 
+static void
+group_capabilities(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct wl_array *wl_capabilities) {
+    XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
+    XfwWorkspaceGroupCapabilities old_capabilities = group->priv->capabilities;
+    XfwWorkspaceGroupCapabilities changed_mask;
+    XfwWorkspaceGroupCapabilities new_capabilities = XFW_WORKSPACE_GROUP_CAPABILITIES_NONE;
+    enum ext_workspace_group_handle_v1_ext_workspace_group_capabilities_v1 *item;
+
+    wl_array_for_each(item, wl_capabilities) {
+        if (*item == EXT_WORKSPACE_GROUP_HANDLE_V1_EXT_WORKSPACE_GROUP_CAPABILITIES_V1_CREATE_WORKSPACE) {
+            new_capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE;
+        }
+    }
+
+    group->priv->capabilities = new_capabilities;
+    changed_mask = old_capabilities ^ new_capabilities;
+    if (changed_mask != 0) {
+        g_object_notify(G_OBJECT(group), "capabilities");
+        g_signal_emit_by_name(group, "capabilities-changed", changed_mask, new_capabilities);
+    }
 }
 
 static void

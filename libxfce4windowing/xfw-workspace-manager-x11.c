@@ -34,6 +34,7 @@ struct _XfwWorkspaceManagerX11Private {
     GList *groups;
     GList *workspaces;
     GHashTable *wnck_workspaces;
+    GHashTable *pending_workspace_names;
 };
 
 static void xfw_workspace_manager_x11_manager_init(XfwWorkspaceManagerIface *iface);
@@ -46,6 +47,8 @@ static GList * xfw_workspace_manager_x11_list_workspace_groups(XfwWorkspaceManag
 static void active_workspace_changed(WnckScreen *screen, WnckWorkspace *workspace, XfwWorkspaceManagerX11 *manager);
 static void workspace_created(WnckScreen *screen, WnckWorkspace *workspace, XfwWorkspaceManagerX11 *manager);
 static void workspace_destroyed(WnckScreen *screen, WnckWorkspace *workspace, XfwWorkspaceManagerX11 *manager);
+
+static gboolean group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerX11, xfw_workspace_manager_x11, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceManagerX11)
@@ -89,6 +92,7 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
 
     group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
                          "screen", priv->screen,
+                         "create-workspace-func", group_create_workspace,
                          NULL);
     priv->groups = g_list_append(NULL, group);
 
@@ -107,6 +111,8 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
         g_hash_table_insert(priv->wnck_workspaces, g_object_ref(l->data), workspace);
     }
     _xfw_workspace_group_dummy_set_workspaces(group, priv->workspaces);
+
+    manager->priv->pending_workspace_names = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
 }
 
 static void
@@ -148,6 +154,7 @@ xfw_workspace_manager_x11_dispose(GObject *obj) {
     g_list_free(priv->workspaces);
     g_hash_table_destroy(priv->wnck_workspaces);
     g_list_free_full(priv->groups, g_object_unref);
+    g_hash_table_destroy(priv->pending_workspace_names);
 }
 
 static GList *
@@ -180,15 +187,16 @@ workspace_created(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorkspac
                                                                 "group", manager->priv->groups->data,
                                                                 "wnck-workspace", wnck_workspace,
                                                                 NULL));
-    int n_workspaces = wnck_screen_get_workspace_count(screen);
+    gint workspace_num = wnck_workspace_get_number(wnck_workspace);
+    gchar *pending_name = g_hash_table_lookup(manager->priv->pending_workspace_names, GUINT_TO_POINTER(workspace_num));
+
+    if (pending_name != NULL) {
+        wnck_workspace_change_name(wnck_workspace, pending_name);
+        g_hash_table_remove(manager->priv->pending_workspace_names, GUINT_TO_POINTER(workspace_num));
+    }
 
     g_hash_table_insert(manager->priv->wnck_workspaces, wnck_workspace, workspace);
-    for (int i = 0; i < n_workspaces; ++i) {
-        if (wnck_screen_get_workspace(screen, i) == wnck_workspace) {
-            manager->priv->workspaces = g_list_insert(manager->priv->workspaces, workspace, i);
-            break;
-        }
-    }
+    manager->priv->workspaces = g_list_insert(manager->priv->workspaces, workspace, workspace_num);
 
     _xfw_workspace_group_dummy_set_workspaces(XFW_WORKSPACE_GROUP_DUMMY(manager->priv->groups->data), manager->priv->workspaces);
     g_signal_emit_by_name(manager->priv->groups->data, "workspace-created", workspace);
@@ -214,6 +222,18 @@ workspace_destroyed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorksp
 
         g_object_unref(workspace);
     }
+}
+
+static gboolean
+group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error) {
+    XfwWorkspaceManagerX11 *manager = XFW_WORKSPACE_MANAGER_X11(xfw_workspace_group_get_workspace_manager(group));
+    gint count = wnck_screen_get_workspace_count(manager->priv->wnck_screen);
+
+    if (name != NULL) {
+        g_hash_table_insert(manager->priv->pending_workspace_names, GUINT_TO_POINTER(count + 1), g_strdup(name));
+    }
+    wnck_screen_change_workspace_count(manager->priv->wnck_screen, count + 1);
+    return TRUE;
 }
 
 XfwWorkspaceManager *
