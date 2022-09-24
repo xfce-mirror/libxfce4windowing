@@ -124,9 +124,6 @@ xfw_workspace_group_wayland_set_property(GObject *obj, guint prop_id, const GVal
             break;
 
         case WORKSPACE_GROUP_PROP_WORKSPACES:
-            g_warning("XfwWorkspaceGroupWayland should never have its 'workspaces' property set externally");
-            break;
-
         case WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE:
         case WORKSPACE_GROUP_PROP_MONITORS:
             break;

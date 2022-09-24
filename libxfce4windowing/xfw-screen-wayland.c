@@ -107,7 +107,7 @@ static void xfw_screen_wayland_constructed(GObject *obj) {
         screen->priv->wl_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
         zwlr_foreign_toplevel_manager_v1_add_listener(screen->priv->toplevel_manager, &toplevel_manager_listener, screen);
     } else {
-        g_warning("Your compositor does not support wlr_foreign_toplevel_manager_v1 protocol");
+        g_message("Your compositor does not support wlr_foreign_toplevel_manager_v1 protocol");
         wl_registry_destroy(screen->priv->wl_registry);
         screen->priv->wl_registry = NULL;
     }
@@ -195,7 +195,7 @@ static GList *xfw_screen_wayland_get_windows(XfwScreen *screen) {
 }
 
 static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen) {
-    g_warning("Wayland does not support discovering window stacking; windows returned are unordered");
+    g_message("Wayland does not support discovering window stacking; windows returned are unordered");
     return XFW_SCREEN_WAYLAND(screen)->priv->windows_stacked;
 }
 

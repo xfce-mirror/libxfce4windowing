@@ -230,7 +230,7 @@ xfw_window_wayland_get_state(XfwWindow *window) {
 
 static GdkRectangle *
 xfw_window_wayland_get_geometry(XfwWindow *window) {
-    g_warning("xfw_window_get_geometry() unsupported on Wayland");
+    g_message("xfw_window_get_geometry() unsupported on Wayland");
     return &XFW_WINDOW_WAYLAND(window)->priv->geometry;
 }
 
@@ -241,7 +241,7 @@ xfw_window_wayland_get_screen(XfwWindow *window) {
 
 static XfwWorkspace *
 xfw_window_wayland_get_workspace(XfwWindow *window) {
-    g_warning("Window<->Workspace association is not available on Wayland");
+    g_message("Window<->Workspace association is not available on Wayland");
     return NULL;
 }
 

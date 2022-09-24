@@ -246,7 +246,7 @@ _xfw_workspace_manager_wayland_new(GdkScreen *screen) {
                                                   "screen", screen,
                                                   NULL));
     } else {
-        g_warning("Your compositor does not support the ext_workspace_manager_v1 protocol");
+        g_message("Your compositor does not support the ext_workspace_manager_v1 protocol");
         wl_registry_destroy(wl_registry);
         return NULL;
     }
