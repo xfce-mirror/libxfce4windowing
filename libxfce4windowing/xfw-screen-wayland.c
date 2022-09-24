@@ -30,6 +30,7 @@
 #include "xfw-screen-wayland.h"
 #include "xfw-screen.h"
 #include "xfw-window-wayland.h"
+#include "xfw-workspace-manager-dummy.h"
 #include "xfw-workspace-manager-wayland.h"
 
 struct _XfwScreenWaylandPrivate {
@@ -112,6 +113,9 @@ static void xfw_screen_wayland_constructed(GObject *obj) {
     }
 
     screen->priv->workspace_manager = _xfw_workspace_manager_wayland_new(screen->priv->gdk_screen);
+    if (screen->priv->workspace_manager == NULL) {
+        screen->priv->workspace_manager = _xfw_workspace_manager_dummy_new(screen->priv->gdk_screen);
+    }
 }
 
 static void
