@@ -7,7 +7,7 @@ dnl
 
 dnl version info
 m4_define([libxfce4windowing_verinfo], [0:0:0])
-m4_define([libxfce4windowing_version_api], [2])
+m4_define([libxfce4windowing_version_api], [0])
 m4_define([libxfce4windowing_version_major], [4])
 m4_define([libxfce4windowing_version_minor], [17])
 m4_define([libxfce4windowing_version_micro], [7])
@@ -25,6 +25,7 @@ m4_define([intltool_minimum_version], [0.31])
 dnl init autoconf
 AC_INIT([libxfce4windowing], [libxfce4windowing_version], [https://gitlab.xfce.org/kelnos/libxfce4windowing])
 AC_PREREQ([2.69])
+AC_CONFIG_MACRO_DIRS([m4])
 
 dnl init automake
 AM_INIT_AUTOMAKE([1.11 dist-bzip2 tar-ustar no-dist-gzip foreign])
@@ -144,7 +145,7 @@ AM_CONDITIONAL([HAVE_GNUC_VISIBILITY], [test "x$have_gnuc_visibility" = "xyes"])
 AC_CONFIG_FILES([
 Makefile
 libxfce4windowing/Makefile
-libxfce4windowing/libxfce4windowing.pc
+libxfce4windowing/libxfce4windowing-0.pc
 libxfce4windowing/protocols/Makefile
 po/Makefile.in
 ])
