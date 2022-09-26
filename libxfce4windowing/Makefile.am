@@ -104,18 +104,20 @@ pkgconfig_DATA = \
 	libxfce4windowing.pc
 
 EXTRA_DIST = \
+	xfw-marshal.c \
+	xfw-marshal.h \
 	xfw-marshal.list
 
 if MAINTAINER_MODE
 
-xfw-marshal.h: xfw-marshal.list Makefile
+xfw-marshal.h: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 	$(AM_V_GEN) glib-genmarshal --prefix=xfw_marshal --internal --header $< > $@
 
-xfw-marshal.c: xfw-marshal.list Makefile
+xfw-marshal.c: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 	$(AM_V_GEN) echo '#include "xfw-marshal.h"' > $@
 	$(AM_V_GET) glib-genmarshal --prefix=xfw_marshal --body $< >> $@
 
-DISTCLEANFILES = \
+CLEANFILES = \
 	$(libxfce4windowing_built_sources)
 
 BUILT_SOURCES = \
