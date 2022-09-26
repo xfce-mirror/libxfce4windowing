@@ -38,7 +38,7 @@ static void xfw_workspace_manager_dummy_manager_init(XfwWorkspaceManagerIface *i
 static void xfw_workspace_manager_dummy_constructed(GObject *obj);
 static void xfw_workspace_manager_dummy_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_workspace_manager_dummy_dispose(GObject *obj);
+static void xfw_workspace_manager_dummy_finalize(GObject *obj);
 static GList *xfw_workspace_manager_dummy_list_workspace_groups(XfwWorkspaceManager *manager);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerDummy, xfw_workspace_manager_dummy, G_TYPE_OBJECT,
@@ -52,7 +52,7 @@ xfw_workspace_manager_dummy_class_init(XfwWorkspaceManagerDummyClass *klass) {
     gklass->constructed = xfw_workspace_manager_dummy_constructed;
     gklass->set_property = xfw_workspace_manager_dummy_set_property;
     gklass->get_property = xfw_workspace_manager_dummy_get_property;
-    gklass->dispose = xfw_workspace_manager_dummy_dispose;
+    gklass->finalize = xfw_workspace_manager_dummy_finalize;
     _xfw_workspace_manager_install_properties(gklass);
 }
 
@@ -116,9 +116,13 @@ xfw_workspace_manager_dummy_get_property(GObject *obj, guint prop_id, GValue *va
 }
 
 static void
-xfw_workspace_manager_dummy_dispose(GObject *obj) {
-    g_list_free_full(XFW_WORKSPACE_MANAGER_DUMMY(obj)->priv->groups, g_object_unref);
-    g_list_free_full(XFW_WORKSPACE_MANAGER_DUMMY(obj)->priv->workspaces, g_object_unref);
+xfw_workspace_manager_dummy_finalize(GObject *obj) {
+    XfwWorkspaceManagerDummy *manager = XFW_WORKSPACE_MANAGER_DUMMY(obj);
+
+    g_list_free_full(manager->priv->groups, g_object_unref);
+    g_list_free_full(manager->priv->workspaces, g_object_unref);
+
+    G_OBJECT_CLASS(xfw_workspace_manager_dummy_parent_class)->finalize(obj);
 }
 
 static GList *

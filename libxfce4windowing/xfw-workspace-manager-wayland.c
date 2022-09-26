@@ -50,7 +50,7 @@ static void xfw_workspace_manager_wayland_manager_init(XfwWorkspaceManagerIface 
 static void xfw_workspace_manager_wayland_constructed(GObject *obj);
 static void xfw_workspace_manager_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_workspace_manager_wayland_dispose(GObject *obj);
+static void xfw_workspace_manager_wayland_finalize(GObject *obj);
 static GList *xfw_workspace_manager_wayland_list_workspace_groups(XfwWorkspaceManager *manager);
 
 static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
@@ -83,7 +83,7 @@ xfw_workspace_manager_wayland_class_init(XfwWorkspaceManagerWaylandClass *klass)
     gklass->constructed = xfw_workspace_manager_wayland_constructed;
     gklass->set_property = xfw_workspace_manager_wayland_set_property;
     gklass->get_property = xfw_workspace_manager_wayland_get_property;
-    gklass->dispose = xfw_workspace_manager_wayland_dispose;
+    gklass->finalize = xfw_workspace_manager_wayland_finalize;
 
     g_object_class_install_property(gklass,
                                     PROP_WL_REGISTRY,
@@ -163,7 +163,7 @@ xfw_workspace_manager_wayland_get_property(GObject *obj, guint prop_id, GValue *
 }
 
 static void
-xfw_workspace_manager_wayland_dispose(GObject *obj) {
+xfw_workspace_manager_wayland_finalize(GObject *obj) {
     XfwWorkspaceManagerWayland *manager = XFW_WORKSPACE_MANAGER_WAYLAND(obj);
     XfwWorkspaceManagerWaylandPrivate *priv = manager->priv;
 
@@ -171,6 +171,8 @@ xfw_workspace_manager_wayland_dispose(GObject *obj) {
 
     ext_workspace_manager_v1_destroy(priv->handle);
     wl_registry_destroy(priv->wl_registry);
+
+    G_OBJECT_CLASS(xfw_workspace_manager_wayland_parent_class)->finalize(obj);
 }
 
 static GList *

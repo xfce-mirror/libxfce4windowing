@@ -45,7 +45,7 @@ static void xfw_window_x11_window_init(XfwWindowIface *iface);
 static void xfw_window_x11_constructed(GObject *obj);
 static void xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_window_x11_dispose(GObject *obj);
+static void xfw_window_x11_finalize(GObject *obj);
 static guint64 xfw_window_x11_get_id(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window);
@@ -85,7 +85,7 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     gklass->constructed = xfw_window_x11_constructed;
     gklass->set_property = xfw_window_x11_set_property;
     gklass->get_property = xfw_window_x11_get_property;
-    gklass->dispose = xfw_window_x11_dispose;
+    gklass->finalize = xfw_window_x11_finalize;
 
     g_object_class_install_property(gklass,
                                     PROP_WNCK_WINDOW,
@@ -187,14 +187,17 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
 }
 
 static void
-xfw_window_x11_dispose(GObject *obj) {
+xfw_window_x11_finalize(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
+
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, name_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, icon_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, state_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, actions_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
+
+    G_OBJECT_CLASS(xfw_window_x11_parent_class)->finalize(obj);
 }
 
 static void

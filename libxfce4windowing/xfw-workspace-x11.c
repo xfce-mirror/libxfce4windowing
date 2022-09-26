@@ -40,7 +40,7 @@ static void xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface);
 static void xfw_workspace_x11_constructed(GObject *obj);
 static void xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_workspace_x11_dispose(GObject *obj);
+static void xfw_workspace_x11_finalize(GObject *obj);
 static const gchar *xfw_workspace_x11_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_x11_get_name(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_x11_get_state(XfwWorkspace *workspace);
@@ -63,7 +63,7 @@ xfw_workspace_x11_class_init(XfwWorkspaceX11Class *klass) {
     gklass->constructed = xfw_workspace_x11_constructed;
     gklass->set_property = xfw_workspace_x11_set_property;
     gklass->get_property = xfw_workspace_x11_get_property;
-    gklass->dispose = xfw_workspace_x11_dispose;
+    gklass->finalize = xfw_workspace_x11_finalize;
 
     g_object_class_install_property(gklass,
                                     PROP_WNCK_WORKSPACE,
@@ -146,9 +146,12 @@ xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GPara
 }
 
 static void
-xfw_workspace_x11_dispose(GObject *obj) {
+xfw_workspace_x11_finalize(GObject *obj) {
     XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(obj);
+
     g_signal_handlers_disconnect_by_func(workspace->priv->wnck_workspace, name_changed, workspace);
+
+    G_OBJECT_CLASS(xfw_workspace_x11_parent_class)->finalize(obj);
 }
 
 static void

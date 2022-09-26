@@ -44,7 +44,7 @@ static void xfw_screen_x11_screen_init(XfwScreenIface *iface);
 static void xfw_screen_x11_constructed(GObject *obj);
 static void xfw_screen_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_screen_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_screen_x11_dispose(GObject *obj);
+static void xfw_screen_x11_finalize(GObject *obj);
 static gint xfw_screen_x11_get_number(XfwScreen *screen);
 static XfwWorkspaceManager *xfw_screen_x11_get_workspace_manager(XfwScreen *screen);
 static GList *xfw_screen_x11_get_windows(XfwScreen *screen);
@@ -68,7 +68,7 @@ xfw_screen_x11_class_init(XfwScreenX11Class *klass) {
     gklass->constructed = xfw_screen_x11_constructed;
     gklass->set_property = xfw_screen_x11_set_property;
     gklass->get_property = xfw_screen_x11_get_property;
-    gklass->dispose = xfw_screen_x11_dispose;
+    gklass->finalize = xfw_screen_x11_finalize;
 
     _xfw_screen_install_properties(gklass);
 }
@@ -144,14 +144,18 @@ xfw_screen_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
 }
 
 static void
-xfw_screen_x11_dispose(GObject *obj) {
+xfw_screen_x11_finalize(GObject *obj) {
     XfwScreenX11 *screen = XFW_SCREEN_X11(obj);
+
     g_object_unref(screen->priv->workspace_manager);
+
     g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, window_opened, screen);
     g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, window_closed, screen);
     g_list_free(screen->priv->windows);
     g_list_free(screen->priv->windows_stacked);
     g_hash_table_destroy(screen->priv->wnck_windows);
+
+    G_OBJECT_CLASS(xfw_screen_x11_parent_class)->finalize(obj);
 }
 
 static void

@@ -54,7 +54,7 @@ static void xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface);
 static void xfw_workspace_wayland_constructed(GObject *obj);
 static void xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_workspace_wayland_dispose(GObject *obj);
+static void xfw_workspace_wayland_finalize(GObject *obj);
 static const gchar *xfw_workspace_wayland_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_wayland_get_name(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_wayland_get_state(XfwWorkspace *workspace);
@@ -89,7 +89,7 @@ xfw_workspace_wayland_class_init(XfwWorkspaceWaylandClass *klass) {
     gklass->constructed = xfw_workspace_wayland_constructed;
     gklass->set_property = xfw_workspace_wayland_set_property;
     gklass->get_property = xfw_workspace_wayland_get_property;
-    gklass->dispose = xfw_workspace_wayland_dispose;
+    gklass->finalize = xfw_workspace_wayland_finalize;
 
     workspace_signals[SIGNAL_DESTROYED] = g_signal_new("destroyed",
                                                        XFW_TYPE_WORKSPACE_WAYLAND,
@@ -195,11 +195,14 @@ xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, G
 }
 
 static void
-xfw_workspace_wayland_dispose(GObject *obj) {
+xfw_workspace_wayland_finalize(GObject *obj) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(obj);
+
     ext_workspace_handle_v1_destroy(workspace->priv->handle);
     g_free(workspace->priv->id);
     g_free(workspace->priv->name);
+
+    G_OBJECT_CLASS(xfw_workspace_wayland_parent_class)->finalize(obj);
 }
 
 static const gchar *

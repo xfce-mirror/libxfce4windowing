@@ -48,7 +48,7 @@ static void xfw_screen_wayland_screen_init(XfwScreenIface *iface);
 static void xfw_screen_wayland_constructed(GObject *obj);
 static void xfw_screen_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_screen_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_screen_wayland_dispose(GObject *obj);
+static void xfw_screen_wayland_finalize(GObject *obj);
 static gint xfw_screen_wayland_get_number(XfwScreen *screen);
 static XfwWorkspaceManager *xfw_screen_wayland_get_workspace_manager(XfwScreen *screen);
 static GList *xfw_screen_wayland_get_windows(XfwScreen *screen);
@@ -82,7 +82,7 @@ xfw_screen_wayland_class_init(XfwScreenWaylandClass *klass) {
     gklass->constructed = xfw_screen_wayland_constructed;
     gklass->set_property = xfw_screen_wayland_set_property;
     gklass->get_property = xfw_screen_wayland_get_property;
-    gklass->dispose = xfw_screen_wayland_dispose;
+    gklass->finalize = xfw_screen_wayland_finalize;
 
     _xfw_screen_install_properties(gklass);
 }
@@ -157,9 +157,11 @@ xfw_screen_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
 }
 
 static void
-xfw_screen_wayland_dispose(GObject *obj) {
+xfw_screen_wayland_finalize(GObject *obj) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(obj);
+
     g_object_unref(screen->priv->workspace_manager);
+
     if (screen->priv->toplevel_manager != NULL) {
         zwlr_foreign_toplevel_manager_v1_destroy(screen->priv->toplevel_manager);
     }
@@ -169,6 +171,8 @@ xfw_screen_wayland_dispose(GObject *obj) {
     g_list_free(screen->priv->windows);
     g_list_free(screen->priv->windows_stacked);
     g_hash_table_destroy(screen->priv->wl_windows);
+
+    G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->finalize(obj);
 }
 
 static void

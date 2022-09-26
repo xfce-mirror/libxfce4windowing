@@ -57,7 +57,7 @@ static void xfw_workspace_group_wayland_workspace_group_init(XfwWorkspaceGroupIf
 static void xfw_workspace_group_wayland_constructed(GObject *obj);
 static void xfw_workspace_group_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_group_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_workspace_group_wayland_dispose(GObject *obj);
+static void xfw_workspace_group_wayland_finalize(GObject *obj);
 static XfwWorkspaceGroupCapabilities xfw_workspace_group_wayland_get_capabilities(XfwWorkspaceGroup *group);
 static guint xfw_workspace_group_wayland_get_workspace_count(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_wayland_list_workspaces(XfwWorkspaceGroup *group);
@@ -94,7 +94,7 @@ xfw_workspace_group_wayland_class_init(XfwWorkspaceGroupWaylandClass *klass) {
     gklass->constructed = xfw_workspace_group_wayland_constructed;
     gklass->set_property = xfw_workspace_group_wayland_set_property;
     gklass->get_property = xfw_workspace_group_wayland_get_property;
-    gklass->dispose = xfw_workspace_group_wayland_dispose;
+    gklass->finalize = xfw_workspace_group_wayland_finalize;
 
     group_signals[SIGNAL_DESTROYED] = g_signal_new("destroyed",
                                                    XFW_TYPE_WORKSPACE_GROUP_WAYLAND,
@@ -175,7 +175,7 @@ xfw_workspace_group_wayland_get_property(GObject *obj, guint prop_id, GValue *va
 }
 
 static void
-xfw_workspace_group_wayland_dispose(GObject *obj) {
+xfw_workspace_group_wayland_finalize(GObject *obj) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
     GdkDisplay *display;
 
@@ -188,6 +188,8 @@ xfw_workspace_group_wayland_dispose(GObject *obj) {
     g_signal_handlers_disconnect_by_func(display, monitor_added, group);
     g_signal_handlers_disconnect_by_func(display, monitor_removed, group);
     g_list_free(group->priv->monitors);
+
+    G_OBJECT_CLASS(xfw_workspace_group_wayland_parent_class)->finalize(obj);
 }
 
 static void

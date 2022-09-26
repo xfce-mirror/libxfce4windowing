@@ -41,7 +41,7 @@ static void xfw_workspace_manager_x11_manager_init(XfwWorkspaceManagerIface *ifa
 static void xfw_workspace_manager_x11_constructed(GObject *obj);
 static void xfw_workspace_manager_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_workspace_manager_x11_dispose(GObject *obj);
+static void xfw_workspace_manager_x11_finalize(GObject *obj);
 static GList * xfw_workspace_manager_x11_list_workspace_groups(XfwWorkspaceManager *manager);
 
 static void active_workspace_changed(WnckScreen *screen, WnckWorkspace *workspace, XfwWorkspaceManagerX11 *manager);
@@ -62,7 +62,7 @@ xfw_workspace_manager_x11_class_init(XfwWorkspaceManagerX11Class *klass) {
     gklass->constructed = xfw_workspace_manager_x11_constructed;
     gklass->set_property = xfw_workspace_manager_x11_set_property;
     gklass->get_property = xfw_workspace_manager_x11_get_property;
-    gklass->dispose = xfw_workspace_manager_x11_dispose;
+    gklass->finalize = xfw_workspace_manager_x11_finalize;
 
     _xfw_workspace_manager_install_properties(gklass);
 }
@@ -145,16 +145,20 @@ static void xfw_workspace_manager_x11_get_property(GObject *obj, guint prop_id, 
 }
 
 static void
-xfw_workspace_manager_x11_dispose(GObject *obj) {
+xfw_workspace_manager_x11_finalize(GObject *obj) {
     XfwWorkspaceManagerX11 *manager = XFW_WORKSPACE_MANAGER_X11(obj);
     XfwWorkspaceManagerX11Private *priv = manager->priv;
+
     g_signal_handlers_disconnect_by_func(priv->wnck_screen, active_workspace_changed, manager);
     g_signal_handlers_disconnect_by_func(priv->wnck_screen, workspace_created, manager);
     g_signal_handlers_disconnect_by_func(priv->wnck_screen, workspace_destroyed, manager);
     g_list_free(priv->workspaces);
     g_hash_table_destroy(priv->wnck_workspaces);
-    g_list_free_full(priv->groups, g_object_unref);
     g_hash_table_destroy(priv->pending_workspace_names);
+
+    g_list_free_full(priv->groups, g_object_unref);
+
+    G_OBJECT_CLASS(xfw_workspace_manager_x11_parent_class)->finalize(obj);
 }
 
 static GList *

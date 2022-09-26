@@ -48,7 +48,7 @@ static void xfw_window_wayland_window_init(XfwWindowIface *iface);
 static void xfw_window_wayland_constructed(GObject *obj);
 static void xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_window_wayland_dispose(GObject *obj);
+static void xfw_window_wayland_finalize(GObject *obj);
 static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window);
@@ -98,7 +98,7 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
     gklass->constructed = xfw_window_wayland_constructed;
     gklass->set_property = xfw_window_wayland_set_property;
     gklass->get_property = xfw_window_wayland_get_property;
-    gklass->dispose = xfw_window_wayland_dispose;
+    gklass->finalize = xfw_window_wayland_finalize;
 
     g_object_class_install_property(gklass,
                                     PROP_HANDLE,
@@ -191,9 +191,12 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
 }
 
 static void
-xfw_window_wayland_dispose(GObject *obj) {
+xfw_window_wayland_finalize(GObject *obj) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
+
     zwlr_foreign_toplevel_handle_v1_destroy(window->priv->handle);
+
+    G_OBJECT_CLASS(xfw_window_wayland_parent_class)->finalize(obj);
 }
 
 static void
