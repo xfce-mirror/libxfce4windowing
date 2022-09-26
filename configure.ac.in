@@ -99,6 +99,8 @@ else
 fi
 AM_CONDITIONAL([WAYLAND_ENABLED], [test x"$enable_wayland" = x"yes"])
 
+GTK_DOC_CHECK([1.30])
+
 dnl check for debugging support
 XDT_FEATURE_DEBUG()
 XDT_FEATURE_LINKER_OPTS()
@@ -144,6 +146,8 @@ AM_CONDITIONAL([HAVE_GNUC_VISIBILITY], [test "x$have_gnuc_visibility" = "xyes"])
 
 AC_CONFIG_FILES([
 Makefile
+docs/Makefile
+docs/reference/Makefile
 libxfce4windowing/Makefile
 libxfce4windowing/libxfce4windowing-0.pc
 libxfce4windowing/protocols/Makefile

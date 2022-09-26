@@ -2,6 +2,7 @@
 
 SUBDIRS = \
 	libxfce4windowing \
+	docs \
 	po
 
 EXTRA_DIST = \

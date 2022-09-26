@@ -17,6 +17,14 @@
  * MA 02110-1301 USA
  */
 
+/**
+ * SECTION:xfw-util
+ * @title: Utilities
+ * @short_description: Miscellaneous windowing utilities
+ * @stability: Unstable
+ * @include: libxfce4windowing/libxfce4windowing.h
+ **/
+
 #include "config.h"
 
 #include <stdlib.h>
@@ -34,6 +42,13 @@
 
 #define WINDOWING_UNKNOWN 0
 
+/**
+ * xfw_windowing_get:
+ *
+ * Determines the windowing environment that is currently active.
+ *
+ * Return value: A value from the #XfwWindowing enum.
+ **/
 XfwWindowing
 xfw_windowing_get(void)
 {

@@ -29,14 +29,34 @@
 #include <gdk/gdkx.h>
 #endif
 
+/**
+ * XFW_ERROR:
+ *
+ * The error domain for all errors returned by this library.
+ **/
 #define XFW_ERROR (xfw_error_quark())
 
+G_BEGIN_DECLS
+
+/**
+ * XfwErrorCode:
+ * @XFW_ERROR_UNSUPPORTED: the operation attempted is not supported.
+ *
+ * An error code enum describing possible errors returned by this library.
+ **/
 typedef enum _XfwErrorCode {
     XFW_ERROR_UNSUPPORTED = 0,
 } XfwErrorCode;
 
-G_BEGIN_DECLS
-
+/**
+ * XfwWindowing:
+ * @XFW_WINDOWING_X11: the application is running under an X11 server.
+ * @XFW_WINDOWING_WAYLAND: the application is running under a Wayland
+ *                         comopositor.
+ *
+ * Represents the windowing environment that is currently running.  Note that
+ * for an application running on XWayland, this will return #XFW_WINDOWING_X11.
+ **/
 typedef enum {
     XFW_WINDOWING_X11 = 1,
     XFW_WINDOWING_WAYLAND = 2
@@ -46,6 +66,16 @@ GQuark xfw_error_quark(void);
 
 XfwWindowing xfw_windowing_get(void);
 
+/**
+ * xfw_windowing_error_trap_push:
+ * @display: a #GdkDisplay.
+ *
+ * Traps errors in the underlying windowing environment.  Error traps work as
+ * a stack, so for every "push" call, there needs to be a "pop" call.  Multiple
+ * pushes need to be matched with an equal number of pops.
+ *
+ * This only does anything on X11.
+ **/
 static inline void
 xfw_windowing_error_trap_push(GdkDisplay *display) {
 #ifdef GDK_WINDOWING_X11
@@ -55,6 +85,17 @@ xfw_windowing_error_trap_push(GdkDisplay *display) {
 #endif  /* GDK_WINDOWING_X11 */
 }
 
+/**
+ * xfw_windowing_error_trap_pop:
+ * @display: a #GdkDisplay.
+ *
+ * Pops the topmost error trap off of the stack.
+ *
+ * This only does anything on X11.
+ *
+ * Return value: Returns the error code of the error that occured, or %0 if
+ * there was no error.
+ **/
 static inline gint
 xfw_windowing_error_trap_pop(GdkDisplay *display) {
 #ifdef GDK_WINDOWING_X11
@@ -67,6 +108,14 @@ xfw_windowing_error_trap_pop(GdkDisplay *display) {
     }
 }
 
+/**
+ * xfw_windowing_error_trap_pop_ignored:
+ * @display: a #GdkDisplay.
+ *
+ * Pops the topmost error trap off of the stack.
+ *
+ * This only does anything on X11.
+ **/
 static inline void
 xfw_windowing_error_trap_pop_ignored(GdkDisplay *display) {
 #ifdef GDK_WINDOWING_X11

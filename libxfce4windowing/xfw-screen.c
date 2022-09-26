@@ -17,6 +17,27 @@
  * MA 02110-1301 USA
  */
 
+/**
+ * SECTION:xfw-screen
+ * @title: XfwScreen
+ * @short_description: An object representing a logical screen
+ * @stability: Unstable
+ * @include: libxfce4windowing/libxfce4windowing.h
+ *
+ * #XfwScreen represents a logical screen.  On most windowing environments,
+ * this doesn't necessarily correspond to a single monitor, but might span
+ * multiple monitors.  These days, most windowing environments will only
+ * have a single screen, even if (API-wise) more than one can be represented.
+ *
+ * The #XfwScreen instance is the main entry point into this library.  You
+ * can obtain an instance using #xfw_screen_get().  From there, you can
+ * enumerate toplevel windows, or examine workspace groups and workspaces.
+ *
+ * Note that #XfwScreen is actually an interface; when obtaining an instance,
+ * an instance of a windowing-environment-specific object that implements
+ * this interface will be returned.
+ **/
+
 #include "config.h"
 
 #include <limits.h>
@@ -35,6 +56,13 @@ G_DEFINE_INTERFACE(XfwScreen, xfw_screen, G_TYPE_OBJECT)
 
 static void
 xfw_screen_default_init(XfwScreenIface *iface) {
+    /**
+     * XfwScreen::window-opened:
+     * @screen: the object which received the signal.
+     * @window: the new window that was opened.
+     *
+     * Emitted when a new window is opened on the screen.
+     **/
     g_signal_new("window-opened",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
@@ -43,6 +71,18 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WINDOW);
+
+    /**
+     * XfwScreen::active-window-changed:
+     * @screen: the object which received the signal.
+     * @window: the previously-active window.
+     *
+     * Emitted when a new window becomes the active window.  Often the
+     * active window will receive keyboard focus.  While @window is
+     * the previously-active window (if any, and may be %NULL), the
+     * newly-active window can be retrieved via
+     * #xfw_screen_get_active_window().
+     **/
     g_signal_new("active-window-changed",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
@@ -51,6 +91,17 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WINDOW);
+
+    /**
+     * XfwScreen::window-stacking-changed:
+     * @screen: the object which received the signal.
+     *
+     * Emitted when the order of the windows as displayed on the screen has
+     * changed.  Windows, in stacking order, can be retrieved via
+     * #xfw_screen_get_windows_stacked().
+     *
+     * Note that currently this signal is not emitted on Wayland.
+     **/
     g_signal_new("window-stacking-changed",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
@@ -58,6 +109,14 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+
+    /**
+     * XfwScreen::window-closed:
+     * @screen: the object that received the signal.
+     * @window: the window that has been closed.
+     *
+     * Emitted when a window is closed on the screen.
+     **/
     g_signal_new("window-closed",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
@@ -67,18 +126,36 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WINDOW);
 
+    /**
+     * XfwScreen:screen:
+     *
+     * The #GdkScreen instance used to construct this #XfwScreen.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("screen",
                                                             "screen",
                                                             "screen",
                                                             GDK_TYPE_SCREEN,
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    /**
+     * XfwScreen:workspace-manager:
+     *
+     * The #XfwWorkspaceManager that manages and describes workspace groups
+     * and workspaces on this screen instance.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("workspace-manager",
                                                             "workspace-manager",
                                                             "workspace-manager",
                                                             XFW_TYPE_WORKSPACE_MANAGER,
                                                             G_PARAM_READABLE));
+
+    /**
+     * XfwScreen:active-window:
+     *
+     * The currently-active window.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("active-window",
                                                             "active-window",
@@ -87,6 +164,13 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                                                             G_PARAM_READABLE));
 }
 
+/**
+ * xfw_screen_get_number:
+ * @screen: an #XfwScreen.
+ *
+ * Retrieves the screen number assigned by the windowing environment.  In
+ * most cases this will be #0.
+ **/
 gint
 xfw_screen_get_number(XfwScreen *screen) {
     XfwScreenIface *iface;
@@ -95,6 +179,16 @@ xfw_screen_get_number(XfwScreen *screen) {
     return (*iface->get_number)(screen);
 }
 
+/**
+ * xfw_screen_get_workspace_manager:
+ * @screen: an #XfwScreen.
+ *
+ * Retrieves this screen's #XfwWorkspaceManager instance, which can be used
+ * to inspect and interact with @screen's workspace groups and workspaces.
+ *
+ * Return value: (not nullable): (transfer none): a #XFW_WorkspaceManager
+ * instance.  This instance is a singleton and is owned by @screen.
+ **/
 XfwWorkspaceManager *
 xfw_screen_get_workspace_manager(XfwScreen *screen) {
     XfwScreenIface *iface;
@@ -103,6 +197,18 @@ xfw_screen_get_workspace_manager(XfwScreen *screen) {
     return (*iface->get_workspace_manager)(screen);
 }
 
+/**
+ * xfw_screen_get_windows:
+ * @screen: an #XfwScreen.
+ *
+ * Retrieves the list of windows currently displayed on @screen.
+ *
+ * The list and its contents are owned by @screen.
+ *
+ * Return value: (nullable) (element-type XfwWindow) (transfer none): the list
+ * of #XfwWindow on @screen, or %NULL if there are no windows.  The list
+ * and its contents are owned by @screen.
+ **/
 GList *
 xfw_screen_get_windows(XfwScreen *screen) {
     XfwScreenIface *iface;
@@ -111,6 +217,17 @@ xfw_screen_get_windows(XfwScreen *screen) {
     return (*iface->get_windows)(screen);
 }
 
+/**
+ * xfw_screen_get_windows_stacked:
+ * @screen: an #XfwScreen.
+ *
+ * Retrieves the list of windows currently displayed on @screen, in stacking
+ * order, with the bottom-most window first in the returned list.
+ *
+ * Return value: (nullable) (element-type XfwWindow) (transfer none): the list
+ * of #XfwWindow on @screen, in stacking order, or %NULL if there are no
+ * windows.  The list and its contents are owned by @screen.
+ **/
 GList *
 xfw_screen_get_windows_stacked(XfwScreen *screen) {
     XfwScreenIface *iface;
@@ -119,6 +236,15 @@ xfw_screen_get_windows_stacked(XfwScreen *screen) {
     return (*iface->get_windows_stacked)(screen);
 }
 
+/**
+ * xfw_screen_get_active_window:
+ * @screen: an #XfwScreen.
+ *
+ * Retrieves the window on @screen that is currently active.
+ *
+ * Return value: (nullable) (transfer none): an #XfWindow, or %NULL if no
+ * window is active on @screen.
+ **/
 XfwWindow *
 xfw_screen_get_active_window(XfwScreen *screen) {
     XfwScreenIface *iface;
@@ -132,6 +258,16 @@ screen_destroyed(GdkScreen *gdk_screen, XfwScreen *screen) {
     g_object_steal_data(G_OBJECT(gdk_screen), GDK_SCREEN_XFW_SCREEN_KEY);
 }
 
+/**
+ * xfw_screen_get: (constructor)
+ * @gdk_screen: a #GdkScreen.
+ *
+ * Retrieves the #XfwScreen instance corresponding to the specified #GdkScreen
+ * instance.
+ *
+ * Return value: (not nullable) (transfer full): an #XfwScreen instance, with
+ * a reference owned by the caller.
+ **/
 XfwScreen *
 xfw_screen_get(GdkScreen *gdk_screen) {
     XfwScreen *screen = XFW_SCREEN(g_object_get_data(G_OBJECT(gdk_screen), GDK_SCREEN_XFW_SCREEN_KEY));
