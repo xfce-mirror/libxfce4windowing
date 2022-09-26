@@ -33,6 +33,7 @@ struct _XfwWorkspaceWaylandPrivate {
     struct ext_workspace_handle_v1 *handle;
     gchar *id;
     gchar *name;
+    XfwWorkspaceCapabilities capabilities;
     XfwWorkspaceState state;
     guint number;
 };
@@ -57,11 +58,12 @@ static void xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GVal
 static void xfw_workspace_wayland_finalize(GObject *obj);
 static const gchar *xfw_workspace_wayland_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_wayland_get_name(XfwWorkspace *workspace);
+static XfwWorkspaceCapabilities xfw_workspace_wayland_get_capabilities(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_wayland_get_state(XfwWorkspace *workspace);
 static guint xfw_workspace_wayland_get_number(XfwWorkspace *workspace);
 static XfwWorkspaceGroup *xfw_workspace_wayland_get_workspace_group(XfwWorkspace *workspace);
-static void xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error);
-static void xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
+static gboolean xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error);
+static gboolean xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
 
 static void workspace_name(void *data, struct ext_workspace_handle_v1 *workspace, const char *name);
 static void workspace_coordinates(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *coordinates);
@@ -124,6 +126,7 @@ static void
 xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_id = xfw_workspace_wayland_get_id;
     iface->get_name = xfw_workspace_wayland_get_name;
+    iface->get_capabilities = xfw_workspace_wayland_get_capabilities;
     iface->get_state = xfw_workspace_wayland_get_state;
     iface->get_number = xfw_workspace_wayland_get_number;
     iface->get_workspace_group = xfw_workspace_wayland_get_workspace_group;
@@ -145,6 +148,7 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
 
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
+        case WORKSPACE_PROP_CAPABILITIES:
         case WORKSPACE_PROP_STATE:
         case WORKSPACE_PROP_NUMBER:
             break;
@@ -173,6 +177,10 @@ xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, G
 
         case WORKSPACE_PROP_NAME:
             g_value_set_string(value, workspace->priv->name);
+            break;
+
+        case WORKSPACE_PROP_CAPABILITIES:
+            g_value_set_flags(value, workspace->priv->capabilities);
             break;
 
         case WORKSPACE_PROP_STATE:
@@ -206,6 +214,11 @@ xfw_workspace_wayland_get_name(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_WAYLAND(workspace)->priv->name;
 }
 
+static XfwWorkspaceCapabilities
+xfw_workspace_wayland_get_capabilities(XfwWorkspace *workspace) {
+    return XFW_WORKSPACE_WAYLAND(workspace)->priv->capabilities;
+}
+
 static XfwWorkspaceState
 xfw_workspace_wayland_get_state(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_WAYLAND(workspace)->priv->state;
@@ -221,14 +234,34 @@ xfw_workspace_wayland_get_workspace_group(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_WAYLAND(workspace)->priv->group;
 }
 
-static void
+static gboolean
 xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error) {
-    ext_workspace_handle_v1_activate(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle);
+    XfwWorkspaceWayland *wworkspace = XFW_WORKSPACE_WAYLAND(workspace);
+
+    if ((wworkspace->priv->capabilities & XFW_WORKSPACE_CAPABILITIES_ACTIVATE) != 0) {
+        ext_workspace_handle_v1_activate(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle);
+        return TRUE;
+    } else {
+        if (error != NULL) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace does not support activation");
+        }
+        return FALSE;
+    }
 }
 
-static void
+static gboolean
 xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error) {
-    ext_workspace_handle_v1_remove(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle);
+    XfwWorkspaceWayland *wworkspace = XFW_WORKSPACE_WAYLAND(workspace);
+
+    if ((wworkspace->priv->capabilities & XFW_WORKSPACE_CAPABILITIES_REMOVE) != 0) {
+        ext_workspace_handle_v1_remove(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle);
+        return TRUE;
+    } else {
+        if (error != NULL) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace does not support removal");
+        }
+        return FALSE;
+    }
 }
 
 static void
@@ -275,9 +308,35 @@ workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct
     }
 }
 
-static void
-workspace_capabilities(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *capabilities) {
+static const struct {
+    enum ext_workspace_handle_v1_ext_workspace_capabilities_v1 wl_capability;
+    XfwWorkspaceCapabilities capability_bit;
+} capabilities_converters[] = {
+    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_ACTIVATE, XFW_WORKSPACE_CAPABILITIES_ACTIVATE },
+    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_REMOVE, XFW_WORKSPACE_CAPABILITIES_REMOVE },
+};
 
+static void
+workspace_capabilities(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct wl_array *wl_capabilities) {
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
+    XfwWorkspaceCapabilities old_capabilities = workspace->priv->capabilities;
+    XfwWorkspaceCapabilities changed_mask;
+    XfwWorkspaceCapabilities new_capabilities = XFW_WORKSPACE_CAPABILITIES_NONE;
+    enum ext_workspace_handle_v1_ext_workspace_capabilities_v1 *item;
+
+    wl_array_for_each(item, wl_capabilities) {
+        for (size_t i = 0; i < sizeof(capabilities_converters) / sizeof(*capabilities_converters); ++i) {
+            if (capabilities_converters[i].wl_capability == *item) {
+                new_capabilities |= capabilities_converters[i].capability_bit;
+                break;
+            }
+        }
+    }
+    workspace->priv->capabilities = new_capabilities;
+
+    changed_mask = old_capabilities ^ new_capabilities;
+    g_object_notify(G_OBJECT(workspace), "capabilities");
+    g_signal_emit_by_name(workspace, "capabilities-changed", changed_mask, new_capabilities);
 }
 
 static void

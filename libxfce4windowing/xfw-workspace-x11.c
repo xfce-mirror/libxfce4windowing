@@ -43,11 +43,12 @@ static void xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *
 static void xfw_workspace_x11_finalize(GObject *obj);
 static const gchar *xfw_workspace_x11_get_id(XfwWorkspace *workspace);
 static const gchar *xfw_workspace_x11_get_name(XfwWorkspace *workspace);
+static XfwWorkspaceCapabilities xfw_workspace_x11_get_capabilities(XfwWorkspace *workspace);
 static XfwWorkspaceState xfw_workspace_x11_get_state(XfwWorkspace *workspace);
 static guint xfw_workspace_x11_get_number(XfwWorkspace *workspace);
 static XfwWorkspaceGroup *xfw_workspace_x11_get_workspace_group(XfwWorkspace *workspace);
-static void xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error);
-static void xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error);
+static gboolean xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error);
+static gboolean xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error);
 
 static void name_changed(WnckWorkspace *wnck_workspace, XfwWorkspaceX11 *workspace);
 
@@ -101,6 +102,7 @@ xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value,
 
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
+        case WORKSPACE_PROP_CAPABILITIES:
         case WORKSPACE_PROP_STATE:
         case WORKSPACE_PROP_NUMBER:
             break;
@@ -131,6 +133,10 @@ xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GPara
             g_value_set_string(value, xfw_workspace_x11_get_name(workspace));
             break;
 
+        case WORKSPACE_PROP_CAPABILITIES:
+            g_value_set_flags(value, xfw_workspace_x11_get_capabilities(workspace));
+            break;
+
         case WORKSPACE_PROP_STATE:
             g_value_set_flags(value, xfw_workspace_x11_get_state(workspace));
             break;
@@ -158,6 +164,7 @@ static void
 xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_id = xfw_workspace_x11_get_id;
     iface->get_name = xfw_workspace_x11_get_name;
+    iface->get_capabilities = xfw_workspace_x11_get_capabilities;
     iface->get_state = xfw_workspace_x11_get_state;
     iface->get_number = xfw_workspace_x11_get_number;
     iface->get_workspace_group = xfw_workspace_x11_get_workspace_group;
@@ -173,6 +180,21 @@ xfw_workspace_x11_get_id(XfwWorkspace *workspace) {
 static const gchar *
 xfw_workspace_x11_get_name(XfwWorkspace *workspace) {
     return wnck_workspace_get_name(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
+}
+
+static XfwWorkspaceCapabilities
+xfw_workspace_x11_get_capabilities(XfwWorkspace *workspace) {
+    XfwWorkspaceX11 *xworkspace = XFW_WORKSPACE_X11(workspace);
+    XfwWorkspaceCapabilities capabilities = XFW_WORKSPACE_CAPABILITIES_ACTIVATE;
+    gint n_workspaces = wnck_screen_get_workspace_count(wnck_workspace_get_screen(xworkspace->priv->wnck_workspace));
+
+    if (n_workspaces == wnck_workspace_get_number(xworkspace->priv->wnck_workspace) + 1) {
+        // This is perhaps not universal, but the Wnck implementation (which xfdesktop/xfce4-panel/xfwm4 conforms
+        // to) only really lets you remove the last workspace.
+        capabilities |= XFW_WORKSPACE_CAPABILITIES_REMOVE;
+    }
+
+    return capabilities;
 }
 
 static XfwWorkspaceState
@@ -195,21 +217,26 @@ xfw_workspace_x11_get_workspace_group(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_X11(workspace)->priv->group;
 }
 
-static void
+static gboolean
 xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceX11Private *priv = XFW_WORKSPACE_X11(workspace)->priv;
     wnck_workspace_activate(priv->wnck_workspace, GDK_CURRENT_TIME);
+    return TRUE;
 }
 
-static void
+static gboolean
 xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceX11Private *priv = XFW_WORKSPACE_X11(workspace)->priv;
     WnckScreen *wnck_screen = wnck_workspace_get_screen(priv->wnck_workspace);
     gint count = wnck_screen_get_workspace_count(wnck_screen);
     if (count > 1) {
         wnck_screen_change_workspace_count(wnck_screen, count - 1);
-    } else if (error != NULL) {
-        *error = g_error_new_literal(XFW_ERROR, 0, "Cannot remove workspace as it is the only one left");
+        return TRUE;
+    } else {
+        if (error != NULL) {
+            *error = g_error_new_literal(XFW_ERROR, 0, "Cannot remove workspace as it is the only one left");
+        }
+        return FALSE;
     }
 }
 

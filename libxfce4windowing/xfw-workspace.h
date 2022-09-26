@@ -36,10 +36,17 @@ typedef struct _XfwWorkspaceGroup XfwWorkspaceGroup;
 #define XFW_IS_WORKSPACE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE))
 #define XFW_WORKSPACE_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE((obj), XFW_TYPE_WORKSPACE, XfwWorkspaceIface))
 
-#define XFW_TYPE_WORKSPACE_STATE     (xfw_workspace_state_get_type())
+#define XFW_TYPE_WORKSPACE_CAPABILITIES (xfw_workspace_capabilities_get_type())
+#define XFW_TYPE_WORKSPACE_STATE        (xfw_workspace_state_get_type())
 
 typedef struct _XfwWorkspace XfwWorkspace;
 typedef struct _XfwWorkspaceIface XfwWorkspaceIface;
+
+typedef enum {
+    XFW_WORKSPACE_CAPABILITIES_NONE = 0,
+    XFW_WORKSPACE_CAPABILITIES_ACTIVATE = (1 << 0),
+    XFW_WORKSPACE_CAPABILITIES_REMOVE = (1 << 2),
+} XfwWorkspaceCapabilities;
 
 typedef enum {
     XFW_WORKSPACE_STATE_NONE = 0,
@@ -56,30 +63,34 @@ struct _XfwWorkspaceIface {
 
     /* Signals */
     void (*name_changed)(XfwWorkspace *workspace);
+    void (*capabilities_changed)(XfwWorkspace *workspace);
     void (*state_changed)(XfwWorkspace *workspace, XfwWorkspaceState old_state);
 
     /* Virtual Table */
     const gchar *(*get_id)(XfwWorkspace *workspace);
     const gchar *(*get_name)(XfwWorkspace *workspace);
+    XfwWorkspaceCapabilities (*get_capabilities)(XfwWorkspace *workspace);
     XfwWorkspaceState (*get_state)(XfwWorkspace *workspace);
     guint (*get_number)(XfwWorkspace *workspace);
     XfwWorkspaceGroup *(*get_workspace_group)(XfwWorkspace *workspace);
 
-    void (*activate)(XfwWorkspace *workspace, GError **error);
-    void (*remove)(XfwWorkspace *workspace, GError **error);
+    gboolean (*activate)(XfwWorkspace *workspace, GError **error);
+    gboolean (*remove)(XfwWorkspace *workspace, GError **error);
 };
 
 GType xfw_workspace_get_type(void) G_GNUC_CONST;
+GType xfw_workspace_capabilities_get_type(void) G_GNUC_CONST;
 GType xfw_workspace_state_get_type(void) G_GNUC_CONST;
 
 const gchar *xfw_workspace_get_id(XfwWorkspace *workspace);
 const gchar *xfw_workspace_get_name(XfwWorkspace *workspace);
+XfwWorkspaceCapabilities xfw_workspace_get_capabilities(XfwWorkspace *workspace);
 XfwWorkspaceState xfw_workspace_get_state(XfwWorkspace *workspace);
 guint xfw_workspace_get_number(XfwWorkspace *workspace);
 XfwWorkspaceGroup *xfw_workspace_get_workspace_group(XfwWorkspace *workspace);
 
-void xfw_workspace_activate(XfwWorkspace *workspace, GError **error);
-void xfw_workspace_remove(XfwWorkspace *workspace, GError **error);
+gboolean xfw_workspace_activate(XfwWorkspace *workspace, GError **error);
+gboolean xfw_workspace_remove(XfwWorkspace *workspace, GError **error);
 
 G_END_DECLS
 

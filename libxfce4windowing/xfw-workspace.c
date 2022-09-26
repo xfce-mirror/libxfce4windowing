@@ -22,6 +22,7 @@
 #include <limits.h>
 
 #include "libxfce4windowing-private.h"
+#include "xfw-marshal.h"
 #include "xfw-window.h"
 #include "xfw-workspace-group.h"
 #include "xfw-workspace.h"
@@ -35,6 +36,11 @@ G_DEFINE_FLAGS_TYPE(XfwWorkspaceState, xfw_workspace_state,
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_URGENT, "urgent"),
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_HIDDEN, "hidden"))
 
+G_DEFINE_FLAGS_TYPE(XfwWorkspaceCapabilities, xfw_workspace_capabilities,
+    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_CAPABILITIES_NONE, "none"),
+    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_CAPABILITIES_ACTIVATE, "activate"),
+    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_CAPABILITIES_REMOVE, "remove"))
+
 static void
 xfw_workspace_default_init(XfwWorkspaceIface *iface) {
     g_signal_new("name-changed",
@@ -44,6 +50,16 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+    g_signal_new("capabilities-changed",
+                 XFW_TYPE_WORKSPACE,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceIface, capabilities_changed),
+                 NULL, NULL,
+                 xfw_marshal_VOID__FLAGS_FLAGS,
+                 G_TYPE_NONE, 2,
+                 XFW_TYPE_WORKSPACE_CAPABILITIES,
+                 XFW_TYPE_WORKSPACE_CAPABILITIES);
+    // TODO: switch to XfwWindow-style (changed_mask, new_state)
     g_signal_new("state-changed",
                  XFW_TYPE_WORKSPACE,
                  G_SIGNAL_RUN_LAST,
@@ -72,12 +88,19 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                             "",
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_interface_install_property(iface,
+                                        g_param_spec_flags("capabilities",
+                                                           "capabilities",
+                                                           "capabilities",
+                                                           XFW_TYPE_WORKSPACE_CAPABILITIES,
+                                                           XFW_WORKSPACE_CAPABILITIES_NONE,
+                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_interface_install_property(iface,
                                         g_param_spec_flags("state",
-                                                          "state",
-                                                          "state",
-                                                          XFW_TYPE_WORKSPACE_STATE,
-                                                          XFW_WORKSPACE_STATE_NONE,
-                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                           "state",
+                                                           "state",
+                                                           XFW_TYPE_WORKSPACE_STATE,
+                                                           XFW_WORKSPACE_STATE_NONE,
+                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_interface_install_property(iface,
                                         g_param_spec_uint("number",
                                                           "number",
@@ -100,6 +123,14 @@ xfw_workspace_get_name(XfwWorkspace *workspace) {
     g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), NULL);
     iface = XFW_WORKSPACE_GET_IFACE(workspace);
     return (*iface->get_name)(workspace);
+}
+
+XfwWorkspaceCapabilities
+xfw_workspace_get_capabilities(XfwWorkspace *workspace) {
+    XfwWorkspaceIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), XFW_WORKSPACE_CAPABILITIES_NONE);
+    iface = XFW_WORKSPACE_GET_IFACE(workspace);
+    return (*iface->get_capabilities)(workspace);
 }
 
 XfwWorkspaceState
@@ -126,18 +157,18 @@ xfw_workspace_get_workspace_group(XfwWorkspace *workspace) {
     return (*iface->get_workspace_group)(workspace);
 }
 
-void
+gboolean
 xfw_workspace_activate(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceIface *iface;
-    g_return_if_fail(XFW_IS_WORKSPACE(workspace));
+    g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), FALSE);
     iface = XFW_WORKSPACE_GET_IFACE(workspace);
     return (*iface->activate)(workspace, error);
 }
 
-void
+gboolean
 xfw_workspace_remove(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceIface *iface;
-    g_return_if_fail(XFW_IS_WORKSPACE(workspace));
+    g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), FALSE);
     iface = XFW_WORKSPACE_GET_IFACE(workspace);
     return (*iface->remove)(workspace, error);
 }
@@ -147,6 +178,7 @@ _xfw_workspace_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_PROP_GROUP, "group");
     g_object_class_override_property(gklass, WORKSPACE_PROP_ID, "id");
     g_object_class_override_property(gklass, WORKSPACE_PROP_NAME, "name");
+    g_object_class_override_property(gklass, WORKSPACE_PROP_CAPABILITIES, "capabilities");
     g_object_class_override_property(gklass, WORKSPACE_PROP_STATE, "state");
     g_object_class_override_property(gklass, WORKSPACE_PROP_NUMBER, "number");
 }
