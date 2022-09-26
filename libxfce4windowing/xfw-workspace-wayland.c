@@ -144,17 +144,8 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
             break;
 
         case WORKSPACE_PROP_ID:
-            break;
-
         case WORKSPACE_PROP_NAME:
-            g_free(workspace->priv->name);
-            workspace->priv->name = g_value_dup_string(value);
-            break;
-
         case WORKSPACE_PROP_STATE:
-            workspace->priv->state = g_value_get_flags(value);
-            break;
-
         case WORKSPACE_PROP_NUMBER:
             break;
 
