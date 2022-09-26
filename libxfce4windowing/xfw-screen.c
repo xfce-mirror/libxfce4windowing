@@ -137,6 +137,8 @@ xfw_screen_get(GdkScreen *gdk_screen) {
     XfwScreen *screen = XFW_SCREEN(g_object_get_data(G_OBJECT(gdk_screen), GDK_SCREEN_XFW_SCREEN_KEY));
 
     if (screen == NULL) {
+        _libxfce4windowing_init();
+
 #ifdef ENABLE_X11
         if (xfw_windowing_get() == XFW_WINDOWING_X11) {
             screen = g_object_new(XFW_TYPE_SCREEN_X11,

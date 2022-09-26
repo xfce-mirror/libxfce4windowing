@@ -29,6 +29,7 @@
 #include <gdk/gdkx.h>
 #endif
 
+#include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 
 #define WINDOWING_UNKNOWN 0
@@ -40,6 +41,9 @@ xfw_windowing_get(void)
 
     if (G_UNLIKELY(windowing == WINDOWING_UNKNOWN)) {
         GdkDisplay *gdpy = gdk_display_get_default();
+
+        _libxfce4windowing_init();
+
 #ifdef ENABLE_X11
         if (GDK_IS_X11_DISPLAY(gdpy)) {
             windowing = XFW_WINDOWING_X11;

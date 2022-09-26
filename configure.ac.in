@@ -64,7 +64,7 @@ AC_CHECK_HEADERS([ctype.h errno.h fcntl.h math.h pwd.h signal.h \
                   sys/types.h time.h \
                   unistd.h])
 dnl Check for i18n support
-XDT_I18N([@LINGUAS@])
+XDT_I18N()
 
 dnl required
 XDT_CHECK_PACKAGE([GOBJECT], [gobject-2.0], [glib_minimum_version])

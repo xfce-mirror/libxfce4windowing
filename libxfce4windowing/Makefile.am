@@ -47,6 +47,7 @@ libxfce4windowing_wayland_sources = \
 libxfce4windowing_la_SOURCES = \
 	$(libxfce4windowing_headers) \
 	$(libxfce4windowing_built_sources) \
+	libxfce4windowing-private.c \
 	libxfce4windowing-private.h \
 	xfw-screen.c \
 	xfw-util.c \

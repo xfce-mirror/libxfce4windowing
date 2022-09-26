@@ -65,6 +65,8 @@ enum {
     WINDOW_PROP_WORKSPACE,
 };
 
+void _libxfce4windowing_init(void);
+
 void _xfw_screen_install_properties(GObjectClass *gklass);
 void _xfw_workspace_manager_install_properties(GObjectClass *gklass);
 void _xfw_workspace_group_install_properties(GObjectClass *gklass);
