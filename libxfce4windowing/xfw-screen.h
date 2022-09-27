@@ -61,6 +61,7 @@ struct _XfwScreenIface {
 
 GType xfw_screen_get_type(void) G_GNUC_CONST;
 
+XfwScreen * xfw_screen_get_default(void);
 XfwScreen * xfw_screen_get(GdkScreen *gdk_screen);
 
 gint xfw_screen_get_number(XfwScreen *screen);

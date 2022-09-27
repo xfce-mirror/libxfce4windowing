@@ -259,6 +259,19 @@ screen_destroyed(GdkScreen *gdk_screen, XfwScreen *screen) {
 }
 
 /**
+ * xfw_screen_get_default: (constructor)
+ *
+ * Retrieves the #XfwScreen instance corresponding to the default #GdkScreen.
+ *
+ * Return value: (not nullable) (transfer full): an #XfScreen instance, with
+ * a reference owned by the caller.
+ **/
+XfwScreen *
+xfw_screen_get_default(void) {
+    return xfw_screen_get(gdk_screen_get_default());
+}
+
+/**
  * xfw_screen_get: (constructor)
  * @gdk_screen: a #GdkScreen.
  *
