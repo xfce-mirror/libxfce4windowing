@@ -67,6 +67,8 @@ static gboolean xfw_window_wayland_set_skip_pager(XfwWindow *window, gboolean is
 static gboolean xfw_window_wayland_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
 static gboolean xfw_window_wayland_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
 static gboolean xfw_window_wayland_set_shaded(XfwWindow *window, gboolean is_pinned, GError **error);
+static gboolean xfw_window_wayland_set_above(XfwWindow *window, gboolean is_above, GError **error);
+static gboolean xfw_window_wayland_set_below(XfwWindow *window, gboolean is_below, GError **error);
 
 static void toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *app_id);
 static void toplevel_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *title);
@@ -226,6 +228,8 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->set_skip_tasklist = xfw_window_wayland_set_skip_tasklist;
     iface->set_pinned = xfw_window_wayland_set_pinned;
     iface->set_shaded = xfw_window_wayland_set_shaded;
+    iface->set_above = xfw_window_wayland_set_above;
+    iface->set_below = xfw_window_wayland_set_below;
 }
 
 static guint64
@@ -397,6 +401,22 @@ static gboolean
 xfw_window_wayland_set_shaded(XfwWindow *window, gboolean is_pinned, GError **error) {
     if (error != NULL) {
         *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Window shading is not supported on Wayland");
+    }
+    return FALSE;
+}
+
+static gboolean
+xfw_window_wayland_set_above(XfwWindow *window, gboolean is_above, GError **error) {
+    if (error != NULL) {
+        *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Placing windows above others is not supported on Wayland");
+    }
+    return FALSE;
+}
+
+static gboolean
+xfw_window_wayland_set_below(XfwWindow *window, gboolean is_below, GError **error) {
+    if (error != NULL) {
+        *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Placing windows below others is not supported on Wayland");
     }
     return FALSE;
 }

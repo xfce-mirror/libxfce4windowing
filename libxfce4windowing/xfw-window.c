@@ -288,6 +288,8 @@ STATE_SETTER(skip_pager)
 STATE_SETTER(skip_tasklist)
 STATE_SETTER(pinned)
 STATE_SETTER(shaded)
+STATE_SETTER(above)
+STATE_SETTER(below)
 
 #undef STATE_SETTER
 
@@ -307,6 +309,8 @@ STATE_GETTER(skip_pager, SKIP_PAGER)
 STATE_GETTER(skip_tasklist, SKIP_TASKLIST)
 STATE_GETTER(pinned, PINNED)
 STATE_GETTER(shaded, SHADED)
+STATE_GETTER(above, ABOVE)
+STATE_GETTER(below, BELOW)
 
 #undef STATE_GETTER
 

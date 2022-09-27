@@ -65,6 +65,8 @@ static gboolean xfw_window_x11_set_skip_pager(XfwWindow *window, gboolean is_ski
 static gboolean xfw_window_x11_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
 static gboolean xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
 static gboolean xfw_window_x11_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error);
+static gboolean xfw_window_x11_set_above(XfwWindow *window, gboolean is_above, GError **error);
+static gboolean xfw_window_x11_set_below(XfwWindow *window, gboolean is_below, GError **error);
 
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
@@ -233,6 +235,8 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->set_skip_tasklist = xfw_window_x11_set_skip_tasklist;
     iface->set_pinned = xfw_window_x11_set_pinned;
     iface->set_shaded = xfw_window_x11_set_shaded;
+    iface->set_above = xfw_window_x11_set_above;
+    iface->set_below = xfw_window_x11_set_below;
 }
 
 static guint64
@@ -451,6 +455,60 @@ xfw_window_x11_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error)
     }
 }
 
+static gboolean
+xfw_window_x11_set_above(XfwWindow *window, gboolean is_above, GError **error) {
+    XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
+    if (is_above) {
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_PLACE_ABOVE) != 0) {
+            wnck_window_make_above(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being placed above others");
+            }
+            return FALSE;
+        }
+    } else {
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_ABOVE) != 0) {
+            wnck_window_unmake_above(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being placed back in the normal stacking order");
+            }
+            return FALSE;
+        }
+    }
+}
+
+static gboolean
+xfw_window_x11_set_below(XfwWindow *window, gboolean is_below, GError **error) {
+    XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
+    if (is_below) {
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_PLACE_BELOW) != 0) {
+            wnck_window_make_below(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being placed below others");
+            }
+            return FALSE;
+        }
+    } else {
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_BELOW) != 0) {
+            wnck_window_unmake_below(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being placed back in the normal stacking order");
+            }
+            return FALSE;
+        }
+    }
+}
+
 static void
 name_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     g_object_notify(G_OBJECT(window), "name");
@@ -577,8 +635,10 @@ static const struct {
     { WNCK_WINDOW_ACTION_UNSTICK | WNCK_WINDOW_ACTION_CHANGE_WORKSPACE, WNCK_WINDOW_STATE_STICKY, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNPIN },
     { WNCK_WINDOW_ACTION_MOVE, 0, FALSE, XFW_WINDOW_CAPABILITIES_CAN_MOVE },
     { WNCK_WINDOW_ACTION_RESIZE, 0, FALSE, XFW_WINDOW_CAPABILITIES_CAN_RESIZE },
-    { WNCK_WINDOW_ACTION_ABOVE, 0, FALSE, XFW_WINDOW_CAPABILITIES_CAN_PLACE_ABOVE },
-    { WNCK_WINDOW_ACTION_BELOW, 0, FALSE, XFW_WINDOW_CAPABILITIES_CAN_PLACE_BELOW },
+    { WNCK_WINDOW_ACTION_ABOVE, WNCK_WINDOW_STATE_ABOVE, FALSE, XFW_WINDOW_CAPABILITIES_CAN_PLACE_ABOVE },
+    { WNCK_WINDOW_ACTION_ABOVE, WNCK_WINDOW_STATE_ABOVE, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_ABOVE },
+    { WNCK_WINDOW_ACTION_BELOW, WNCK_WINDOW_STATE_BELOW, FALSE, XFW_WINDOW_CAPABILITIES_CAN_PLACE_BELOW },
+    { WNCK_WINDOW_ACTION_BELOW, WNCK_WINDOW_STATE_BELOW, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_BELOW },
 };
 static XfwWindowCapabilities
 convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions)

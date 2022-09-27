@@ -74,7 +74,9 @@ typedef enum {
     XFW_WINDOW_CAPABILITIES_CAN_MOVE = (1 << 10),
     XFW_WINDOW_CAPABILITIES_CAN_RESIZE = (1 << 11),
     XFW_WINDOW_CAPABILITIES_CAN_PLACE_ABOVE = (1 << 12),
-    XFW_WINDOW_CAPABILITIES_CAN_PLACE_BELOW = (1 << 13),
+    XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_ABOVE = (1 << 13),
+    XFW_WINDOW_CAPABILITIES_CAN_PLACE_BELOW = (1 << 14),
+    XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_BELOW = (1 << 15),
 } XfwWindowCapabilities;
 
 typedef enum {
@@ -117,6 +119,8 @@ struct _XfwWindowIface {
 
     gboolean (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
     gboolean (*close)(XfwWindow *window, guint64 event_timestamp, GError **error);
+    gboolean (*move_to_workspace)(XfwWindow *window, XfwWorkspace *workspace, GError **error);
+
     gboolean (*set_minimized)(XfwWindow *window, gboolean is_minimized, GError **error);
     gboolean (*set_maximized)(XfwWindow *window, gboolean is_maximized, GError **error);
     gboolean (*set_fullscreen)(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -124,6 +128,8 @@ struct _XfwWindowIface {
     gboolean (*set_skip_tasklist)(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
     gboolean (*set_pinned)(XfwWindow *window, gboolean is_pinned, GError **error);
     gboolean (*set_shaded)(XfwWindow *window, gboolean is_shaded, GError **error);
+    gboolean (*set_above)(XfwWindow *window, gboolean is_above, GError **error);
+    gboolean (*set_below)(XfwWindow *window, gboolean is_below, GError **error);
 };
 
 GType xfw_window_get_type(void) G_GNUC_CONST;
@@ -143,6 +149,7 @@ XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);
 
 gboolean xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 gboolean xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error);
+gboolean xfw_window_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
 
 gboolean xfw_window_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 gboolean xfw_window_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
@@ -151,6 +158,8 @@ gboolean xfw_window_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GE
 gboolean xfw_window_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
 gboolean xfw_window_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
 gboolean xfw_window_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error);
+gboolean xfw_window_set_above(XfwWindow *window, gboolean is_above, GError **error);
+gboolean xfw_window_set_below(XfwWindow *window, gboolean is_below, GError **error);
 
 gboolean xfw_window_is_minimized(XfwWindow *window);
 gboolean xfw_window_is_maximized(XfwWindow *window);
@@ -159,6 +168,8 @@ gboolean xfw_window_is_skip_pager(XfwWindow *window);
 gboolean xfw_window_is_skip_tasklist(XfwWindow *window);
 gboolean xfw_window_is_pinned(XfwWindow *window);
 gboolean xfw_window_is_shaded(XfwWindow *window);
+gboolean xfw_window_is_above(XfwWindow *window);
+gboolean xfw_window_is_below(XfwWindow *window);
 
 G_END_DECLS
 
