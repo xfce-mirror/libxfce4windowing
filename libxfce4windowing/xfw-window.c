@@ -43,13 +43,15 @@ G_DEFINE_FLAGS_TYPE(XfwWindowState, xfw_window_state,
 G_DEFINE_FLAGS_TYPE(XfwWindowCapabilities, xfw_window_capabilities,
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_NONE, "none"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE, "can-minimize"),
-    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE, "can-maximize"),
-    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN, "can-fullscreen"),
-    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_PIN, "can-pin"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE, "can-unminimize"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE, "can-maximize"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE, "can-unmaximize"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN, "can-unfullscreen"),
-    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNPIN, "can-unpin"))
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN, "can-fullscreen"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_PIN, "can-pin"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNPIN, "can-unpin"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_SHADE, "can-shade"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNSHADE, "can-unshade"));
 
 G_DEFINE_ENUM_TYPE(XfwWindowType, xfw_window_type,
   G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_NORMAL, "normal"),
@@ -281,14 +283,16 @@ STATE_SETTER(fullscreen)
 STATE_SETTER(skip_pager)
 STATE_SETTER(skip_tasklist)
 STATE_SETTER(pinned)
+STATE_SETTER(shaded)
 
 #undef STATE_SETTER
 
 #define STATE_GETTER(state_lower, state_upper) \
     gboolean \
     xfw_window_is_ ## state_lower(XfwWindow *window) { \
-        XfwWindowState state = XFW_WINDOW_STATE_NONE; \
-        g_object_get(G_OBJECT(window), "state", &state, NULL); \
+        XfwWindowState state; \
+        g_return_val_if_fail(XFW_IS_WINDOW(window), XFW_WINDOW_STATE_NONE); \
+        state = xfw_window_get_state(window); \
         return (state & XFW_WINDOW_STATE_ ## state_upper) != 0; \
     }
 
@@ -298,6 +302,7 @@ STATE_GETTER(fullscreen, FULLSCREEN)
 STATE_GETTER(skip_pager, SKIP_PAGER)
 STATE_GETTER(skip_tasklist, SKIP_TASKLIST)
 STATE_GETTER(pinned, PINNED)
+STATE_GETTER(shaded, SHADED)
 
 #undef STATE_GETTER
 

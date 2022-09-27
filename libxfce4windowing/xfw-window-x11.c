@@ -64,6 +64,7 @@ static void xfw_window_x11_set_fullscreen(XfwWindow *window, gboolean is_fullscr
 static void xfw_window_x11_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error);
 static void xfw_window_x11_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
 static void xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
+static void xfw_window_x11_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error);
 
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
@@ -231,6 +232,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->set_skip_pager = xfw_window_x11_set_skip_pager;
     iface->set_skip_tasklist = xfw_window_x11_set_skip_tasklist;
     iface->set_pinned = xfw_window_x11_set_pinned;
+    iface->set_shaded = xfw_window_x11_set_shaded;
 }
 
 static guint64
@@ -349,6 +351,16 @@ xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error)
         wnck_window_pin(priv->wnck_window);
     } else {
         wnck_window_unpin(priv->wnck_window);
+    }
+}
+
+static void
+xfw_window_x11_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error) {
+    XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+    if (is_shaded) {
+        wnck_window_shade(priv->wnck_window);
+    } else {
+        wnck_window_unshade(priv->wnck_window);
     }
 }
 

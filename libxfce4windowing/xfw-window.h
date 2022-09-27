@@ -54,18 +54,21 @@ typedef enum {
     XFW_WINDOW_STATE_SKIP_PAGER = (1 << 4),
     XFW_WINDOW_STATE_SKIP_TASKLIST = (1 << 5),
     XFW_WINDOW_STATE_PINNED = (1 << 6),
+    XFW_WINDOW_STATE_SHADED = (1 << 7),
 } XfwWindowState;
 
 typedef enum {
     XFW_WINDOW_CAPABILITIES_NONE = 0,
     XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE = (1 << 0),
-    XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE = (1 << 1),
-    XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN = (1 << 2),
-    XFW_WINDOW_CAPABILITIES_CAN_PIN = (1 << 3),
-    XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE = (1 << 4),
-    XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE = (1 << 5),
-    XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN = (1 << 6),
+    XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE = (1 << 1),
+    XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE = (1 << 2),
+    XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE = (1 << 3),
+    XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN = (1 << 4),
+    XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN = (1 << 5),
+    XFW_WINDOW_CAPABILITIES_CAN_PIN = (1 << 6),
     XFW_WINDOW_CAPABILITIES_CAN_UNPIN = (1 << 7),
+    XFW_WINDOW_CAPABILITIES_CAN_SHADE = (1 << 8),
+    XFW_WINDOW_CAPABILITIES_CAN_UNSHADE = (1 << 9),
 } XfwWindowCapabilities;
 
 typedef enum {
@@ -114,6 +117,7 @@ struct _XfwWindowIface {
     void (*set_skip_pager)(XfwWindow *window, gboolean is_skip_pager, GError **error);
     void (*set_skip_tasklist)(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
     void (*set_pinned)(XfwWindow *window, gboolean is_pinned, GError **error);
+    void (*set_shaded)(XfwWindow *window, gboolean is_shaded, GError **error);
 };
 
 GType xfw_window_get_type(void) G_GNUC_CONST;
@@ -140,6 +144,7 @@ void xfw_window_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError
 void xfw_window_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error);
 void xfw_window_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
 void xfw_window_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
+void xfw_window_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error);
 
 gboolean xfw_window_is_minimized(XfwWindow *window);
 gboolean xfw_window_is_maximized(XfwWindow *window);
@@ -147,6 +152,7 @@ gboolean xfw_window_is_fullscreen(XfwWindow *window);
 gboolean xfw_window_is_skip_pager(XfwWindow *window);
 gboolean xfw_window_is_skip_tasklist(XfwWindow *window);
 gboolean xfw_window_is_pinned(XfwWindow *window);
+gboolean xfw_window_is_shaded(XfwWindow *window);
 
 G_END_DECLS
 

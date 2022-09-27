@@ -66,6 +66,7 @@ static void xfw_window_wayland_set_fullscreen(XfwWindow *window, gboolean is_ful
 static void xfw_window_wayland_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error);
 static void xfw_window_wayland_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
 static void xfw_window_wayland_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
+static void xfw_window_wayland_set_shaded(XfwWindow *window, gboolean is_pinned, GError **error);
 
 static void toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *app_id);
 static void toplevel_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *title);
@@ -224,6 +225,7 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->set_skip_pager = xfw_window_wayland_set_skip_pager;
     iface->set_skip_tasklist = xfw_window_wayland_set_skip_tasklist;
     iface->set_pinned = xfw_window_wayland_set_pinned;
+    iface->set_shaded = xfw_window_wayland_set_shaded;
 }
 
 static guint64
@@ -332,6 +334,13 @@ static void
 xfw_window_wayland_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error) {
     if (error != NULL) {
         *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Window pinning is not supported on Wayland");
+    }
+}
+
+static void
+xfw_window_wayland_set_shaded(XfwWindow *window, gboolean is_pinned, GError **error) {
+    if (error != NULL) {
+        *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Window shading is not supported on Wayland");
     }
 }
 
