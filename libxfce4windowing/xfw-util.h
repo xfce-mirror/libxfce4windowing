@@ -62,7 +62,26 @@ typedef enum {
     XFW_WINDOWING_WAYLAND = 2
 } XfwWindowing;
 
-GQuark xfw_error_quark(void);
+/**
+ * XfwDirection:
+ * @XFW_DIRECTION_UP: upward from the current location
+ * @XFW_DIRECTION_DOWN: downward from the current location
+ * @XFW_DIRECTION_LEFT: to the left of the current location
+ * @XFW_DIRECTION_RIGHT: to the right of the current location
+ *
+ * Represents a direction, either of position ("This workspace is to the left
+ * of the current workspace") or movement ("Move this window to the workspace to
+ * the right of its current workspace").
+ **/
+typedef enum {
+    XFW_DIRECTION_UP = 0,
+    XFW_DIRECTION_DOWN,
+    XFW_DIRECTION_LEFT,
+    XFW_DIRECTION_RIGHT,
+} XfwDirection;
+
+GQuark xfw_error_quark(void) G_GNUC_CONST;
+GType xfw_direction_get_type(void) G_GNUC_CONST;
 
 XfwWindowing xfw_windowing_get(void);
 

@@ -26,6 +26,8 @@
 
 #include <glib-object.h>
 
+#include "xfw-util.h"
+
 G_BEGIN_DECLS
 
 /* fwd decl */
@@ -74,6 +76,11 @@ struct _XfwWorkspaceIface {
     guint (*get_number)(XfwWorkspace *workspace);
     XfwWorkspaceGroup *(*get_workspace_group)(XfwWorkspace *workspace);
 
+    gint (*get_layout_row)(XfwWorkspace *workspace);
+    gint (*get_layout_column)(XfwWorkspace *workspace);
+    XfwWorkspace *(*get_neighbor)(XfwWorkspace *workspace,
+                                  XfwDirection direction);
+
     gboolean (*activate)(XfwWorkspace *workspace, GError **error);
     gboolean (*remove)(XfwWorkspace *workspace, GError **error);
 };
@@ -88,6 +95,11 @@ XfwWorkspaceCapabilities xfw_workspace_get_capabilities(XfwWorkspace *workspace)
 XfwWorkspaceState xfw_workspace_get_state(XfwWorkspace *workspace);
 guint xfw_workspace_get_number(XfwWorkspace *workspace);
 XfwWorkspaceGroup *xfw_workspace_get_workspace_group(XfwWorkspace *workspace);
+
+gint xfw_workspace_get_layout_row(XfwWorkspace *workspace);
+gint xfw_workspace_get_layout_column(XfwWorkspace *workspace);
+XfwWorkspace *xfw_workspace_get_neighbor(XfwWorkspace *workspace,
+                                         XfwDirection direction);
 
 gboolean xfw_workspace_activate(XfwWorkspace *workspace, GError **error);
 gboolean xfw_workspace_remove(XfwWorkspace *workspace, GError **error);

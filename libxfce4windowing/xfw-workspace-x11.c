@@ -23,6 +23,7 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
+#include "xfw-workspace-manager-x11.h"
 #include "xfw-workspace-x11.h"
 #include "xfw-workspace.h"
 
@@ -47,6 +48,9 @@ static XfwWorkspaceCapabilities xfw_workspace_x11_get_capabilities(XfwWorkspace 
 static XfwWorkspaceState xfw_workspace_x11_get_state(XfwWorkspace *workspace);
 static guint xfw_workspace_x11_get_number(XfwWorkspace *workspace);
 static XfwWorkspaceGroup *xfw_workspace_x11_get_workspace_group(XfwWorkspace *workspace);
+gint xfw_workspace_x11_get_layout_row(XfwWorkspace *workspace);
+gint xfw_workspace_x11_get_layout_column(XfwWorkspace *workspace);
+XfwWorkspace *xfw_workspace_x11_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
 static gboolean xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error);
 
@@ -168,6 +172,9 @@ xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_state = xfw_workspace_x11_get_state;
     iface->get_number = xfw_workspace_x11_get_number;
     iface->get_workspace_group = xfw_workspace_x11_get_workspace_group;
+    iface->get_layout_row = xfw_workspace_x11_get_layout_row;
+    iface->get_layout_column = xfw_workspace_x11_get_layout_column;
+    iface->get_neighbor = xfw_workspace_x11_get_neighbor;
     iface->activate = xfw_workspace_x11_activate;
     iface->remove = xfw_workspace_x11_remove;
 }
@@ -215,6 +222,49 @@ xfw_workspace_x11_get_number(XfwWorkspace *workspace) {
 static XfwWorkspaceGroup *
 xfw_workspace_x11_get_workspace_group(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_X11(workspace)->priv->group;
+}
+
+gint
+xfw_workspace_x11_get_layout_row(XfwWorkspace *workspace) {
+    return wnck_workspace_get_layout_row(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
+}
+
+gint
+xfw_workspace_x11_get_layout_column(XfwWorkspace *workspace) {
+    return wnck_workspace_get_layout_column(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
+}
+
+XfwWorkspace *
+xfw_workspace_x11_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) {
+    XfwWorkspaceX11 *xworkspace = XFW_WORKSPACE_X11(workspace);
+    WnckMotionDirection wnck_direction;
+    WnckWorkspace *wnck_workspace;
+
+    switch (direction) {
+        case XFW_DIRECTION_UP:
+            wnck_direction = WNCK_MOTION_UP;
+            break;
+        case XFW_DIRECTION_DOWN:
+            wnck_direction = WNCK_MOTION_DOWN;
+            break;
+        case XFW_DIRECTION_LEFT:
+            wnck_direction = WNCK_MOTION_LEFT;
+            break;
+        case XFW_DIRECTION_RIGHT:
+            wnck_direction = WNCK_MOTION_RIGHT;
+            break;
+        default:
+            g_critical("Invalid XfwDirection %d", direction);
+            return NULL;
+    }
+
+    wnck_workspace = wnck_workspace_get_neighbor(xworkspace->priv->wnck_workspace, wnck_direction);
+    if (wnck_workspace != NULL) {
+        XfwWorkspaceManager *manager = xfw_workspace_group_get_workspace_manager(xworkspace->priv->group);
+        return _xfw_workspace_manager_x11_workspace_for_wnck_workspace(XFW_WORKSPACE_MANAGER_X11(manager), wnck_workspace);
+    } else {
+        return NULL;
+    }
 }
 
 static gboolean

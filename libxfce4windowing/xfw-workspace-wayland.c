@@ -25,6 +25,7 @@
 #include "protocols/ext-workspace-v1-20220919-client.h"
 #include "xfw-util.h"
 #include "xfw-workspace-group-wayland.h"
+#include "xfw-workspace-group.h"
 #include "xfw-workspace-wayland.h"
 #include "xfw-workspace.h"
 
@@ -62,6 +63,9 @@ static XfwWorkspaceCapabilities xfw_workspace_wayland_get_capabilities(XfwWorksp
 static XfwWorkspaceState xfw_workspace_wayland_get_state(XfwWorkspace *workspace);
 static guint xfw_workspace_wayland_get_number(XfwWorkspace *workspace);
 static XfwWorkspaceGroup *xfw_workspace_wayland_get_workspace_group(XfwWorkspace *workspace);
+gint xfw_workspace_wayland_get_layout_row(XfwWorkspace *workspace);
+gint xfw_workspace_wayland_get_layout_column(XfwWorkspace *workspace);
+XfwWorkspace *xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
 static gboolean xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
 
@@ -130,6 +134,9 @@ xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_state = xfw_workspace_wayland_get_state;
     iface->get_number = xfw_workspace_wayland_get_number;
     iface->get_workspace_group = xfw_workspace_wayland_get_workspace_group;
+    iface->get_layout_row = xfw_workspace_wayland_get_layout_row;
+    iface->get_layout_column = xfw_workspace_wayland_get_layout_column;
+    iface->get_neighbor = xfw_workspace_wayland_get_neighbor;
     iface->activate = xfw_workspace_wayland_activate;
     iface->remove = xfw_workspace_wayland_remove;
 }
@@ -232,6 +239,44 @@ xfw_workspace_wayland_get_number(XfwWorkspace *workspace) {
 static XfwWorkspaceGroup *
 xfw_workspace_wayland_get_workspace_group(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_WAYLAND(workspace)->priv->group;
+}
+
+gint
+xfw_workspace_wayland_get_layout_row(XfwWorkspace *workspace) {
+    return 0;
+}
+
+gint
+xfw_workspace_wayland_get_layout_column(XfwWorkspace *workspace) {
+    return xfw_workspace_wayland_get_number(workspace);
+}
+
+XfwWorkspace *
+xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) {
+    switch (direction) {
+        case XFW_DIRECTION_UP:
+        case XFW_DIRECTION_DOWN:
+            return NULL;
+
+        case XFW_DIRECTION_LEFT: {
+            gint num = xfw_workspace_wayland_get_layout_column(workspace);
+            if (num < 1) {
+                return NULL;
+            } else {
+                GList *workspaces = xfw_workspace_group_list_workspaces(XFW_WORKSPACE_WAYLAND(workspace)->priv->group);
+                return XFW_WORKSPACE(g_list_nth_data(workspaces, num - 1));
+            }
+        }
+
+        case XFW_DIRECTION_RIGHT: {
+            gint num = xfw_workspace_wayland_get_layout_column(workspace);
+            GList *workspaces = xfw_workspace_group_list_workspaces(XFW_WORKSPACE_WAYLAND(workspace)->priv->group);
+            return XFW_WORKSPACE(g_list_nth_data(workspaces, num + 1));
+        }
+    }
+
+    g_critical("Invalid XfwDirection %d", direction);
+    return NULL;
 }
 
 static gboolean

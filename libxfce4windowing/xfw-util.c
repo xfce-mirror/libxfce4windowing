@@ -42,6 +42,12 @@
 
 #define WINDOWING_UNKNOWN 0
 
+G_DEFINE_ENUM_TYPE(XfwDirection, xfw_direction,
+                   G_DEFINE_ENUM_VALUE(XFW_DIRECTION_UP, "up"),
+                   G_DEFINE_ENUM_VALUE(XFW_DIRECTION_DOWN, "down"),
+                   G_DEFINE_ENUM_VALUE(XFW_DIRECTION_LEFT, "left"),
+                   G_DEFINE_ENUM_VALUE(XFW_DIRECTION_RIGHT, "right"));
+
 /**
  * xfw_windowing_get:
  *
