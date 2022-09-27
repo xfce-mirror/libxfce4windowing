@@ -3,7 +3,7 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libxfce4windowing
+Name: libxfce4windowing-0
 Description: X11/Wayland windowing utility library for Xfce
 Requires: gdk-3.0
 Version: @PACKAGE_VERSION@
