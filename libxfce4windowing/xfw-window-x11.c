@@ -56,15 +56,15 @@ static XfwWindowCapabilities xfw_window_x11_get_capabilities(XfwWindow *window);
 static GdkRectangle *xfw_window_x11_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_x11_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
-static void xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
-static void xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
-static void xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
-static void xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
-static void xfw_window_x11_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
-static void xfw_window_x11_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error);
-static void xfw_window_x11_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
-static void xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
-static void xfw_window_x11_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error);
+static gboolean xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
+static gboolean xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
+static gboolean xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
+static gboolean xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
+static gboolean xfw_window_x11_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
+static gboolean xfw_window_x11_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error);
+static gboolean xfw_window_x11_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
+static gboolean xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
+static gboolean xfw_window_x11_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error);
 
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
@@ -297,70 +297,157 @@ xfw_window_x11_get_workspace(XfwWindow *window) {
     }
 }
 
-static void
+static gboolean
 xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
     wnck_window_activate(priv->wnck_window, (guint32)event_timestamp);
+    return TRUE;
 }
 
-static void
+static gboolean
 xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
     wnck_window_close(priv->wnck_window, (guint32)event_timestamp);
+    return TRUE;
 }
 
-static void
+static gboolean
 xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
     if (is_minimized) {
-        wnck_window_minimize(priv->wnck_window);
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE) != 0) {
+            wnck_window_minimize(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being minimized");
+            }
+            return FALSE;
+        }
     } else {
-        wnck_window_unminimize(priv->wnck_window, GDK_CURRENT_TIME);
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE) != 0) {
+            wnck_window_unminimize(priv->wnck_window, GDK_CURRENT_TIME);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being unminimized");
+            }
+            return FALSE;
+        }
     }
 }
 
-static void
+static gboolean
 xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
     if (is_maximized) {
-        wnck_window_maximize(priv->wnck_window);
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE) != 0) {
+            wnck_window_maximize(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being maximized");
+            }
+            return FALSE;
+        }
     } else {
-        wnck_window_unmaximize(priv->wnck_window);
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE) != 0) {
+            wnck_window_unmaximize(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being unmaximized");
+            }
+            return FALSE;
+        }
     }
 }
 
-static void
+static gboolean
 xfw_window_x11_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error) {
-    wnck_window_set_fullscreen(XFW_WINDOW_X11(window)->priv->wnck_window, is_fullscreen);
+    XfwWindowX11 *xwindow = XFW_WINDOW_X11(window);
+
+    if (is_fullscreen && (xwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN) == 0) {
+        if (error != NULL) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being set fullscreen");
+        }
+        return FALSE;
+    } else if (!is_fullscreen && (xwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN) == 0) {
+        if (error != NULL) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being unset fullscreen");
+        }
+        return FALSE;
+    } else {
+        wnck_window_set_fullscreen(xwindow->priv->wnck_window, is_fullscreen);
+        return TRUE;
+    }
 }
 
-static void
+static gboolean
 xfw_window_x11_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error) {
     wnck_window_set_skip_pager(XFW_WINDOW_X11(window)->priv->wnck_window, is_skip_pager);
+    return TRUE;
 }
 
-static void
+static gboolean
 xfw_window_x11_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error) {
     wnck_window_set_skip_tasklist(XFW_WINDOW_X11(window)->priv->wnck_window, is_skip_tasklist);
+    return TRUE;
 }
 
-static void
+static gboolean
 xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
     if (is_pinned) {
-        wnck_window_pin(priv->wnck_window);
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_PIN) != 0) {
+            wnck_window_pin(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being pinned");
+            }
+            return FALSE;
+        }
     } else {
-        wnck_window_unpin(priv->wnck_window);
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNPIN) != 0) {
+            wnck_window_unpin(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being unpinned");
+            }
+            return FALSE;
+        }
     }
 }
 
-static void
+static gboolean
 xfw_window_x11_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
     if (is_shaded) {
-        wnck_window_shade(priv->wnck_window);
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_SHADE) != 0) {
+            wnck_window_shade(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being shaded");
+            }
+            return FALSE;
+        }
     } else {
-        wnck_window_unshade(priv->wnck_window);
+        if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNSHADE) != 0) {
+            wnck_window_unshade(priv->wnck_window);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being unshaded");
+            }
+            return FALSE;
+        }
     }
 }
 

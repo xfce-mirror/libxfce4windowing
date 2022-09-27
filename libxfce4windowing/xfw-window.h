@@ -109,15 +109,15 @@ struct _XfwWindowIface {
     XfwScreen *(*get_screen)(XfwWindow *window);
     XfwWorkspace *(*get_workspace)(XfwWindow *window);
 
-    void (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
-    void (*close)(XfwWindow *window, guint64 event_timestamp, GError **error);
-    void (*set_minimized)(XfwWindow *window, gboolean is_minimized, GError **error);
-    void (*set_maximized)(XfwWindow *window, gboolean is_maximized, GError **error);
-    void (*set_fullscreen)(XfwWindow *window, gboolean is_fullscreen, GError **error);
-    void (*set_skip_pager)(XfwWindow *window, gboolean is_skip_pager, GError **error);
-    void (*set_skip_tasklist)(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
-    void (*set_pinned)(XfwWindow *window, gboolean is_pinned, GError **error);
-    void (*set_shaded)(XfwWindow *window, gboolean is_shaded, GError **error);
+    gboolean (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
+    gboolean (*close)(XfwWindow *window, guint64 event_timestamp, GError **error);
+    gboolean (*set_minimized)(XfwWindow *window, gboolean is_minimized, GError **error);
+    gboolean (*set_maximized)(XfwWindow *window, gboolean is_maximized, GError **error);
+    gboolean (*set_fullscreen)(XfwWindow *window, gboolean is_fullscreen, GError **error);
+    gboolean (*set_skip_pager)(XfwWindow *window, gboolean is_skip_pager, GError **error);
+    gboolean (*set_skip_tasklist)(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
+    gboolean (*set_pinned)(XfwWindow *window, gboolean is_pinned, GError **error);
+    gboolean (*set_shaded)(XfwWindow *window, gboolean is_shaded, GError **error);
 };
 
 GType xfw_window_get_type(void) G_GNUC_CONST;
@@ -135,16 +135,16 @@ GdkRectangle *xfw_window_get_geometry(XfwWindow *window);
 XfwScreen *xfw_window_get_screen(XfwWindow *window);
 XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);
 
-void xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
-void xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error);
+gboolean xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
+gboolean xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 
-void xfw_window_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
-void xfw_window_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
-void xfw_window_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
-void xfw_window_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error);
-void xfw_window_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
-void xfw_window_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
-void xfw_window_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error);
+gboolean xfw_window_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
+gboolean xfw_window_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
+gboolean xfw_window_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
+gboolean xfw_window_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error);
+gboolean xfw_window_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
+gboolean xfw_window_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
+gboolean xfw_window_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error);
 
 gboolean xfw_window_is_minimized(XfwWindow *window);
 gboolean xfw_window_is_maximized(XfwWindow *window);

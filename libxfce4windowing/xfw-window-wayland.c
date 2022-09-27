@@ -58,15 +58,15 @@ static XfwWindowCapabilities xfw_window_wayland_get_capabilities(XfwWindow *wind
 static GdkRectangle *xfw_window_wayland_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_wayland_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
-static void xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
-static void xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error);
-static void xfw_window_wayland_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
-static void xfw_window_wayland_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
-static void xfw_window_wayland_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
-static void xfw_window_wayland_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error);
-static void xfw_window_wayland_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
-static void xfw_window_wayland_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
-static void xfw_window_wayland_set_shaded(XfwWindow *window, gboolean is_pinned, GError **error);
+static gboolean xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
+static gboolean xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error);
+static gboolean xfw_window_wayland_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
+static gboolean xfw_window_wayland_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
+static gboolean xfw_window_wayland_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
+static gboolean xfw_window_wayland_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error);
+static gboolean xfw_window_wayland_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
+static gboolean xfw_window_wayland_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error);
+static gboolean xfw_window_wayland_set_shaded(XfwWindow *window, gboolean is_pinned, GError **error);
 
 static void toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *app_id);
 static void toplevel_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *title);
@@ -275,73 +275,130 @@ xfw_window_wayland_get_workspace(XfwWindow *window) {
     return _xfw_screen_wayland_get_window_workspace(XFW_SCREEN_WAYLAND(XFW_WINDOW_WAYLAND(window)->priv->screen), window);
 }
 
-static void
+static gboolean
 xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error) {
     // FIXME: make sure NULL for seat means "compositor picks what seat", and doesn't crash or fail
     zwlr_foreign_toplevel_handle_v1_activate(XFW_WINDOW_WAYLAND(window)->priv->handle, NULL);
+    return TRUE;
 }
 
-static void
+static gboolean
 xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
     zwlr_foreign_toplevel_handle_v1_close(XFW_WINDOW_WAYLAND(window)->priv->handle);
+    return TRUE;
 }
 
-static void
+static gboolean
 xfw_window_wayland_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error) {
     XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
+
     if (is_minimized) {
-        zwlr_foreign_toplevel_handle_v1_set_minimized(wwindow->priv->handle);
+        if ((wwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE) != 0) {
+            zwlr_foreign_toplevel_handle_v1_set_minimized(wwindow->priv->handle);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being minimized");
+            }
+            return FALSE;
+        }
     } else {
-        zwlr_foreign_toplevel_handle_v1_unset_minimized(wwindow->priv->handle);
+        if ((wwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE) != 0) {
+            zwlr_foreign_toplevel_handle_v1_unset_minimized(wwindow->priv->handle);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being unminimized");
+            }
+            return FALSE;
+        }
     }
 }
 
-static void
+static gboolean
 xfw_window_wayland_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error) {
     XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
+
     if (is_maximized) {
-        zwlr_foreign_toplevel_handle_v1_set_maximized(wwindow->priv->handle);
+        if ((wwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE) != 0) {
+            zwlr_foreign_toplevel_handle_v1_set_maximized(wwindow->priv->handle);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being maximized");
+            }
+            return FALSE;
+        }
     } else {
-        zwlr_foreign_toplevel_handle_v1_unset_maximized(wwindow->priv->handle);
+        if ((wwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE) != 0) {
+            zwlr_foreign_toplevel_handle_v1_unset_maximized(wwindow->priv->handle);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being unmaximized");
+            }
+            return FALSE;
+        }
     }
 }
 
-static void
+static gboolean
 xfw_window_wayland_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error) {
     XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
+
     if (is_fullscreen) {
-        zwlr_foreign_toplevel_handle_v1_set_fullscreen(wwindow->priv->handle, NULL);
+        if ((wwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN) != 0) {
+            zwlr_foreign_toplevel_handle_v1_set_fullscreen(wwindow->priv->handle, NULL);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being set fullscreen");
+            }
+            return FALSE;
+        }
     } else {
-        zwlr_foreign_toplevel_handle_v1_unset_fullscreen(wwindow->priv->handle);
+        if ((wwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN) != 0) {
+            zwlr_foreign_toplevel_handle_v1_unset_fullscreen(wwindow->priv->handle);
+            return TRUE;
+        } else {
+            if (error != NULL) {
+                *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This window does not currently support being unset fullscreen");
+            }
+            return FALSE;
+        }
     }
 }
 
-static void
+static gboolean
 xfw_window_wayland_set_skip_pager(XfwWindow *window, gboolean is_skip_pager, GError **error) {
     if (error != NULL) {
         *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Pager skipping is not supported in Wayland");
     }
+    return FALSE;
 }
 
-static void
+static gboolean
 xfw_window_wayland_set_skip_tasklist(XfwWindow *window, gboolean is_skip_tasklist, GError **error) {
     if (error != NULL) {
         *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Tasklist skipping is not supported in Wayland");
     }
+    return FALSE;
 }
 
-static void
+static gboolean
 xfw_window_wayland_set_pinned(XfwWindow *window, gboolean is_pinned, GError **error) {
     if (error != NULL) {
         *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Window pinning is not supported on Wayland");
     }
+    return FALSE;
 }
 
-static void
+static gboolean
 xfw_window_wayland_set_shaded(XfwWindow *window, gboolean is_pinned, GError **error) {
     if (error != NULL) {
         *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Window shading is not supported on Wayland");
     }
+    return FALSE;
 }
 
 static void
