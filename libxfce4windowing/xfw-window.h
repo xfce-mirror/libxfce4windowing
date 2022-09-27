@@ -55,6 +55,8 @@ typedef enum {
     XFW_WINDOW_STATE_SKIP_TASKLIST = (1 << 5),
     XFW_WINDOW_STATE_PINNED = (1 << 6),
     XFW_WINDOW_STATE_SHADED = (1 << 7),
+    XFW_WINDOW_STATE_ABOVE = (1 << 8),
+    XFW_WINDOW_STATE_BELOW = (1 << 9),
 } XfwWindowState;
 
 typedef enum {
@@ -69,6 +71,10 @@ typedef enum {
     XFW_WINDOW_CAPABILITIES_CAN_UNPIN = (1 << 7),
     XFW_WINDOW_CAPABILITIES_CAN_SHADE = (1 << 8),
     XFW_WINDOW_CAPABILITIES_CAN_UNSHADE = (1 << 9),
+    XFW_WINDOW_CAPABILITIES_CAN_MOVE = (1 << 10),
+    XFW_WINDOW_CAPABILITIES_CAN_RESIZE = (1 << 11),
+    XFW_WINDOW_CAPABILITIES_CAN_PLACE_ABOVE = (1 << 12),
+    XFW_WINDOW_CAPABILITIES_CAN_PLACE_BELOW = (1 << 13),
 } XfwWindowCapabilities;
 
 typedef enum {
