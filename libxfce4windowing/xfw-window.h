@@ -38,6 +38,7 @@ typedef struct _XfwScreen XfwScreen;
 #define XFW_IS_WINDOW(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WINDOW))
 #define XFW_WINDOW_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE((obj), XFW_TYPE_WINDOW, XfwWindowIface))
 
+#define XFW_TYPE_WINDOW_TYPE         (xfw_window_type_get_type())
 #define XFW_TYPE_WINDOW_STATE        (xfw_window_state_get_type())
 #define XFW_TYPE_WINDOW_CAPABILITIES (xfw_window_capabilities_get_type())
 
@@ -67,6 +68,17 @@ typedef enum {
     XFW_WINDOW_CAPABILITIES_CAN_UNPIN = (1 << 7),
 } XfwWindowCapabilities;
 
+typedef enum {
+  XFW_WINDOW_TYPE_NORMAL = 0,
+  XFW_WINDOW_TYPE_DESKTOP = 1,
+  XFW_WINDOW_TYPE_DOCK = 2,
+  XFW_WINDOW_TYPE_DIALOG = 3,
+  XFW_WINDOW_TYPE_TOOLBAR = 4,
+  XFW_WINDOW_TYPE_MENU = 5,
+  XFW_WINDOW_TYPE_UTILITY = 6,
+  XFW_WINDOW_TYPE_SPLASHSCREEN = 7,
+} XfwWindowType;
+
 struct _XfwWindowIface {
     /*< private >*/
     GTypeInterface g_iface;
@@ -76,6 +88,7 @@ struct _XfwWindowIface {
     /* Signals */
     void (*name_changed)(XfwWindow *window);
     void (*icon_changed)(XfwWindow *window);
+    void (*type_changed)(XfwWindow *window, XfwWindowType old_type);
     void (*state_changed)(XfwWindow *window, XfwWindowState changed_mask, XfwWindowState new_state);
     void (*capabilities_changed)(XfwWindow *window, XfwWindowCapabilities changed_mask, XfwWindowCapabilities new_capabilities);
     void (*geometry_changed)(XfwWindow *window);
@@ -86,6 +99,7 @@ struct _XfwWindowIface {
     guint64 (*get_id)(XfwWindow *window);
     const gchar *(*get_name)(XfwWindow *window);
     GdkPixbuf *(*get_icon)(XfwWindow *window);
+    XfwWindowType (*get_window_type)(XfwWindow *window);
     XfwWindowState (*get_state)(XfwWindow *window);
     XfwWindowCapabilities (*get_capabilities)(XfwWindow *window);
     GdkRectangle *(*get_geometry)(XfwWindow *window);
@@ -103,12 +117,14 @@ struct _XfwWindowIface {
 };
 
 GType xfw_window_get_type(void) G_GNUC_CONST;
+GType xfw_window_type_get_type(void) G_GNUC_CONST;
 GType xfw_window_state_get_type(void) G_GNUC_CONST;
 GType xfw_window_capabilities_get_type(void) G_GNUC_CONST;
 
 guint64 xfw_window_get_id(XfwWindow *window);
 const gchar *xfw_window_get_name(XfwWindow *window);
 GdkPixbuf *xfw_window_get_icon(XfwWindow *window);
+XfwWindowType xfw_window_get_window_type(XfwWindow *window);
 XfwWindowState xfw_window_get_state(XfwWindow *window);
 XfwWindowCapabilities xfw_window_get_capabilities(XfwWindow *window);
 GdkRectangle *xfw_window_get_geometry(XfwWindow *window);

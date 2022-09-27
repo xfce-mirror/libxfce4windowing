@@ -51,6 +51,16 @@ G_DEFINE_FLAGS_TYPE(XfwWindowCapabilities, xfw_window_capabilities,
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN, "can-unfullscreen"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNPIN, "can-unpin"))
 
+G_DEFINE_ENUM_TYPE(XfwWindowType, xfw_window_type,
+  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_NORMAL, "normal"),
+  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_DESKTOP, "desktop"),
+  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_DOCK, "dock"),
+  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_DIALOG, "dialog"),
+  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_TOOLBAR, "toolbar"),
+  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_MENU, "menu"),
+  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_UTILITY, "utility"),
+  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_SPLASHSCREEN, "splashscreen"))
+
 static void
 xfw_window_default_init(XfwWindowIface *iface) {
     g_signal_new("name-changed",
@@ -67,6 +77,14 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+    g_signal_new("type-changed",
+                 XFW_TYPE_WINDOW,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWindowIface, type_changed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__ENUM,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_WINDOW_TYPE);
     g_signal_new("state-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -132,12 +150,19 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                             GDK_TYPE_PIXBUF,
                                                             G_PARAM_READABLE));
     g_object_interface_install_property(iface,
-                                        g_param_spec_flags("state",
-                                                          "state",
-                                                          "state",
-                                                          XFW_TYPE_WINDOW_STATE,
-                                                          XFW_WINDOW_STATE_NONE,
+                                        g_param_spec_enum("type",
+                                                          "type",
+                                                          "type",
+                                                          XFW_TYPE_WINDOW_TYPE,
+                                                          XFW_WINDOW_TYPE_NORMAL,
                                                           G_PARAM_READABLE));
+    g_object_interface_install_property(iface,
+                                        g_param_spec_flags("state",
+                                                           "state",
+                                                           "state",
+                                                           XFW_TYPE_WINDOW_STATE,
+                                                           XFW_WINDOW_STATE_NONE,
+                                                           G_PARAM_READABLE));
     g_object_interface_install_property(iface,
                                         g_param_spec_flags("capabilities",
                                                            "capabilities",
@@ -175,6 +200,14 @@ xfw_window_get_icon(XfwWindow *window) {
     g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
     iface = XFW_WINDOW_GET_IFACE(window);
     return (*iface->get_icon)(window);
+}
+
+XfwWindowType
+xfw_window_get_window_type(XfwWindow *window) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), XFW_WINDOW_TYPE_NORMAL);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->get_window_type)(window);
 }
 
 XfwWindowState
@@ -274,6 +307,7 @@ _xfw_window_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WINDOW_PROP_ID, "id");
     g_object_class_override_property(gklass, WINDOW_PROP_NAME, "name");
     g_object_class_override_property(gklass, WINDOW_PROP_ICON, "icon");
+    g_object_class_override_property(gklass, WINDOW_PROP_TYPE, "type");
     g_object_class_override_property(gklass, WINDOW_PROP_STATE, "state");
     g_object_class_override_property(gklass, WINDOW_PROP_CAPABILITIES, "capabilities");
     g_object_class_override_property(gklass, WINDOW_PROP_WORKSPACE, "workspace");

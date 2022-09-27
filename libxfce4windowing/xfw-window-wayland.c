@@ -52,6 +52,7 @@ static void xfw_window_wayland_finalize(GObject *obj);
 static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window);
+static XfwWindowType xfw_window_wayland_get_window_type(XfwWindow *window);
 static XfwWindowState xfw_window_wayland_get_state(XfwWindow *window);
 static XfwWindowCapabilities xfw_window_wayland_get_capabilities(XfwWindow *window);
 static GdkRectangle *xfw_window_wayland_get_geometry(XfwWindow *window);
@@ -136,6 +137,7 @@ xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value
         case WINDOW_PROP_ID:
         case WINDOW_PROP_NAME:
         case WINDOW_PROP_ICON:
+        case WINDOW_PROP_TYPE:
         case WINDOW_PROP_STATE:
         case WINDOW_PROP_CAPABILITIES:
         case WINDOW_PROP_WORKSPACE:
@@ -172,6 +174,10 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
             g_value_set_object(value, xfw_window_wayland_get_icon(window));
             break;
 
+        case WINDOW_PROP_TYPE:
+            g_value_set_enum(value, xfw_window_wayland_get_window_type(window));
+            break;
+
         case WINDOW_PROP_STATE:
             g_value_set_flags(value, xfw_window_wayland_get_state(window));
             break;
@@ -204,6 +210,7 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->get_id = xfw_window_wayland_get_id;
     iface->get_name = xfw_window_wayland_get_name;
     iface->get_icon = xfw_window_wayland_get_icon;
+    iface->get_window_type = xfw_window_wayland_get_window_type;
     iface->get_state = xfw_window_wayland_get_state;
     iface->get_capabilities = xfw_window_wayland_get_capabilities;
     iface->get_geometry = xfw_window_wayland_get_geometry;
@@ -232,6 +239,12 @@ xfw_window_wayland_get_name(XfwWindow *window) {
 static GdkPixbuf *
 xfw_window_wayland_get_icon(XfwWindow *window) {
     return NULL;
+}
+
+static XfwWindowType
+xfw_window_wayland_get_window_type(XfwWindow *window) {
+    g_message("Window types are not supported on Wayland");
+    return XFW_WINDOW_TYPE_NORMAL;
 }
 
 static XfwWindowState

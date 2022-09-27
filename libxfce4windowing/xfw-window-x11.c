@@ -36,6 +36,7 @@ enum {
 struct _XfwWindowX11Private {
     XfwScreen *screen;
     WnckWindow *wnck_window;
+    XfwWindowType window_type;
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
     GdkRectangle geometry;
@@ -49,6 +50,7 @@ static void xfw_window_x11_finalize(GObject *obj);
 static guint64 xfw_window_x11_get_id(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window);
+static XfwWindowType xfw_window_x11_get_window_type(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
 static XfwWindowCapabilities xfw_window_x11_get_capabilities(XfwWindow *window);
 static GdkRectangle *xfw_window_x11_get_geometry(XfwWindow *window);
@@ -65,11 +67,13 @@ static void xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned, GEr
 
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
+static void type_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void state_changed(WnckWindow *wnck_window, WnckWindowState changed_mask, WnckWindowState new_state, XfwWindowX11 *window);
 static void actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, WnckWindowActions wnck_new_actions, XfwWindowX11 *window);
 static void geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 
+static XfwWindowType convert_type(WnckWindowType wnck_type);
 static XfwWindowState convert_state(WnckWindow *wnck_window, WnckWindowState wnck_state);
 static XfwWindowCapabilities convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions);
 
@@ -105,11 +109,13 @@ xfw_window_x11_init(XfwWindowX11 *window) {
 static void xfw_window_x11_constructed(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
 
+    window->priv->window_type = convert_type(wnck_window_get_window_type(window->priv->wnck_window));
     window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
     window->priv->capabilities = convert_capabilities(window->priv->wnck_window, wnck_window_get_actions(window->priv->wnck_window));
 
     g_signal_connect(window->priv->wnck_window, "name-changed", (GCallback)name_changed, window);
     g_signal_connect(window->priv->wnck_window, "icon-changed", (GCallback)icon_changed, window);
+    g_signal_connect(window->priv->wnck_window, "type-changed", (GCallback)type_changed, window);
     g_signal_connect(window->priv->wnck_window, "state-changed", (GCallback)state_changed, window);
     g_signal_connect(window->priv->wnck_window, "actions-changed", (GCallback)actions_changed, window);
     g_signal_connect(window->priv->wnck_window, "geometry-changed", (GCallback)geometry_changed, window);
@@ -132,6 +138,7 @@ xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GP
         case WINDOW_PROP_ID:
         case WINDOW_PROP_NAME:
         case WINDOW_PROP_ICON:
+        case WINDOW_PROP_TYPE:
         case WINDOW_PROP_STATE:
         case WINDOW_PROP_CAPABILITIES:
         case WINDOW_PROP_WORKSPACE:
@@ -168,6 +175,10 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
             g_value_set_object(value, xfw_window_x11_get_icon(window));
             break;
 
+        case WINDOW_PROP_TYPE:
+            g_value_set_enum(value, xfw_window_x11_get_window_type(window));
+            break;
+
         case WINDOW_PROP_STATE:
             g_value_set_flags(value, xfw_window_x11_get_state(window));
             break;
@@ -192,6 +203,7 @@ xfw_window_x11_finalize(GObject *obj) {
 
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, name_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, icon_changed, window);
+    g_signal_handlers_disconnect_by_func(window->priv->wnck_window, type_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, state_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, actions_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
@@ -205,6 +217,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_id = xfw_window_x11_get_id;
     iface->get_name = xfw_window_x11_get_name;
     iface->get_icon = xfw_window_x11_get_icon;
+    iface->get_window_type = xfw_window_x11_get_window_type;
     iface->get_state = xfw_window_x11_get_state;
     iface->get_capabilities = xfw_window_x11_get_capabilities;
     iface->get_geometry = xfw_window_x11_get_geometry;
@@ -244,6 +257,11 @@ xfw_window_x11_get_icon(XfwWindow *window) {
     } else {
         return mini_icon;
     }
+}
+
+static XfwWindowType
+xfw_window_x11_get_window_type(XfwWindow *window) {
+    return XFW_WINDOW_X11(window)->priv->window_type;
 }
 
 static XfwWindowState
@@ -347,6 +365,14 @@ icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
 }
 
 static void
+type_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
+    XfwWindowType old_type = window->priv->window_type;
+    window->priv->window_type = convert_type(wnck_window_get_window_type(window->priv->wnck_window));
+    g_object_notify(G_OBJECT(window), "type");
+    g_signal_emit_by_name("window", "type-changed", old_type);
+}
+
+static void
 state_changed(WnckWindow *wnck_window, WnckWindowState wnck_changed_mask, WnckWindowState wnck_new_state, XfwWindowX11 *window) {
     XfwWindowState old_state = window->priv->state;
     XfwWindowState new_state = convert_state(wnck_window, wnck_new_state);
@@ -380,6 +406,29 @@ static void
 workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     g_object_notify(G_OBJECT(window), "workspace");
     g_signal_emit_by_name(window, "workspace-changed");
+}
+
+static XfwWindowType
+convert_type(WnckWindowType wnck_type) {
+    switch (wnck_type) {
+        case WNCK_WINDOW_NORMAL:
+            return XFW_WINDOW_TYPE_NORMAL;
+        case WNCK_WINDOW_DESKTOP:
+            return XFW_WINDOW_TYPE_DESKTOP;
+        case WNCK_WINDOW_DOCK:
+            return XFW_WINDOW_TYPE_DOCK;
+        case WNCK_WINDOW_DIALOG:
+            return XFW_WINDOW_TYPE_DIALOG;
+        case WNCK_WINDOW_TOOLBAR:
+            return XFW_WINDOW_TYPE_TOOLBAR;
+        case WNCK_WINDOW_MENU:
+            return XFW_WINDOW_TYPE_MENU;
+        case WNCK_WINDOW_UTILITY:
+            return XFW_WINDOW_TYPE_UTILITY;
+        case WNCK_WINDOW_SPLASHSCREEN:
+            return XFW_WINDOW_TYPE_SPLASHSCREEN;
+    }
+    return XFW_WINDOW_TYPE_NORMAL;
 }
 
 static const struct {
