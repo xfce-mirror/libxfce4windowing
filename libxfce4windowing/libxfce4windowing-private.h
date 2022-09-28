@@ -65,6 +65,7 @@ enum {
     WINDOW_PROP_STATE,
     WINDOW_PROP_CAPABILITIES,
     WINDOW_PROP_WORKSPACE,
+    WINDOW_PROP_MONITORS,
 };
 
 void _libxfce4windowing_init(void);
