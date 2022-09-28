@@ -168,21 +168,20 @@ xfw_workspace_manager_x11_list_workspace_groups(XfwWorkspaceManager *manager) {
 }
 
 static void
-active_workspace_changed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorkspaceManagerX11 *manager) {
-    XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(g_hash_table_lookup(manager->priv->wnck_workspaces, wnck_workspace));
-    if (workspace != NULL) {
-        XfwWorkspaceGroup *group = XFW_WORKSPACE_GROUP(manager->priv->groups->data);
-        XfwWorkspace *old_active_workspace = xfw_workspace_group_get_active_workspace(group);
+active_workspace_changed(WnckScreen *screen, WnckWorkspace *previous_wnck_workspace, XfwWorkspaceManagerX11 *manager) {
+    XfwWorkspaceX11 *previous_workspace = g_hash_table_lookup(manager->priv->wnck_workspaces, previous_wnck_workspace);
+    XfwWorkspaceGroup *group = XFW_WORKSPACE_GROUP(manager->priv->groups->data);
+    WnckWorkspace *active_wnck_workspace = wnck_screen_get_active_workspace(screen);
+    XfwWorkspace *active_workspace = g_hash_table_lookup(manager->priv->wnck_workspaces, active_wnck_workspace);
 
-        if (old_active_workspace != NULL) {
-            g_object_notify(G_OBJECT(old_active_workspace), "state");
-            g_signal_emit_by_name(old_active_workspace, "state-changed", XFW_WORKSPACE_STATE_ACTIVE);
-        }
-
-        g_object_notify(G_OBJECT(workspace), "state");
-        g_signal_emit_by_name(workspace, "state-changed", XFW_WORKSPACE_STATE_NONE);
-        _xfw_workspace_group_dummy_set_active_workspace(XFW_WORKSPACE_GROUP_DUMMY(group), XFW_WORKSPACE(workspace));
+    _xfw_workspace_group_dummy_set_active_workspace(XFW_WORKSPACE_GROUP_DUMMY(group), XFW_WORKSPACE(active_workspace));
+    if (previous_workspace != NULL) {
+        g_object_notify(G_OBJECT(previous_workspace), "state");
+        g_signal_emit_by_name(previous_workspace, "state-changed", XFW_WORKSPACE_STATE_ACTIVE);
     }
+
+    g_object_notify(G_OBJECT(active_workspace), "state");
+    g_signal_emit_by_name(active_workspace, "state-changed", XFW_WORKSPACE_STATE_NONE);
 }
 
 static void
