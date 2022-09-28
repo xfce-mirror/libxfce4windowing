@@ -41,6 +41,7 @@ struct _XfwWindowX11Private {
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
     GdkRectangle geometry;
+    XfwWorkspace *workspace;
 };
 
 static void xfw_window_x11_window_init(XfwWindowIface *iface);
@@ -117,6 +118,8 @@ static void xfw_window_x11_constructed(GObject *obj) {
     window->priv->window_type = convert_type(wnck_window_get_window_type(window->priv->wnck_window));
     window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
     window->priv->capabilities = convert_capabilities(window->priv->wnck_window, wnck_window_get_actions(window->priv->wnck_window));
+    window->priv->workspace = _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(window->priv->screen),
+                                                                           wnck_window_get_workspace(window->priv->wnck_window));
 
     g_signal_connect(window->priv->wnck_window, "name-changed", (GCallback)name_changed, window);
     g_signal_connect(window->priv->wnck_window, "icon-changed", (GCallback)icon_changed, window);
@@ -295,13 +298,7 @@ xfw_window_x11_get_screen(XfwWindow *window) {
 
 static XfwWorkspace *
 xfw_window_x11_get_workspace(XfwWindow *window) {
-    XfwWindowX11 *xwindow = XFW_WINDOW_X11(window);
-    WnckWorkspace *workspace = wnck_window_get_workspace(xwindow->priv->wnck_window);
-    if (workspace != NULL) {
-        return _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(xwindow->priv->screen), workspace);
-    } else {
-        return NULL;
-    }
+    return XFW_WINDOW_X11(window)->priv->workspace;
 }
 
 static gboolean
@@ -575,8 +572,25 @@ geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
 
 static void
 workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
-    g_object_notify(G_OBJECT(window), "workspace");
-    g_signal_emit_by_name(window, "workspace-changed");
+    XfwWorkspace *new_workspace = _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(window->priv->screen),
+                                                                               wnck_window_get_workspace(wnck_window));
+    XfwWorkspace *old_workspace = window->priv->workspace;
+
+    if (old_workspace != new_workspace) {
+        window->priv->workspace = new_workspace;
+    }
+
+    // workspace-changed is also fired when the windows pinned state changes
+    if ((!wnck_window_is_pinned(wnck_window) && (window->priv->state & XFW_WINDOW_STATE_PINNED) != 0)
+        || (wnck_window_is_pinned(wnck_window) && (window->priv->state & XFW_WINDOW_STATE_PINNED) == 0))
+    {
+        state_changed(wnck_window, 0, wnck_window_get_state(wnck_window), window);
+    }
+
+    if (old_workspace != new_workspace) {
+        g_object_notify(G_OBJECT(window), "workspace");
+        g_signal_emit_by_name(window, "workspace-changed");
+    }
 }
 
 static XfwWindowType
@@ -611,7 +625,6 @@ static const struct {
     { WNCK_WINDOW_STATE_FULLSCREEN, XFW_WINDOW_STATE_FULLSCREEN },
     { WNCK_WINDOW_STATE_SKIP_PAGER, XFW_WINDOW_STATE_SKIP_PAGER },
     { WNCK_WINDOW_STATE_SKIP_TASKLIST, XFW_WINDOW_STATE_SKIP_TASKLIST },
-    { WNCK_WINDOW_STATE_STICKY, XFW_WINDOW_STATE_PINNED },
     { WNCK_WINDOW_STATE_ABOVE, XFW_WINDOW_STATE_ABOVE },
     { WNCK_WINDOW_STATE_BELOW, XFW_WINDOW_STATE_BELOW },
 };
@@ -626,6 +639,9 @@ convert_state(WnckWindow *wnck_window, WnckWindowState wnck_state) {
     }
     if (wnck_window_is_active(wnck_window)) {
         state |= XFW_WINDOW_STATE_ACTIVE;
+    }
+    if (wnck_window_is_pinned(wnck_window)) {
+        state |= XFW_WINDOW_STATE_PINNED;
     }
     return state;
 }
