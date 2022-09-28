@@ -21,6 +21,7 @@
 
 #include <gio/gdesktopappinfo.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkwayland.h>
 
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 
@@ -48,6 +49,7 @@ struct _XfwWindowWaylandPrivate {
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
     GdkRectangle geometry;  // unfortunately unsupported
+    GList *monitors;
 };
 
 static void xfw_window_wayland_window_init(XfwWindowIface *iface);
@@ -64,6 +66,7 @@ static XfwWindowCapabilities xfw_window_wayland_get_capabilities(XfwWindow *wind
 static GdkRectangle *xfw_window_wayland_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_wayland_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
+static GList *xfw_window_wayland_get_monitors(XfwWindow *window);
 static gboolean xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_wayland_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
@@ -151,6 +154,7 @@ xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value
         case WINDOW_PROP_STATE:
         case WINDOW_PROP_CAPABILITIES:
         case WINDOW_PROP_WORKSPACE:
+        case WINDOW_PROP_MONITORS:
             break;
 
         default:
@@ -200,6 +204,10 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
             g_value_set_object(value, xfw_window_wayland_get_workspace(window));
             break;
 
+        case WINDOW_PROP_MONITORS:
+            g_value_set_pointer(value, xfw_window_wayland_get_monitors(window));
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
             break;
@@ -216,6 +224,7 @@ xfw_window_wayland_finalize(GObject *obj) {
     if (window->priv->icon) {
         g_object_unref(window->priv->icon);
     }
+    g_list_free(window->priv->monitors);
 
     G_OBJECT_CLASS(xfw_window_wayland_parent_class)->finalize(obj);
 }
@@ -231,6 +240,7 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->get_geometry = xfw_window_wayland_get_geometry;
     iface->get_screen = xfw_window_wayland_get_screen;
     iface->get_workspace = xfw_window_wayland_get_workspace;
+    iface->get_monitors = xfw_window_wayland_get_monitors;
     iface->activate = xfw_window_wayland_activate;
     iface->close = xfw_window_wayland_close;
     iface->move_to_workspace = xfw_window_wayland_move_to_workspace;
@@ -309,6 +319,11 @@ xfw_window_wayland_get_screen(XfwWindow *window) {
 static XfwWorkspace *
 xfw_window_wayland_get_workspace(XfwWindow *window) {
     return _xfw_screen_wayland_get_window_workspace(XFW_SCREEN_WAYLAND(XFW_WINDOW_WAYLAND(window)->priv->screen), window);
+}
+
+static GList *
+xfw_window_wayland_get_monitors(XfwWindow *window) {
+    return XFW_WINDOW_WAYLAND(window)->priv->monitors;
 }
 
 static gboolean
@@ -579,12 +594,38 @@ toplevel_parent(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
 
 static void
 toplevel_output_enter(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_output *output) {
+    XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
+    GdkDisplay *display = gdk_display_get_default();
+    GdkMonitor *monitor;
+    gint n_monitors = gdk_display_get_n_monitors(display);
 
+    for (gint n = 0; n < n_monitors; n++) {
+        monitor = gdk_display_get_monitor(display, n);
+        if (output == gdk_wayland_monitor_get_wl_output(monitor)) {
+            window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
+            break;
+        }
+    }
+
+    g_object_notify(G_OBJECT(window), "monitors");
 }
 
 static void
 toplevel_output_leave(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_output *output) {
+    XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
+    GdkDisplay *display = gdk_display_get_default();
+    GdkMonitor *monitor;
+    gint n_monitors = gdk_display_get_n_monitors(display);
 
+    for (gint n = 0; n < n_monitors; n++) {
+        monitor = gdk_display_get_monitor(display, n);
+        if (output == gdk_wayland_monitor_get_wl_output(monitor)) {
+            window->priv->monitors = g_list_remove(window->priv->monitors, monitor);
+            break;
+        }
+    }
+
+    g_object_notify(G_OBJECT(window), "monitors");
 }
 
 static void

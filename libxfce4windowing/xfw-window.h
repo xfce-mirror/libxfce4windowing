@@ -116,6 +116,7 @@ struct _XfwWindowIface {
     GdkRectangle *(*get_geometry)(XfwWindow *window);
     XfwScreen *(*get_screen)(XfwWindow *window);
     XfwWorkspace *(*get_workspace)(XfwWindow *window);
+    GList *(*get_monitors)(XfwWindow *window);
 
     gboolean (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
     gboolean (*close)(XfwWindow *window, guint64 event_timestamp, GError **error);
@@ -146,6 +147,7 @@ XfwWindowCapabilities xfw_window_get_capabilities(XfwWindow *window);
 GdkRectangle *xfw_window_get_geometry(XfwWindow *window);
 XfwScreen *xfw_window_get_screen(XfwWindow *window);
 XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);
+GList *xfw_window_get_monitors(XfwWindow *window);
 
 gboolean xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 gboolean xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error);
