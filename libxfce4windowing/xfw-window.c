@@ -272,6 +272,14 @@ xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
     return (*iface->close)(window, event_timestamp, error);
 }
 
+gboolean
+xfw_window_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->move_to_workspace)(window, workspace, error);
+}
+
 #define STATE_SETTER(state) \
     gboolean \
     xfw_window_set_ ## state(XfwWindow *window, gboolean is_ ## state, GError **error) { \

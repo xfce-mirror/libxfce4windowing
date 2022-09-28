@@ -296,3 +296,8 @@ name_changed(WnckWorkspace *wnck_workspace, XfwWorkspaceX11 *workspace) {
     g_object_notify(G_OBJECT(workspace), "name");
     g_signal_emit_by_name(workspace, "name-changed");
 }
+
+WnckWorkspace *
+_xfw_workspace_x11_get_wnck_workspace(XfwWorkspaceX11 *workspace) {
+    return workspace->priv->wnck_workspace;
+}

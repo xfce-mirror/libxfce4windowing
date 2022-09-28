@@ -27,6 +27,7 @@
 #include "xfw-util.h"
 #include "xfw-window-x11.h"
 #include "xfw-window.h"
+#include "xfw-workspace-x11.h"
 
 enum {
     PROP0,
@@ -58,6 +59,7 @@ static XfwScreen *xfw_window_x11_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
 static gboolean xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
+static gboolean xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
 static gboolean xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
 static gboolean xfw_window_x11_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -228,6 +230,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_workspace = xfw_window_x11_get_workspace;
     iface->activate = xfw_window_x11_activate;
     iface->close = xfw_window_x11_close;
+    iface->move_to_workspace = xfw_window_x11_move_to_workspace;
     iface->set_minimized = xfw_window_x11_set_minimized;
     iface->set_maximized = xfw_window_x11_set_maximized;
     iface->set_fullscreen = xfw_window_x11_set_fullscreen;
@@ -312,6 +315,17 @@ static gboolean
 xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
     wnck_window_close(priv->wnck_window, (guint32)event_timestamp);
+    return TRUE;
+}
+
+static gboolean
+xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error) {
+    WnckWorkspace *wnck_workspace;
+
+    g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), FALSE);
+
+    wnck_workspace = _xfw_workspace_x11_get_wnck_workspace(XFW_WORKSPACE_X11(workspace));
+    wnck_window_move_to_workspace(XFW_WINDOW_X11(window)->priv->wnck_window, wnck_workspace);
     return TRUE;
 }
 

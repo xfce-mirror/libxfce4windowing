@@ -25,6 +25,7 @@
 #endif
 
 #include <glib-object.h>
+#include <libwnck/libwnck.h>
 
 G_BEGIN_DECLS
 
@@ -47,5 +48,7 @@ struct _XfwWorkspaceX11Class {
 };
 
 GType xfw_workspace_x11_get_type(void) G_GNUC_CONST;
+
+WnckWorkspace *_xfw_workspace_x11_get_wnck_workspace(XfwWorkspaceX11 *workspace);
 
 #endif  /* __XFW_WORKSPACE_X11_H__ */

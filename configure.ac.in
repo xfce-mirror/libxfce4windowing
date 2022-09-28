@@ -18,7 +18,7 @@ m4_define([libxfce4windowing_version], [libxfce4windowing_version_major().libxfc
 
 dnl minimum required versions
 m4_define([glib_minimum_version], [2.50.0])
-m4_define([gdk_minimum_version], [3.22.0])
+m4_define([gtk_minimum_version], [3.22.0])
 m4_define([wnck_minimum_version], [3.14])
 m4_define([intltool_minimum_version], [0.31])
 
@@ -69,9 +69,10 @@ XDT_I18N()
 
 dnl required
 XDT_CHECK_PACKAGE([GOBJECT], [gobject-2.0], [glib_minimum_version])
-XDT_CHECK_PACKAGE([GDK], [gdk-3.0], [gdk_minimum_version])
+XDT_CHECK_PACKAGE([GDK], [gdk-3.0], [gtk_minimum_version])
+XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [gtk_minimum_version])
 
-XDT_CHECK_OPTIONAL_PACKAGE([GDK_X11], [gdk-x11-3.0], [gdk_minimum_version],
+XDT_CHECK_OPTIONAL_PACKAGE([GDK_X11], [gdk-x11-3.0], [gtk_minimum_version],
                            [gdk-x11], [X11 backend for GDK])
 XDT_CHECK_OPTIONAL_PACKAGE([LIBWNCK], [libwnck-3.0], [wnck_minimum_version],
                            [libwnck], [X11 WNCK library])
@@ -84,7 +85,7 @@ else
 fi
 AM_CONDITIONAL([X11_ENABLED], [test x"$enable_x11" = x"yes"])
 
-XDT_CHECK_OPTIONAL_PACKAGE([GDK_WAYLAND], [gdk-wayland-3.0], [gdk_minimum_version],
+XDT_CHECK_OPTIONAL_PACKAGE([GDK_WAYLAND], [gdk-wayland-3.0], [gtk_minimum_version],
                            [gdk-wayland], [Wayland backend for GDK])
 XDT_CHECK_OPTIONAL_PACKAGE([WAYLAND_SCANNER], [wayland-scanner], [1.15],
                            [wayland-scanner], [Wayland protocol code generator])
@@ -151,6 +152,8 @@ docs/reference/Makefile
 libxfce4windowing/Makefile
 libxfce4windowing/libxfce4windowing-0.pc
 libxfce4windowing/protocols/Makefile
+libxfce4windowingui/Makefile
+libxfce4windowingui/libxfce4windowingui-0.pc
 po/Makefile.in
 ])
 AC_OUTPUT
