@@ -21,7 +21,7 @@ m4_define([libxfce4windowing_version_tag], [git])
 m4_define([libxfce4windowing_version], [libxfce4windowing_version_major().libxfce4windowing_version_minor().libxfce4windowing_version_micro()ifelse(libxfce4windowing_version_nano(), [], [], [.libxfce4windowing_version_nano()])ifelse(libxfce4windowing_version_tag(), [git], [libxfce4windowing_version_tag()-libxfce4windowing_version_build()], [libxfce4windowing_version_tag()])])
 
 dnl minimum required versions
-m4_define([glib_minimum_version], [2.50.0])
+m4_define([glib_minimum_version], [2.74.0])
 m4_define([gtk_minimum_version], [3.22.0])
 m4_define([wnck_minimum_version], [3.14])
 m4_define([intltool_minimum_version], [0.31])
@@ -76,6 +76,7 @@ dnl Check for i18n support
 XDT_I18N()
 
 dnl required
+XDT_CHECK_PACKAGE([GLIB], [glib-2.0], [glib_minimum_version])
 XDT_CHECK_PACKAGE([GOBJECT], [gobject-2.0], [glib_minimum_version])
 XDT_CHECK_PACKAGE([GIO_UNIX], [gio-unix-2.0], [glib_minimum_version])
 XDT_CHECK_PACKAGE([GDK], [gdk-3.0], [gtk_minimum_version])
