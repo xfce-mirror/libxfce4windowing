@@ -246,6 +246,9 @@ window_closed(XfwWindowWayland *window, XfwScreenWayland *screen) {
     screen->priv->windows_stacked = g_list_remove(screen->priv->windows_stacked, window);
     g_hash_table_remove(screen->priv->wl_windows, _xfw_window_wayland_get_handle(window));
     g_signal_emit_by_name(screen, "window-closed", window);
+    if (XFW_WINDOW(window) == screen->priv->active_window) {
+        _xfw_screen_wayland_set_active_window(screen, NULL);
+    }
     g_object_unref(window);
 }
 
