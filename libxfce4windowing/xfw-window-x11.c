@@ -42,6 +42,7 @@ struct _XfwWindowX11Private {
     XfwWindowCapabilities capabilities;
     GdkRectangle geometry;
     XfwWorkspace *workspace;
+    GList *monitors;
 };
 
 static void xfw_window_x11_window_init(XfwWindowIface *iface);
@@ -58,6 +59,7 @@ static XfwWindowCapabilities xfw_window_x11_get_capabilities(XfwWindow *window);
 static GdkRectangle *xfw_window_x11_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_x11_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
+static GList *xfw_window_x11_get_monitors(XfwWindow *window);
 static gboolean xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
@@ -150,6 +152,7 @@ xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GP
         case WINDOW_PROP_STATE:
         case WINDOW_PROP_CAPABILITIES:
         case WINDOW_PROP_WORKSPACE:
+        case WINDOW_PROP_MONITORS:
             break;
 
         default:
@@ -199,6 +202,10 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
             g_value_set_object(value, xfw_window_x11_get_workspace(window));
             break;
 
+        case WINDOW_PROP_MONITORS:
+            g_value_set_pointer(value, xfw_window_x11_get_monitors(window));
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
             break;
@@ -217,6 +224,8 @@ xfw_window_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 
+    g_list_free(window->priv->monitors);
+
     G_OBJECT_CLASS(xfw_window_x11_parent_class)->finalize(obj);
 }
 
@@ -231,6 +240,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_geometry = xfw_window_x11_get_geometry;
     iface->get_screen = xfw_window_x11_get_screen;
     iface->get_workspace = xfw_window_x11_get_workspace;
+    iface->get_monitors = xfw_window_x11_get_monitors;
     iface->activate = xfw_window_x11_activate;
     iface->close = xfw_window_x11_close;
     iface->move_to_workspace = xfw_window_x11_move_to_workspace;
@@ -299,6 +309,25 @@ xfw_window_x11_get_screen(XfwWindow *window) {
 static XfwWorkspace *
 xfw_window_x11_get_workspace(XfwWindow *window) {
     return XFW_WINDOW_X11(window)->priv->workspace;
+}
+
+static GList *
+xfw_window_x11_get_monitors(XfwWindow *window) {
+    XfwWindowX11 *xwindow = XFW_WINDOW_X11(window);
+    GdkMonitor *monitor = NULL;
+    GdkWindow *gwindow = gtk_widget_get_window(GTK_WIDGET(window));
+
+    if (gwindow != NULL) {
+        GdkDisplay *display = gdk_display_get_default();
+
+        monitor = gdk_display_get_monitor_at_window(display, gwindow);
+        if (xwindow->priv->monitors == NULL || monitor != xwindow->priv->monitors->data) {
+            xwindow->priv->monitors = g_list_remove(xwindow->priv->monitors, xwindow->priv->monitors->data);
+            xwindow->priv->monitors = g_list_prepend(xwindow->priv->monitors, monitor);
+        }
+    }
+
+    return xwindow->priv->monitors;
 }
 
 static gboolean

@@ -182,6 +182,11 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                             "workspace",
                                                             XFW_TYPE_WORKSPACE,
                                                             G_PARAM_READABLE));
+    g_object_interface_install_property(iface,
+                                        g_param_spec_pointer("monitors",
+                                                             "monitors",
+                                                             "monitors",
+                                                             G_PARAM_READABLE));
 }
 
 guint64
@@ -254,6 +259,14 @@ xfw_window_get_workspace(XfwWindow *window) {
     g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
     iface = XFW_WINDOW_GET_IFACE(window);
     return (*iface->get_workspace)(window);
+}
+
+GList *
+xfw_window_get_monitors(XfwWindow *window) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->get_monitors)(window);
 }
 
 gboolean
@@ -332,4 +345,5 @@ _xfw_window_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WINDOW_PROP_STATE, "state");
     g_object_class_override_property(gklass, WINDOW_PROP_CAPABILITIES, "capabilities");
     g_object_class_override_property(gklass, WINDOW_PROP_WORKSPACE, "workspace");
+    g_object_class_override_property(gklass, WINDOW_PROP_MONITORS, "monitors");
 }
