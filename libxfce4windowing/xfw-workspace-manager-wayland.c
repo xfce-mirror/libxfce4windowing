@@ -214,7 +214,7 @@ manager_workspace_group(void *data, struct ext_workspace_manager_v1 *manager, st
                                                    "handle", wl_group,
                                                    NULL);
     wmanager->priv->groups = g_list_append(wmanager->priv->groups, group);
-    g_signal_connect(group, "destroyed", (GCallback)group_destroyed, wmanager);
+    g_signal_connect(group, "destroyed", G_CALLBACK(group_destroyed), wmanager);
     g_signal_emit_by_name(wmanager, "workspace-group-created", group);
 }
 

@@ -121,13 +121,13 @@ static void xfw_window_x11_constructed(GObject *obj) {
     window->priv->workspace = _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(window->priv->screen),
                                                                            wnck_window_get_workspace(window->priv->wnck_window));
 
-    g_signal_connect(window->priv->wnck_window, "name-changed", (GCallback)name_changed, window);
-    g_signal_connect(window->priv->wnck_window, "icon-changed", (GCallback)icon_changed, window);
-    g_signal_connect(window->priv->wnck_window, "type-changed", (GCallback)type_changed, window);
-    g_signal_connect(window->priv->wnck_window, "state-changed", (GCallback)state_changed, window);
-    g_signal_connect(window->priv->wnck_window, "actions-changed", (GCallback)actions_changed, window);
-    g_signal_connect(window->priv->wnck_window, "geometry-changed", (GCallback)geometry_changed, window);
-    g_signal_connect(window->priv->wnck_window, "workspace-changed", (GCallback)workspace_changed, window);
+    g_signal_connect(window->priv->wnck_window, "name-changed", G_CALLBACK(name_changed), window);
+    g_signal_connect(window->priv->wnck_window, "icon-changed", G_CALLBACK(icon_changed), window);
+    g_signal_connect(window->priv->wnck_window, "type-changed", G_CALLBACK(type_changed), window);
+    g_signal_connect(window->priv->wnck_window, "state-changed", G_CALLBACK(state_changed), window);
+    g_signal_connect(window->priv->wnck_window, "actions-changed", G_CALLBACK(actions_changed), window);
+    g_signal_connect(window->priv->wnck_window, "geometry-changed", G_CALLBACK(geometry_changed), window);
+    g_signal_connect(window->priv->wnck_window, "workspace-changed", G_CALLBACK(workspace_changed), window);
 }
 
 static void

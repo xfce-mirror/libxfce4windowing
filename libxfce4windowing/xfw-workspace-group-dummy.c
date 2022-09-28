@@ -96,8 +96,8 @@ xfw_workspace_group_dummy_constructed(GObject *obj) {
         group->priv->monitors = g_list_prepend(group->priv->monitors, gdk_display_get_monitor(display, i));
     }
     group->priv->monitors = g_list_reverse(group->priv->monitors);
-    g_signal_connect(display, "monitor-added", (GCallback)monitor_added, group);
-    g_signal_connect(display, "monitor-removed", (GCallback)monitor_removed, group);
+    g_signal_connect(display, "monitor-added", G_CALLBACK(monitor_added), group);
+    g_signal_connect(display, "monitor-removed", G_CALLBACK(monitor_removed), group);
 }
 
 static void

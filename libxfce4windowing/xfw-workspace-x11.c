@@ -88,7 +88,7 @@ xfw_workspace_x11_init(XfwWorkspaceX11 *workspace) {
 static void
 xfw_workspace_x11_constructed(GObject *obj) {
     XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(obj);
-    g_signal_connect(workspace->priv->wnck_workspace, "name-changed", (GCallback)name_changed, workspace);
+    g_signal_connect(workspace->priv->wnck_workspace, "name-changed", G_CALLBACK(name_changed), workspace);
 }
 
 static void

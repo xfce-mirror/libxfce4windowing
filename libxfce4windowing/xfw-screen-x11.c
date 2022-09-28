@@ -99,10 +99,10 @@ xfw_screen_x11_constructed(GObject *obj) {
 
     screen->priv->active_window = g_hash_table_lookup(screen->priv->wnck_windows, wnck_screen_get_active_window(screen->priv->wnck_screen));
 
-    g_signal_connect(screen->priv->wnck_screen, "window-opened", (GCallback)window_opened, screen);
-    g_signal_connect(screen->priv->wnck_screen, "window-closed", (GCallback)window_closed, screen);
-    g_signal_connect(screen->priv->wnck_screen, "active-window-changed", (GCallback)active_window_changed, screen);
-    g_signal_connect(screen->priv->wnck_screen, "window-stacking-changed", (GCallback)window_stacking_changed, screen);
+    g_signal_connect(screen->priv->wnck_screen, "window-opened", G_CALLBACK(window_opened), screen);
+    g_signal_connect(screen->priv->wnck_screen, "window-closed", G_CALLBACK(window_closed), screen);
+    g_signal_connect(screen->priv->wnck_screen, "active-window-changed", G_CALLBACK(active_window_changed), screen);
+    g_signal_connect(screen->priv->wnck_screen, "window-stacking-changed", G_CALLBACK(window_stacking_changed), screen);
 }
 
 static void

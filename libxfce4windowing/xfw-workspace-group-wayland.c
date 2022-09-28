@@ -335,7 +335,7 @@ group_workspace(void *data, struct ext_workspace_group_handle_v1 *wl_group, stru
     _xfw_workspace_wayland_set_number(workspace, g_list_length(group->priv->workspaces));
     g_hash_table_insert(group->priv->wl_workspaces, wl_workspace, workspace);
     group->priv->workspaces = g_list_append(group->priv->workspaces, workspace);
-    g_signal_connect(workspace, "destroyed", (GCallback)workspace_destroyed, group);
+    g_signal_connect(workspace, "destroyed", G_CALLBACK(workspace_destroyed), group);
     g_signal_emit_by_name(group, "workspace-created", workspace);
 }
 

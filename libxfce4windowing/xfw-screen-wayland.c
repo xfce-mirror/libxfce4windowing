@@ -245,7 +245,7 @@ toplevel_manager_toplevel(void *data, struct zwlr_foreign_toplevel_manager_v1 *w
     screen->priv->windows = g_list_prepend(screen->priv->windows, window);
     screen->priv->windows_stacked = g_list_prepend(screen->priv->windows_stacked, window);
     g_hash_table_insert(screen->priv->wl_windows, wl_toplevel, window);
-    g_signal_connect(window, "closed", (GCallback)window_closed, screen);
+    g_signal_connect(window, "closed", G_CALLBACK(window_closed), screen);
 }
 
 static void

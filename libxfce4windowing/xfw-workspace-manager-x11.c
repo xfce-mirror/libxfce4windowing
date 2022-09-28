@@ -86,9 +86,9 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
     WnckWorkspace *active_wnck_workspace;
 
     priv->wnck_screen = wnck_screen_get(gdk_x11_screen_get_screen_number(GDK_X11_SCREEN(priv->screen)));
-    g_signal_connect(priv->wnck_screen, "active-workspace-changed", (GCallback)active_workspace_changed, manager);
-    g_signal_connect(priv->wnck_screen, "workspace-created", (GCallback)workspace_created, manager);
-    g_signal_connect(priv->wnck_screen, "workspace-destroyed", (GCallback)workspace_destroyed, manager);
+    g_signal_connect(priv->wnck_screen, "active-workspace-changed", G_CALLBACK(active_workspace_changed), manager);
+    g_signal_connect(priv->wnck_screen, "workspace-created", G_CALLBACK(workspace_created), manager);
+    g_signal_connect(priv->wnck_screen, "workspace-destroyed", G_CALLBACK(workspace_destroyed), manager);
 
     group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
                          "screen", priv->screen,
