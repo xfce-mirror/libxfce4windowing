@@ -255,6 +255,11 @@ toplevel_manager_finished(void *data, struct zwlr_foreign_toplevel_manager_v1 *w
     screen->priv->toplevel_manager = NULL;
 }
 
+GdkScreen *
+_xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen) {
+    return screen->priv->gdk_screen;
+}
+
 void
 _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *window) {
     if (screen->priv->active_window != window) {
@@ -263,6 +268,7 @@ _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *windo
         g_signal_emit_by_name(screen, "active-window-changed", window);
     }
 }
+
 XfwWorkspace *
 _xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window) {
     if (XFW_IS_WORKSPACE_MANAGER_DUMMY(screen->priv->workspace_manager)) {

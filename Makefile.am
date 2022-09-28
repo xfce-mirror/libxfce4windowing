@@ -35,6 +35,18 @@ dist-hook: ChangeLog
 
 compile_flags.txt: $(shell find . -name Makefile)
 	rm -f $@
-	for flag in -DHAVE_CONFIG_H -DLIBXFCE4WINDOWING_COMPILATION -DWNCK_I_KNOW_THIS_IS_UNSTABLE -I$(top_srcdir) -I$(top_srcdir)/libxfce4windowing -I$(top_builddir)/libxfce4windowing $(GOBJECT_CFLAGS) $(GDK_CFLAGS) $(LIBWNCK_CFLAGS) $(WAYLAND_CLIENT_CFLAGS); do \
+	for flag in \
+		-DHAVE_CONFIG_H \
+		-DLIBXFCE4WINDOWING_COMPILATION \
+		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
+		-I$(top_srcdir) \
+		-I$(top_srcdir)/libxfce4windowing \
+		-I$(top_builddir)/libxfce4windowing \
+		$(GOBJECT_CFLAGS) \
+		$(GIO_UNIX_CFLAGS) \
+		$(GTK_CFLAGS) \
+		$(LIBWNCK_CFLAGS) \
+		$(WAYLAND_CLIENT_CFLAGS) \
+	; do \
 		echo "$$flag" >> $@ || exit 1; \
 	done

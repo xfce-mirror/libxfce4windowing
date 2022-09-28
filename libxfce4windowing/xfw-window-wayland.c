@@ -19,6 +19,9 @@
 
 #include "config.h"
 
+#include <gio/gdesktopappinfo.h>
+#include <gtk/gtk.h>
+
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 
 #include "libxfce4windowing-private.h"
@@ -38,7 +41,10 @@ struct _XfwWindowWaylandPrivate {
     gboolean created_emitted;
 
     guint64 id;
+    gchar *app_id;
     gchar *name;
+    gchar *icon_name;
+    GdkPixbuf *icon;
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
     GdkRectangle geometry;  // unfortunately unsupported
@@ -205,6 +211,11 @@ xfw_window_wayland_finalize(GObject *obj) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
 
     zwlr_foreign_toplevel_handle_v1_destroy(window->priv->handle);
+    g_free(window->priv->app_id);
+    g_free(window->priv->icon_name);
+    if (window->priv->icon) {
+        g_object_unref(window->priv->icon);
+    }
 
     G_OBJECT_CLASS(xfw_window_wayland_parent_class)->finalize(obj);
 }
@@ -246,7 +257,26 @@ xfw_window_wayland_get_name(XfwWindow *window) {
 
 static GdkPixbuf *
 xfw_window_wayland_get_icon(XfwWindow *window) {
-    return NULL;
+    XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
+
+    if (wwindow->priv->icon == NULL && wwindow->priv->icon_name != NULL) {
+        GtkIconTheme *itheme = gtk_icon_theme_get_for_screen(_xfw_screen_wayland_get_gdk_screen(XFW_SCREEN_WAYLAND(wwindow->priv->screen)));
+        GError *error = NULL;
+        GdkPixbuf *icon = gtk_icon_theme_load_icon(itheme, wwindow->priv->icon_name, 64, 0, &error);
+        if (icon != NULL) {
+            wwindow->priv->icon = icon;
+        } else if (error != NULL) {
+            g_message("Failed to load icon for app '%s': %s", wwindow->priv->app_id, error->message);
+            g_error_free(error);
+        } else {
+            g_message("Failed to load icon for app '%s'", wwindow->priv->app_id);
+        }
+    }
+
+    if (wwindow->priv->icon != NULL) {
+        g_object_ref(wwindow->priv->icon);
+    }
+    return wwindow->priv->icon;
 }
 
 static XfwWindowType
@@ -433,7 +463,32 @@ xfw_window_wayland_set_below(XfwWindow *window, gboolean is_below, GError **erro
 
 static void
 toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *app_id) {
+    XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
+    GDesktopAppInfo *app_info;
+    gchar *desktop_id;
 
+    g_free(window->priv->app_id);
+    window->priv->app_id = g_strdup(app_id);
+
+    desktop_id = g_strdup_printf("%s.desktop", app_id);
+    app_info = g_desktop_app_info_new(desktop_id);
+    g_free(desktop_id);
+
+    if (app_info != NULL) {
+        gchar *icon_name = g_desktop_app_info_get_string(app_info, "Icon");
+        if (icon_name != NULL) {
+            g_free(window->priv->icon_name);
+            window->priv->icon_name = icon_name;
+
+            if (window->priv->icon != NULL) {
+                g_object_unref(window->priv->icon);
+                window->priv->icon = NULL;
+            }
+
+            g_object_notify(G_OBJECT(window), "icon");
+            g_signal_emit_by_name(window, "icon-changed");
+        }
+    }
 }
 
 static void

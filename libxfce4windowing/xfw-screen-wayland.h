@@ -51,6 +51,7 @@ struct _XfwScreenWaylandClass {
 
 GType xfw_screen_wayland_get_type(void) G_GNUC_CONST;
 
+GdkScreen * _xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen);
 void _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *window);
 XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window);
 

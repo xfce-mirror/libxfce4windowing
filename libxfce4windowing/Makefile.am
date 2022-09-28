@@ -80,8 +80,9 @@ libxfce4windowing_0_la_CFLAGS = \
 	-DLOCALEDIR=\"$(localedir)\" \
 	-DDATADIR=\"$(datadir)\" \
 	-DSYSCONFDIR=\"$(sysconfdir)\" \
+	$(GIO_UNIX_CFLAGS) \
 	$(GOBJECT_CFLAGS) \
-	$(GDK_CFLAGS) \
+	$(GTK_CFLAGS) \
 	$(LIBWNCK_CFLAGS) \
 	$(WAYLAND_CLIENT_CFLAGS)
 
@@ -92,7 +93,8 @@ libxfce4windowing_0_la_LDFLAGS = \
 
 libxfce4windowing_0_la_LIBADD = \
 	$(GOBJECT_LIBS) \
-	$(GDK_LIBS) \
+	$(GIO_UNIX_LIBS) \
+	$(GTK_LIBS) \
 	$(LIBWNCK_LIBS) \
 	$(WAYLAND_CLIENT_LIBS)
 
