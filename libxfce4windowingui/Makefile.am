@@ -6,14 +6,14 @@ lib_LTLIBRARIES = \
 libxfce4windowingui_0_includedir = $(includedir)/xfce4/libxfce4windowingui
 libxfce4windowingui_0_headers = \
 	libxfce4windowingui.h \
-	xfw-window-actions-menu.h
+	xfw-window-action-menu.h
 
 libxfce4windowingui_0_include_HEADERS = \
 	$(libxfce4windowingui_0_headers)
 
 libxfce4windowingui_0_la_SOURCES = \
 	$(libxfce4windowingui_0_headers) \
-	xfw-window-actions-menu.c
+	xfw-window-action-menu.c
 
 libxfce4windowingui_0_la_CFLAGS = \
 	-I$(top_srcdir) \
