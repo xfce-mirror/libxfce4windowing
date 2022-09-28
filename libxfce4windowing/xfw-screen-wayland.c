@@ -21,7 +21,7 @@
 
 #include <gdk/gdkwayland.h>
 #include <string.h>
-#include <wayland-client-protocol.h>
+#include <wayland-client.h>
 
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 
@@ -37,6 +37,7 @@ struct _XfwScreenWaylandPrivate {
     GdkScreen *gdk_screen;
     struct wl_registry *wl_registry;
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
+    struct wl_seat *wl_seat;
     XfwWorkspaceManager *workspace_manager;
     GList *windows;
     GList *windows_stacked;
@@ -92,7 +93,8 @@ xfw_screen_wayland_init(XfwScreenWayland *screen) {
     screen->priv = xfw_screen_wayland_get_instance_private(screen);
 }
 
-static void xfw_screen_wayland_constructed(GObject *obj) {
+static void
+xfw_screen_wayland_constructed(GObject *obj) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(obj);
     GdkDisplay *gdk_display;
     struct wl_display *wl_display;
@@ -165,6 +167,9 @@ xfw_screen_wayland_finalize(GObject *obj) {
     if (screen->priv->toplevel_manager != NULL) {
         zwlr_foreign_toplevel_manager_v1_destroy(screen->priv->toplevel_manager);
     }
+    if (screen->priv->wl_seat != NULL) {
+        wl_seat_release(screen->priv->wl_seat);
+    }
     if (screen->priv->wl_registry != NULL) {
         wl_registry_destroy(screen->priv->wl_registry);
     }
@@ -216,6 +221,15 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
                                                           id,
                                                           &zwlr_foreign_toplevel_manager_v1_interface,
                                                           MIN((uint32_t)zwlr_foreign_toplevel_manager_v1_interface.version, version));
+    } else if (strcmp(wl_seat_interface.name, interface) == 0) {
+        if (screen->priv->wl_seat != NULL) {
+            g_debug("We already had a wl_seat, but now we're getting a new one");
+            wl_seat_release(screen->priv->wl_seat);
+        }
+        screen->priv->wl_seat = wl_registry_bind(screen->priv->wl_registry,
+                                                 id,
+                                                 &wl_seat_interface,
+                                                 MIN((uint32_t)wl_seat_interface.version, version));
     }
 }
 
@@ -258,6 +272,11 @@ toplevel_manager_finished(void *data, struct zwlr_foreign_toplevel_manager_v1 *w
 GdkScreen *
 _xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen) {
     return screen->priv->gdk_screen;
+}
+
+struct wl_seat *
+_xfw_screen_wayland_get_wl_seat(XfwScreenWayland *screen) {
+    return screen->priv->wl_seat;
 }
 
 void

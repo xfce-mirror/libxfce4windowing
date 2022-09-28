@@ -313,9 +313,18 @@ xfw_window_wayland_get_workspace(XfwWindow *window) {
 
 static gboolean
 xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error) {
-    // FIXME: make sure NULL for seat means "compositor picks what seat", and doesn't crash or fail
-    zwlr_foreign_toplevel_handle_v1_activate(XFW_WINDOW_WAYLAND(window)->priv->handle, NULL);
-    return TRUE;
+    XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
+    struct wl_seat *wl_seat = _xfw_screen_wayland_get_wl_seat(XFW_SCREEN_WAYLAND(wwindow->priv->screen));
+
+    if (wl_seat != NULL) {
+        zwlr_foreign_toplevel_handle_v1_activate(wwindow->priv->handle, wl_seat);
+        return TRUE;
+    } else {
+        if (error != NULL) {
+            *error = g_error_new(XFW_ERROR, XFW_ERROR_INTERNAL, "Cannot activate window as we do not have a wl_seat");
+        }
+        return FALSE;
+    }
 }
 
 static gboolean

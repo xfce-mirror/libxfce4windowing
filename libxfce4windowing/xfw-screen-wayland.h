@@ -25,6 +25,7 @@
 #endif
 
 #include <glib-object.h>
+#include <wayland-client.h>
 
 #include "xfw-window.h"
 #include "xfw-workspace.h"
@@ -51,7 +52,8 @@ struct _XfwScreenWaylandClass {
 
 GType xfw_screen_wayland_get_type(void) G_GNUC_CONST;
 
-GdkScreen * _xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen);
+GdkScreen *_xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen);
+struct wl_seat *_xfw_screen_wayland_get_wl_seat(XfwScreenWayland *screen);
 void _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *window);
 XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window);
 
