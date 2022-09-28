@@ -69,6 +69,8 @@ static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
 static GList *xfw_window_wayland_get_monitors(XfwWindow *window);
 static gboolean xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error);
+static gboolean xfw_window_wayland_start_move(XfwWindow *window, GError **error);
+static gboolean xfw_window_wayland_start_resize(XfwWindow *window, GError **error);
 static gboolean xfw_window_wayland_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
 static gboolean xfw_window_wayland_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_wayland_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
@@ -243,6 +245,8 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->get_monitors = xfw_window_wayland_get_monitors;
     iface->activate = xfw_window_wayland_activate;
     iface->close = xfw_window_wayland_close;
+    iface->start_move = xfw_window_wayland_start_move;
+    iface->start_resize = xfw_window_wayland_start_resize;
     iface->move_to_workspace = xfw_window_wayland_move_to_workspace;
     iface->set_minimized = xfw_window_wayland_set_minimized;
     iface->set_maximized = xfw_window_wayland_set_maximized;
@@ -346,6 +350,22 @@ static gboolean
 xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
     zwlr_foreign_toplevel_handle_v1_close(XFW_WINDOW_WAYLAND(window)->priv->handle);
     return TRUE;
+}
+
+static gboolean
+xfw_window_wayland_start_move(XfwWindow *window, GError **error) {
+    if (error != NULL) {
+        *error = g_error_new(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Moving windows is not supported on Wayland");
+    }
+    return FALSE;
+}
+
+static gboolean
+xfw_window_wayland_start_resize(XfwWindow *window, GError **error) {
+    if (error != NULL) {
+        *error = g_error_new(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Resizing windows is not supported on Wayland");
+    }
+    return FALSE;
 }
 
 static gboolean

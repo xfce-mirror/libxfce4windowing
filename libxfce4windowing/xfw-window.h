@@ -120,6 +120,8 @@ struct _XfwWindowIface {
 
     gboolean (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
     gboolean (*close)(XfwWindow *window, guint64 event_timestamp, GError **error);
+    gboolean (*start_move)(XfwWindow *window, GError **error);
+    gboolean (*start_resize)(XfwWindow *window, GError **error);
     gboolean (*move_to_workspace)(XfwWindow *window, XfwWorkspace *workspace, GError **error);
 
     gboolean (*set_minimized)(XfwWindow *window, gboolean is_minimized, GError **error);
@@ -151,6 +153,8 @@ GList *xfw_window_get_monitors(XfwWindow *window);
 
 gboolean xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 gboolean xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error);
+gboolean xfw_window_start_move(XfwWindow *window, GError **error);
+gboolean xfw_window_start_resize(XfwWindow *window, GError **error);
 gboolean xfw_window_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
 
 gboolean xfw_window_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);

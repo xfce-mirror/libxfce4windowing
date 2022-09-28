@@ -286,6 +286,22 @@ xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
 }
 
 gboolean
+xfw_window_start_move(XfwWindow *window, GError **error){
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->start_move)(window, error);
+}
+
+gboolean
+xfw_window_start_resize(XfwWindow *window, GError **error) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->start_resize)(window, error);
+}
+
+gboolean
 xfw_window_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error) {
     XfwWindowIface *iface;
     g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);

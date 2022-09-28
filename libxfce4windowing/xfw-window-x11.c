@@ -62,6 +62,8 @@ static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
 static GList *xfw_window_x11_get_monitors(XfwWindow *window);
 static gboolean xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
+static gboolean xfw_window_x11_start_move(XfwWindow *window, GError **error);
+static gboolean xfw_window_x11_start_resize(XfwWindow *window, GError **error);
 static gboolean xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
 static gboolean xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
@@ -243,6 +245,8 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_monitors = xfw_window_x11_get_monitors;
     iface->activate = xfw_window_x11_activate;
     iface->close = xfw_window_x11_close;
+    iface->start_move = xfw_window_x11_start_move;
+    iface->start_resize = xfw_window_x11_start_resize;
     iface->move_to_workspace = xfw_window_x11_move_to_workspace;
     iface->set_minimized = xfw_window_x11_set_minimized;
     iface->set_maximized = xfw_window_x11_set_maximized;
@@ -341,6 +345,18 @@ static gboolean
 xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
     wnck_window_close(priv->wnck_window, (guint32)event_timestamp);
+    return TRUE;
+}
+
+static gboolean
+xfw_window_x11_start_move(XfwWindow *window, GError **error) {
+    wnck_window_keyboard_move(XFW_WINDOW_X11(window)->priv->wnck_window);
+    return TRUE;
+}
+
+static gboolean
+xfw_window_x11_start_resize(XfwWindow *window, GError **error) {
+    wnck_window_keyboard_size(XFW_WINDOW_X11(window)->priv->wnck_window);
     return TRUE;
 }
 

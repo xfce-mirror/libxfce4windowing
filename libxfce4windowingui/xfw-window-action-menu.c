@@ -267,12 +267,12 @@ toggle_maximize_state(GtkWidget *item, XfwWindow *window) {
 }
 static void
 move_window(GtkWidget *item, XfwWindow *window) {
-    // TODO: implementme
+    xfw_window_start_move(window, NULL);
 }
 
 static void
 resize_window(GtkWidget *item, XfwWindow *window) {
-    // TODO: implementme
+    xfw_window_start_resize(window, NULL);
 }
 
 static void
