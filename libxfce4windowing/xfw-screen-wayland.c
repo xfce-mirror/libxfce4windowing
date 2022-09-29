@@ -43,6 +43,11 @@ struct _XfwScreenWaylandPrivate {
     GList *windows_stacked;
     GHashTable *wl_windows;
     XfwWindow *active_window;
+    guint show_desktop : 1;
+    struct {
+        GList *minimized;
+        XfwWindow *was_active;
+    } show_desktop_data;
 };
 
 static void xfw_screen_wayland_screen_init(XfwScreenIface *iface);
@@ -55,6 +60,10 @@ static XfwWorkspaceManager *xfw_screen_wayland_get_workspace_manager(XfwScreen *
 static GList *xfw_screen_wayland_get_windows(XfwScreen *screen);
 static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen);
 static XfwWindow *xfw_screen_wayland_get_active_window(XfwScreen *screen);
+static gboolean xfw_screen_wayland_get_show_desktop(XfwScreen *screen);
+
+static void xfw_screen_wayland_set_show_desktop(XfwScreen *screen, gboolean show);
+static void show_desktop_disconnect(gpointer object, gpointer data);
 
 static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
 static void registry_global_remove(void *data, struct wl_registry *registry, uint32_t id);
@@ -129,6 +138,10 @@ xfw_screen_wayland_set_property(GObject *obj, guint prop_id, const GValue *value
             screen->priv->gdk_screen = g_value_get_object(value);
             break;
 
+        case SCREEN_PROP_SHOW_DESKTOP:
+            xfw_screen_wayland_set_show_desktop(XFW_SCREEN(screen), g_value_get_boolean(value));
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
             break;
@@ -150,6 +163,10 @@ xfw_screen_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
 
         case SCREEN_PROP_ACTIVE_WINDOW:
             g_value_set_object(value, xfw_screen_wayland_get_active_window(XFW_SCREEN(screen)));
+            break;
+
+        case SCREEN_PROP_SHOW_DESKTOP:
+            g_value_set_boolean(value, xfw_screen_wayland_get_show_desktop(XFW_SCREEN(screen)));
             break;
 
         default:
@@ -176,6 +193,7 @@ xfw_screen_wayland_finalize(GObject *obj) {
     g_list_free(screen->priv->windows);
     g_list_free(screen->priv->windows_stacked);
     g_hash_table_destroy(screen->priv->wl_windows);
+    g_list_free(screen->priv->show_desktop_data.minimized);
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->finalize(obj);
 }
@@ -187,6 +205,9 @@ xfw_screen_wayland_screen_init(XfwScreenIface *iface) {
     iface->get_windows = xfw_screen_wayland_get_windows;
     iface->get_windows_stacked = xfw_screen_wayland_get_windows_stacked;
     iface->get_active_window = xfw_screen_wayland_get_active_window;
+    iface->get_show_desktop = xfw_screen_wayland_get_show_desktop;
+
+    iface->set_show_desktop = xfw_screen_wayland_set_show_desktop;
 }
 
 static gint
@@ -210,6 +231,97 @@ static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen) {
 
 static XfwWindow *xfw_screen_wayland_get_active_window(XfwScreen *screen) {
     return XFW_SCREEN_WAYLAND(screen)->priv->active_window;
+}
+
+static gboolean
+xfw_screen_wayland_get_show_desktop(XfwScreen *screen) {
+    return XFW_SCREEN_WAYLAND(screen)->priv->show_desktop;
+}
+
+static void
+show_desktop_state_changed(XfwWindow *window, XfwWindowState changed, XfwWindowState new, XfwScreenWayland *screen) {
+    if (!(changed & XFW_WINDOW_STATE_MINIMIZED)) {
+        return;
+    }
+
+    if (new & XFW_WINDOW_STATE_MINIMIZED) {
+        screen->priv->show_desktop_data.minimized = g_list_prepend(screen->priv->show_desktop_data.minimized, window);
+    } else {
+        show_desktop_disconnect(window, screen);
+        screen->priv->show_desktop_data.minimized = g_list_remove(screen->priv->show_desktop_data.minimized, window);
+        if (screen->priv->show_desktop_data.minimized == NULL) {
+            if (screen->priv->show_desktop) {
+                screen->priv->show_desktop = FALSE;
+                g_object_notify(G_OBJECT(screen), "show-desktop");
+            }
+            if (screen->priv->show_desktop_data.was_active != NULL) {
+                xfw_window_activate(screen->priv->show_desktop_data.was_active, 0, NULL);
+            }
+        }
+    }
+}
+
+static void
+show_desktop_closed(XfwWindow *window, XfwScreenWayland *screen) {
+    screen->priv->show_desktop_data.minimized = g_list_remove(screen->priv->show_desktop_data.minimized, window);
+    if (screen->priv->show_desktop_data.minimized == NULL && screen->priv->show_desktop) {
+        screen->priv->show_desktop = FALSE;
+        g_object_notify(G_OBJECT(screen), "show-desktop");
+    }
+}
+
+static void
+xfw_screen_wayland_set_show_desktop(XfwScreen *screen, gboolean show) {
+    XfwScreenWayland *wscreen = XFW_SCREEN_WAYLAND(screen);
+    gboolean revert = TRUE;
+
+    if (!!show == wscreen->priv->show_desktop) {
+        return;
+    }
+
+    wscreen->priv->show_desktop = !!show;
+    g_object_notify(G_OBJECT(screen), "show-desktop");
+
+    // unminimize previously minimized windows
+    if (!show) {
+        for (GList *lp = wscreen->priv->show_desktop_data.minimized; lp != NULL; lp = lp->next) {
+            xfw_window_set_minimized(lp->data, FALSE, NULL);
+        }
+        return;
+    }
+
+    // remove and disconnect from any previously minimized window: probably there is none,
+    // but it is asynchronous and the compositor might have failed to unminimize some of them
+    g_list_foreach(wscreen->priv->show_desktop_data.minimized, show_desktop_disconnect, wscreen);
+    g_list_free(wscreen->priv->show_desktop_data.minimized);
+    wscreen->priv->show_desktop_data.minimized = NULL;
+    wscreen->priv->show_desktop_data.was_active = NULL;
+
+    // request for showing the desktop and prepare reverse process
+    for (GList *lp = xfw_screen_wayland_get_windows(screen); lp != NULL; lp = lp->next) {
+        XfwWindowState state = xfw_window_get_state(lp->data);
+        if (!(state & XFW_WINDOW_STATE_MINIMIZED)) {
+            revert = FALSE;
+            g_signal_connect(lp->data, "state-changed", G_CALLBACK(show_desktop_state_changed), wscreen);
+            g_signal_connect(lp->data, "closed", G_CALLBACK(show_desktop_closed), wscreen);
+            if (state & XFW_WINDOW_STATE_ACTIVE) {
+                wscreen->priv->show_desktop_data.was_active = lp->data;
+            }
+            xfw_window_set_minimized(lp->data, TRUE, NULL);
+        }
+    }
+
+    // there was no window to minimize, revert state
+    if (revert) {
+        wscreen->priv->show_desktop = FALSE;
+        g_object_notify(G_OBJECT(screen), "show-desktop");
+    }
+}
+
+static void
+show_desktop_disconnect(gpointer object, gpointer data) {
+    g_signal_handlers_disconnect_by_func(object, show_desktop_state_changed, data);
+    g_signal_handlers_disconnect_by_func(object, show_desktop_closed, data);
 }
 
 static void

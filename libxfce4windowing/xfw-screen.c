@@ -162,6 +162,18 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                                                             "active-window",
                                                             XFW_TYPE_WINDOW,
                                                             G_PARAM_READABLE));
+
+    /**
+     * XfwScreen:show-desktop:
+     *
+     * Whether or not to show the desktop.
+     **/
+    g_object_interface_install_property(iface,
+                                        g_param_spec_boolean("show-desktop",
+                                                             "show-desktop",
+                                                             "show-desktop",
+                                                             FALSE,
+                                                             G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY));
 }
 
 /**
@@ -253,6 +265,43 @@ xfw_screen_get_active_window(XfwScreen *screen) {
     return (*iface->get_active_window)(screen);
 }
 
+/**
+ * xfw_screen_get_show_desktop:
+ * @screen: an #XfwScreen.
+ *
+ * Return value: %TRUE if the desktop is shown, %FALSE otherwise.
+ **/
+gboolean
+xfw_screen_get_show_desktop(XfwScreen *screen) {
+    XfwScreenIface *iface;
+    g_return_val_if_fail(XFW_IS_SCREEN(screen), FALSE);
+    iface = XFW_SCREEN_GET_IFACE(screen);
+    return (*iface->get_show_desktop)(screen);
+}
+
+/**
+ * xfw_screen_set_show_desktop:
+ * @screen: an #XfwScreen.
+ * @show: %TRUE to show the desktop, %FALSE to restore the previous state.
+ *
+ * Showing the desktop minimizes the windows not minimized at the time of the query.
+ * The reverse process unminimizes those same windows, if they have not already been
+ * unminimized or destroyed. The desktop show state can be tracked via
+ * #XfwScreen:show-desktop.
+ *
+ * The state of the previously active window is always restored upon unminimization,
+ * but there is no guarantee for the rest of the window stacking order on Wayland.
+ *
+ * A request to switch to the current state is silently ignored.
+ **/
+void
+xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show) {
+    XfwScreenIface *iface;
+    g_return_if_fail(XFW_IS_SCREEN(screen));
+    iface = XFW_SCREEN_GET_IFACE(screen);
+    (*iface->set_show_desktop)(screen, show);
+}
+
 static void
 screen_destroyed(GdkScreen *gdk_screen, XfwScreen *screen) {
     g_object_steal_data(G_OBJECT(gdk_screen), GDK_SCREEN_XFW_SCREEN_KEY);
@@ -322,4 +371,5 @@ _xfw_screen_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, SCREEN_PROP_SCREEN, "screen");
     g_object_class_override_property(gklass, SCREEN_PROP_WORKSPACE_MANAGER, "workspace-manager");
     g_object_class_override_property(gklass, SCREEN_PROP_ACTIVE_WINDOW, "active-window");
+    g_object_class_override_property(gklass, SCREEN_PROP_SHOW_DESKTOP, "show-desktop");
 }

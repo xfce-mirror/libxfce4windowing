@@ -57,6 +57,9 @@ struct _XfwScreenIface {
     GList *(*get_windows)(XfwScreen *screen);
     GList *(*get_windows_stacked)(XfwScreen *screen);
     XfwWindow *(*get_active_window)(XfwScreen *screen);
+    gboolean (*get_show_desktop)(XfwScreen *screen);
+
+    void (*set_show_desktop)(XfwScreen *screen, gboolean show);
 };
 
 GType xfw_screen_get_type(void) G_GNUC_CONST;
@@ -69,6 +72,9 @@ XfwWorkspaceManager *xfw_screen_get_workspace_manager(XfwScreen *screen);
 GList *xfw_screen_get_windows(XfwScreen *screen);
 GList *xfw_screen_get_windows_stacked(XfwScreen *screen);
 XfwWindow *xfw_screen_get_active_window(XfwScreen *screen);
+gboolean xfw_screen_get_show_desktop(XfwScreen *screen);
+
+void xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show);
 
 
 G_END_DECLS
