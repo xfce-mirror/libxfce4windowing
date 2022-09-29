@@ -1,1 +1,2 @@
 libxfce4windowing/xfw-workspace-dummy.c
+libxfce4windowingui/xfw-window-action-menu.c
