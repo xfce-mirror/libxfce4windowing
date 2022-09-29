@@ -1,8 +1,5 @@
 # vi:set ts=8 sw=8 noet ai nocindent syntax=automake:
 
-SUBDIRS = \
-	protocols
-
 lib_LTLIBRARIES = \
 	libxfce4windowing-0.la
 
@@ -100,7 +97,7 @@ libxfce4windowing_0_la_LIBADD = \
 
 if WAYLAND_ENABLED
 libxfce4windowing_0_la_LIBADD += \
-	protocols/libwayland-protocols.la
+	$(top_builddir)/protocols/libwayland-protocols.la
 endif
 
 pkgconfigdir = $(libdir)/pkgconfig

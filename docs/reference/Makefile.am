@@ -36,8 +36,7 @@ IGNORE_HFILES = \
 	xfw-workspace-manager-wayland.h \
 	xfw-workspace-manager-x11.h \
 	xfw-workspace-wayland.h \
-	xfw-workspace-x11.h \
-	protocols
+	xfw-workspace-x11.h
 
 # Extra files to add when scanning (relative to $srcdir)
 EXTRA_HFILES =

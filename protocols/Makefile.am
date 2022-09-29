@@ -40,3 +40,6 @@ endif
 EXTRA_DIST = \
 	ext-workspace-v1-20220919.xml \
 	wlr-foreign-toplevel-management-unstable-v1.xml
+
+# required for make distcheck
+dist-hook: all

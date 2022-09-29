@@ -1,6 +1,7 @@
 @SET_MAKE@
 
 SUBDIRS = \
+	protocols \
 	libxfce4windowing \
 	libxfce4windowingui \
 	docs \

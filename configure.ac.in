@@ -161,10 +161,10 @@ docs/Makefile
 docs/reference/Makefile
 libxfce4windowing/Makefile
 libxfce4windowing/libxfce4windowing-0.pc
-libxfce4windowing/protocols/Makefile
 libxfce4windowingui/Makefile
 libxfce4windowingui/libxfce4windowingui-0.pc
 po/Makefile.in
+protocols/Makefile
 ])
 AC_OUTPUT
 
