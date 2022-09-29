@@ -339,6 +339,7 @@ STATE_SETTER(below)
         return (state & XFW_WINDOW_STATE_ ## state_upper) != 0; \
     }
 
+STATE_GETTER(active, ACTIVE)
 STATE_GETTER(minimized, MINIMIZED)
 STATE_GETTER(maximized, MAXIMIZED)
 STATE_GETTER(fullscreen, FULLSCREEN)

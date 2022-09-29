@@ -167,6 +167,7 @@ gboolean xfw_window_set_shaded(XfwWindow *window, gboolean is_shaded, GError **e
 gboolean xfw_window_set_above(XfwWindow *window, gboolean is_above, GError **error);
 gboolean xfw_window_set_below(XfwWindow *window, gboolean is_below, GError **error);
 
+gboolean xfw_window_is_active(XfwWindow *window);
 gboolean xfw_window_is_minimized(XfwWindow *window);
 gboolean xfw_window_is_maximized(XfwWindow *window);
 gboolean xfw_window_is_fullscreen(XfwWindow *window);
