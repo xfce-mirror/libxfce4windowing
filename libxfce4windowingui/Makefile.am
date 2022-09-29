@@ -37,3 +37,6 @@ libxfce4windowingui_0_la_LIBADD = \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = \
 	libxfce4windowingui-$(LIBXFCE4WINDOWING_VERSION_API).pc
+
+# required for make distcheck (gtk-doc)
+dist-hook: all

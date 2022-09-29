@@ -128,3 +128,6 @@ BUILT_SOURCES = \
 	$(libxfce4windowing_0_built_sources)
 
 endif
+
+# required for make distcheck (gtk-doc)
+dist-hook: all
