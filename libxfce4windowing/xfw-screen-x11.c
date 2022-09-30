@@ -237,33 +237,30 @@ static void
 window_closed(WnckScreen *wnck_screen, WnckWindow *wnck_window, XfwScreenX11 *screen) {
     XfwWindowX11 *window = g_hash_table_lookup(screen->priv->wnck_windows, wnck_window);
     if (window != NULL) {
+        // will be unreffed on "active-window-changed"
         g_object_ref(window);
 
         g_hash_table_remove(screen->priv->wnck_windows, wnck_window);
         screen->priv->windows = g_list_remove(screen->priv->windows, window);
         screen->priv->windows_stacked = g_list_remove(screen->priv->windows_stacked, window);
 
-        if (screen->priv->active_window == XFW_WINDOW(window)) {
-            // TODO: maybe hold an extra reference for this so when a new window
-            // is activated, the old one will be still around
-            screen->priv->active_window = NULL;
-        }
-
         g_signal_emit_by_name(window, "closed");
         g_signal_emit_by_name(screen, "window-closed", window);
         g_signal_emit_by_name(screen, "window-stacking-changed", screen);
-
-        g_object_unref(window);
     }
 }
 
 static void
 active_window_changed(WnckScreen *wnck_screen, WnckWindow *previous_wnck_window, XfwScreenX11 *screen) {
     XfwWindow *window = g_hash_table_lookup(screen->priv->wnck_windows, wnck_screen_get_active_window(screen->priv->wnck_screen));
-    if (window != screen->priv->active_window) {
+    XfwWindow *previous_window = screen->priv->active_window;
+    if (window != previous_window) {
         screen->priv->active_window = window;
-        g_signal_emit_by_name(screen, "active-window-changed", g_hash_table_lookup(screen->priv->wnck_windows, previous_wnck_window));
-    }    
+        g_signal_emit_by_name(screen, "active-window-changed", previous_window);
+        if (window == NULL) {
+            g_object_unref(previous_window);
+        }
+    }
 }
 
 static void
