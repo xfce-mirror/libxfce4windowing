@@ -244,9 +244,8 @@ window_closed(WnckScreen *wnck_screen, WnckWindow *wnck_window, XfwScreenX11 *sc
         screen->priv->windows_stacked = g_list_remove(screen->priv->windows_stacked, window);
 
         if (screen->priv->active_window == XFW_WINDOW(window)) {
-            // TODO: maybe hold an extra reference for this so when a new window
-            // is activated, the old one will be still around
             screen->priv->active_window = NULL;
+            g_signal_emit_by_name(screen, "active-window-changed", window);
         }
 
         g_signal_emit_by_name(window, "closed");
