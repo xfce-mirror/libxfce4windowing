@@ -165,6 +165,9 @@ xfw_screen_x11_finalize(GObject *obj) {
 
     g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, window_opened, screen);
     g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, window_closed, screen);
+    g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, active_window_changed, screen);
+    g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, window_stacking_changed, screen);
+    g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, showing_desktop_changed, screen);
     g_list_free(screen->priv->windows);
     g_list_free(screen->priv->windows_stacked);
     g_hash_table_destroy(screen->priv->wnck_windows);
