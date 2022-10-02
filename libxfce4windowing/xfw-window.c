@@ -150,12 +150,6 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                             "",
                                                             G_PARAM_READABLE));
     g_object_interface_install_property(iface,
-                                        g_param_spec_object("icon",
-                                                            "icon",
-                                                            "icon",
-                                                            GDK_TYPE_PIXBUF,
-                                                            G_PARAM_READABLE));
-    g_object_interface_install_property(iface,
                                         g_param_spec_enum("type",
                                                           "type",
                                                           "type",
@@ -206,11 +200,11 @@ xfw_window_get_name(XfwWindow *window) {
 }
 
 GdkPixbuf *
-xfw_window_get_icon(XfwWindow *window) {
+xfw_window_get_icon(XfwWindow *window, gint size) {
     XfwWindowIface *iface;
     g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
     iface = XFW_WINDOW_GET_IFACE(window);
-    return (*iface->get_icon)(window);
+    return (*iface->get_icon)(window, size);
 }
 
 XfwWindowType
@@ -357,7 +351,6 @@ _xfw_window_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WINDOW_PROP_SCREEN, "screen");
     g_object_class_override_property(gklass, WINDOW_PROP_ID, "id");
     g_object_class_override_property(gklass, WINDOW_PROP_NAME, "name");
-    g_object_class_override_property(gklass, WINDOW_PROP_ICON, "icon");
     g_object_class_override_property(gklass, WINDOW_PROP_TYPE, "type");
     g_object_class_override_property(gklass, WINDOW_PROP_STATE, "state");
     g_object_class_override_property(gklass, WINDOW_PROP_CAPABILITIES, "capabilities");
