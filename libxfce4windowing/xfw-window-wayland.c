@@ -222,6 +222,7 @@ xfw_window_wayland_finalize(GObject *obj) {
 
     zwlr_foreign_toplevel_handle_v1_destroy(window->priv->handle);
     g_free(window->priv->app_id);
+    g_free(window->priv->name);
     g_free(window->priv->icon_name);
     if (window->priv->icon) {
         g_object_unref(window->priv->icon);
@@ -287,9 +288,6 @@ xfw_window_wayland_get_icon(XfwWindow *window) {
         }
     }
 
-    if (wwindow->priv->icon != NULL) {
-        g_object_ref(wwindow->priv->icon);
-    }
     return wwindow->priv->icon;
 }
 
@@ -532,6 +530,7 @@ toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
             g_object_notify(G_OBJECT(window), "icon");
             g_signal_emit_by_name(window, "icon-changed");
         }
+        g_object_unref(app_info);
     }
 }
 
