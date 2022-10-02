@@ -96,7 +96,7 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
                          NULL);
     priv->groups = g_list_append(NULL, group);
 
-    priv->wnck_workspaces = g_hash_table_new_full(g_direct_hash, g_direct_equal, g_object_unref, g_object_unref);
+    priv->wnck_workspaces = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
     active_wnck_workspace = wnck_screen_get_active_workspace(priv->wnck_screen);
     wnck_workspaces = wnck_screen_get_workspaces(priv->wnck_screen);
     for (GList *l = wnck_workspaces; l != NULL; l = l->next) {
@@ -108,7 +108,7 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
             _xfw_workspace_group_dummy_set_active_workspace(XFW_WORKSPACE_GROUP_DUMMY(priv->groups->data), workspace);
         }
         priv->workspaces = g_list_append(priv->workspaces, workspace);
-        g_hash_table_insert(priv->wnck_workspaces, g_object_ref(l->data), workspace);
+        g_hash_table_insert(priv->wnck_workspaces, l->data, workspace);
     }
     _xfw_workspace_group_dummy_set_workspaces(group, priv->workspaces);
 
