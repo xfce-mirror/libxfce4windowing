@@ -52,7 +52,7 @@ static void xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *val
 static void xfw_window_x11_finalize(GObject *obj);
 static guint64 xfw_window_x11_get_id(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
-static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window);
+static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window, gint size);
 static XfwWindowType xfw_window_x11_get_window_type(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
 static XfwWindowCapabilities xfw_window_x11_get_capabilities(XfwWindow *window);
@@ -149,7 +149,6 @@ xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GP
 
         case WINDOW_PROP_ID:
         case WINDOW_PROP_NAME:
-        case WINDOW_PROP_ICON:
         case WINDOW_PROP_TYPE:
         case WINDOW_PROP_STATE:
         case WINDOW_PROP_CAPABILITIES:
@@ -182,10 +181,6 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
 
         case WINDOW_PROP_NAME:
             g_value_set_string(value, xfw_window_x11_get_name(window));
-            break;
-
-        case WINDOW_PROP_ICON:
-            g_value_set_object(value, xfw_window_x11_get_icon(window));
             break;
 
         case WINDOW_PROP_TYPE:
@@ -270,19 +265,12 @@ xfw_window_x11_get_name(XfwWindow *window) {
 }
 
 static GdkPixbuf *
-xfw_window_x11_get_icon(XfwWindow *window) {
+xfw_window_x11_get_icon(XfwWindow *window, gint size) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
-    GdkPixbuf *icon = wnck_window_get_icon(priv->wnck_window);
-    GdkPixbuf *mini_icon = wnck_window_get_mini_icon(priv->wnck_window);
-    if (icon == NULL) {
-        return mini_icon;
-    } else if (mini_icon == NULL) {
-        return icon;
-    } else if (gdk_pixbuf_get_width(icon) >= gdk_pixbuf_get_height(mini_icon)) {
-        return icon;
-    } else {
-        return mini_icon;
+    if (size < WNCK_DEFAULT_ICON_SIZE) {
+        return wnck_window_get_mini_icon(priv->wnck_window);
     }
+    return wnck_window_get_icon(priv->wnck_window);
 }
 
 static XfwWindowType
@@ -573,7 +561,6 @@ name_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
 
 static void
 icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
-    g_object_notify(G_OBJECT(window), "icon");
     g_signal_emit_by_name(window, "icon-changed");
 }
 
