@@ -27,6 +27,7 @@
 #include <gdk/gdk.h>
 
 #include "xfw-workspace.h"
+#include "xfw-application.h"
 
 G_BEGIN_DECLS
 
@@ -117,6 +118,7 @@ struct _XfwWindowIface {
     XfwScreen *(*get_screen)(XfwWindow *window);
     XfwWorkspace *(*get_workspace)(XfwWindow *window);
     GList *(*get_monitors)(XfwWindow *window);
+    XfwApplication *(*get_application)(XfwWindow *window);
 
     gboolean (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
     gboolean (*close)(XfwWindow *window, guint64 event_timestamp, GError **error);
@@ -150,6 +152,7 @@ GdkRectangle *xfw_window_get_geometry(XfwWindow *window);
 XfwScreen *xfw_window_get_screen(XfwWindow *window);
 XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);
 GList *xfw_window_get_monitors(XfwWindow *window);
+XfwApplication *xfw_window_get_application(XfwWindow *window);
 
 gboolean xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 gboolean xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error);

@@ -30,6 +30,7 @@
 #include "xfw-util.h"
 #include "xfw-window-wayland.h"
 #include "xfw-window.h"
+#include "xfw-application-wayland.h"
 
 enum {
     PROP0,
@@ -51,6 +52,7 @@ struct _XfwWindowWaylandPrivate {
     XfwWindowCapabilities capabilities;
     GdkRectangle geometry;  // unfortunately unsupported
     GList *monitors;
+    XfwApplication *app;
 };
 
 static void xfw_window_wayland_window_init(XfwWindowIface *iface);
@@ -68,6 +70,7 @@ static GdkRectangle *xfw_window_wayland_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_wayland_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
 static GList *xfw_window_wayland_get_monitors(XfwWindow *window);
+static XfwApplication *xfw_window_wayland_get_application(XfwWindow *window);
 static gboolean xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_wayland_start_move(XfwWindow *window, GError **error);
@@ -157,6 +160,7 @@ xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value
         case WINDOW_PROP_CAPABILITIES:
         case WINDOW_PROP_WORKSPACE:
         case WINDOW_PROP_MONITORS:
+        case WINDOW_PROP_APPLICATION:
             break;
 
         default:
@@ -206,6 +210,10 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
             g_value_set_pointer(value, xfw_window_wayland_get_monitors(window));
             break;
 
+        case WINDOW_PROP_APPLICATION:
+            g_value_set_object(value, xfw_window_wayland_get_application(window));
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
             break;
@@ -224,6 +232,9 @@ xfw_window_wayland_finalize(GObject *obj) {
         g_object_unref(window->priv->icon);
     }
     g_list_free(window->priv->monitors);
+    if (window->priv->app) {
+        g_object_unref(window->priv->app);
+    }
 
     G_OBJECT_CLASS(xfw_window_wayland_parent_class)->finalize(obj);
 }
@@ -240,6 +251,7 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->get_screen = xfw_window_wayland_get_screen;
     iface->get_workspace = xfw_window_wayland_get_workspace;
     iface->get_monitors = xfw_window_wayland_get_monitors;
+    iface->get_application = xfw_window_wayland_get_application;
     iface->activate = xfw_window_wayland_activate;
     iface->close = xfw_window_wayland_close;
     iface->start_move = xfw_window_wayland_start_move;
@@ -326,6 +338,11 @@ xfw_window_wayland_get_workspace(XfwWindow *window) {
 static GList *
 xfw_window_wayland_get_monitors(XfwWindow *window) {
     return XFW_WINDOW_WAYLAND(window)->priv->monitors;
+}
+
+static XfwApplication *
+xfw_window_wayland_get_application(XfwWindow *window) {
+    return XFW_WINDOW_WAYLAND(window)->priv->app;
 }
 
 static gboolean
@@ -511,6 +528,11 @@ toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
 
     g_free(window->priv->app_id);
     window->priv->app_id = g_strdup(app_id);
+    if (window->priv->app != NULL) {
+        g_object_unref(window->priv->app);
+    }
+    window->priv->app = XFW_APPLICATION(_xfw_application_wayland_get(window));
+    g_object_notify(G_OBJECT(window), "application");
 
     desktop_id = g_strdup_printf("%s.desktop", app_id);
     app_info = g_desktop_app_info_new(desktop_id);

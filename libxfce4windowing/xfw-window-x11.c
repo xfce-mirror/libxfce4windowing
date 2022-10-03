@@ -28,6 +28,7 @@
 #include "xfw-window-x11.h"
 #include "xfw-window.h"
 #include "xfw-workspace-x11.h"
+#include "xfw-application-x11.h"
 
 enum {
     PROP0,
@@ -43,6 +44,7 @@ struct _XfwWindowX11Private {
     GdkRectangle geometry;
     XfwWorkspace *workspace;
     GList *monitors;
+    XfwApplication *app;
 };
 
 static void xfw_window_x11_window_init(XfwWindowIface *iface);
@@ -60,6 +62,7 @@ static GdkRectangle *xfw_window_x11_get_geometry(XfwWindow *window);
 static XfwScreen *xfw_window_x11_get_screen(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
 static GList *xfw_window_x11_get_monitors(XfwWindow *window);
+static XfwApplication *xfw_window_x11_get_application(XfwWindow *window);
 static gboolean xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_x11_start_move(XfwWindow *window, GError **error);
@@ -124,6 +127,7 @@ static void xfw_window_x11_constructed(GObject *obj) {
     window->priv->capabilities = convert_capabilities(window->priv->wnck_window, wnck_window_get_actions(window->priv->wnck_window));
     window->priv->workspace = _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(window->priv->screen),
                                                                            wnck_window_get_workspace(window->priv->wnck_window));
+    window->priv->app = XFW_APPLICATION(_xfw_application_x11_get(wnck_window_get_application(window->priv->wnck_window)));
 
     g_signal_connect(window->priv->wnck_window, "name-changed", G_CALLBACK(name_changed), window);
     g_signal_connect(window->priv->wnck_window, "icon-changed", G_CALLBACK(icon_changed), window);
@@ -154,6 +158,7 @@ xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GP
         case WINDOW_PROP_CAPABILITIES:
         case WINDOW_PROP_WORKSPACE:
         case WINDOW_PROP_MONITORS:
+        case WINDOW_PROP_APPLICATION:
             break;
 
         default:
@@ -203,6 +208,10 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
             g_value_set_pointer(value, xfw_window_x11_get_monitors(window));
             break;
 
+        case WINDOW_PROP_APPLICATION:
+            g_value_set_object(value, xfw_window_x11_get_application(window));
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
             break;
@@ -222,6 +231,7 @@ xfw_window_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 
     g_list_free(window->priv->monitors);
+    g_object_unref(window->priv->app);
 
     // to be released last
     g_object_unref(window->priv->wnck_window);
@@ -241,6 +251,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_screen = xfw_window_x11_get_screen;
     iface->get_workspace = xfw_window_x11_get_workspace;
     iface->get_monitors = xfw_window_x11_get_monitors;
+    iface->get_application = xfw_window_x11_get_application;
     iface->activate = xfw_window_x11_activate;
     iface->close = xfw_window_x11_close;
     iface->start_move = xfw_window_x11_start_move;
@@ -323,6 +334,11 @@ xfw_window_x11_get_monitors(XfwWindow *window) {
     }
 
     return xwindow->priv->monitors;
+}
+
+static XfwApplication *
+xfw_window_x11_get_application(XfwWindow *window) {
+    return XFW_WINDOW_X11(window)->priv->app;
 }
 
 static gboolean
