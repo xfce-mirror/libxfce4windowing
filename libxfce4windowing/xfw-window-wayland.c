@@ -665,3 +665,8 @@ struct zwlr_foreign_toplevel_handle_v1 *
 _xfw_window_wayland_get_handle(XfwWindowWayland *window) {
     return window->priv->handle;
 }
+
+const gchar *
+_xfw_window_wayland_get_app_id(XfwWindowWayland *window) {
+    return window->priv->app_id;
+}

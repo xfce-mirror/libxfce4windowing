@@ -68,6 +68,13 @@ enum {
     WINDOW_PROP_MONITORS,
 };
 
+enum {
+    APPLICATION_PROP_ID = 0x6000,
+    APPLICATION_PROP_NAME,
+    APPLICATION_PROP_PID,
+    APPLICATION_PROP_WINDOWS,
+};
+
 void _libxfce4windowing_init(void);
 
 void _xfw_screen_install_properties(GObjectClass *gklass);
@@ -75,6 +82,7 @@ void _xfw_workspace_manager_install_properties(GObjectClass *gklass);
 void _xfw_workspace_group_install_properties(GObjectClass *gklass);
 void _xfw_workspace_install_properties(GObjectClass *gklass);
 void _xfw_window_install_properties(GObjectClass *gklass);
+void _xfw_application_install_properties(GObjectClass *gklass);
 
 G_END_DECLS
 

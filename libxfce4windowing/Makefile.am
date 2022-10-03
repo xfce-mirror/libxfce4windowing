@@ -6,6 +6,7 @@ lib_LTLIBRARIES = \
 libxfce4windowing_0_includedir = $(includedir)/xfce4/libxfce4windowing
 libxfce4windowing_0_headers = \
 	libxfce4windowing.h \
+	xfw-application.h \
 	xfw-screen.h \
 	xfw-util.h \
 	xfw-window.h \
@@ -21,6 +22,8 @@ libxfce4windowing_0_built_sources = \
 	xfw-marshal.h
 
 libxfce4windowing_0_x11_sources = \
+	xfw-application-x11.c \
+	xfw-application-x11.h \
 	xfw-screen-x11.c \
 	xfw-screen-x11.h \
 	xfw-window-x11.c \
@@ -31,6 +34,8 @@ libxfce4windowing_0_x11_sources = \
 	xfw-workspace-x11.h
 
 libxfce4windowing_0_wayland_sources = \
+	xfw-application-wayland.c \
+	xfw-application-wayland.h \
 	xfw-screen-wayland.c \
 	xfw-screen-wayland.h \
 	xfw-window-wayland.c \
@@ -47,6 +52,7 @@ libxfce4windowing_0_la_SOURCES = \
 	$(libxfce4windowing_0_built_sources) \
 	libxfce4windowing-private.c \
 	libxfce4windowing-private.h \
+	xfw-application.c \
 	xfw-screen.c \
 	xfw-util.c \
 	xfw-window.c \
