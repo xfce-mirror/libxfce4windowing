@@ -46,6 +46,7 @@ struct _XfwWindowWaylandPrivate {
     gchar *name;
     gchar *icon_name;
     GdkPixbuf *icon;
+    gint icon_size;
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
     GdkRectangle geometry;  // unfortunately unsupported
@@ -59,7 +60,7 @@ static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue 
 static void xfw_window_wayland_finalize(GObject *obj);
 static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
-static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window);
+static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window, gint size);
 static XfwWindowType xfw_window_wayland_get_window_type(XfwWindow *window);
 static XfwWindowState xfw_window_wayland_get_state(XfwWindow *window);
 static XfwWindowCapabilities xfw_window_wayland_get_capabilities(XfwWindow *window);
@@ -151,7 +152,6 @@ xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value
 
         case WINDOW_PROP_ID:
         case WINDOW_PROP_NAME:
-        case WINDOW_PROP_ICON:
         case WINDOW_PROP_TYPE:
         case WINDOW_PROP_STATE:
         case WINDOW_PROP_CAPABILITIES:
@@ -184,10 +184,6 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
 
         case WINDOW_PROP_NAME:
             g_value_set_string(value, xfw_window_wayland_get_name(window));
-            break;
-
-        case WINDOW_PROP_ICON:
-            g_value_set_object(value, xfw_window_wayland_get_icon(window));
             break;
 
         case WINDOW_PROP_TYPE:
@@ -271,14 +267,18 @@ xfw_window_wayland_get_name(XfwWindow *window) {
 }
 
 static GdkPixbuf *
-xfw_window_wayland_get_icon(XfwWindow *window) {
+xfw_window_wayland_get_icon(XfwWindow *window, gint size) {
     XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
 
-    if (wwindow->priv->icon == NULL && wwindow->priv->icon_name != NULL) {
+    if (wwindow->priv->icon_name != NULL && (wwindow->priv->icon == NULL || size != wwindow->priv->icon_size)) {
         GtkIconTheme *itheme = gtk_icon_theme_get_for_screen(_xfw_screen_wayland_get_gdk_screen(XFW_SCREEN_WAYLAND(wwindow->priv->screen)));
         GError *error = NULL;
-        GdkPixbuf *icon = gtk_icon_theme_load_icon(itheme, wwindow->priv->icon_name, 64, 0, &error);
+        GdkPixbuf *icon = gtk_icon_theme_load_icon(itheme, wwindow->priv->icon_name, size, 0, &error);
+        wwindow->priv->icon_size = size;
         if (icon != NULL) {
+            if (wwindow->priv->icon != NULL) {
+                g_object_unref(wwindow->priv->icon);
+            }
             wwindow->priv->icon = icon;
         } else if (error != NULL) {
             g_message("Failed to load icon for app '%s': %s", wwindow->priv->app_id, error->message);
@@ -527,7 +527,6 @@ toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
                 window->priv->icon = NULL;
             }
 
-            g_object_notify(G_OBJECT(window), "icon");
             g_signal_emit_by_name(window, "icon-changed");
         }
         g_object_unref(app_info);
