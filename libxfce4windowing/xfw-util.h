@@ -24,6 +24,7 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
+#include <gio/gdesktopappinfo.h>
 #include <gdk/gdk.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -86,6 +87,7 @@ GQuark xfw_error_quark(void) G_GNUC_CONST;
 GType xfw_direction_get_type(void) G_GNUC_CONST;
 
 XfwWindowing xfw_windowing_get(void);
+GDesktopAppInfo *xfw_g_desktop_app_info_get(const gchar *app_id);
 
 /**
  * xfw_windowing_error_trap_push:

@@ -19,7 +19,6 @@
 
 #include "config.h"
 
-#include <gio/gdesktopappinfo.h>
 #include <gtk/gtk.h>
 
 #include "libxfce4windowing-private.h"
@@ -87,24 +86,10 @@ xfw_application_wayland_init(XfwApplicationWayland *app) {
 static void xfw_application_wayland_constructed(GObject *obj) {
     XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(obj)->priv;
     GDesktopAppInfo *app_info;
-    gchar *desktop_id;
 
     g_hash_table_insert(app_ids, priv->app_id, obj);
 
-    desktop_id = g_strdup_printf("%s.desktop", priv->app_id);
-    app_info = g_desktop_app_info_new(desktop_id);
-    g_free(desktop_id);
-    if (app_info == NULL) {
-        gchar ***desktop_ids = g_desktop_app_info_search(priv->app_id);
-        if (desktop_ids[0] != NULL) {
-            app_info = g_desktop_app_info_new(desktop_ids[0][0]);
-        }
-        for (gchar ***p = desktop_ids; *p != NULL; p++) {
-            g_strfreev (*p);
-        }
-        g_free (desktop_ids);
-    }
-
+    app_info = xfw_g_desktop_app_info_get(priv->app_id);
     if (app_info != NULL) {
         gchar *name = g_desktop_app_info_get_string(app_info, G_KEY_FILE_DESKTOP_KEY_NAME);
         gchar *icon_name = g_desktop_app_info_get_string(app_info, G_KEY_FILE_DESKTOP_KEY_ICON);
