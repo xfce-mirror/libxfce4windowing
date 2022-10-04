@@ -87,7 +87,7 @@ static void
 xfw_screen_x11_constructed(GObject *obj) {
     XfwScreenX11 *screen = XFW_SCREEN_X11(obj);
 
-    screen->priv->wnck_screen = wnck_screen_get(gdk_x11_screen_get_screen_number(screen->priv->gdk_screen));
+    screen->priv->wnck_screen = g_object_ref(wnck_screen_get(gdk_x11_screen_get_screen_number(screen->priv->gdk_screen)));
     screen->priv->workspace_manager = _xfw_workspace_manager_x11_new(screen->priv->gdk_screen);
     screen->priv->wnck_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
 
@@ -171,6 +171,9 @@ xfw_screen_x11_finalize(GObject *obj) {
     g_list_free(screen->priv->windows);
     g_list_free(screen->priv->windows_stacked);
     g_hash_table_destroy(screen->priv->wnck_windows);
+
+    // to be released last
+    g_object_unref(screen->priv->wnck_screen);
 
     G_OBJECT_CLASS(xfw_screen_x11_parent_class)->finalize(obj);
 }

@@ -140,7 +140,7 @@ xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GP
 
     switch (prop_id) {
         case PROP_WNCK_WINDOW:
-            window->priv->wnck_window = g_value_get_object(value);
+            window->priv->wnck_window = g_value_dup_object(value);
             break;
 
         case WINDOW_PROP_SCREEN:
@@ -222,6 +222,9 @@ xfw_window_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 
     g_list_free(window->priv->monitors);
+
+    // to be released last
+    g_object_unref(window->priv->wnck_window);
 
     G_OBJECT_CLASS(xfw_window_x11_parent_class)->finalize(obj);
 }

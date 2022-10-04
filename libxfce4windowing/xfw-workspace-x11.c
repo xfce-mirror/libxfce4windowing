@@ -97,7 +97,7 @@ xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value,
 
     switch (prop_id) {
         case PROP_WNCK_WORKSPACE:
-            workspace->priv->wnck_workspace = g_value_get_object(value);
+            workspace->priv->wnck_workspace = g_value_dup_object(value);
             break;
 
         case WORKSPACE_PROP_GROUP:
@@ -160,6 +160,9 @@ xfw_workspace_x11_finalize(GObject *obj) {
     XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(obj);
 
     g_signal_handlers_disconnect_by_func(workspace->priv->wnck_workspace, name_changed, workspace);
+
+    // to be released last
+    g_object_unref(workspace->priv->wnck_workspace);
 
     G_OBJECT_CLASS(xfw_workspace_x11_parent_class)->finalize(obj);
 }
