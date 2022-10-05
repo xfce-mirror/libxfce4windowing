@@ -177,21 +177,6 @@ xfw_screen_default_init(XfwScreenIface *iface) {
 }
 
 /**
- * xfw_screen_get_number:
- * @screen: an #XfwScreen.
- *
- * Retrieves the screen number assigned by the windowing environment.  In
- * most cases this will be #0.
- **/
-gint
-xfw_screen_get_number(XfwScreen *screen) {
-    XfwScreenIface *iface;
-    g_return_val_if_fail(XFW_IS_SCREEN(screen), 0);
-    iface = XFW_SCREEN_GET_IFACE(screen);
-    return (*iface->get_number)(screen);
-}
-
-/**
  * xfw_screen_get_workspace_manager:
  * @screen: an #XfwScreen.
  *
@@ -308,19 +293,6 @@ screen_destroyed(GdkScreen *gdk_screen, XfwScreen *screen) {
 }
 
 /**
- * xfw_screen_get_default: (constructor)
- *
- * Retrieves the #XfwScreen instance corresponding to the default #GdkScreen.
- *
- * Return value: (not nullable) (transfer full): an #XfScreen instance, with
- * a reference owned by the caller.
- **/
-XfwScreen *
-xfw_screen_get_default(void) {
-    return xfw_screen_get(gdk_screen_get_default());
-}
-
-/**
  * xfw_screen_get: (constructor)
  * @gdk_screen: a #GdkScreen.
  *
@@ -330,7 +302,7 @@ xfw_screen_get_default(void) {
  * Return value: (not nullable) (transfer full): an #XfwScreen instance, with
  * a reference owned by the caller.
  **/
-XfwScreen *
+static XfwScreen *
 xfw_screen_get(GdkScreen *gdk_screen) {
     XfwScreen *screen = XFW_SCREEN(g_object_get_data(G_OBJECT(gdk_screen), GDK_SCREEN_XFW_SCREEN_KEY));
 
@@ -364,6 +336,19 @@ xfw_screen_get(GdkScreen *gdk_screen) {
     }
 
     return screen;
+}
+
+/**
+ * xfw_screen_get_default: (constructor)
+ *
+ * Retrieves the #XfwScreen instance corresponding to the default #GdkScreen.
+ *
+ * Return value: (not nullable) (transfer full): an #XfScreen instance, with
+ * a reference owned by the caller.
+ **/
+XfwScreen *
+xfw_screen_get_default(void) {
+    return xfw_screen_get(gdk_screen_get_default());
 }
 
 void
