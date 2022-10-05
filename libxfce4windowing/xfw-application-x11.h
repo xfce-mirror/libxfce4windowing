@@ -41,5 +41,6 @@ struct _XfwApplicationX11 {
 };
 
 XfwApplicationX11 *_xfw_application_x11_get(WnckApplication *wnck_app);
+const gchar *_xfw_application_x11_get_icon_name(XfwApplicationX11 *app);
 
 #endif  /* __XFW_APPLICATION_X11_H__ */

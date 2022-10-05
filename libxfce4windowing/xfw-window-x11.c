@@ -38,6 +38,8 @@ enum {
 struct _XfwWindowX11Private {
     XfwScreen *screen;
     WnckWindow *wnck_window;
+    GdkPixbuf *icon;
+    gint icon_size;
     XfwWindowType window_type;
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
@@ -80,6 +82,7 @@ static gboolean xfw_window_x11_set_below(XfwWindow *window, gboolean is_below, G
 
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
+static void app_name_changed(XfwApplication *app, GParamSpec *pspec, XfwWindowX11 *window);
 static void type_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void state_changed(WnckWindow *wnck_window, WnckWindowState changed_mask, WnckWindowState new_state, XfwWindowX11 *window);
 static void actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, WnckWindowActions wnck_new_actions, XfwWindowX11 *window);
@@ -131,6 +134,7 @@ static void xfw_window_x11_constructed(GObject *obj) {
 
     g_signal_connect(window->priv->wnck_window, "name-changed", G_CALLBACK(name_changed), window);
     g_signal_connect(window->priv->wnck_window, "icon-changed", G_CALLBACK(icon_changed), window);
+    g_signal_connect(window->priv->app, "notify::name", G_CALLBACK(app_name_changed), window);
     g_signal_connect(window->priv->wnck_window, "type-changed", G_CALLBACK(type_changed), window);
     g_signal_connect(window->priv->wnck_window, "state-changed", G_CALLBACK(state_changed), window);
     g_signal_connect(window->priv->wnck_window, "actions-changed", G_CALLBACK(actions_changed), window);
@@ -224,12 +228,16 @@ xfw_window_x11_finalize(GObject *obj) {
 
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, name_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, icon_changed, window);
+    g_signal_handlers_disconnect_by_func(window->priv->app, app_name_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, type_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, state_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, actions_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 
+    if (window->priv->icon != NULL) {
+        g_object_unref(window->priv->icon);
+    }
     g_list_free(window->priv->monitors);
     g_object_unref(window->priv->app);
 
@@ -281,10 +289,24 @@ xfw_window_x11_get_name(XfwWindow *window) {
 static GdkPixbuf *
 xfw_window_x11_get_icon(XfwWindow *window, gint size) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
-    if (size < WNCK_DEFAULT_ICON_SIZE) {
-        return wnck_window_get_mini_icon(priv->wnck_window);
+
+    size = size < WNCK_DEFAULT_ICON_SIZE ? WNCK_DEFAULT_MINI_ICON_SIZE : WNCK_DEFAULT_ICON_SIZE;
+    if (priv->icon == NULL || size != priv->icon_size) {
+        priv->icon_size = size;
+        g_clear_object(&priv->icon);
+        if (wnck_window_get_icon_is_fallback(priv->wnck_window)) {
+            const gchar *icon_name = _xfw_application_x11_get_icon_name(XFW_APPLICATION_X11(priv->app));
+            if (icon_name != NULL) {
+                priv->icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), icon_name, size, 0, NULL);
+            }
+        } else if (size == WNCK_DEFAULT_ICON_SIZE) {
+            priv->icon = g_object_ref(wnck_window_get_icon(priv->wnck_window));
+        } else {
+            priv->icon = g_object_ref(wnck_window_get_mini_icon(priv->wnck_window));
+        }
     }
-    return wnck_window_get_icon(priv->wnck_window);
+
+    return priv->icon;
 }
 
 static XfwWindowType
@@ -580,6 +602,13 @@ name_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
 
 static void
 icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
+    g_clear_object(&window->priv->icon);
+    g_signal_emit_by_name(window, "icon-changed");
+}
+
+static void
+app_name_changed(XfwApplication *app, GParamSpec *pspec, XfwWindowX11 *window) {
+    g_clear_object(&window->priv->icon);
     g_signal_emit_by_name(window, "icon-changed");
 }
 

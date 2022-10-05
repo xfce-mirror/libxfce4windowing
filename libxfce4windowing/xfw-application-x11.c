@@ -22,6 +22,7 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-application.h"
 #include "xfw-application-x11.h"
+#include "xfw-util.h"
 
 enum {
     PROP0,
@@ -30,6 +31,9 @@ enum {
 
 struct _XfwApplicationX11Private {
     WnckApplication *wnck_app;
+    GdkPixbuf *icon;
+    gchar *icon_name;
+    gint icon_size;
 };
 
 static GHashTable *wnck_apps = NULL;
@@ -146,6 +150,11 @@ xfw_application_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(priv->wnck_app, icon_changed, obj);
     g_signal_handlers_disconnect_by_func(priv->wnck_app, name_changed, obj);
 
+    if (priv->icon != NULL) {
+        g_object_unref(priv->icon);
+    }
+    g_free(priv->icon_name);
+
     // to be released last
     g_object_unref(priv->wnck_app);
 
@@ -179,10 +188,23 @@ xfw_application_x11_get_pid(XfwApplication *app) {
 static GdkPixbuf *
 xfw_application_x11_get_icon(XfwApplication *app, gint size) {
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(app)->priv;
-    if (size < WNCK_DEFAULT_ICON_SIZE) {
-        return wnck_application_get_mini_icon(priv->wnck_app);
+
+    size = size < WNCK_DEFAULT_ICON_SIZE ? WNCK_DEFAULT_MINI_ICON_SIZE : WNCK_DEFAULT_ICON_SIZE;
+    if (priv->icon == NULL || size != priv->icon_size) {
+        priv->icon_size = size;
+        g_clear_object(&priv->icon);
+        if (wnck_application_get_icon_is_fallback(priv->wnck_app)) {
+            if (priv->icon_name != NULL) {
+                priv->icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), priv->icon_name, size, 0, NULL);
+            }
+        } else if (size == WNCK_DEFAULT_ICON_SIZE) {
+            priv->icon = g_object_ref(wnck_application_get_icon(priv->wnck_app));
+        } else {
+            priv->icon = g_object_ref(wnck_application_get_mini_icon(priv->wnck_app));
+        }
     }
-    return wnck_application_get_icon(priv->wnck_app);
+
+    return priv->icon;
 }
 
 static GList *
@@ -192,11 +214,25 @@ xfw_application_x11_get_windows(XfwApplication *app) {
 
 static void
 icon_changed(WnckApplication *wnck_app, XfwApplicationX11 *app) {
+    g_clear_object(&app->priv->icon);
     g_signal_emit_by_name(app, "icon-changed");
 }
 
 static void
 name_changed(WnckApplication *wnck_app, XfwApplicationX11 *app) {
+    GDesktopAppInfo *app_info = xfw_g_desktop_app_info_get(wnck_application_get_name(wnck_app));
+    gchar *icon_name = NULL;
+
+    if (app_info != NULL) {
+        icon_name = g_desktop_app_info_get_string(app_info, G_KEY_FILE_DESKTOP_KEY_ICON);
+        g_object_unref(app_info);
+    }
+    if (g_strcmp0(icon_name, app->priv->icon_name) != 0) {
+        g_free(app->priv->icon_name);
+        app->priv->icon_name = icon_name;
+        g_clear_object(&app->priv->icon);
+        g_signal_emit_by_name(app, "icon-changed");
+    }
     g_object_notify(G_OBJECT(app), "name");
 }
 
@@ -219,4 +255,9 @@ _xfw_application_x11_get(WnckApplication *wnck_app) {
     }
 
     return app;
+}
+
+const gchar *
+_xfw_application_x11_get_icon_name(XfwApplicationX11 *app) {
+    return app->priv->icon_name;
 }
