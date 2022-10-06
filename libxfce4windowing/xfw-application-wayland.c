@@ -103,6 +103,10 @@ static void xfw_application_wayland_constructed(GObject *obj) {
         }
         g_object_unref(app_info);
     }
+    if (priv->name == NULL) {
+        priv->name = g_strdup_printf("%c%s", g_unichar_totitle(*priv->app_id), priv->app_id + 1);
+        g_object_notify(obj, "name");
+    }
 }
 
 static void

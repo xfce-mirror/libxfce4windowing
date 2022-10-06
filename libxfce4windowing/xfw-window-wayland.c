@@ -500,7 +500,7 @@ toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
 
     g_free(window->priv->app_id);
-    window->priv->app_id = g_strdup(app_id);
+    window->priv->app_id = (app_id != NULL && *app_id != '\0') ? g_strdup(app_id) : g_strdup("UnknownAppID");
     if (window->priv->app != NULL) {
         g_object_unref(window->priv->app);
     }
