@@ -85,6 +85,7 @@ static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void app_name_changed(XfwApplication *app, GParamSpec *pspec, XfwWindowX11 *window);
 static void type_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void state_changed(WnckWindow *wnck_window, WnckWindowState changed_mask, WnckWindowState new_state, XfwWindowX11 *window);
+static void active_window_changed(XfwScreen *screen, XfwWindow *previous_active_window, XfwWindowX11 *window);
 static void actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, WnckWindowActions wnck_new_actions, XfwWindowX11 *window);
 static void geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
@@ -137,6 +138,7 @@ static void xfw_window_x11_constructed(GObject *obj) {
     g_signal_connect(window->priv->app, "notify::name", G_CALLBACK(app_name_changed), window);
     g_signal_connect(window->priv->wnck_window, "type-changed", G_CALLBACK(type_changed), window);
     g_signal_connect(window->priv->wnck_window, "state-changed", G_CALLBACK(state_changed), window);
+    g_signal_connect(window->priv->screen, "active-window-changed", G_CALLBACK(active_window_changed), window);
     g_signal_connect(window->priv->wnck_window, "actions-changed", G_CALLBACK(actions_changed), window);
     g_signal_connect(window->priv->wnck_window, "geometry-changed", G_CALLBACK(geometry_changed), window);
     g_signal_connect(window->priv->wnck_window, "workspace-changed", G_CALLBACK(workspace_changed), window);
@@ -231,6 +233,7 @@ xfw_window_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(window->priv->app, app_name_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, type_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, state_changed, window);
+    g_signal_handlers_disconnect_by_func(window->priv->screen, active_window_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, actions_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
@@ -629,6 +632,15 @@ state_changed(WnckWindow *wnck_window, WnckWindowState wnck_changed_mask, WnckWi
 
     g_object_notify(G_OBJECT(window), "state");
     g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
+}
+
+static void
+active_window_changed(XfwScreen *screen, XfwWindow *previous_active_window, XfwWindowX11 *window) {
+    gboolean new_state = !!wnck_window_is_active(window->priv->wnck_window);
+    gboolean old_state = (window->priv->state & XFW_WINDOW_STATE_ACTIVE) != 0;
+    if (new_state != old_state) {
+        state_changed(window->priv->wnck_window, 0, wnck_window_get_state(window->priv->wnck_window), window);
+    }
 }
 
 static void
