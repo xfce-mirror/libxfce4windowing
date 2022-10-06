@@ -34,6 +34,7 @@ struct _XfwApplicationX11Private {
     GdkPixbuf *icon;
     gchar *icon_name;
     gint icon_size;
+    GList *windows;
 };
 
 static GHashTable *wnck_apps = NULL;
@@ -154,6 +155,10 @@ xfw_application_x11_finalize(GObject *obj) {
         g_object_unref(priv->icon);
     }
     g_free(priv->icon_name);
+    for (GList *lp = priv->windows; lp != NULL; lp = lp->next) {
+        g_signal_handlers_disconnect_by_data(lp->data, obj);
+    }
+    g_list_free(priv->windows);
 
     // to be released last
     g_object_unref(priv->wnck_app);
@@ -209,7 +214,7 @@ xfw_application_x11_get_icon(XfwApplication *app, gint size) {
 
 static GList *
 xfw_application_x11_get_windows(XfwApplication *app) {
-    return wnck_application_get_windows(XFW_APPLICATION_X11(app)->priv->wnck_app);
+    return XFW_APPLICATION_X11(app)->priv->windows;
 }
 
 static void
@@ -236,8 +241,15 @@ name_changed(WnckApplication *wnck_app, XfwApplicationX11 *app) {
     g_object_notify(G_OBJECT(app), "name");
 }
 
+static void
+window_closed(XfwWindowX11 *window, XfwApplicationX11 *app) {
+    g_signal_handlers_disconnect_by_data(window, app);
+    app->priv->windows = g_list_remove(app->priv->windows, window);
+    g_object_notify(G_OBJECT(app), "windows");
+}
+
 XfwApplicationX11 *
-_xfw_application_x11_get(WnckApplication *wnck_app) {
+_xfw_application_x11_get(WnckApplication *wnck_app, XfwWindowX11 *window) {
     XfwApplicationX11 *app = NULL;
 
     if (wnck_apps == NULL) {
@@ -253,6 +265,10 @@ _xfw_application_x11_get(WnckApplication *wnck_app) {
     } else {
         g_object_ref(app);
     }
+
+    app->priv->windows = g_list_prepend(app->priv->windows, window);
+    g_signal_connect(window, "closed", G_CALLBACK(window_closed), app);
+    g_object_notify(G_OBJECT(app), "windows");
 
     return app;
 }

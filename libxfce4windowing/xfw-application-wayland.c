@@ -237,6 +237,7 @@ static void
 window_closed(XfwWindowWayland *window, XfwApplicationWayland *app) {
     g_signal_handlers_disconnect_by_data(window, app);
     app->priv->windows = g_list_remove(app->priv->windows, window);
+    g_object_notify(G_OBJECT(app), "windows");
 }
 
 static void
@@ -244,6 +245,7 @@ window_application_changed(XfwWindowWayland *window, GParamSpec *pspec, XfwAppli
     if (XFW_APPLICATION(app) != xfw_window_get_application(XFW_WINDOW(window))) {
         g_signal_handlers_disconnect_by_data(window, app);
         app->priv->windows = g_list_remove(app->priv->windows, window);
+        g_object_notify(G_OBJECT(app), "windows");
     }
 }
 

@@ -27,6 +27,8 @@
 #include <glib-object.h>
 #include <libwnck/libwnck.h>
 
+#include "xfw-window-x11.h"
+
 G_BEGIN_DECLS
 
 #define XFW_TYPE_APPLICATION_X11 (xfw_application_x11_get_type())
@@ -40,7 +42,7 @@ struct _XfwApplicationX11 {
     XfwApplicationX11Private *priv;
 };
 
-XfwApplicationX11 *_xfw_application_x11_get(WnckApplication *wnck_app);
+XfwApplicationX11 *_xfw_application_x11_get(WnckApplication *wnck_app, XfwWindowX11 *window);
 const gchar *_xfw_application_x11_get_icon_name(XfwApplicationX11 *app);
 
 #endif  /* __XFW_APPLICATION_X11_H__ */
