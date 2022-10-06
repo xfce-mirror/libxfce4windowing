@@ -131,7 +131,7 @@ static void xfw_window_x11_constructed(GObject *obj) {
     window->priv->capabilities = convert_capabilities(window->priv->wnck_window, wnck_window_get_actions(window->priv->wnck_window));
     window->priv->workspace = _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(window->priv->screen),
                                                                            wnck_window_get_workspace(window->priv->wnck_window));
-    window->priv->app = XFW_APPLICATION(_xfw_application_x11_get(wnck_window_get_application(window->priv->wnck_window), window));
+    window->priv->app = XFW_APPLICATION(_xfw_application_x11_get(wnck_window_get_class_group(window->priv->wnck_window), window));
 
     g_signal_connect(window->priv->wnck_window, "name-changed", G_CALLBACK(name_changed), window);
     g_signal_connect(window->priv->wnck_window, "icon-changed", G_CALLBACK(icon_changed), window);

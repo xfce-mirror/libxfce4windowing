@@ -23,21 +23,22 @@
 #include "xfw-application.h"
 #include "xfw-application-x11.h"
 #include "xfw-util.h"
+#include "xfw-window.h"
 
 enum {
     PROP0,
-    PROP_WNCK_APP,
+    PROP_WNCK_GROUP,
 };
 
 struct _XfwApplicationX11Private {
-    WnckApplication *wnck_app;
+    WnckClassGroup *wnck_group;
     GdkPixbuf *icon;
     gchar *icon_name;
     gint icon_size;
     GList *windows;
 };
 
-static GHashTable *wnck_apps = NULL;
+static GHashTable *wnck_groups = NULL;
 
 static void xfw_application_x11_iface_init(XfwApplicationIface *iface);
 static void xfw_application_x11_constructed(GObject *obj);
@@ -50,8 +51,8 @@ static gint xfw_application_x11_get_pid(XfwApplication *app);
 static GdkPixbuf *xfw_application_x11_get_icon(XfwApplication *app, gint size);
 static GList *xfw_application_x11_get_windows(XfwApplication *app);
 
-static void icon_changed(WnckApplication *wnck_app, XfwApplicationX11 *app);
-static void name_changed(WnckApplication *wnck_app, XfwApplicationX11 *app);
+static void icon_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app);
+static void name_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app);
 
 G_DEFINE_TYPE_WITH_CODE(XfwApplicationX11, xfw_application_x11, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwApplicationX11)
@@ -68,11 +69,11 @@ xfw_application_x11_class_init(XfwApplicationX11Class *klass) {
     gklass->finalize = xfw_application_x11_finalize;
 
     g_object_class_install_property(gklass,
-                                    PROP_WNCK_APP,
-                                    g_param_spec_object("wnck-app",
-                                                        "wnck-app",
-                                                        "wnck-app",
-                                                        WNCK_TYPE_APPLICATION,
+                                    PROP_WNCK_GROUP,
+                                    g_param_spec_object("wnck-group",
+                                                        "wnck-group",
+                                                        "wnck-group",
+                                                        WNCK_TYPE_CLASS_GROUP,
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     _xfw_application_install_properties(gklass);
 }
@@ -85,10 +86,11 @@ xfw_application_x11_init(XfwApplicationX11 *app) {
 static void xfw_application_x11_constructed(GObject *obj) {
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(obj)->priv;
 
-    g_hash_table_insert(wnck_apps, priv->wnck_app, obj);
+    g_hash_table_insert(wnck_groups, priv->wnck_group, obj);
 
-    g_signal_connect(priv->wnck_app, "icon-changed", G_CALLBACK(icon_changed), obj);
-    g_signal_connect(priv->wnck_app, "name-changed", G_CALLBACK(name_changed), obj);
+    g_signal_connect(priv->wnck_group, "icon-changed", G_CALLBACK(icon_changed), obj);
+    name_changed(priv->wnck_group, XFW_APPLICATION_X11(obj));
+    g_signal_connect(priv->wnck_group, "name-changed", G_CALLBACK(name_changed), obj);
 }
 
 static void
@@ -96,8 +98,8 @@ xfw_application_x11_set_property(GObject *obj, guint prop_id, const GValue *valu
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(obj)->priv;
 
     switch (prop_id) {
-        case PROP_WNCK_APP:
-            priv->wnck_app = g_value_dup_object(value);
+        case PROP_WNCK_GROUP:
+            priv->wnck_group = g_value_dup_object(value);
             break;
 
         default:
@@ -112,8 +114,8 @@ xfw_application_x11_get_property(GObject *obj, guint prop_id, GValue *value, GPa
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(obj)->priv;
 
     switch (prop_id) {
-        case PROP_WNCK_APP:
-            g_value_set_object(value, priv->wnck_app);
+        case PROP_WNCK_GROUP:
+            g_value_set_object(value, priv->wnck_group);
             break;
 
         case APPLICATION_PROP_ID:
@@ -142,14 +144,14 @@ static void
 xfw_application_x11_finalize(GObject *obj) {
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(obj)->priv;
 
-    g_hash_table_remove(wnck_apps, priv->wnck_app);
-    if (g_hash_table_size(wnck_apps) == 0) {
-        g_hash_table_destroy(wnck_apps);
-        wnck_apps = NULL;
+    g_hash_table_remove(wnck_groups, priv->wnck_group);
+    if (g_hash_table_size(wnck_groups) == 0) {
+        g_hash_table_destroy(wnck_groups);
+        wnck_groups = NULL;
     }
 
-    g_signal_handlers_disconnect_by_func(priv->wnck_app, icon_changed, obj);
-    g_signal_handlers_disconnect_by_func(priv->wnck_app, name_changed, obj);
+    g_signal_handlers_disconnect_by_func(priv->wnck_group, icon_changed, obj);
+    g_signal_handlers_disconnect_by_func(priv->wnck_group, name_changed, obj);
 
     if (priv->icon != NULL) {
         g_object_unref(priv->icon);
@@ -161,7 +163,7 @@ xfw_application_x11_finalize(GObject *obj) {
     g_list_free(priv->windows);
 
     // to be released last
-    g_object_unref(priv->wnck_app);
+    g_object_unref(priv->wnck_group);
 
     G_OBJECT_CLASS(xfw_application_x11_parent_class)->finalize(obj);
 }
@@ -177,17 +179,17 @@ xfw_application_x11_iface_init(XfwApplicationIface *iface) {
 
 static guint64
 xfw_application_x11_get_id(XfwApplication *app) {
-    return wnck_application_get_xid(XFW_APPLICATION_X11(app)->priv->wnck_app);
+    return xfw_window_get_id(XFW_APPLICATION_X11(app)->priv->windows->data);
 }
 
 static const gchar *
 xfw_application_x11_get_name(XfwApplication *app) {
-    return wnck_application_get_name(XFW_APPLICATION_X11(app)->priv->wnck_app);
+    return wnck_class_group_get_name(XFW_APPLICATION_X11(app)->priv->wnck_group);
 }
 
 static gint
 xfw_application_x11_get_pid(XfwApplication *app) {
-    return wnck_application_get_pid(XFW_APPLICATION_X11(app)->priv->wnck_app);
+    return 0;
 }
 
 static GdkPixbuf *
@@ -198,14 +200,14 @@ xfw_application_x11_get_icon(XfwApplication *app, gint size) {
     if (priv->icon == NULL || size != priv->icon_size) {
         priv->icon_size = size;
         g_clear_object(&priv->icon);
-        if (wnck_application_get_icon_is_fallback(priv->wnck_app)) {
+        if (FALSE) {
             if (priv->icon_name != NULL) {
                 priv->icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), priv->icon_name, size, 0, NULL);
             }
         } else if (size == WNCK_DEFAULT_ICON_SIZE) {
-            priv->icon = g_object_ref(wnck_application_get_icon(priv->wnck_app));
+            priv->icon = g_object_ref(wnck_class_group_get_icon(priv->wnck_group));
         } else {
-            priv->icon = g_object_ref(wnck_application_get_mini_icon(priv->wnck_app));
+            priv->icon = g_object_ref(wnck_class_group_get_mini_icon(priv->wnck_group));
         }
     }
 
@@ -218,14 +220,14 @@ xfw_application_x11_get_windows(XfwApplication *app) {
 }
 
 static void
-icon_changed(WnckApplication *wnck_app, XfwApplicationX11 *app) {
+icon_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app) {
     g_clear_object(&app->priv->icon);
     g_signal_emit_by_name(app, "icon-changed");
 }
 
 static void
-name_changed(WnckApplication *wnck_app, XfwApplicationX11 *app) {
-    GDesktopAppInfo *app_info = xfw_g_desktop_app_info_get(wnck_application_get_name(wnck_app));
+name_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app) {
+    GDesktopAppInfo *app_info = xfw_g_desktop_app_info_get(wnck_class_group_get_name(wnck_group));
     gchar *icon_name = NULL;
 
     if (app_info != NULL) {
@@ -249,18 +251,18 @@ window_closed(XfwWindowX11 *window, XfwApplicationX11 *app) {
 }
 
 XfwApplicationX11 *
-_xfw_application_x11_get(WnckApplication *wnck_app, XfwWindowX11 *window) {
+_xfw_application_x11_get(WnckClassGroup *wnck_group, XfwWindowX11 *window) {
     XfwApplicationX11 *app = NULL;
 
-    if (wnck_apps == NULL) {
-        wnck_apps = g_hash_table_new(g_direct_hash, g_direct_equal);
+    if (wnck_groups == NULL) {
+        wnck_groups = g_hash_table_new(g_direct_hash, g_direct_equal);
     } else {
-        app = g_hash_table_lookup(wnck_apps, wnck_app);
+        app = g_hash_table_lookup(wnck_groups, wnck_group);
     }
 
     if (app == NULL) {
         app = g_object_new(XFW_TYPE_APPLICATION_X11,
-                           "wnck-app", wnck_app,
+                           "wnck-group", wnck_group,
                            NULL);
     } else {
         g_object_ref(app);
