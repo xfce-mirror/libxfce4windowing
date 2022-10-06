@@ -45,14 +45,12 @@ struct _XfwApplicationInterface {
     /* Virtual Table */
     guint64 (*get_id)(XfwApplication *app);
     const gchar *(*get_name)(XfwApplication *app);
-    gint (*get_pid)(XfwApplication *app);
     GdkPixbuf *(*get_icon)(XfwApplication *app, gint size);
     GList *(*get_windows)(XfwApplication *app);
 };
 
 guint64 xfw_application_get_id(XfwApplication *app);
 const gchar *xfw_application_get_name(XfwApplication *app);
-gint xfw_application_get_pid(XfwApplication *app);
 GdkPixbuf *xfw_application_get_icon(XfwApplication *app, gint size);
 GList *xfw_application_get_windows(XfwApplication *app);
 

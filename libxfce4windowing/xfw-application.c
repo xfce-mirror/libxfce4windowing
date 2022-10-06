@@ -47,12 +47,6 @@ xfw_application_default_init(XfwApplicationIface *iface) {
                                                             NULL,
                                                             G_PARAM_READABLE));
     g_object_interface_install_property(iface,
-                                        g_param_spec_int("pid",
-                                                         "pid",
-                                                         "pid",
-                                                         -1, G_MAXINT, 0,
-                                                         G_PARAM_READABLE));
-    g_object_interface_install_property(iface,
                                         g_param_spec_pointer("windows",
                                                              "windows",
                                                              "windows",
@@ -75,14 +69,6 @@ xfw_application_get_name(XfwApplication *app) {
     return (*iface->get_name)(app);
 }
 
-gint
-xfw_application_get_pid(XfwApplication *app) {
-    XfwApplicationIface *iface;
-    g_return_val_if_fail(XFW_IS_APPLICATION(app), -1);
-    iface = XFW_APPLICATION_GET_IFACE(app);
-    return (*iface->get_pid)(app);
-}
-
 GdkPixbuf *
 xfw_application_get_icon(XfwApplication *app, gint size) {
     XfwApplicationIface *iface;
@@ -103,6 +89,5 @@ void
 _xfw_application_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, APPLICATION_PROP_ID, "id");
     g_object_class_override_property(gklass, APPLICATION_PROP_NAME, "name");
-    g_object_class_override_property(gklass, APPLICATION_PROP_PID, "pid");
     g_object_class_override_property(gklass, APPLICATION_PROP_WINDOWS, "windows");
 }

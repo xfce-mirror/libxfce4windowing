@@ -47,7 +47,6 @@ static void xfw_application_x11_get_property(GObject *obj, guint prop_id, GValue
 static void xfw_application_x11_finalize(GObject *obj);
 static guint64 xfw_application_x11_get_id(XfwApplication *app);
 static const gchar *xfw_application_x11_get_name(XfwApplication *app);
-static gint xfw_application_x11_get_pid(XfwApplication *app);
 static GdkPixbuf *xfw_application_x11_get_icon(XfwApplication *app, gint size);
 static GList *xfw_application_x11_get_windows(XfwApplication *app);
 
@@ -126,10 +125,6 @@ xfw_application_x11_get_property(GObject *obj, guint prop_id, GValue *value, GPa
             g_value_set_string(value, xfw_application_x11_get_name(app));
             break;
 
-        case APPLICATION_PROP_PID:
-            g_value_set_int(value, xfw_application_x11_get_pid(app));
-            break;
-
         case APPLICATION_PROP_WINDOWS:
             g_value_set_pointer(value, xfw_application_x11_get_windows(app));
             break;
@@ -172,7 +167,6 @@ static void
 xfw_application_x11_iface_init(XfwApplicationIface *iface) {
     iface->get_id = xfw_application_x11_get_id;
     iface->get_name = xfw_application_x11_get_name;
-    iface->get_pid = xfw_application_x11_get_pid;
     iface->get_icon = xfw_application_x11_get_icon;
     iface->get_windows = xfw_application_x11_get_windows;
 }
@@ -185,11 +179,6 @@ xfw_application_x11_get_id(XfwApplication *app) {
 static const gchar *
 xfw_application_x11_get_name(XfwApplication *app) {
     return wnck_class_group_get_name(XFW_APPLICATION_X11(app)->priv->wnck_group);
-}
-
-static gint
-xfw_application_x11_get_pid(XfwApplication *app) {
-    return 0;
 }
 
 static GdkPixbuf *
