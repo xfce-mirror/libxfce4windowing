@@ -51,6 +51,5 @@ struct _XfwWindowWaylandClass {
 GType xfw_window_wayland_get_type(void) G_GNUC_CONST;
 
 struct zwlr_foreign_toplevel_handle_v1 *_xfw_window_wayland_get_handle(XfwWindowWayland *window);
-const gchar *_xfw_window_wayland_get_app_id(XfwWindowWayland *window);
 
 #endif  /* __XFW_WINDOW_WAYLAND_H__ */

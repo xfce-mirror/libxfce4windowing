@@ -248,8 +248,7 @@ window_application_changed(XfwWindowWayland *window, GParamSpec *pspec, XfwAppli
 }
 
 XfwApplicationWayland *
-_xfw_application_wayland_get(XfwWindowWayland *window) {
-    const gchar *app_id = _xfw_window_wayland_get_app_id(window);
+_xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id) {
     XfwApplicationWayland *app = NULL;
 
     if (app_ids == NULL) {

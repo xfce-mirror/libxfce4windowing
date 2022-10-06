@@ -504,7 +504,7 @@ toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
     if (window->priv->app != NULL) {
         g_object_unref(window->priv->app);
     }
-    window->priv->app = XFW_APPLICATION(_xfw_application_wayland_get(window));
+    window->priv->app = XFW_APPLICATION(_xfw_application_wayland_get(window, window->priv->app_id));
     g_object_notify(G_OBJECT(window), "application");
     g_signal_emit_by_name(window, "icon-changed");
 }
@@ -640,9 +640,4 @@ toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel) {
 struct zwlr_foreign_toplevel_handle_v1 *
 _xfw_window_wayland_get_handle(XfwWindowWayland *window) {
     return window->priv->handle;
-}
-
-const gchar *
-_xfw_window_wayland_get_app_id(XfwWindowWayland *window) {
-    return window->priv->app_id;
 }

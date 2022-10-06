@@ -41,6 +41,6 @@ struct _XfwApplicationWayland {
     XfwApplicationWaylandPrivate *priv;
 };
 
-XfwApplicationWayland *_xfw_application_wayland_get(XfwWindowWayland *window);
+XfwApplicationWayland *_xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id);
 
 #endif  /* __XFW_APPLICATION_WAYLAND_H__ */
