@@ -92,6 +92,7 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
 
     group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
                          "screen", priv->screen,
+                         "workspace-manager", manager,
                          "create-workspace-func", group_create_workspace,
                          NULL);
     priv->groups = g_list_append(NULL, group);

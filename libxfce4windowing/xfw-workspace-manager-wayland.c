@@ -211,6 +211,7 @@ manager_workspace_group(void *data, struct ext_workspace_manager_v1 *manager, st
     XfwWorkspaceManagerWayland *wmanager = XFW_WORKSPACE_MANAGER_WAYLAND(data);
     XfwWorkspaceGroupWayland *group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_WAYLAND,
                                                    "screen", wmanager->priv->screen,
+                                                   "workspace-manager", wmanager,
                                                    "handle", wl_group,
                                                    NULL);
     wmanager->priv->groups = g_list_append(wmanager->priv->groups, group);
