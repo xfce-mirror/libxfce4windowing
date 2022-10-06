@@ -38,6 +38,7 @@ struct _XfwApplicationWaylandPrivate {
     gchar *icon_name;
     gint icon_size;
     GList *windows;
+    GList *instances;
 };
 
 static GHashTable *app_ids = NULL;
@@ -51,6 +52,8 @@ static guint64 xfw_application_wayland_get_id(XfwApplication *app);
 static const gchar *xfw_application_wayland_get_name(XfwApplication *app);
 static GdkPixbuf *xfw_application_wayland_get_icon(XfwApplication *app, gint size);
 static GList *xfw_application_wayland_get_windows(XfwApplication *app);
+static GList *xfw_application_wayland_get_instances(XfwApplication *app);
+static XfwApplicationInstance *xfw_application_wayland_get_instance(XfwApplication *app, XfwWindow *window);
 
 G_DEFINE_TYPE_WITH_CODE(XfwApplicationWayland, xfw_application_wayland, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwApplicationWayland)
@@ -144,6 +147,10 @@ xfw_application_wayland_get_property(GObject *obj, guint prop_id, GValue *value,
             g_value_set_pointer(value, xfw_application_wayland_get_windows(app));
             break;
 
+        case APPLICATION_PROP_INSTANCES:
+            g_value_set_pointer(value, xfw_application_wayland_get_instances(app));
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
             break;
@@ -170,6 +177,7 @@ xfw_application_wayland_finalize(GObject *obj) {
         g_signal_handlers_disconnect_by_data(lp->data, obj);
     }
     g_list_free(priv->windows);
+    g_list_free(priv->instances);
 
     G_OBJECT_CLASS(xfw_application_wayland_parent_class)->finalize(obj);
 }
@@ -180,6 +188,8 @@ xfw_application_wayland_iface_init(XfwApplicationIface *iface) {
     iface->get_name = xfw_application_wayland_get_name;
     iface->get_icon = xfw_application_wayland_get_icon;
     iface->get_windows = xfw_application_wayland_get_windows;
+    iface->get_instances = xfw_application_wayland_get_instances;
+    iface->get_instance = xfw_application_wayland_get_instance;
 }
 
 static guint64
@@ -219,6 +229,17 @@ xfw_application_wayland_get_icon(XfwApplication *app, gint size) {
 static GList *
 xfw_application_wayland_get_windows(XfwApplication *app) {
     return XFW_APPLICATION_WAYLAND(app)->priv->windows;
+}
+
+static GList *
+xfw_application_wayland_get_instances(XfwApplication *app) {
+    return XFW_APPLICATION_WAYLAND(app)->priv->instances;
+}
+
+static XfwApplicationInstance *
+xfw_application_wayland_get_instance(XfwApplication *app, XfwWindow *window) {
+    // TODO
+    return NULL;
 }
 
 static void

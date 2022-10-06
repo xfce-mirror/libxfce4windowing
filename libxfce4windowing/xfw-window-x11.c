@@ -785,3 +785,8 @@ convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions)
     }
     return capabilities;
 }
+
+WnckWindow *
+_xfw_window_x11_get_wnck_window(XfwWindowX11 *window) {
+    return window->priv->wnck_window;
+}

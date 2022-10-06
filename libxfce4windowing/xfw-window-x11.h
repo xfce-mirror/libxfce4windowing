@@ -48,4 +48,6 @@ struct _XfwWindowX11Class {
 
 GType xfw_window_x11_get_type(void) G_GNUC_CONST;
 
+WnckWindow *_xfw_window_x11_get_wnck_window(XfwWindowX11 *window);
+
 #endif  /* __XFW_WINDOW_X11_H__ */

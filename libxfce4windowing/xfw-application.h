@@ -28,10 +28,14 @@
 
 G_BEGIN_DECLS
 
+/* fwd decl */
+typedef struct _XfwWindow XfwWindow;
+
 #define XFW_TYPE_APPLICATION (xfw_application_get_type())
 G_DECLARE_INTERFACE(XfwApplication, xfw_application, XFW, APPLICATION, GObject)
 
 typedef struct _XfwApplicationInterface XfwApplicationIface;
+typedef struct _XfwApplicationInstance XfwApplicationInstance;
 
 struct _XfwApplicationInterface {
     /*< private >*/
@@ -47,12 +51,22 @@ struct _XfwApplicationInterface {
     const gchar *(*get_name)(XfwApplication *app);
     GdkPixbuf *(*get_icon)(XfwApplication *app, gint size);
     GList *(*get_windows)(XfwApplication *app);
+    GList *(*get_instances)(XfwApplication *app);
+    XfwApplicationInstance *(*get_instance)(XfwApplication *app, XfwWindow *window);
+};
+
+struct _XfwApplicationInstance {
+    gint pid;
+    gchar *name;
+    GList *windows;
 };
 
 guint64 xfw_application_get_id(XfwApplication *app);
 const gchar *xfw_application_get_name(XfwApplication *app);
 GdkPixbuf *xfw_application_get_icon(XfwApplication *app, gint size);
 GList *xfw_application_get_windows(XfwApplication *app);
+GList *xfw_application_get_instances(XfwApplication *app);
+XfwApplicationInstance *xfw_application_get_instance(XfwApplication *app, XfwWindow *window);
 
 G_END_DECLS
 

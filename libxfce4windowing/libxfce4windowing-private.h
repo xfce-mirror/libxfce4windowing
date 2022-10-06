@@ -73,6 +73,7 @@ enum {
     APPLICATION_PROP_ID = 0x6000,
     APPLICATION_PROP_NAME,
     APPLICATION_PROP_WINDOWS,
+    APPLICATION_PROP_INSTANCES,
 };
 
 void _libxfce4windowing_init(void);
@@ -83,6 +84,7 @@ void _xfw_workspace_group_install_properties(GObjectClass *gklass);
 void _xfw_workspace_install_properties(GObjectClass *gklass);
 void _xfw_window_install_properties(GObjectClass *gklass);
 void _xfw_application_install_properties(GObjectClass *gklass);
+void _xfw_application_instance_free(gpointer data);
 
 G_END_DECLS
 
