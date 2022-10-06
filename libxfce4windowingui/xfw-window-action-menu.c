@@ -219,6 +219,9 @@ xfw_window_action_menu_constructed(GObject *obj) {
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(close_window), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+
+    gtk_widget_show_all(GTK_WIDGET(menu));
+    gtk_widget_hide(GTK_WIDGET(menu));
 }
 
 static void
