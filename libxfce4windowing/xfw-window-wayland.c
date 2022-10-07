@@ -576,7 +576,7 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
         g_signal_emit_by_name(window, "capabilities-changed", capapbilities_changed_mask, new_capabilities);
     }
 
-    if ((old_state & XFW_WINDOW_STATE_ACTIVE) == 0 && (new_state & XFW_WINDOW_STATE_ACTIVE) != 0) {
+    if (window->priv->created_emitted && (old_state & XFW_WINDOW_STATE_ACTIVE) == 0 && (new_state & XFW_WINDOW_STATE_ACTIVE) != 0) {
         _xfw_screen_wayland_set_active_window(XFW_SCREEN_WAYLAND(window->priv->screen), XFW_WINDOW(window));
     }
 }
@@ -634,6 +634,9 @@ toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel) {
     if (!window->priv->created_emitted) {
         window->priv->created_emitted = TRUE;
         g_signal_emit_by_name(window->priv->screen, "window-opened", window);
+        if (window->priv->state & XFW_WINDOW_STATE_ACTIVE) {
+            _xfw_screen_wayland_set_active_window(XFW_SCREEN_WAYLAND(window->priv->screen), XFW_WINDOW(window));
+        }
     }
 }
 
