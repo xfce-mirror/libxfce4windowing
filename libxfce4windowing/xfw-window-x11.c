@@ -628,10 +628,12 @@ state_changed(WnckWindow *wnck_window, WnckWindowState wnck_changed_mask, WnckWi
     XfwWindowState old_state = window->priv->state;
     XfwWindowState new_state = convert_state(wnck_window, wnck_new_state);
     XfwWindowState changed_mask = old_state ^ new_state;
-    window->priv->state = new_state;
 
-    g_object_notify(G_OBJECT(window), "state");
-    g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
+    if (changed_mask != XFW_WINDOW_STATE_NONE) {
+        window->priv->state = new_state;
+        g_object_notify(G_OBJECT(window), "state");
+        g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
+    }
 
     // Not all capability changes are reported by WnckWindow::actions-changed (e.g. shade/unshade) so we need to add this update
     actions_changed(wnck_window, 0, wnck_window_get_actions(wnck_window), window);
@@ -639,11 +641,7 @@ state_changed(WnckWindow *wnck_window, WnckWindowState wnck_changed_mask, WnckWi
 
 static void
 active_window_changed(XfwScreen *screen, XfwWindow *previous_active_window, XfwWindowX11 *window) {
-    gboolean new_state = !!wnck_window_is_active(window->priv->wnck_window);
-    gboolean old_state = (window->priv->state & XFW_WINDOW_STATE_ACTIVE) != 0;
-    if (new_state != old_state) {
-        state_changed(window->priv->wnck_window, 0, wnck_window_get_state(window->priv->wnck_window), window);
-    }
+    state_changed(window->priv->wnck_window, 0, wnck_window_get_state(window->priv->wnck_window), window);
 }
 
 static void
@@ -678,11 +676,7 @@ workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     }
 
     // workspace-changed is also fired when the windows pinned state changes
-    if ((!wnck_window_is_pinned(wnck_window) && (window->priv->state & XFW_WINDOW_STATE_PINNED) != 0)
-        || (wnck_window_is_pinned(wnck_window) && (window->priv->state & XFW_WINDOW_STATE_PINNED) == 0))
-    {
-        state_changed(wnck_window, 0, wnck_window_get_state(wnck_window), window);
-    }
+    state_changed(wnck_window, 0, wnck_window_get_state(wnck_window), window);
 
     if (old_workspace != new_workspace) {
         g_object_notify(G_OBJECT(window), "workspace");
