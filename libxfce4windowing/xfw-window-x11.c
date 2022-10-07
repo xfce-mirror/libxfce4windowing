@@ -632,6 +632,9 @@ state_changed(WnckWindow *wnck_window, WnckWindowState wnck_changed_mask, WnckWi
 
     g_object_notify(G_OBJECT(window), "state");
     g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
+
+    // Not all capability changes are reported by WnckWindow::actions-changed (e.g. shade/unshade) so we need to add this update
+    actions_changed(wnck_window, 0, wnck_window_get_actions(wnck_window), window);
 }
 
 static void
@@ -648,10 +651,12 @@ actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, Wn
     XfwWindowCapabilities old_capabilities = window->priv->capabilities;
     XfwWindowCapabilities new_capabilities = convert_capabilities(wnck_window, wnck_new_actions);
     XfwWindowCapabilities changed_mask = old_capabilities ^ new_capabilities;
-    window->priv->capabilities = new_capabilities;
 
-    g_object_notify(G_OBJECT(window), "capabilities");
-    g_signal_emit_by_name(window, "capabilities-changed", changed_mask, new_capabilities);
+    if (changed_mask != XFW_WINDOW_CAPABILITIES_NONE) {
+        window->priv->capabilities = new_capabilities;
+        g_object_notify(G_OBJECT(window), "capabilities");
+        g_signal_emit_by_name(window, "capabilities-changed", changed_mask, new_capabilities);
+    }
 }
 
 static void
@@ -735,6 +740,9 @@ convert_state(WnckWindow *wnck_window, WnckWindowState wnck_state) {
     if (wnck_window_is_pinned(wnck_window)) {
         state |= XFW_WINDOW_STATE_PINNED;
     }
+    if (wnck_window_is_shaded(wnck_window)) {
+        state |= XFW_WINDOW_STATE_SHADED;
+    }
     return state;
 }
 
@@ -751,10 +759,12 @@ static const struct {
     { WNCK_WINDOW_ACTION_MAXIMIZE, WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY, FALSE, XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE },
     { WNCK_WINDOW_ACTION_FULLSCREEN, WNCK_WINDOW_STATE_FULLSCREEN, FALSE, XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN },
     { WNCK_WINDOW_ACTION_STICK | WNCK_WINDOW_ACTION_CHANGE_WORKSPACE, WNCK_WINDOW_STATE_STICKY, FALSE,  XFW_WINDOW_CAPABILITIES_CAN_PIN },
+    { WNCK_WINDOW_ACTION_SHADE, WNCK_WINDOW_STATE_SHADED, FALSE, XFW_WINDOW_CAPABILITIES_CAN_SHADE },
     { WNCK_WINDOW_ACTION_UNMINIMIZE, WNCK_WINDOW_STATE_MINIMIZED, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE },
     { WNCK_WINDOW_ACTION_UNMAXIMIZE, WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE },
     { WNCK_WINDOW_ACTION_FULLSCREEN, WNCK_WINDOW_STATE_FULLSCREEN, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN },
     { WNCK_WINDOW_ACTION_UNSTICK | WNCK_WINDOW_ACTION_CHANGE_WORKSPACE, WNCK_WINDOW_STATE_STICKY, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNPIN },
+    { WNCK_WINDOW_ACTION_UNSHADE, WNCK_WINDOW_STATE_SHADED, TRUE, XFW_WINDOW_CAPABILITIES_CAN_UNSHADE },
     { WNCK_WINDOW_ACTION_MOVE, 0, FALSE, XFW_WINDOW_CAPABILITIES_CAN_MOVE },
     { WNCK_WINDOW_ACTION_RESIZE, 0, FALSE, XFW_WINDOW_CAPABILITIES_CAN_RESIZE },
     { WNCK_WINDOW_ACTION_ABOVE, WNCK_WINDOW_STATE_ABOVE, FALSE, XFW_WINDOW_CAPABILITIES_CAN_PLACE_ABOVE },
