@@ -63,9 +63,9 @@ static XfwWorkspaceCapabilities xfw_workspace_wayland_get_capabilities(XfwWorksp
 static XfwWorkspaceState xfw_workspace_wayland_get_state(XfwWorkspace *workspace);
 static guint xfw_workspace_wayland_get_number(XfwWorkspace *workspace);
 static XfwWorkspaceGroup *xfw_workspace_wayland_get_workspace_group(XfwWorkspace *workspace);
-gint xfw_workspace_wayland_get_layout_row(XfwWorkspace *workspace);
-gint xfw_workspace_wayland_get_layout_column(XfwWorkspace *workspace);
-XfwWorkspace *xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
+static gint xfw_workspace_wayland_get_layout_row(XfwWorkspace *workspace);
+static gint xfw_workspace_wayland_get_layout_column(XfwWorkspace *workspace);
+static XfwWorkspace *xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
 static gboolean xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
 
@@ -241,17 +241,17 @@ xfw_workspace_wayland_get_workspace_group(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_WAYLAND(workspace)->priv->group;
 }
 
-gint
+static gint
 xfw_workspace_wayland_get_layout_row(XfwWorkspace *workspace) {
     return 0;
 }
 
-gint
+static gint
 xfw_workspace_wayland_get_layout_column(XfwWorkspace *workspace) {
     return xfw_workspace_wayland_get_number(workspace);
 }
 
-XfwWorkspace *
+static XfwWorkspace *
 xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) {
     switch (direction) {
         case XFW_DIRECTION_UP:

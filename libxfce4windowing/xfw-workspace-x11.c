@@ -48,9 +48,9 @@ static XfwWorkspaceCapabilities xfw_workspace_x11_get_capabilities(XfwWorkspace 
 static XfwWorkspaceState xfw_workspace_x11_get_state(XfwWorkspace *workspace);
 static guint xfw_workspace_x11_get_number(XfwWorkspace *workspace);
 static XfwWorkspaceGroup *xfw_workspace_x11_get_workspace_group(XfwWorkspace *workspace);
-gint xfw_workspace_x11_get_layout_row(XfwWorkspace *workspace);
-gint xfw_workspace_x11_get_layout_column(XfwWorkspace *workspace);
-XfwWorkspace *xfw_workspace_x11_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
+static gint xfw_workspace_x11_get_layout_row(XfwWorkspace *workspace);
+static gint xfw_workspace_x11_get_layout_column(XfwWorkspace *workspace);
+static XfwWorkspace *xfw_workspace_x11_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
 static gboolean xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error);
 
@@ -227,17 +227,17 @@ xfw_workspace_x11_get_workspace_group(XfwWorkspace *workspace) {
     return XFW_WORKSPACE_X11(workspace)->priv->group;
 }
 
-gint
+static gint
 xfw_workspace_x11_get_layout_row(XfwWorkspace *workspace) {
     return wnck_workspace_get_layout_row(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
 }
 
-gint
+static gint
 xfw_workspace_x11_get_layout_column(XfwWorkspace *workspace) {
     return wnck_workspace_get_layout_column(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
 }
 
-XfwWorkspace *
+static XfwWorkspace *
 xfw_workspace_x11_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) {
     XfwWorkspaceX11 *xworkspace = XFW_WORKSPACE_X11(workspace);
     WnckMotionDirection wnck_direction;
