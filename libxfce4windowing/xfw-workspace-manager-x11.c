@@ -47,6 +47,7 @@ static GList * xfw_workspace_manager_x11_list_workspace_groups(XfwWorkspaceManag
 static void active_workspace_changed(WnckScreen *screen, WnckWorkspace *workspace, XfwWorkspaceManagerX11 *manager);
 static void workspace_created(WnckScreen *screen, WnckWorkspace *workspace, XfwWorkspaceManagerX11 *manager);
 static void workspace_destroyed(WnckScreen *screen, WnckWorkspace *workspace, XfwWorkspaceManagerX11 *manager);
+static void viewports_changed(WnckScreen *screen, XfwWorkspaceManagerX11 *manager);
 
 static gboolean group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 static gboolean group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
@@ -90,6 +91,7 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
     g_signal_connect(priv->wnck_screen, "active-workspace-changed", G_CALLBACK(active_workspace_changed), manager);
     g_signal_connect(priv->wnck_screen, "workspace-created", G_CALLBACK(workspace_created), manager);
     g_signal_connect(priv->wnck_screen, "workspace-destroyed", G_CALLBACK(workspace_destroyed), manager);
+    g_signal_connect(priv->wnck_screen, "viewports-changed", G_CALLBACK(viewports_changed), manager);
 
     group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_DUMMY,
                          "screen", priv->screen,
@@ -155,6 +157,7 @@ xfw_workspace_manager_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(priv->wnck_screen, active_workspace_changed, manager);
     g_signal_handlers_disconnect_by_func(priv->wnck_screen, workspace_created, manager);
     g_signal_handlers_disconnect_by_func(priv->wnck_screen, workspace_destroyed, manager);
+    g_signal_handlers_disconnect_by_func(priv->wnck_screen, viewports_changed, manager);
     g_list_free(priv->workspaces);
     g_hash_table_destroy(priv->wnck_workspaces);
     g_hash_table_destroy(priv->pending_workspace_names);
@@ -231,6 +234,11 @@ workspace_destroyed(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorksp
 
         g_object_unref(workspace);
     }
+}
+
+static void
+viewports_changed(WnckScreen *screen, XfwWorkspaceManagerX11 *manager) {
+    g_signal_emit_by_name(XFW_WORKSPACE_GROUP(manager->priv->groups->data), "viewports-changed");
 }
 
 static gboolean

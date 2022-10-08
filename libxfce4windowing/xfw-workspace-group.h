@@ -69,6 +69,7 @@ struct _XfwWorkspaceGroupIface {
     void (*workspace_destroyed)(XfwWorkspaceGroup *group,
                                 XfwWorkspace *workspace);
     void (*monitors_changed)(XfwWorkspaceGroup *group);
+    void (*viewports_changed)(XfwWorkspaceGroup *group);
 
     /* Virtual Table */
     XfwWorkspaceGroupCapabilities (*get_capabilities)(XfwWorkspaceGroup *group);

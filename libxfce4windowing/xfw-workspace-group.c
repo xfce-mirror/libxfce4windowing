@@ -75,6 +75,13 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+    g_signal_new("viewports-changed",
+                 XFW_TYPE_WORKSPACE_GROUP,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, viewports_changed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__VOID,
+                 G_TYPE_NONE, 0);
 
     g_object_interface_install_property(iface,
                                         g_param_spec_object("screen",
