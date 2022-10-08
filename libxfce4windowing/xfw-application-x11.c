@@ -90,7 +90,7 @@ static void xfw_application_x11_constructed(GObject *obj) {
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(obj)->priv;
 
     g_hash_table_insert(wnck_groups, priv->wnck_group, obj);
-    priv->instances = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, _xfw_application_instance_free);
+    priv->instances = g_hash_table_new_full(g_direct_hash, g_direct_equal, g_object_unref, _xfw_application_instance_free);
 
     g_signal_connect(priv->wnck_group, "icon-changed", G_CALLBACK(icon_changed), obj);
     name_changed(priv->wnck_group, XFW_APPLICATION_X11(obj));
@@ -311,7 +311,7 @@ _xfw_application_x11_get(WnckClassGroup *wnck_group, XfwWindowX11 *window) {
         instance->pid = wnck_application_get_pid(wnck_app);
         instance->name = g_strdup(wnck_application_get_name(wnck_app));
         instance->windows = g_list_prepend(NULL, window);
-        g_hash_table_insert(app->priv->instances, wnck_app, instance);
+        g_hash_table_insert(app->priv->instances, g_object_ref(wnck_app), instance);
         app->priv->instance_list = g_list_prepend(app->priv->instance_list, instance);
         g_object_notify(G_OBJECT(app), "instances");
     } else {
