@@ -217,6 +217,9 @@ xfw_workspace_x11_get_state(XfwWorkspace *workspace) {
     if (wnck_screen_get_active_workspace(wnck_workspace_get_screen(priv->wnck_workspace)) == priv->wnck_workspace) {
         state |= XFW_WORKSPACE_STATE_ACTIVE;
     }
+    if (wnck_workspace_is_virtual(priv->wnck_workspace)) {
+        state |= XFW_WORKSPACE_STATE_VIRTUAL;
+    }
     return state;
 }
 

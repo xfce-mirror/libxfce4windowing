@@ -54,7 +54,8 @@ typedef enum {
     XFW_WORKSPACE_STATE_NONE = 0,
     XFW_WORKSPACE_STATE_ACTIVE = (1 << 0),
     XFW_WORKSPACE_STATE_URGENT = (1 << 1),
-    XFW_WORKSPACE_STATE_HIDDEN = (1 << 2)
+    XFW_WORKSPACE_STATE_HIDDEN = (1 << 2),
+    XFW_WORKSPACE_STATE_VIRTUAL = (1 << 3),
 } XfwWorkspaceState;
 
 struct _XfwWorkspaceIface {
