@@ -79,6 +79,7 @@ struct _XfwWorkspaceIface {
     gint (*get_layout_row)(XfwWorkspace *workspace);
     gint (*get_layout_column)(XfwWorkspace *workspace);
     XfwWorkspace *(*get_neighbor)(XfwWorkspace *workspace, XfwDirection direction);
+    GdkRectangle *(*get_geometry)(XfwWorkspace *workspace);
 
     gboolean (*activate)(XfwWorkspace *workspace, GError **error);
     gboolean (*remove)(XfwWorkspace *workspace, GError **error);
@@ -98,6 +99,7 @@ XfwWorkspaceGroup *xfw_workspace_get_workspace_group(XfwWorkspace *workspace);
 gint xfw_workspace_get_layout_row(XfwWorkspace *workspace);
 gint xfw_workspace_get_layout_column(XfwWorkspace *workspace);
 XfwWorkspace *xfw_workspace_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
+GdkRectangle *xfw_workspace_get_geometry(XfwWorkspace *workspace);
 
 gboolean xfw_workspace_activate(XfwWorkspace *workspace, GError **error);
 gboolean xfw_workspace_remove(XfwWorkspace *workspace, GError **error);

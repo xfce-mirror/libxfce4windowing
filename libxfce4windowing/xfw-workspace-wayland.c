@@ -37,6 +37,7 @@ struct _XfwWorkspaceWaylandPrivate {
     XfwWorkspaceCapabilities capabilities;
     XfwWorkspaceState state;
     guint number;
+    GdkRectangle geometry;
 };
 
 enum {
@@ -66,6 +67,7 @@ static XfwWorkspaceGroup *xfw_workspace_wayland_get_workspace_group(XfwWorkspace
 static gint xfw_workspace_wayland_get_layout_row(XfwWorkspace *workspace);
 static gint xfw_workspace_wayland_get_layout_column(XfwWorkspace *workspace);
 static XfwWorkspace *xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
+static GdkRectangle *xfw_workspace_x11_get_geometry(XfwWorkspace *workspace);
 static gboolean xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
 
@@ -137,6 +139,7 @@ xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_layout_row = xfw_workspace_wayland_get_layout_row;
     iface->get_layout_column = xfw_workspace_wayland_get_layout_column;
     iface->get_neighbor = xfw_workspace_wayland_get_neighbor;
+    iface->get_geometry = xfw_workspace_x11_get_geometry;
     iface->activate = xfw_workspace_wayland_activate;
     iface->remove = xfw_workspace_wayland_remove;
 }
@@ -277,6 +280,12 @@ xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection directi
 
     g_critical("Invalid XfwDirection %d", direction);
     return NULL;
+}
+
+static GdkRectangle *
+xfw_workspace_x11_get_geometry(XfwWorkspace *workspace) {
+    // probably something to do with coordinates and outputs if needed
+    return &XFW_WORKSPACE_WAYLAND(workspace)->priv->geometry;
 }
 
 static gboolean

@@ -35,6 +35,7 @@ enum {
 struct _XfwWorkspaceX11Private {
     XfwWorkspaceGroup *group;
     WnckWorkspace *wnck_workspace;
+    GdkRectangle geometry;
 };
 
 static void xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface);
@@ -51,6 +52,7 @@ static XfwWorkspaceGroup *xfw_workspace_x11_get_workspace_group(XfwWorkspace *wo
 static gint xfw_workspace_x11_get_layout_row(XfwWorkspace *workspace);
 static gint xfw_workspace_x11_get_layout_column(XfwWorkspace *workspace);
 static XfwWorkspace *xfw_workspace_x11_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
+static GdkRectangle *xfw_workspace_x11_get_geometry(XfwWorkspace *workspace);
 static gboolean xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error);
 
@@ -178,6 +180,7 @@ xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_layout_row = xfw_workspace_x11_get_layout_row;
     iface->get_layout_column = xfw_workspace_x11_get_layout_column;
     iface->get_neighbor = xfw_workspace_x11_get_neighbor;
+    iface->get_geometry = xfw_workspace_x11_get_geometry;
     iface->activate = xfw_workspace_x11_activate;
     iface->remove = xfw_workspace_x11_remove;
 }
@@ -268,6 +271,17 @@ xfw_workspace_x11_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) 
     } else {
         return NULL;
     }
+}
+
+static GdkRectangle *
+xfw_workspace_x11_get_geometry(XfwWorkspace *workspace) {
+    XfwWorkspaceX11Private *priv = XFW_WORKSPACE_X11(workspace)->priv;
+    gboolean virtual = wnck_workspace_is_virtual(priv->wnck_workspace);
+    priv->geometry.x = virtual ? wnck_workspace_get_viewport_x(priv->wnck_workspace) : 0;
+    priv->geometry.y = virtual ? wnck_workspace_get_viewport_y(priv->wnck_workspace) : 0;
+    priv->geometry.width = wnck_workspace_get_width(priv->wnck_workspace);
+    priv->geometry.height = wnck_workspace_get_width(priv->wnck_workspace);
+    return &priv->geometry;
 }
 
 static gboolean

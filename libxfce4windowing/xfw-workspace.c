@@ -181,6 +181,14 @@ xfw_workspace_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) {
     return (*iface->get_neighbor)(workspace, direction);
 }
 
+GdkRectangle *
+xfw_workspace_get_geometry(XfwWorkspace *workspace) {
+    XfwWorkspaceIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), NULL);
+    iface = XFW_WORKSPACE_GET_IFACE(workspace);
+    return (*iface->get_geometry)(workspace);
+}
+
 gboolean
 xfw_workspace_activate(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceIface *iface;
