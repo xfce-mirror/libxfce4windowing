@@ -58,6 +58,7 @@ typedef enum {
     XFW_WINDOW_STATE_SHADED = (1 << 7),
     XFW_WINDOW_STATE_ABOVE = (1 << 8),
     XFW_WINDOW_STATE_BELOW = (1 << 9),
+    XFW_WINDOW_STATE_URGENT = (1 << 10),
 } XfwWindowState;
 
 typedef enum {
@@ -184,6 +185,7 @@ gboolean xfw_window_is_pinned(XfwWindow *window);
 gboolean xfw_window_is_shaded(XfwWindow *window);
 gboolean xfw_window_is_above(XfwWindow *window);
 gboolean xfw_window_is_below(XfwWindow *window);
+gboolean xfw_window_is_urgent(XfwWindow *window);
 
 G_END_DECLS
 
