@@ -69,6 +69,7 @@ static gboolean xfw_window_x11_activate(XfwWindow *window, guint64 event_timesta
 static gboolean xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_x11_start_move(XfwWindow *window, GError **error);
 static gboolean xfw_window_x11_start_resize(XfwWindow *window, GError **error);
+static gboolean xfw_window_x11_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
 static gboolean xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
@@ -267,6 +268,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->close = xfw_window_x11_close;
     iface->start_move = xfw_window_x11_start_move;
     iface->start_resize = xfw_window_x11_start_resize;
+    iface->set_geometry = xfw_window_x11_set_geometry;
     iface->move_to_workspace = xfw_window_x11_move_to_workspace;
     iface->set_minimized = xfw_window_x11_set_minimized;
     iface->set_maximized = xfw_window_x11_set_maximized;
@@ -389,6 +391,25 @@ xfw_window_x11_start_move(XfwWindow *window, GError **error) {
 static gboolean
 xfw_window_x11_start_resize(XfwWindow *window, GError **error) {
     wnck_window_keyboard_size(XFW_WINDOW_X11(window)->priv->wnck_window);
+    return TRUE;
+}
+
+static gboolean
+xfw_window_x11_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error) {
+    WnckWindowMoveResizeMask mask = 0;
+    if (rect->x >= 0) {
+        mask |= WNCK_WINDOW_CHANGE_X;
+    }
+    if (rect->y >= 0) {
+        mask |= WNCK_WINDOW_CHANGE_Y;
+    }
+    if (rect->width >= 0) {
+        mask |= WNCK_WINDOW_CHANGE_WIDTH;
+    }
+    if (rect->height >= 0) {
+        mask |= WNCK_WINDOW_CHANGE_HEIGHT;
+    }
+    wnck_window_set_geometry(XFW_WINDOW_X11(window)->priv->wnck_window, WNCK_WINDOW_GRAVITY_NORTHWEST, mask, rect->x, rect->y, rect->width, rect->height);
     return TRUE;
 }
 

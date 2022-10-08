@@ -315,6 +315,14 @@ xfw_window_start_resize(XfwWindow *window, GError **error) {
 }
 
 gboolean
+xfw_window_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->set_geometry)(window, rect, error);
+}
+
+gboolean
 xfw_window_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error) {
     XfwWindowIface *iface;
     g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
