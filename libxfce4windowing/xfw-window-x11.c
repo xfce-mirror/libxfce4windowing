@@ -81,6 +81,8 @@ static gboolean xfw_window_x11_set_pinned(XfwWindow *window, gboolean is_pinned,
 static gboolean xfw_window_x11_set_shaded(XfwWindow *window, gboolean is_shaded, GError **error);
 static gboolean xfw_window_x11_set_above(XfwWindow *window, gboolean is_above, GError **error);
 static gboolean xfw_window_x11_set_below(XfwWindow *window, gboolean is_below, GError **error);
+static gboolean xfw_window_x11_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace);
+static gboolean xfw_window_x11_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace);
 
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
@@ -281,6 +283,8 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->set_shaded = xfw_window_x11_set_shaded;
     iface->set_above = xfw_window_x11_set_above;
     iface->set_below = xfw_window_x11_set_below;
+    iface->is_on_workspace = xfw_window_x11_is_on_workspace;
+    iface->is_in_viewport = xfw_window_x11_is_in_viewport;
 }
 
 static guint64
@@ -624,6 +628,18 @@ xfw_window_x11_set_below(XfwWindow *window, gboolean is_below, GError **error) {
             return FALSE;
         }
     }
+}
+
+static gboolean
+xfw_window_x11_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace) {
+    return wnck_window_is_on_workspace(XFW_WINDOW_X11(window)->priv->wnck_window,
+                                       _xfw_workspace_x11_get_wnck_workspace(XFW_WORKSPACE_X11(workspace)));
+}
+
+static gboolean
+xfw_window_x11_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace) {
+    return wnck_window_is_in_viewport(XFW_WINDOW_X11(window)->priv->wnck_window,
+                                      _xfw_workspace_x11_get_wnck_workspace(XFW_WORKSPACE_X11(workspace)));
 }
 
 static void

@@ -82,6 +82,8 @@ static gboolean xfw_window_wayland_set_pinned(XfwWindow *window, gboolean is_pin
 static gboolean xfw_window_wayland_set_shaded(XfwWindow *window, gboolean is_pinned, GError **error);
 static gboolean xfw_window_wayland_set_above(XfwWindow *window, gboolean is_above, GError **error);
 static gboolean xfw_window_wayland_set_below(XfwWindow *window, gboolean is_below, GError **error);
+static gboolean xfw_window_wayland_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace);
+static gboolean xfw_window_wayland_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace);
 
 static void toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *app_id);
 static void toplevel_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *title);
@@ -261,6 +263,8 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->set_shaded = xfw_window_wayland_set_shaded;
     iface->set_above = xfw_window_wayland_set_above;
     iface->set_below = xfw_window_wayland_set_below;
+    iface->is_on_workspace = xfw_window_wayland_is_on_workspace;
+    iface->is_in_viewport = xfw_window_wayland_is_in_viewport;
 }
 
 static guint64
@@ -510,6 +514,16 @@ xfw_window_wayland_set_below(XfwWindow *window, gboolean is_below, GError **erro
     if (error != NULL) {
         *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Placing windows below others is not supported on Wayland");
     }
+    return FALSE;
+}
+
+static gboolean
+xfw_window_wayland_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace) {
+    return xfw_window_wayland_get_workspace(window) == workspace;
+}
+
+static gboolean
+xfw_window_wayland_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace) {
     return FALSE;
 }
 

@@ -383,6 +383,22 @@ STATE_GETTER(urgent, URGENT)
 
 #undef STATE_GETTER
 
+gboolean
+xfw_window_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->is_on_workspace)(window, workspace);
+}
+
+gboolean
+xfw_window_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->is_in_viewport)(window, workspace);
+}
+
 void
 _xfw_window_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WINDOW_PROP_SCREEN, "screen");

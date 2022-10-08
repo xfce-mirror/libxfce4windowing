@@ -138,6 +138,9 @@ struct _XfwWindowIface {
     gboolean (*set_shaded)(XfwWindow *window, gboolean is_shaded, GError **error);
     gboolean (*set_above)(XfwWindow *window, gboolean is_above, GError **error);
     gboolean (*set_below)(XfwWindow *window, gboolean is_below, GError **error);
+
+    gboolean (*is_on_workspace)(XfwWindow *window, XfwWorkspace *workspace);
+    gboolean (*is_in_viewport)(XfwWindow *window, XfwWorkspace *workspace);
 };
 
 GType xfw_window_get_type(void) G_GNUC_CONST;
@@ -186,6 +189,9 @@ gboolean xfw_window_is_shaded(XfwWindow *window);
 gboolean xfw_window_is_above(XfwWindow *window);
 gboolean xfw_window_is_below(XfwWindow *window);
 gboolean xfw_window_is_urgent(XfwWindow *window);
+
+gboolean xfw_window_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace);
+gboolean xfw_window_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace);
 
 G_END_DECLS
 
