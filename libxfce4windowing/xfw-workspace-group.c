@@ -162,6 +162,14 @@ xfw_workspace_group_create_workspace(XfwWorkspaceGroup *group, const gchar *name
     return (*iface->create_workspace)(group, name, error);
 }
 
+gboolean
+xfw_workspace_group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error) {
+    XfwWorkspaceGroupIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE_GROUP(group), FALSE);
+    iface = XFW_WORKSPACE_GROUP_GET_IFACE(group);
+    return (*iface->move_viewport)(group, x, y, error);
+}
+
 void
 _xfw_workspace_group_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_SCREEN, "screen");

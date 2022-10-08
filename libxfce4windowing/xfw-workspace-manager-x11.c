@@ -49,6 +49,7 @@ static void workspace_created(WnckScreen *screen, WnckWorkspace *workspace, XfwW
 static void workspace_destroyed(WnckScreen *screen, WnckWorkspace *workspace, XfwWorkspaceManagerX11 *manager);
 
 static gboolean group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
+static gboolean group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerX11, xfw_workspace_manager_x11, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceManagerX11)
@@ -94,6 +95,7 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
                          "screen", priv->screen,
                          "workspace-manager", manager,
                          "create-workspace-func", group_create_workspace,
+                         "move-viewport-func", group_move_viewport,
                          NULL);
     priv->groups = g_list_append(NULL, group);
 
@@ -240,6 +242,13 @@ group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **err
         g_hash_table_insert(manager->priv->pending_workspace_names, GUINT_TO_POINTER(count + 1), g_strdup(name));
     }
     wnck_screen_change_workspace_count(manager->priv->wnck_screen, count + 1);
+    return TRUE;
+}
+
+static gboolean
+group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error) {
+    XfwWorkspaceManagerX11 *manager = XFW_WORKSPACE_MANAGER_X11(xfw_workspace_group_get_workspace_manager(group));
+    wnck_screen_move_viewport(manager->priv->wnck_screen, x, y);
     return TRUE;
 }
 

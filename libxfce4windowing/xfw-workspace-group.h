@@ -79,6 +79,7 @@ struct _XfwWorkspaceGroupIface {
     XfwWorkspaceManager *(*get_workspace_manager)(XfwWorkspaceGroup *group);
 
     gboolean (*create_workspace)(XfwWorkspaceGroup *group, const gchar *name, GError **error);
+    gboolean (*move_viewport)(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
 };
 
 XfwWorkspaceGroupCapabilities xfw_workspace_group_get_capabilities(XfwWorkspaceGroup *group);
@@ -89,6 +90,7 @@ GList *xfw_workspace_group_get_monitors(XfwWorkspaceGroup *group);
 XfwWorkspaceManager *xfw_workspace_group_get_workspace_manager(XfwWorkspaceGroup *group);
 
 gboolean xfw_workspace_group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
+gboolean xfw_workspace_group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
 
 G_END_DECLS
 

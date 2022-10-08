@@ -31,10 +31,12 @@
 enum {
     PROP0,
     PROP_CREATE_WORKSPACE_FUNC,
+    PROP_MOVE_VIEWPORT_FUNC,
 };
 
 struct _XfwWorkspaceGroupDummyPrivate {
     XfwCreateWorkspaceFunc create_workspace_func;
+    XfwMoveViewportFunc move_viewport_func;
     GdkScreen *screen;
     XfwWorkspaceManager *workspace_manager;
     GList *workspaces;
@@ -54,6 +56,7 @@ static XfwWorkspace *xfw_workspace_group_dummy_get_active_workspace(XfwWorkspace
 static GList *xfw_workspace_group_dummy_get_monitors(XfwWorkspaceGroup *group);
 static XfwWorkspaceManager *xfw_workspace_group_dummy_get_workspace_manager(XfwWorkspaceGroup *group);
 static gboolean xfw_workspace_group_dummy_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
+static gboolean xfw_workspace_group_dummy_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
 
 static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
 static void monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
@@ -77,6 +80,12 @@ xfw_workspace_group_dummy_class_init(XfwWorkspaceGroupDummyClass *klass) {
                                     g_param_spec_pointer("create-workspace-func",
                                                          "create-workspace-func",
                                                          "create-workspace-func",
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gklass,
+                                    PROP_MOVE_VIEWPORT_FUNC,
+                                    g_param_spec_pointer("move-viewport-func",
+                                                         "move-viewport-func",
+                                                         "move-viewport-func",
                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     _xfw_workspace_group_install_properties(gklass);
 }
@@ -108,6 +117,10 @@ xfw_workspace_group_dummy_set_property(GObject *obj, guint prop_id, const GValue
             group->priv->create_workspace_func = g_value_get_pointer(value);
             break;
 
+        case PROP_MOVE_VIEWPORT_FUNC:
+            group->priv->move_viewport_func = g_value_get_pointer(value);
+            break;
+
         case WORKSPACE_GROUP_PROP_SCREEN:
             group->priv->screen = g_value_get_object(value);
             break;
@@ -134,6 +147,10 @@ xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *valu
     switch (prop_id) {
         case PROP_CREATE_WORKSPACE_FUNC:
             g_value_set_pointer(value, group->priv->create_workspace_func);
+            break;
+
+        case PROP_MOVE_VIEWPORT_FUNC:
+            g_value_set_pointer(value, group->priv->move_viewport_func);
             break;
 
         case WORKSPACE_GROUP_PROP_SCREEN:
@@ -186,6 +203,7 @@ xfw_workspace_group_dummy_workspace_group_init(XfwWorkspaceGroupIface *iface) {
     iface->get_monitors = xfw_workspace_group_dummy_get_monitors;
     iface->get_workspace_manager = xfw_workspace_group_dummy_get_workspace_manager;
     iface->create_workspace = xfw_workspace_group_dummy_create_workspace;
+    iface->move_viewport = xfw_workspace_group_dummy_move_viewport;
 }
 
 static XfwWorkspaceGroupCapabilities
@@ -228,6 +246,19 @@ xfw_workspace_group_dummy_create_workspace(XfwWorkspaceGroup *group, const gchar
     } else {
         if (error) {
             *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace group does not support creating new workspaces");
+        }
+        return FALSE;
+    }
+}
+
+static gboolean
+xfw_workspace_group_dummy_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error) {
+    XfwWorkspaceGroupDummy *dgroup = XFW_WORKSPACE_GROUP_DUMMY(group);
+    if (dgroup->priv->move_viewport_func != NULL) {
+        return (*dgroup->priv->move_viewport_func)(group, x, y, error);
+    } else {
+        if (error) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace group does not support moving viewports");
         }
         return FALSE;
     }
