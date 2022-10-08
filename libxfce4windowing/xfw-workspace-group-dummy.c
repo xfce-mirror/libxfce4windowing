@@ -35,7 +35,6 @@ enum {
 
 struct _XfwWorkspaceGroupDummyPrivate {
     XfwCreateWorkspaceFunc create_workspace_func;
-    gboolean allows_create_workspace;
     GdkScreen *screen;
     XfwWorkspaceManager *workspace_manager;
     GList *workspaces;
