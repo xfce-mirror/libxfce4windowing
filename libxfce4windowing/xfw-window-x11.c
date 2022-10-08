@@ -70,6 +70,7 @@ static gboolean xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp,
 static gboolean xfw_window_x11_start_move(XfwWindow *window, GError **error);
 static gboolean xfw_window_x11_start_resize(XfwWindow *window, GError **error);
 static gboolean xfw_window_x11_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error);
+static gboolean xfw_window_x11_set_button_geometry(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
 static gboolean xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
@@ -269,6 +270,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->start_move = xfw_window_x11_start_move;
     iface->start_resize = xfw_window_x11_start_resize;
     iface->set_geometry = xfw_window_x11_set_geometry;
+    iface->set_button_geometry = xfw_window_x11_set_button_geometry;
     iface->move_to_workspace = xfw_window_x11_move_to_workspace;
     iface->set_minimized = xfw_window_x11_set_minimized;
     iface->set_maximized = xfw_window_x11_set_maximized;
@@ -410,6 +412,12 @@ xfw_window_x11_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError 
         mask |= WNCK_WINDOW_CHANGE_HEIGHT;
     }
     wnck_window_set_geometry(XFW_WINDOW_X11(window)->priv->wnck_window, WNCK_WINDOW_GRAVITY_NORTHWEST, mask, rect->x, rect->y, rect->width, rect->height);
+    return TRUE;
+}
+
+static gboolean
+xfw_window_x11_set_button_geometry(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error) {
+    wnck_window_set_icon_geometry(XFW_WINDOW_X11(window)->priv->wnck_window, rect->x, rect->y, rect->width, rect->height);
     return TRUE;
 }
 

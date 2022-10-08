@@ -71,6 +71,7 @@ static gboolean xfw_window_wayland_close(XfwWindow *window, guint64 event_timest
 static gboolean xfw_window_wayland_start_move(XfwWindow *window, GError **error);
 static gboolean xfw_window_wayland_start_resize(XfwWindow *window, GError **error);
 static gboolean xfw_window_wayland_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error);
+static gboolean xfw_window_wayland_set_button_geometry(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_wayland_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
 static gboolean xfw_window_wayland_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_wayland_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
@@ -249,6 +250,7 @@ xfw_window_wayland_window_init(XfwWindowIface *iface) {
     iface->start_move = xfw_window_wayland_start_move;
     iface->start_resize = xfw_window_wayland_start_resize;
     iface->set_geometry = xfw_window_wayland_set_geometry;
+    iface->set_button_geometry = xfw_window_wayland_set_button_geometry;
     iface->move_to_workspace = xfw_window_wayland_move_to_workspace;
     iface->set_minimized = xfw_window_wayland_set_minimized;
     iface->set_maximized = xfw_window_wayland_set_maximized;
@@ -366,6 +368,12 @@ xfw_window_wayland_set_geometry(XfwWindow *window, const GdkRectangle *rect, GEr
         *error = g_error_new(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Setting windows geometry is not supported on Wayland");
     }
     return FALSE;
+}
+
+static gboolean
+xfw_window_wayland_set_button_geometry(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error) {
+    zwlr_foreign_toplevel_handle_v1_set_rectangle(XFW_WINDOW_WAYLAND(window)->priv->handle, gdk_wayland_window_get_wl_surface(relative_to), rect->x, rect->y, rect->width, rect->height);
+    return TRUE;
 }
 
 static gboolean
