@@ -449,7 +449,7 @@ xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **
         }
     } else {
         if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE) != 0) {
-            wnck_window_unminimize(priv->wnck_window, GDK_CURRENT_TIME);
+            wnck_window_unminimize(priv->wnck_window, g_get_monotonic_time() / 1000);
             return TRUE;
         } else {
             if (error != NULL) {

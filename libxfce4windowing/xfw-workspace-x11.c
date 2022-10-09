@@ -290,7 +290,7 @@ xfw_workspace_x11_get_geometry(XfwWorkspace *workspace) {
 static gboolean
 xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceX11Private *priv = XFW_WORKSPACE_X11(workspace)->priv;
-    wnck_workspace_activate(priv->wnck_workspace, GDK_CURRENT_TIME);
+    wnck_workspace_activate(priv->wnck_workspace, g_get_monotonic_time() / 1000);
     return TRUE;
 }
 
