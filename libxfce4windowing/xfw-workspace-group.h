@@ -47,6 +47,7 @@ typedef struct _XfwWorkspaceGroupIface XfwWorkspaceGroupIface;
 typedef enum {
     XFW_WORKSPACE_GROUP_CAPABILITIES_NONE = 0,
     XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE = (1 << 0),
+    XFW_WORKSPACE_GROUP_CAPABILITIES_MOVE_VIEWPORT = (1 << 1),
 } XfwWorkspaceGroupCapabilities;
 
 GType xfw_workspace_group_get_type(void) G_GNUC_CONST;

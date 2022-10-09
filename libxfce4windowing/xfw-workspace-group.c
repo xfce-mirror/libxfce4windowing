@@ -31,7 +31,8 @@ G_DEFINE_INTERFACE(XfwWorkspaceGroup, xfw_workspace_group, G_TYPE_OBJECT)
 
 G_DEFINE_FLAGS_TYPE(XfwWorkspaceGroupCapabilities, xfw_workspace_group_capabilities,
                     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_GROUP_CAPABILITIES_NONE, "none"),
-                    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE, "create-workspace"));
+                    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE, "create-workspace"),
+                    G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_GROUP_CAPABILITIES_MOVE_VIEWPORT, "move-viewport"))
 
 static void
 xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {

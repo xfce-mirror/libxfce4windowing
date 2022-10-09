@@ -208,9 +208,15 @@ xfw_workspace_group_dummy_workspace_group_init(XfwWorkspaceGroupIface *iface) {
 
 static XfwWorkspaceGroupCapabilities
 xfw_workspace_group_dummy_get_capabilities(XfwWorkspaceGroup *group) {
-    return XFW_WORKSPACE_GROUP_DUMMY(group)->priv->create_workspace_func != NULL
-        ? XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE
-        : XFW_WORKSPACE_GROUP_CAPABILITIES_NONE;
+    XfwWorkspaceGroupDummyPrivate *priv = XFW_WORKSPACE_GROUP_DUMMY(group)->priv;
+    XfwWorkspaceGroupCapabilities capabilities = XFW_WORKSPACE_GROUP_CAPABILITIES_NONE;
+    if (priv->create_workspace_func != NULL) {
+        capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE;
+    }
+    if (priv->move_viewport_func != NULL) {
+        capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_MOVE_VIEWPORT;
+    }
+    return capabilities;
 }
 
 static guint
