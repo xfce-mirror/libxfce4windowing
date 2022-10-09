@@ -430,7 +430,7 @@ xfw_window_wayland_set_maximized(XfwWindow *window, gboolean is_maximized, GErro
             return FALSE;
         }
     } else {
-        if ((wwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE) != 0) {
+        if ((wwindow->priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE) != 0) {
             zwlr_foreign_toplevel_handle_v1_unset_maximized(wwindow->priv->handle);
             return TRUE;
         } else {
