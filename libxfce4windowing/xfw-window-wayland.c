@@ -29,6 +29,7 @@
 #include "xfw-window-wayland.h"
 #include "xfw-window.h"
 #include "xfw-application-wayland.h"
+#include "xfw-screen.h"
 
 enum {
     PROP0,
@@ -608,8 +609,12 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
         g_signal_emit_by_name(window, "capabilities-changed", capabilities_changed_mask, new_capabilities);
     }
 
-    if (window->priv->created_emitted && (old_state & XFW_WINDOW_STATE_ACTIVE) == 0 && (new_state & XFW_WINDOW_STATE_ACTIVE) != 0) {
-        _xfw_screen_wayland_set_active_window(XFW_SCREEN_WAYLAND(window->priv->screen), XFW_WINDOW(window));
+    if (window->priv->created_emitted && (old_state & XFW_WINDOW_STATE_ACTIVE) != (new_state & XFW_WINDOW_STATE_ACTIVE)) {
+        if (new_state & XFW_WINDOW_STATE_ACTIVE) {
+            _xfw_screen_wayland_set_active_window(XFW_SCREEN_WAYLAND(window->priv->screen), XFW_WINDOW(window));
+        } else if (xfw_screen_get_active_window(window->priv->screen) == XFW_WINDOW(window)) {
+            _xfw_screen_wayland_set_active_window(XFW_SCREEN_WAYLAND(window->priv->screen), NULL);
+        }
     }
 }
 
