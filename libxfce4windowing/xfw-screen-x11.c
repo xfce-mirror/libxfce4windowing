@@ -247,6 +247,7 @@ window_closed(WnckScreen *wnck_screen, WnckWindow *wnck_window, XfwScreenX11 *sc
 
         if (screen->priv->active_window == XFW_WINDOW(window)) {
             screen->priv->active_window = NULL;
+            g_signal_emit_by_name(wnck_window, "state-changed", 0, wnck_window_get_state(wnck_window));
             g_signal_emit_by_name(screen, "active-window-changed", window);
         }
 
@@ -260,9 +261,16 @@ window_closed(WnckScreen *wnck_screen, WnckWindow *wnck_window, XfwScreenX11 *sc
 
 static void
 active_window_changed(WnckScreen *wnck_screen, WnckWindow *previous_wnck_window, XfwScreenX11 *screen) {
-    XfwWindow *window = g_hash_table_lookup(screen->priv->wnck_windows, wnck_screen_get_active_window(screen->priv->wnck_screen));
+    WnckWindow *wnck_window = wnck_screen_get_active_window(screen->priv->wnck_screen);
+    XfwWindow *window = g_hash_table_lookup(screen->priv->wnck_windows, wnck_window);
     if (window != screen->priv->active_window) {
         screen->priv->active_window = window;
+        if (previous_wnck_window != NULL) {
+            g_signal_emit_by_name(previous_wnck_window, "state-changed", 0, wnck_window_get_state(previous_wnck_window));
+        }
+        if (wnck_window != NULL) {
+            g_signal_emit_by_name(wnck_window, "state-changed", 0, wnck_window_get_state(wnck_window));
+        }
         g_signal_emit_by_name(screen, "active-window-changed", g_hash_table_lookup(screen->priv->wnck_windows, previous_wnck_window));
     }    
 }
