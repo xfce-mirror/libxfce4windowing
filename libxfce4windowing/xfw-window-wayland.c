@@ -577,7 +577,7 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
     enum zwlr_foreign_toplevel_handle_v1_state *item;
     XfwWindowState changed_mask;
     XfwWindowCapabilities old_capabilities = window->priv->capabilities;
-    XfwWindowCapabilities capapbilities_changed_mask;
+    XfwWindowCapabilities capabilities_changed_mask;
     XfwWindowCapabilities new_capabilities = XFW_WINDOW_CAPABILITIES_NONE;
 
     wl_array_for_each(item, wl_state) {
@@ -601,11 +601,11 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
             new_capabilities |= capabilities_converters[i].capabilities_bit_if_absent;
         }
     }
-    capapbilities_changed_mask = old_capabilities ^ new_capabilities;
-    if (capapbilities_changed_mask != 0) {
+    capabilities_changed_mask = old_capabilities ^ new_capabilities;
+    if (capabilities_changed_mask != 0) {
         window->priv->capabilities = new_capabilities;
         g_object_notify(G_OBJECT(window), "capabilities");
-        g_signal_emit_by_name(window, "capabilities-changed", capapbilities_changed_mask, new_capabilities);
+        g_signal_emit_by_name(window, "capabilities-changed", capabilities_changed_mask, new_capabilities);
     }
 
     if (window->priv->created_emitted && (old_state & XFW_WINDOW_STATE_ACTIVE) == 0 && (new_state & XFW_WINDOW_STATE_ACTIVE) != 0) {
