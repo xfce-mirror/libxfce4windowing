@@ -399,6 +399,11 @@ workspace_removed(void *data, struct ext_workspace_handle_v1 *wl_workspace) {
     g_signal_emit(workspace, workspace_signals[SIGNAL_DESTROYED], 0);
 }
 
+struct ext_workspace_handle_v1 *
+_xfw_workspace_wayland_get_handle(XfwWorkspaceWayland *workspace) {
+    return workspace->priv->handle;
+}
+
 void
 _xfw_workspace_wayland_set_number(XfwWorkspaceWayland *workspace, guint number) {
     if (number != workspace->priv->number) {

@@ -332,7 +332,7 @@ workspace_destroyed(XfwWorkspace *workspace, XfwWorkspaceGroupWayland *group) {
     }
 
     g_signal_emit_by_name(group, "workspace-destroyed", workspace);
-    g_object_unref(workspace);
+    g_hash_table_remove(group->priv->wl_workspaces, _xfw_workspace_wayland_get_handle(XFW_WORKSPACE_WAYLAND(workspace)));
 }
 
 static void

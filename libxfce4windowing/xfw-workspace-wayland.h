@@ -53,6 +53,7 @@ struct _XfwWorkspaceWaylandClass {
 
 GType xfw_workspace_wayland_get_type(void) G_GNUC_CONST;
 
+struct ext_workspace_handle_v1 *_xfw_workspace_wayland_get_handle(XfwWorkspaceWayland *workspace);
 void _xfw_workspace_wayland_set_number(XfwWorkspaceWayland *workspace, guint number);
 
 #endif  /* __XFW_WORKSPACE_WAYLAND_H__ */
