@@ -28,6 +28,7 @@
 
 struct _XfwWorkspaceDummyPrivate {
     XfwWorkspaceGroup *group;
+    GdkRectangle geometry;
 };
 
 static void xfw_workspace_dummy_workspace_init(XfwWorkspaceIface *iface);
@@ -42,6 +43,7 @@ static XfwWorkspaceGroup *xfw_workspace_dummy_get_workspace_group(XfwWorkspace *
 gint xfw_workspace_dummy_get_layout_row(XfwWorkspace *workspace);
 gint xfw_workspace_dummy_get_layout_column(XfwWorkspace *workspace);
 XfwWorkspace *xfw_workspace_dummy_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
+static GdkRectangle *xfw_workspace_dummy_get_geometry(XfwWorkspace *workspace);
 static gboolean xfw_workspace_dummy_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_dummy_remove(XfwWorkspace *workspace, GError **error);
 
@@ -130,6 +132,7 @@ xfw_workspace_dummy_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_layout_row = xfw_workspace_dummy_get_layout_row;
     iface->get_layout_column = xfw_workspace_dummy_get_layout_column;
     iface->get_neighbor = xfw_workspace_dummy_get_neighbor;
+    iface->get_geometry = xfw_workspace_dummy_get_geometry;
     iface->activate = xfw_workspace_dummy_activate;
     iface->remove = xfw_workspace_dummy_remove;
 }
@@ -177,6 +180,11 @@ xfw_workspace_dummy_get_layout_column(XfwWorkspace *workspace) {
 XfwWorkspace *
 xfw_workspace_dummy_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) {
     return NULL;
+}
+
+static GdkRectangle *
+xfw_workspace_dummy_get_geometry(XfwWorkspace *workspace) {
+    return &XFW_WORKSPACE_DUMMY(workspace)->priv->geometry;
 }
 
 static gboolean
