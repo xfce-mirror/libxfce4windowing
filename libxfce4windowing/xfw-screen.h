@@ -50,6 +50,7 @@ struct _XfwScreenIface {
     void (*active_window_changed)(XfwScreen *screen, XfwWindow *previous_active_window);
     void (*window_stacking_changed)(XfwScreen *screen);
     void (*window_closed)(XfwScreen *screen, XfwWindow *window);
+    void (*window_manager_changed)(XfwScreen *screen);
 
     /* Virtual Table */
     XfwWorkspaceManager *(*get_workspace_manager)(XfwScreen *screen);

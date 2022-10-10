@@ -59,6 +59,7 @@ static void window_closed(WnckScreen *wnck_screen, WnckWindow *window, XfwScreen
 static void active_window_changed(WnckScreen *wnck_screen, WnckWindow *previous_window, XfwScreenX11 *screen);
 static void window_stacking_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen);
 static void showing_desktop_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen);
+static void window_manager_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen);
 
 G_DEFINE_TYPE_WITH_CODE(XfwScreenX11, xfw_screen_x11, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwScreenX11)
@@ -109,6 +110,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     g_signal_connect(screen->priv->wnck_screen, "window-closed", G_CALLBACK(window_closed), screen);
     g_signal_connect(screen->priv->wnck_screen, "active-window-changed", G_CALLBACK(active_window_changed), screen);
     g_signal_connect(screen->priv->wnck_screen, "window-stacking-changed", G_CALLBACK(window_stacking_changed), screen);
+    g_signal_connect(screen->priv->wnck_screen, "window-manager-changed", G_CALLBACK(window_manager_changed), screen);
     g_signal_connect(screen->priv->wnck_screen, "showing-desktop-changed", G_CALLBACK(showing_desktop_changed), screen);
 }
 
@@ -168,6 +170,7 @@ xfw_screen_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, window_closed, screen);
     g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, active_window_changed, screen);
     g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, window_stacking_changed, screen);
+    g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, window_manager_changed, screen);
     g_signal_handlers_disconnect_by_func(screen->priv->wnck_screen, showing_desktop_changed, screen);
     g_list_free(screen->priv->windows);
     g_list_free(screen->priv->windows_stacked);
@@ -288,6 +291,11 @@ window_stacking_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen) {
     }
     screen->priv->windows_stacked = g_list_reverse(screen->priv->windows_stacked);
     g_signal_emit_by_name(screen, "window-stacking-changed");
+}
+
+static void
+window_manager_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen) {
+    g_signal_emit_by_name(screen, "window-manager-changed");
 }
 
 static void

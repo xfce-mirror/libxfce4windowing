@@ -127,6 +127,22 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                  XFW_TYPE_WINDOW);
 
     /**
+     * XfwScreen::window-manager-changed:
+     * @screen: the object which received the signal.
+     *
+     * Emitted when the window manager on @screen has changed.
+     *
+     * Note that currently this signal is not emitted on Wayland.
+     **/
+    g_signal_new("window-manager-changed",
+                 XFW_TYPE_SCREEN,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwScreenIface, window_manager_changed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__VOID,
+                 G_TYPE_NONE, 0);
+
+    /**
      * XfwScreen:screen:
      *
      * The #GdkScreen instance used to construct this #XfwScreen.
