@@ -32,11 +32,13 @@ enum {
     PROP0,
     PROP_CREATE_WORKSPACE_FUNC,
     PROP_MOVE_VIEWPORT_FUNC,
+    PROP_SET_LAYOUT_FUNC,
 };
 
 struct _XfwWorkspaceGroupDummyPrivate {
     XfwCreateWorkspaceFunc create_workspace_func;
     XfwMoveViewportFunc move_viewport_func;
+    XfwSetLayoutFunc set_layout_func;
     GdkScreen *screen;
     XfwWorkspaceManager *workspace_manager;
     GList *workspaces;
@@ -57,6 +59,7 @@ static GList *xfw_workspace_group_dummy_get_monitors(XfwWorkspaceGroup *group);
 static XfwWorkspaceManager *xfw_workspace_group_dummy_get_workspace_manager(XfwWorkspaceGroup *group);
 static gboolean xfw_workspace_group_dummy_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 static gboolean xfw_workspace_group_dummy_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
+static gboolean xfw_workspace_group_dummy_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
 
 static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
 static void monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
@@ -86,6 +89,12 @@ xfw_workspace_group_dummy_class_init(XfwWorkspaceGroupDummyClass *klass) {
                                     g_param_spec_pointer("move-viewport-func",
                                                          "move-viewport-func",
                                                          "move-viewport-func",
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gklass,
+                                    PROP_SET_LAYOUT_FUNC,
+                                    g_param_spec_pointer("set-layout-func",
+                                                         "set-layout-func",
+                                                         "set-layout-func",
                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     _xfw_workspace_group_install_properties(gklass);
 }
@@ -121,6 +130,10 @@ xfw_workspace_group_dummy_set_property(GObject *obj, guint prop_id, const GValue
             group->priv->move_viewport_func = g_value_get_pointer(value);
             break;
 
+        case PROP_SET_LAYOUT_FUNC:
+            group->priv->set_layout_func = g_value_get_pointer(value);
+            break;
+
         case WORKSPACE_GROUP_PROP_SCREEN:
             group->priv->screen = g_value_get_object(value);
             break;
@@ -151,6 +164,10 @@ xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *valu
 
         case PROP_MOVE_VIEWPORT_FUNC:
             g_value_set_pointer(value, group->priv->move_viewport_func);
+            break;
+
+        case PROP_SET_LAYOUT_FUNC:
+            g_value_set_pointer(value, group->priv->set_layout_func);
             break;
 
         case WORKSPACE_GROUP_PROP_SCREEN:
@@ -204,6 +221,7 @@ xfw_workspace_group_dummy_workspace_group_init(XfwWorkspaceGroupIface *iface) {
     iface->get_workspace_manager = xfw_workspace_group_dummy_get_workspace_manager;
     iface->create_workspace = xfw_workspace_group_dummy_create_workspace;
     iface->move_viewport = xfw_workspace_group_dummy_move_viewport;
+    iface->set_layout = xfw_workspace_group_dummy_set_layout;
 }
 
 static XfwWorkspaceGroupCapabilities
@@ -215,6 +233,9 @@ xfw_workspace_group_dummy_get_capabilities(XfwWorkspaceGroup *group) {
     }
     if (priv->move_viewport_func != NULL) {
         capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_MOVE_VIEWPORT;
+    }
+    if (priv->set_layout_func != NULL) {
+        capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_SET_LAYOUT;
     }
     return capabilities;
 }
@@ -265,6 +286,19 @@ xfw_workspace_group_dummy_move_viewport(XfwWorkspaceGroup *group, gint x, gint y
     } else {
         if (error) {
             *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace group does not support moving viewports");
+        }
+        return FALSE;
+    }
+}
+
+static gboolean
+xfw_workspace_group_dummy_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error) {
+    XfwWorkspaceGroupDummy *dgroup = XFW_WORKSPACE_GROUP_DUMMY(group);
+    if (dgroup->priv->set_layout_func != NULL) {
+        return (*dgroup->priv->set_layout_func)(group, rows, columns, error);
+    } else {
+        if (error) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace group does not support setting a layout");
         }
         return FALSE;
     }

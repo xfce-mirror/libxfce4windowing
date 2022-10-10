@@ -48,6 +48,7 @@ typedef enum {
     XFW_WORKSPACE_GROUP_CAPABILITIES_NONE = 0,
     XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE = (1 << 0),
     XFW_WORKSPACE_GROUP_CAPABILITIES_MOVE_VIEWPORT = (1 << 1),
+    XFW_WORKSPACE_GROUP_CAPABILITIES_SET_LAYOUT = (1 << 2),
 } XfwWorkspaceGroupCapabilities;
 
 GType xfw_workspace_group_get_type(void) G_GNUC_CONST;
@@ -82,6 +83,7 @@ struct _XfwWorkspaceGroupIface {
 
     gboolean (*create_workspace)(XfwWorkspaceGroup *group, const gchar *name, GError **error);
     gboolean (*move_viewport)(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
+    gboolean (*set_layout)(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
 };
 
 XfwWorkspaceGroupCapabilities xfw_workspace_group_get_capabilities(XfwWorkspaceGroup *group);
@@ -93,6 +95,7 @@ XfwWorkspaceManager *xfw_workspace_group_get_workspace_manager(XfwWorkspaceGroup
 
 gboolean xfw_workspace_group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 gboolean xfw_workspace_group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
+gboolean xfw_workspace_group_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
 
 G_END_DECLS
 

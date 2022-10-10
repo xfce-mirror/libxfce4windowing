@@ -78,6 +78,7 @@ xfw_workspace_manager_dummy_constructed(GObject *obj) {
                          "workspace-manager", manager,
                          "create-workspace-func", NULL,
                          "move-viewport-func", NULL,
+                         "set-layout-func", NULL,
                          NULL);
     manager->priv->groups = g_list_append(NULL, group);
     manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY,

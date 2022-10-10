@@ -51,6 +51,7 @@ static void viewports_changed(WnckScreen *screen, XfwWorkspaceManagerX11 *manage
 
 static gboolean group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 static gboolean group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
+static gboolean group_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerX11, xfw_workspace_manager_x11, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceManagerX11)
@@ -100,6 +101,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
                          "workspace-manager", manager,
                          "create-workspace-func", group_create_workspace,
                          "move-viewport-func", group_move_viewport,
+                         "set-layout-func", group_set_layout,
                          NULL);
     priv->groups = g_list_append(NULL, group);
 
@@ -259,6 +261,18 @@ static gboolean
 group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error) {
     XfwWorkspaceManagerX11 *manager = XFW_WORKSPACE_MANAGER_X11(xfw_workspace_group_get_workspace_manager(group));
     wnck_screen_move_viewport(manager->priv->wnck_screen, x, y);
+    return TRUE;
+}
+
+static gboolean
+group_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error) {
+    XfwWorkspaceManagerX11 *manager = XFW_WORKSPACE_MANAGER_X11(xfw_workspace_group_get_workspace_manager(group));
+    if (wnck_screen_try_set_workspace_layout(manager->priv->wnck_screen, 0, rows, columns) == 0) {
+        if (error) {
+            *error = g_error_new(XFW_ERROR, XFW_ERROR_INTERNAL, "Cannot acquire ownership of the layout");
+        }
+        return FALSE;
+    }
     return TRUE;
 }
 

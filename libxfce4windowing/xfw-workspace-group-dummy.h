@@ -41,6 +41,7 @@ typedef struct _XfwWorkspaceGroupDummyClass XfwWorkspaceGroupDummyClass;
 
 typedef gboolean (*XfwCreateWorkspaceFunc)(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 typedef gboolean (*XfwMoveViewportFunc)(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
+typedef gboolean (*XfwSetLayoutFunc)(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
 
 struct _XfwWorkspaceGroupDummy {
     GObject parent;

@@ -66,6 +66,7 @@ static GList *xfw_workspace_group_wayland_get_monitors(XfwWorkspaceGroup *group)
 static XfwWorkspaceManager * xfw_workspace_group_wayland_get_workspace_manager(XfwWorkspaceGroup *group);
 static gboolean xfw_workspace_group_wayland_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 static gboolean xfw_workspace_group_wayland_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
+static gboolean xfw_workspace_group_wayland_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
 
 static void group_capabilities(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_array *capabilities);
 static void group_output_enter(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_output *output);
@@ -203,6 +204,7 @@ xfw_workspace_group_wayland_workspace_group_init(XfwWorkspaceGroupIface *iface) 
     iface->get_workspace_manager = xfw_workspace_group_wayland_get_workspace_manager;
     iface->create_workspace = xfw_workspace_group_wayland_create_workspace;
     iface->move_viewport = xfw_workspace_group_wayland_move_viewport;
+    iface->set_layout = xfw_workspace_group_wayland_set_layout;
 }
 
 static XfwWorkspaceGroupCapabilities
@@ -253,6 +255,14 @@ static gboolean
 xfw_workspace_group_wayland_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error) {
     if (error) {
         *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace group does not support moving viewports");
+    }
+    return FALSE;
+}
+
+static gboolean
+xfw_workspace_group_wayland_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error) {
+    if (error) {
+        *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace group does not support setting a layout");
     }
     return FALSE;
 }
