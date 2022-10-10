@@ -176,7 +176,7 @@ xfw_application_wayland_finalize(GObject *obj) {
     for (GList *lp = priv->windows; lp != NULL; lp = lp->next) {
         g_signal_handlers_disconnect_by_data(lp->data, obj);
     }
-    g_list_free(priv->windows);
+    g_list_free_full(priv->windows, g_object_unref);
     g_list_free(priv->instances);
 
     G_OBJECT_CLASS(xfw_application_wayland_parent_class)->finalize(obj);
@@ -246,6 +246,7 @@ static void
 window_closed(XfwWindowWayland *window, XfwApplicationWayland *app) {
     g_signal_handlers_disconnect_by_data(window, app);
     app->priv->windows = g_list_remove(app->priv->windows, window);
+    g_object_unref(window);
     g_object_notify(G_OBJECT(app), "windows");
 }
 
@@ -254,6 +255,7 @@ window_application_changed(XfwWindowWayland *window, GParamSpec *pspec, XfwAppli
     if (XFW_APPLICATION(app) != xfw_window_get_application(XFW_WINDOW(window))) {
         g_signal_handlers_disconnect_by_data(window, app);
         app->priv->windows = g_list_remove(app->priv->windows, window);
+        g_object_unref(window);
         g_object_notify(G_OBJECT(app), "windows");
     }
 }
@@ -276,7 +278,7 @@ _xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id) {
         g_object_ref(app);
     }
 
-    app->priv->windows = g_list_prepend(app->priv->windows, window);
+    app->priv->windows = g_list_prepend(app->priv->windows, g_object_ref(window));
     g_signal_connect(window, "closed", G_CALLBACK(window_closed), app);
     g_signal_connect(window, "notify::application", G_CALLBACK(window_application_changed), app);
     g_object_notify(G_OBJECT(app), "windows");
