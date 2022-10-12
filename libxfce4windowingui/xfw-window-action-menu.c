@@ -140,19 +140,19 @@ xfw_window_action_menu_constructed(GObject *obj) {
 
     item = gtk_radio_menu_item_new_with_mnemonic(NULL, _("_Always on Visible Workspace"));
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (state & XFW_WINDOW_STATE_PINNED) != 0);
-    gtk_widget_set_sensitive(item, (caps & (XFW_WINDOW_CAPABILITIES_CAN_PIN | XFW_WINDOW_CAPABILITIES_CAN_UNPIN)) != 0);
+    gtk_widget_set_sensitive(item, (caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0);
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_pinned_state), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     item = gtk_radio_menu_item_new_with_mnemonic_from_widget(GTK_RADIO_MENU_ITEM(item), _("_Only on This Workspace"));
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), (state & XFW_WINDOW_STATE_PINNED) == 0);
-    gtk_widget_set_sensitive(item, (caps & (XFW_WINDOW_CAPABILITIES_CAN_PIN | XFW_WINDOW_CAPABILITIES_CAN_UNPIN)) != 0);
+    gtk_widget_set_sensitive(item, (caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0);
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_pinned_state), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    if ((caps & XFW_WINDOW_CAPABILITIES_CAN_MOVE) != 0) {
+    if ((caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0) {
         XfwWorkspace *workspace = xfw_window_get_workspace(window);
 
         if (workspace != NULL) {
