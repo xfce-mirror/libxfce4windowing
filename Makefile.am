@@ -11,7 +11,8 @@ EXTRA_DIST = \
 	README.md \
 	intltool-extract.in \
 	intltool-merge.in \
-	intltool-update.in
+	intltool-update.in \
+	m4/introspection.m4
 
 DISTCLEANFILES = \
 	intltool-extract \
@@ -51,3 +52,7 @@ compile_flags.txt: $(shell find . -name Makefile)
 	; do \
 		echo "$$flag" >> $@ || exit 1; \
 	done
+
+DISTCHECK_CONFIGURE_FLAGS = \
+	--enable-gtk-doc \
+	--enable-introspection

@@ -112,6 +112,8 @@ AM_CONDITIONAL([WAYLAND_ENABLED], [test x"$enable_wayland" = x"yes"])
 
 GTK_DOC_CHECK([1.30])
 
+GOBJECT_INTROSPECTION_CHECK([1.66.0])
+
 dnl check for debugging support
 XDT_FEATURE_DEBUG()
 XDT_FEATURE_LINKER_OPTS()
@@ -170,6 +172,9 @@ AC_OUTPUT
 
 echo
 echo "Build Configuration:"
-echo "* X11 support:               $enable_x11"
-echo "* Wayland support:           $enable_wayland"
+echo "* X11 support:                   $enable_x11"
+echo "* Wayland support:               $enable_wayland"
+echo "* Debug support:                 $enable_debug"
+echo "* GObject Introspection support: $enable_introspection"
+echo "* Documentation support:         $enable_gtk_doc"
 echo

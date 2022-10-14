@@ -115,6 +115,8 @@ EXTRA_DIST = \
 	xfw-marshal.h \
 	xfw-marshal.list
 
+CLEANFILES =
+
 if MAINTAINER_MODE
 
 xfw-marshal.h: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
@@ -124,11 +126,46 @@ xfw-marshal.c: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 	$(AM_V_GEN) echo '#include "xfw-marshal.h"' > $@
 	$(AM_V_GET) glib-genmarshal --prefix=xfw_marshal --body $< >> $@
 
-CLEANFILES = \
+CLEANFILES += \
 	$(libxfce4windowing_0_built_sources)
 
 BUILT_SOURCES = \
 	$(libxfce4windowing_0_built_sources)
+
+endif
+
+# GObject Introspection
+-include $(INTROSPECTION_MAKEFILE)
+INTROSPECTION_GIRS =
+INTROSPECTION_SCANNER_ENV = CC="$(CC)"
+INTROSPECTION_SCANNER_ARGS = \
+	--add-include-path=$(srcdir) \
+	--warn-all \
+	--identifier-prefix=Xfw \
+	--c-include=libxfce4windowing/libxfce4windowing.h
+INTROSPECTION_COMPILER_ARGS = \
+	--includedir=$(srcdir) \
+	--includedir=.
+
+if HAVE_INTROSPECTION
+
+introspection_sources = $(libxfce4windowing_0_la_SOURCES)
+
+Libxfce4windowing-0.0.gir: libxfce4windowing-0.la Makefile
+Libxfce4windowing_0_0_gir_INCLUDES = GObject-2.0 GLib-2.0 Gio-2.0 Gtk-3.0
+Libxfce4windowing_0_0_gir_CFLAGS = $(libxfce4windowing_0_la_CFLAGS)
+Libxfce4windowing_0_0_gir_LIBS = libxfce4windowing-0.la
+Libxfce4windowing_0_0_gir_FILES = $(introspection_sources)
+Libxfce4windowing_0_0_gir_EXPORT_PACKAGES = libxfce4windowing-0
+INTROSPECTION_GIRS += Libxfce4windowing-0.0.gir
+
+girdir = $(datadir)/gir-1.0
+gir_DATA = $(INTROSPECTION_GIRS)
+
+typelibdir = $(libdir)/girepository-1.0
+typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
+
+CLEANFILES += $(gir_DATA) $(typelib_DATA)
 
 endif
 

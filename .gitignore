@@ -39,6 +39,8 @@ po/*.gmo
 *.lo
 *.o
 *.stamp
+*.gir
+*.typelib
 libxfce4windowing-*.tar.bz2
 tests/test-ui
 docs/reference/html/
