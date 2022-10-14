@@ -53,6 +53,8 @@ typedef enum _XfwErrorCode {
 
 /**
  * XfwWindowing:
+ * @XFW_WINDOWING_UNKNOWN: the application is running under an unknown
+ *                         or unsupported windowing system.
  * @XFW_WINDOWING_X11: the application is running under an X11 server.
  * @XFW_WINDOWING_WAYLAND: the application is running under a Wayland
  *                         comopositor.
@@ -61,8 +63,9 @@ typedef enum _XfwErrorCode {
  * for an application running on XWayland, this will return #XFW_WINDOWING_X11.
  **/
 typedef enum {
-    XFW_WINDOWING_X11 = 1,
-    XFW_WINDOWING_WAYLAND = 2
+    XFW_WINDOWING_UNKNOWN = 0,
+    XFW_WINDOWING_X11,
+    XFW_WINDOWING_WAYLAND,
 } XfwWindowing;
 
 /**

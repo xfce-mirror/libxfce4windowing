@@ -27,8 +27,6 @@
 
 #include "config.h"
 
-#include <stdlib.h>
-
 #include <gdk/gdk.h>
 #ifdef ENABLE_WAYLAND
 #include <gdk/gdkwayland.h>
@@ -39,8 +37,6 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
-
-#define WINDOWING_UNKNOWN 0
 
 G_DEFINE_ENUM_TYPE(XfwDirection, xfw_direction,
                    G_DEFINE_ENUM_VALUE(XFW_DIRECTION_UP, "up"),
@@ -58,9 +54,9 @@ G_DEFINE_ENUM_TYPE(XfwDirection, xfw_direction,
 XfwWindowing
 xfw_windowing_get(void)
 {
-    static XfwWindowing windowing = WINDOWING_UNKNOWN;
+    static XfwWindowing windowing = XFW_WINDOWING_UNKNOWN;
 
-    if (G_UNLIKELY(windowing == WINDOWING_UNKNOWN)) {
+    if (G_UNLIKELY(windowing == XFW_WINDOWING_UNKNOWN)) {
         GdkDisplay *gdpy = gdk_display_get_default();
 
         _libxfce4windowing_init();
@@ -77,7 +73,6 @@ xfw_windowing_get(void)
 #endif  /* ENABLE_WAYLAND */
         {
             g_critical("Unknown/unsupported GDK windowing type");
-            exit(1);
         }
     }
 
