@@ -199,7 +199,7 @@ xfw_screen_default_init(XfwScreenIface *iface) {
  * Retrieves this screen's #XfwWorkspaceManager instance, which can be used
  * to inspect and interact with @screen's workspace groups and workspaces.
  *
- * Return value: (not nullable): (transfer none): a #XFW_WorkspaceManager
+ * Return value: (not nullable) (transfer none): a #XfwWorkspaceManager
  * instance.  This instance is a singleton and is owned by @screen.
  **/
 XfwWorkspaceManager *
@@ -359,7 +359,7 @@ xfw_screen_get(GdkScreen *gdk_screen) {
  *
  * Retrieves the #XfwScreen instance corresponding to the default #GdkScreen.
  *
- * Return value: (not nullable) (transfer full): an #XfScreen instance, with
+ * Return value: (not nullable) (transfer full): an #XfwScreen instance, with
  * a reference owned by the caller.
  **/
 XfwScreen *

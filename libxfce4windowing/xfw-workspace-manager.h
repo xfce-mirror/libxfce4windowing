@@ -54,7 +54,7 @@ struct _XfwWorkspaceManagerIface {
                                       XfwWorkspaceGroup *group);
 
     /* Virtual Table */
-    GList *(*list_workspace_groups)(XfwWorkspaceManager *);
+    GList *(*list_workspace_groups)(XfwWorkspaceManager *manager);
 };
 
 GList *xfw_workspace_manager_list_workspace_groups(XfwWorkspaceManager *manager);

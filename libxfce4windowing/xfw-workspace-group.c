@@ -37,6 +37,14 @@ G_DEFINE_FLAGS_TYPE(XfwWorkspaceGroupCapabilities, xfw_workspace_group_capabilit
 
 static void
 xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
+    /**
+     * XfwWorkspaceGroup::capabilities-changed:
+     * @group: the object which received the signal.
+     * @changed_mask: a bitfield representing the capabilities that have changed.
+     * @new_capabilities: a bitfield of the new capabilities.
+     *
+     * Emitted when capabilities have changed on @group.
+     **/
     g_signal_new("capabilities-changed",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
@@ -46,6 +54,14 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  G_TYPE_NONE, 2,
                  XFW_TYPE_WORKSPACE_GROUP_CAPABILITIES,
                  XFW_TYPE_WORKSPACE_GROUP_CAPABILITIES);
+
+    /**
+     * XfwWorkspaceGroup::workspace-created:
+     * @group: the object which received the signal.
+     * @workspace: (not nullable): the newly-created workspace.
+     *
+     * Emitted when a new workspace is created in @group.
+     **/
     g_signal_new("workspace-created",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
@@ -54,6 +70,15 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE);
+
+    /**
+     * XfwWorkspaceGroup::active-workspace-changed:
+     * @group: the object which received the signal.
+     * @previously_active_workspace: (nullable): the previously active
+     *                                           #XfwWorkspace, or %NULL.
+     *
+     * Emitted when the active workspace of @group changes.
+     **/
     g_signal_new("active-workspace-changed",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
@@ -62,6 +87,14 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE);
+
+    /**
+     * XfwWorkspaceGroup::workspace-destroyed:
+     * @group: the object which received the signal.
+     * @workspace: (not nullable): the workspace that was destroyed.
+     *
+     * Emitted when a workspace in @group is destroyed.
+     **/
     g_signal_new("workspace-destroyed",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
@@ -70,6 +103,13 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE);
+
+    /**
+     * XfwWorkspaceGroup::monitors-changed:
+     * @group: the object which received the signal.
+     *
+     * Emitted when @group moves to a new set of monitors.
+     **/
     g_signal_new("monitors-changed",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
@@ -77,6 +117,13 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+
+    /**
+     * XfwWorkspaceGroup::viewports-changed:
+     * @group: the object which recieved the signal.
+     *
+     * Emitted when @group's viewport coordinates have changed.
+     **/
     g_signal_new("viewports-changed",
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
@@ -85,29 +132,59 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
 
+    /**
+     * XfwWorkspaceGroup:screen:
+     *
+     * The #GdkScreen used when creating the #XfwScreen that owns this
+     * #XfwWorkspaceGroup.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("screen",
                                                             "screen",
                                                             "screen",
                                                             GDK_TYPE_SCREEN,
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    /**
+     * XfwWorkspaceGroup:workspace-manager:
+     *
+     * The #XfwWorkspaceManager instance that manages this #XfwWorkspaceGroup.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("workspace-manager",
                                                             "workspace-manager",
                                                             "workspace-manager",
                                                             XFW_TYPE_WORKSPACE_MANAGER,
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    /**
+     * XfwWorkspaceGroup:workspaces:
+     *
+     * The list of #XfwWorkspace in this #XfwWorkspaceGroup.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_pointer("workspaces",
                                                              "workspaces",
                                                              "workspaces",
                                                              G_PARAM_READABLE));
+
+    /**
+     * XfwWorkspaceGroup:active-workspace:
+     *
+     * The active #XfwWorkspace on this #XfwWorkspaceGroup, or %NULL.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("active-workspace",
                                                             "active-workspace",
                                                             "active-workspace",
                                                             XFW_TYPE_WORKSPACE,
                                                             G_PARAM_READABLE));
+
+    /**
+     * XfwWorkspaceGroup:monitors:
+     *
+     * The list of #GdkMonitor this #XfwWorkspaceGroup is displayed on.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_pointer("monitors",
                                                              "monitors",
@@ -115,6 +192,14 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                              G_PARAM_READABLE));
 }
 
+/**
+ * xfw_workspace_group_get_capabilities:
+ * @group: an #XfwWorkspaceGroup.
+ *
+ * Returns a bitfield describing operations allowed on this @group.
+ * 
+ * Return value: an #XfwWorkspaceGroupCapabilities bitfield.
+ **/
 XfwWorkspaceGroupCapabilities
 xfw_workspace_group_get_capabilities(XfwWorkspaceGroup *group) {
     XfwWorkspaceGroupIface *iface;
@@ -123,6 +208,14 @@ xfw_workspace_group_get_capabilities(XfwWorkspaceGroup *group) {
     return (*iface->get_capabilities)(group);
 }
 
+/**
+ * xfw_workspace_group_get_workspace_count: (get-property workspace-manager)
+ * @group: an #XfwWorkspaceGroup.
+ *
+ * Fetches the number of workspaces in @group.
+ *
+ * Return value: an unsigned integer describing the number of workspaces.
+ **/
 guint
 xfw_workspace_group_get_workspace_count(XfwWorkspaceGroup *group) {
     XfwWorkspaceGroupIface *iface;
@@ -131,6 +224,16 @@ xfw_workspace_group_get_workspace_count(XfwWorkspaceGroup *group) {
     return (*iface->get_workspace_count)(group);
 }
 
+/**
+ * xfw_workspace_group_list_workspaces:
+ * @group: an #XfwWorkspaceGroup.
+ *
+ * Lists the workspaces in @group.
+ *
+ * Return value: (nullable) (element-type XfwWorkspace) (transfer none):
+ * the list of #XfwWorkspace in @group, or %NULL if there are no workspaces.
+ * The list and its contents are owned by @group.
+ **/
 GList *
 xfw_workspace_group_list_workspaces(XfwWorkspaceGroup *group) {
     XfwWorkspaceGroupIface *iface;
@@ -139,6 +242,15 @@ xfw_workspace_group_list_workspaces(XfwWorkspaceGroup *group) {
     return (*iface->list_workspaces)(group);
 }
 
+/**
+ * xfw_workspace_group_get_active_workspace:
+ * @group: an #XfwWorkspaceGroup.
+ *
+ * Gets the active workspace on @group, if there is one.
+ *
+ * Return value: (nullable) (transfer none): an #XfwWorkspace, or %NULL
+ * if there is no active workspace.
+ **/
 XfwWorkspace *
 xfw_workspace_group_get_active_workspace(XfwWorkspaceGroup *group) {
     XfwWorkspaceGroupIface *iface;
@@ -147,6 +259,16 @@ xfw_workspace_group_get_active_workspace(XfwWorkspaceGroup *group) {
     return (*iface->get_active_workspace)(group);
 }
 
+/**
+ * xfw_workspace_group_get_monitors:
+ * @group: an #XfwWorkspaceGroup.
+ *
+ * Lists the physical monitors that this workspace group displays on.
+ *
+ * Return value: (nullable) (element-type GdkMonitor) (transfer none):
+ * A list of #GdkMonitor, or %NULL if @group is not displayed on any
+ * monitors.  The list and its contents are owned by @group.
+ **/
 GList *
 xfw_workspace_group_get_monitors(XfwWorkspaceGroup *group) {
     XfwWorkspaceGroupIface *iface;
@@ -155,6 +277,15 @@ xfw_workspace_group_get_monitors(XfwWorkspaceGroup *group) {
     return (*iface->get_monitors)(group);
 }
 
+/**
+ * xfw_workspace_group_get_workspace_manager:
+ * @group: an #XfwWorkspaceGroup.
+ *
+ * Fetches the #XfwWorkspaceManager instance that owns @group.
+ *
+ * Return value: (not nullable) (transfer none): a #XfwWorkspaceManager,
+ * owned by @group.
+ **/
 XfwWorkspaceManager *
 xfw_workspace_group_get_workspace_manager(XfwWorkspaceGroup *group) {
     XfwWorkspaceGroupIface *iface;
@@ -163,6 +294,22 @@ xfw_workspace_group_get_workspace_manager(XfwWorkspaceGroup *group) {
     return (*iface->get_workspace_manager)(group);
 }
 
+/**
+ * xfw_workspace_group_create_workspace:
+ * @group: an #XfwWorkspaceGroup.
+ * @name: a name for the new workspace.
+ * @error: (out callee-allocates): a location to store a possible error.
+ *
+ * Attempts to create a new workspace on @group.  Typically, the new workspace
+ * will be appended to the existing list of workspaces.
+ *
+ * On failure, @error (if provided) will be set to a description of the error
+ * that occurred.
+ *
+ * Return value: %TRUE if workspace creation succeeded, %FALSE otherwise.  If
+ * %FALSE, and @error is non-%NULL, an error will be returned that must be
+ * freed using #g_error_free().
+ **/
 gboolean
 xfw_workspace_group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error) {
     XfwWorkspaceGroupIface *iface;
@@ -171,6 +318,22 @@ xfw_workspace_group_create_workspace(XfwWorkspaceGroup *group, const gchar *name
     return (*iface->create_workspace)(group, name, error);
 }
 
+/**
+ * xfw_workspace_group_move_viewport:
+ * @group: an #XfwWorkspaceGroup.
+ * @x: a coordinate in the horizontal direction.
+ * @y: a coordinate in the vertical direction.
+ * @error; (out callee-allocates): a location to store a possible error.
+ *
+ * Moves the workspace group to a new location, and possibly a new monitor.
+ *
+ * On failure, @error (if provided) will be set to a description of the error
+ * that occurred.
+ *
+ * Return value: %TRUE if moving the workspace group succeeded, %FALSE
+ * otherwise.  If %FALSE, and @error is non-%NULL, an error will be returned
+ * that must be freed using #g_error_free().
+ **/
 gboolean
 xfw_workspace_group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error) {
     XfwWorkspaceGroupIface *iface;
@@ -179,6 +342,25 @@ xfw_workspace_group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GErr
     return (*iface->move_viewport)(group, x, y, error);
 }
 
+/**
+ * xfw_workspace_group_set_layout:
+ * @group: an #XfwWorkspaceGroup.
+ * @rows: the new numbers of rows.
+ * @columns: the new number of columns.
+ * @error: (out callee-allocates): a location to store a possible error.
+ *
+ * Sets the layout of @group to @rows by @columns.
+ *
+ * Note that this will not change the number of workspaces if the new layout
+ * implies a larger number of workspaces than currently exists.
+ *
+ * On failure, @error (if provided) will be set to a description of the error
+ * that occurred.
+ *
+ * Return value: %TRUE if changing the layout of @group succeede, %FALSE
+ * otherwise.  If %FALSE, and @error is non-%NULL, an error will be returned
+ * that must be freed using #g_error_free().
+ **/
 gboolean
 xfw_workspace_group_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error) {
     XfwWorkspaceGroupIface *iface;

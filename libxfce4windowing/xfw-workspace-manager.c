@@ -29,6 +29,13 @@ G_DEFINE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, G_TYPE_OBJECT)
 
 static void
 xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
+    /**
+     * XfwWorkspaceManager::workspace-group-created:
+     * @manager: the object which received the signal.
+     * @group: (not nullable): the newly-created #XfwWorkspaceGroup.
+     *
+     * Emitted when a new workspace group is craeted.
+     **/
     g_signal_new("workspace-group-created",
                  XFW_TYPE_WORKSPACE_MANAGER,
                  G_SIGNAL_RUN_LAST,
@@ -37,6 +44,14 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE_GROUP);
+
+    /**
+     * XfwWorkspaceManager::workspace-group-destroyed:
+     * @manager: the object which received the signal.
+     * @group: (not nullable): the recently-destroyed #XfwWorkspaceGroup.
+     *
+     * Emitted when a workspace group is destroyed.
+     **/
     g_signal_new("workspace-group-destroyed",
                  XFW_TYPE_WORKSPACE_MANAGER,
                  G_SIGNAL_RUN_LAST,
@@ -46,6 +61,12 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE_GROUP);
 
+    /**
+     * XfwWorkspaceManager:screen:
+     *
+     * The #GdkScreen instance used to construct the #XfwScreen that owns this
+     * workspace manager.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("screen",
                                                             "screen",
@@ -54,6 +75,16 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 }
 
+/**
+ * xfw_workspace_manager_list_workspace_groups:
+ * @manager: an #XfwWorkspaceManager.
+ *
+ * Lists all workspace groups known to the workspace manager.
+ *
+ * Return value: (nullable) (element-type XfwWorkspaceGroup) (transfer none):
+ * the list of #XfwWorkspaceGroup managed by @maanger, or %NULL if there are
+ * no workspace groups.  The list and its contents are owned by @manager.
+ **/
 GList *
 xfw_workspace_manager_list_workspace_groups(XfwWorkspaceManager *manager) {
     XfwWorkspaceManagerIface *iface;

@@ -88,6 +88,16 @@ xfw_error_quark(void) {
     return quark;
 }
 
+/**
+ * xfw_g_desktop_app_info_get:
+ * @app_id: an application ID
+ *
+ * Attempts to find a #GDesktopAppInfo instance for the provided application
+ * ID.
+ *
+ * Return value: (nullable) (transfer full): a #GDesktopAppInfo instance,
+ * with the reference owned by the caller, or %NULL.
+ **/
 GDesktopAppInfo *
 xfw_g_desktop_app_info_get(const gchar *app_id) {
     GDesktopAppInfo *app_info;
