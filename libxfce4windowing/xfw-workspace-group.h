@@ -44,6 +44,20 @@ G_BEGIN_DECLS
 typedef struct _XfwWorkspaceGroup XfwWorkspaceGroup;
 typedef struct _XfwWorkspaceGroupIface XfwWorkspaceGroupIface;
 
+/**
+ * XfwWorkspaceGroupCapabilities:
+ * @XFW_WORKSPACE_GROUP_CAPABILITIES_NONE: group has no capabilities.
+ * @XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE: new workspaces can be
+ *                                                     created in this group.
+ * @XFW_WORKSPACE_GROUP_CAPABILITIES_MOVE_VIEWPORT: the viewport coordinates
+ *                                                  for this group can be
+ *                                                  changed.
+ * @XFW_WORKSPACE_GROUP_CAPABILITIES_SET_LAYOUT: the number of rows and columns
+ *                                               for this group can be changed.
+ *
+ * Flags enum representing a bitfield of actions that can be performed on this
+ * workspace group.
+ **/
 typedef enum {
     XFW_WORKSPACE_GROUP_CAPABILITIES_NONE = 0,
     XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE = (1 << 0),

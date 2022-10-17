@@ -31,6 +31,7 @@ xfw_workspace_manager_list_workspace_groups
 <SECTION>
 <FILE>xfw-workspace-group</FILE>
 XfwWorkspaceGroup
+XfwWorkspaceGroupCapabilities
 xfw_workspace_group_get_capabilities
 xfw_workspace_group_get_workspace_count
 xfw_workspace_group_list_workspaces
