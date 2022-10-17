@@ -209,7 +209,7 @@ xfw_workspace_group_get_capabilities(XfwWorkspaceGroup *group) {
 }
 
 /**
- * xfw_workspace_group_get_workspace_count: (get-property workspace-manager)
+ * xfw_workspace_group_get_workspace_count:
  * @group: an #XfwWorkspaceGroup.
  *
  * Fetches the number of workspaces in @group.
@@ -323,7 +323,7 @@ xfw_workspace_group_create_workspace(XfwWorkspaceGroup *group, const gchar *name
  * @group: an #XfwWorkspaceGroup.
  * @x: a coordinate in the horizontal direction.
  * @y: a coordinate in the vertical direction.
- * @error; (out callee-allocates): a location to store a possible error.
+ * @error: (out callee-allocates): a location to store a possible error.
  *
  * Moves the workspace group to a new location, and possibly a new monitor.
  *

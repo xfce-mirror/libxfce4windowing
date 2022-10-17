@@ -308,16 +308,6 @@ screen_destroyed(GdkScreen *gdk_screen, XfwScreen *screen) {
     g_object_steal_data(G_OBJECT(gdk_screen), GDK_SCREEN_XFW_SCREEN_KEY);
 }
 
-/**
- * xfw_screen_get: (constructor)
- * @gdk_screen: a #GdkScreen.
- *
- * Retrieves the #XfwScreen instance corresponding to the specified #GdkScreen
- * instance.
- *
- * Return value: (not nullable) (transfer full): an #XfwScreen instance, with
- * a reference owned by the caller.
- **/
 static XfwScreen *
 xfw_screen_get(GdkScreen *gdk_screen) {
     XfwScreen *screen = XFW_SCREEN(g_object_get_data(G_OBJECT(gdk_screen), GDK_SCREEN_XFW_SCREEN_KEY));
