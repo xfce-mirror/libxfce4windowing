@@ -44,12 +44,33 @@ typedef struct _XfwWorkspaceGroup XfwWorkspaceGroup;
 typedef struct _XfwWorkspace XfwWorkspace;
 typedef struct _XfwWorkspaceIface XfwWorkspaceIface;
 
+/**
+ * XfwWorkspaceCapabilities:
+ * @XFW_WORKSPACE_CAPABILITIES_NONE: workspace has no capabilities.
+ * @XFW_WORKSPACE_CAPABILITIES_ACTIVATE: workspace can be activated.
+ * @XFW_WORKSPACE_CAPABILITIES_REMOVE: workspace can be removed.
+ *
+ * Flags enum representing a bitfield of actions that can be performed on this
+ * workspace.
+ **/
 typedef enum {
     XFW_WORKSPACE_CAPABILITIES_NONE = 0,
     XFW_WORKSPACE_CAPABILITIES_ACTIVATE = (1 << 0),
     XFW_WORKSPACE_CAPABILITIES_REMOVE = (1 << 2),
 } XfwWorkspaceCapabilities;
 
+/**
+ * XfwWorkspaceState:
+ * @XFW_WORKSPACE_STATE_NONE: workspace has no state information.
+ * @XFW_WORKSPACE_STATE_ACTIVE: workspace is the active workspace in its group.
+ * @XFW_WORKSPACE_STATE_URGENT: workspace contains a window that is requesting
+ *                              attention.
+ * @XFW_WORKSPACE_STATE_HIDDEN: workspace should be hidden from pagers or other
+ *                              UI elements.
+ * @XFW_WORKSPACE_STATE_VIRTUAL: workspace has a valid, visible viewport.
+ *
+ * Flags enum representing a bitfield that describes the workspace's state.
+ **/
 typedef enum {
     XFW_WORKSPACE_STATE_NONE = 0,
     XFW_WORKSPACE_STATE_ACTIVE = (1 << 0),

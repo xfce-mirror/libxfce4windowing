@@ -17,6 +17,26 @@
  * MA 02110-1301 USA
  */
 
+/**
+ * SECTION:xfw-workspace
+ * @title: XfwWorkspace
+ * @short_description: A workspace that is part of a workspace group
+ * @stability: Unstable
+ * @include: libxfce4windowing/libxfce4windowing.h
+ *
+ * #XfwWorkspace represents a single workspace within a workspace group.  A
+ * workspace is usually a collection of windows that are shown together on the
+ * desktop when that workspace is the active workspace.
+ *
+ * An instance of #XfwWorkspace can be used to obtain information about the
+ * workspace, such as its name, position in the group, and capabilities.  The
+ * workspace can also be activated or removed.
+ *
+ * Note that #XfwWorkspace is actually an interface; when obtaining an
+ * instance, an instance of a windowing-environment-specific object that
+ * implements this interface will be returned.
+ **/
+
 #include "config.h"
 
 #include <limits.h>
@@ -44,6 +64,12 @@ G_DEFINE_FLAGS_TYPE(XfwWorkspaceCapabilities, xfw_workspace_capabilities,
 
 static void
 xfw_workspace_default_init(XfwWorkspaceIface *iface) {
+    /**
+     * XfwWorkspace::name-changed:
+     * @workspace: the object which received the signal.
+     *
+     * Emitted when @workspace's name changes.
+     **/
     g_signal_new("name-changed",
                  XFW_TYPE_WORKSPACE,
                  G_SIGNAL_RUN_LAST,
@@ -51,6 +77,15 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+
+    /**
+     * XfwWorkspace::capabilities-changed:
+     * @workspace: the object which received the signal.
+     * @changed_mask: a bitfield representing the capabilities that have changed.
+     * @new_capabilities: a bitfield of the new capabilities.
+     *
+     * Emitted when @workspace's capabilities change.
+     **/
     g_signal_new("capabilities-changed",
                  XFW_TYPE_WORKSPACE,
                  G_SIGNAL_RUN_LAST,
@@ -60,6 +95,13 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                  G_TYPE_NONE, 2,
                  XFW_TYPE_WORKSPACE_CAPABILITIES,
                  XFW_TYPE_WORKSPACE_CAPABILITIES);
+    /**
+     * XfwWorkspace::state-changed:
+     * @workspace: the object which received the signal.
+     * @old_state: a bitfield of the new state.
+     *
+     * Emitted when @workspace's state changes.
+     **/
     // TODO: switch to XfwWindow-style (changed_mask, new_state)
     g_signal_new("state-changed",
                  XFW_TYPE_WORKSPACE,
@@ -70,24 +112,47 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE_STATE);
 
+    /**
+     * XfwWorkspace:group:
+     *
+     * The #XfwWorkspaceGroup that this workspace is a member of.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("group",
                                                             "group",
                                                             "group",
                                                             XFW_TYPE_WORKSPACE_GROUP,
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    /**
+     * XfwWorkspace:id:
+     *
+     * The opaque ID of this workspace.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_string("id",
                                                             "id",
                                                             "id",
                                                             "",
                                                             G_PARAM_READABLE));
+
+    /**
+     * XfwWorkspace:name:
+     *
+     * The human-readable name of this workspace.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_string("name",
                                                             "name",
                                                             "name",
                                                             "",
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+
+    /**
+     * XfwWorkspace:capabilities:
+     *
+     * The #XfwWorkspaceCapabilities bitfield for this workspace.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_flags("capabilities",
                                                            "capabilities",
@@ -95,6 +160,12 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                            XFW_TYPE_WORKSPACE_CAPABILITIES,
                                                            XFW_WORKSPACE_CAPABILITIES_NONE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+
+    /**
+     * XfwWorkspaceIface:state:
+     *
+     * The #XfwWorkspaceState bitfield for this workspace.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_flags("state",
                                                            "state",
@@ -102,6 +173,12 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                            XFW_TYPE_WORKSPACE_STATE,
                                                            XFW_WORKSPACE_STATE_NONE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+
+    /**
+     * XfwWorkspace:number:
+     *
+     * The ordinal number of this workspace.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_uint("number",
                                                           "number",
@@ -110,6 +187,15 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 }
 
+/**
+ * xfw_workspace_get_id:
+ * @workspace: an #XfwWorkspace.
+ *
+ * Fetches this workspace's opaque ID.
+ *
+ * Return value: (not nullable) (transfer none): A UTF-8 formatted string,
+ * owned by @workspace.
+ **/
 const gchar *
 xfw_workspace_get_id(XfwWorkspace *workspace) {
     XfwWorkspaceIface *iface;
@@ -118,6 +204,15 @@ xfw_workspace_get_id(XfwWorkspace *workspace) {
     return (*iface->get_id)(workspace);
 }
 
+/**
+ * xfw_workspace_get_name:
+ * @workspace: an #XfwWorkspace.
+ *
+ * Fetches this workspace's human-readable name.
+ *
+ * Return value: (not nullable) (transfer none): A UTF-8 formatted string,
+ * owned by @workspace.
+ **/
 const gchar *
 xfw_workspace_get_name(XfwWorkspace *workspace) {
     XfwWorkspaceIface *iface;
@@ -126,6 +221,16 @@ xfw_workspace_get_name(XfwWorkspace *workspace) {
     return (*iface->get_name)(workspace);
 }
 
+/**
+ * xfw_workspace_get_capabilities:
+ * @workspace: an #XfwWorkspace.
+ *
+ * Fetches this workspace's capabilities bitfield.
+ *
+ * The bitfield describes what operations are available on this workspace.
+ *
+ * Return value: a #XfwWorkspaceCapabilities bitfield.
+ **/
 XfwWorkspaceCapabilities
 xfw_workspace_get_capabilities(XfwWorkspace *workspace) {
     XfwWorkspaceIface *iface;
@@ -134,6 +239,14 @@ xfw_workspace_get_capabilities(XfwWorkspace *workspace) {
     return (*iface->get_capabilities)(workspace);
 }
 
+/**
+ * xfw_workspace_get_state:
+ * @workspace: an #XfwWorkspace.
+ *
+ * Fetches this workspace's state bitfield.
+ *
+ * Return value: a #XfwWorkspaceState bitfield.
+ **/
 XfwWorkspaceState
 xfw_workspace_get_state(XfwWorkspace *workspace) {
     XfwWorkspaceIface *iface;
@@ -142,6 +255,16 @@ xfw_workspace_get_state(XfwWorkspace *workspace) {
     return (*iface->get_state)(workspace);
 }
 
+/**
+ * xfw_workspace_get_number:
+ * @workspace: an #XfwWorkspace.
+ *
+ * Fetches the ordinal number of this workspace.
+ *
+ * The number can be used to order workspaces in a UI representation.
+ *
+ * Return value: a non-negative, 0-indexed integer.
+ **/
 guint
 xfw_workspace_get_number(XfwWorkspace *workspace) {
     XfwWorkspaceIface *iface;
@@ -150,6 +273,15 @@ xfw_workspace_get_number(XfwWorkspace *workspace) {
     return (*iface->get_number)(workspace);
 }
 
+/**
+ * xfw_workspace_get_workspace_group:
+ * @workspace: an #XfwWorkspace.
+ *
+ * Fetches the group this workspace belongs to.
+ *
+ * Return value: (not nullable) (transfer none): a #XfwWorkspaceGroup
+ * instance, owned by @workspace.
+ **/
 XfwWorkspaceGroup *
 xfw_workspace_get_workspace_group(XfwWorkspace *workspace) {
     XfwWorkspaceIface *iface;
@@ -158,6 +290,17 @@ xfw_workspace_get_workspace_group(XfwWorkspace *workspace) {
     return (*iface->get_workspace_group)(workspace);
 }
 
+/**
+ * xfw_workspace_get_layout_row:
+ * @workspace: an #XfwWorkspace.
+ *
+ * Fetches the row this workspace belongs to in the workspace's group.
+ *
+ * This information can be used to lay out workspaces in a grid in a pager
+ * UI, for example.
+ *
+ * Return value: a non-negative, 0-indexed integer.
+ **/
 gint
 xfw_workspace_get_layout_row(XfwWorkspace *workspace) {
     XfwWorkspaceIface *iface;
@@ -166,6 +309,17 @@ xfw_workspace_get_layout_row(XfwWorkspace *workspace) {
     return (*iface->get_layout_row)(workspace);
 }
 
+/**
+ * xfw_workspace_get_layout_column:
+ * @workspace: an #XfwWorkspace.
+ *
+ * Fetches the column this workspace belongs to in the workspace's group.
+ *
+ * This information can be used to lay out workspaces in a grid in a pager
+ * UI, for example.
+ *
+ * Return value: a non-negative, 0-indexed integer.
+ **/
 gint
 xfw_workspace_get_layout_column(XfwWorkspace *workspace) {
     XfwWorkspaceIface *iface;
@@ -174,6 +328,18 @@ xfw_workspace_get_layout_column(XfwWorkspace *workspace) {
     return (*iface->get_layout_column)(workspace);
 }
 
+/**
+ * xfw_workspace_get_neighbor:
+ * @workspace: an #XfwWorkspace.
+ * @direction: an #XfwDirection.
+ *
+ * Fetches the workspace that resides in @direction from the @workspace, if
+ * any.  If workspace is on the edge of the layout, and @direction points off
+ * the edge of the layout, will return %NULL.
+ *
+ * Return value: (nullable) (transfer none): a #XfwWorkspace, owned by
+ * the parent @group, or %NULL if no workspace exists in @direction.
+ **/
 XfwWorkspace *
 xfw_workspace_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) {
     XfwWorkspaceIface *iface;
@@ -182,6 +348,18 @@ xfw_workspace_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) {
     return (*iface->get_neighbor)(workspace, direction);
 }
 
+/**
+ * xfw_workspace_get_geometry:
+ * @workspace: an #XfwWorkspace.
+ *
+ * Fetches the position and size of the workspace in screen coordinates.
+ *
+ * The values in the returned #GdkRectangle are owned by @workspace and should
+ * not be modified.
+ *
+ * Return value: (not nullable) (transfer none): a #GdkRectangle, owned by
+ * @workspace.
+ **/
 GdkRectangle *
 xfw_workspace_get_geometry(XfwWorkspace *workspace) {
     XfwWorkspaceIface *iface;
@@ -190,6 +368,20 @@ xfw_workspace_get_geometry(XfwWorkspace *workspace) {
     return (*iface->get_geometry)(workspace);
 }
 
+/**
+ * xfw_workspace_activate:
+ * @workspace: an #XfwWorkspace.
+ * @error: (out callee-allocates): a location to store a possible error.
+ *
+ * Attempts to set @workspace as the active workspace in its group.
+ *
+ * On failure, @error (if provided) will be set to a description of the error
+ * that occurred.
+ *
+ * Return value: %TRUE if workspace activation succeeded, %FALSE otherwise.  If
+ * %FALSE, and @error is non-%NULL, an error will be returned that must be
+ * freed using #g_error_free().
+ **/
 gboolean
 xfw_workspace_activate(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceIface *iface;
@@ -198,6 +390,20 @@ xfw_workspace_activate(XfwWorkspace *workspace, GError **error) {
     return (*iface->activate)(workspace, error);
 }
 
+/**
+ * xfw_workspace_remove:
+ * @workspace: an #XfwWorkspace.
+ * @error: (out callee-allocates): a location to store a possible error.
+ *
+ * Attempts to remove @workspace from its group.
+ *
+ * On failure, @error (if provided) will be set to a description of the error
+ * that occurred.
+ *
+ * Return value: %TRUE if workspace removal succeeded, %FALSE otherwise.  If
+ * %FALSE, and @error is non-%NULL, an error will be returned that must be
+ * freed using #g_error_free().
+ **/
 gboolean
 xfw_workspace_remove(XfwWorkspace *workspace, GError **error) {
     XfwWorkspaceIface *iface;
