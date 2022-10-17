@@ -87,7 +87,7 @@ struct _XfwWorkspaceIface {
 
     /* Signals */
     void (*name_changed)(XfwWorkspace *workspace);
-    void (*capabilities_changed)(XfwWorkspace *workspace);
+    void (*capabilities_changed)(XfwWorkspace *workspace, XfwWorkspaceCapabilities changed_mask, XfwWorkspaceCapabilities new_capabilities);
     void (*state_changed)(XfwWorkspace *workspace, XfwWorkspaceState old_state);
 
     /* Virtual Table */
