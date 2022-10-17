@@ -662,7 +662,7 @@ type_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     XfwWindowType old_type = window->priv->window_type;
     window->priv->window_type = convert_type(wnck_window_get_window_type(window->priv->wnck_window));
     g_object_notify(G_OBJECT(window), "type");
-    g_signal_emit_by_name("window", "type-changed", old_type);
+    g_signal_emit_by_name(window, "type-changed", old_type);
 }
 
 static void
