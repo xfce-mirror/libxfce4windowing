@@ -17,6 +17,27 @@
  * MA 02110-1301 USA
  */
 
+/**
+ * SECTION:xfw-workspace-group
+ * @title: XfwWorkspaceGroup
+ * @short_description: A group of workspaces
+ * @stability: Unstable
+ * @include: libxfce4windowing/libxfce4windowing.h
+ *
+ * Workspaces may be arranged in groups, and groups may be present on different
+ * monitors.  The #XfwWorkspaceGroup can create and enumerate workspaces, as
+ * well as provide notifications when workspaces are created and destroyed.
+ *
+ * Each workspace group may have an active workspace.
+ *
+ * Workspace groups are displayed on a list of zero or more monitors, and
+ * have viewport coordinates.
+ *
+ * Note that #XfwWorkspaceGroup is actually an interface; when obtaining an
+ * instance, an instance of a windowing-environment-specific object that
+ * implements this interface will be returned.
+ **/
+
 #include "config.h"
 
 #include <gdk/gdk.h>

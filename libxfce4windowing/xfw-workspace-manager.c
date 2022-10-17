@@ -17,6 +17,21 @@
  * MA 02110-1301 USA
  */
 
+/**
+ * SECTION:xfw-workspace-manager
+ * @title: XfwWorkspaceManager
+ * @short_description: An object that manages the workspace groups
+ * @stability: Unstable
+ * @include: libxfce4windowing/libxfce4windowing.h
+ *
+ * #XfwWorkspaceManager is used to enumerate and perform actions on the
+ * workspace groups present on the parent #XfwScreen.
+ *
+ * Note that #XfwWorkspaceManager is actually an interface; when obtaining an
+ * instance, an instance of a windowing-environment-specific object that
+ * implements this interface will be returned.
+ **/
+
 #include "config.h"
 
 #include <gdk/gdk.h>
