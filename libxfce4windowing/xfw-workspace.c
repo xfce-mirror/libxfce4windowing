@@ -95,21 +95,22 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                  G_TYPE_NONE, 2,
                  XFW_TYPE_WORKSPACE_CAPABILITIES,
                  XFW_TYPE_WORKSPACE_CAPABILITIES);
+
     /**
      * XfwWorkspace::state-changed:
-     * @workspace: the object which received the signal.
-     * @old_state: a bitfield of the new state.
+     * @changed_mask: a bitfield representing the state bits that have changed.
+     * @new_capabilities: a bitfield of the new state.
      *
      * Emitted when @workspace's state changes.
      **/
-    // TODO: switch to XfwWindow-style (changed_mask, new_state)
     g_signal_new("state-changed",
                  XFW_TYPE_WORKSPACE,
                  G_SIGNAL_RUN_LAST,
                  G_STRUCT_OFFSET(XfwWorkspaceIface, state_changed),
                  NULL, NULL,
-                 g_cclosure_marshal_VOID__FLAGS,
-                 G_TYPE_NONE, 1,
+                 xfw_marshal_VOID__FLAGS_FLAGS,
+                 G_TYPE_NONE, 2,
+                 XFW_TYPE_WORKSPACE_STATE,
                  XFW_TYPE_WORKSPACE_STATE);
 
     /**

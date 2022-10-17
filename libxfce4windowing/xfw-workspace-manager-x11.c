@@ -190,11 +190,11 @@ active_workspace_changed(WnckScreen *screen, WnckWorkspace *previous_wnck_worksp
     _xfw_workspace_group_dummy_set_active_workspace(XFW_WORKSPACE_GROUP_DUMMY(group), XFW_WORKSPACE(active_workspace));
     if (previous_workspace != NULL) {
         g_object_notify(G_OBJECT(previous_workspace), "state");
-        g_signal_emit_by_name(previous_workspace, "state-changed", XFW_WORKSPACE_STATE_ACTIVE);
+        g_signal_emit_by_name(previous_workspace, "state-changed", XFW_WORKSPACE_STATE_ACTIVE, xfw_workspace_get_state(XFW_WORKSPACE(previous_workspace)));
     }
 
     g_object_notify(G_OBJECT(active_workspace), "state");
-    g_signal_emit_by_name(active_workspace, "state-changed", XFW_WORKSPACE_STATE_NONE);
+    g_signal_emit_by_name(active_workspace, "state-changed", XFW_WORKSPACE_STATE_ACTIVE, xfw_workspace_get_state(XFW_WORKSPACE(active_workspace)));
 }
 
 static void

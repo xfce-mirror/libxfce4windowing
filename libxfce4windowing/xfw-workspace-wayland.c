@@ -343,22 +343,34 @@ static void
 workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct wl_array *wl_state) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
     XfwWorkspaceState old_state = workspace->priv->state;
-    XfwWorkspaceState state = XFW_WORKSPACE_STATE_NONE;
+    XfwWorkspaceState changed_mask;
+    XfwWorkspaceState new_state = XFW_WORKSPACE_STATE_NONE;
     enum ext_workspace_handle_v1_state *item;
 
     wl_array_for_each(item, wl_state) {
         for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
             if (state_converters[i].wl_state == *item) {
-                state |= state_converters[i].state_bit;
+                new_state |= state_converters[i].state_bit;
                 break;
             }
         }
     }
-    workspace->priv->state = state;
+
+    workspace->priv->state = new_state;
+    changed_mask = old_state ^ new_state;
     g_object_notify(G_OBJECT(workspace), "state");
-    g_signal_emit_by_name(workspace, "state-changed", old_state);
-    if ((old_state & XFW_WORKSPACE_STATE_ACTIVE) == 0 && (state & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
-        _xfw_workspace_group_wayland_set_active_workspace(XFW_WORKSPACE_GROUP_WAYLAND(workspace->priv->group), XFW_WORKSPACE(workspace));
+    g_signal_emit_by_name(workspace, "state-changed", changed_mask, new_state);
+    if ((changed_mask & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
+        if ((new_state & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
+            _xfw_workspace_group_wayland_set_active_workspace(XFW_WORKSPACE_GROUP_WAYLAND(workspace->priv->group), XFW_WORKSPACE(workspace));
+        } else {
+            XfwWorkspace *current_active_workspace = xfw_workspace_group_get_active_workspace(workspace->priv->group);
+            // If what's set as the current active workspace is *not* this workspace, then the newly-active
+            // workspace has already been set, so only unset it if what's currently active is this workspace.
+            if (current_active_workspace == XFW_WORKSPACE(workspace)) {
+                _xfw_workspace_group_wayland_set_active_workspace(XFW_WORKSPACE_GROUP_WAYLAND(workspace->priv->group), NULL);
+            }
+        }
     }
 }
 
