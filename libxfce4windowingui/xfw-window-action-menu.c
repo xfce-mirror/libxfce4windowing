@@ -17,6 +17,18 @@
  * MA 02110-1301 USA
  */
 
+/**
+ * SECTION:xfw-window-action-menu
+ * @title: XfwWindowActionMenu
+ * @short_description: a #GtkMenu subclass that lists window actions
+ * @stability: Unstable
+ * @include: libxfce4windowingui/libxfce4windowingui.h
+ *
+ * #XfwWindowActionMenu is a #GtkMenu that contains actions that can be
+ * performed on a toplevel window, such as minimizing, maximizing, pinning,
+ * and moving to another workspace.
+ **/
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -92,6 +104,11 @@ xfw_window_action_menu_class_init(XfwWindowActionMenuClass *klass) {
     gklass->get_property = xfw_window_action_menu_get_property;
     gklass->finalize = xfw_window_action_menu_finalize;
 
+    /**
+     * XfwWindowActionMenu:window:
+     *
+     * The #XfwWindow instance used to create the action menu.
+     **/
     g_object_class_install_property(gklass,
                                     PROP_WINDOW,
                                     g_param_spec_object("window",
@@ -460,6 +477,15 @@ window_workspace_changed(XfwWindow *window, XfwWindowActionMenu *menu) {
     update_menu_items(menu);
 }
 
+/**
+ * xfw_window_action_menu_new: (constructor)
+ * @window: (not nullable) (transfer none): an #XfwWindow.
+ *
+ * Creates a new window action menu that acts on @window.
+ *
+ * Return value: (not nullable) (transfer full): a new #XfwWindowActionMenu
+ * instance, with a floating reference owned by the caller.
+ **/
 GtkWidget *
 xfw_window_action_menu_new(XfwWindow *window) {
     return g_object_new(XFW_TYPE_WINDOW_ACTION_MENU,

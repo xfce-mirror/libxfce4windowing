@@ -162,6 +162,7 @@ Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/libxfce4windowing/Makefile
+docs/reference/libxfce4windowingui/Makefile
 libxfce4windowing/Makefile
 libxfce4windowing/libxfce4windowing-0.pc
 libxfce4windowingui/Makefile

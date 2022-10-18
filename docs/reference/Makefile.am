@@ -1,2 +1,3 @@
 SUBDIRS = \
-	libxfce4windowing
+	libxfce4windowing \
+	libxfce4windowingui
