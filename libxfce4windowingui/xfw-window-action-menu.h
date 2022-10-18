@@ -25,13 +25,10 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WINDOW_ACTION_MENU    (xfw_window_action_menu_get_type())
-#define XFW_WINDOW_ACTION_MENU(obj)    (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WINDOW_ACTION_MENU, XfwWindowActionMenu))
-#define XFW_IS_WINDOW_ACTION_MENU(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WINDOW_ACTION_MENU))
+#define XFW_TYPE_WINDOW_ACTION_MENU (xfw_window_action_menu_get_type())
+G_DECLARE_FINAL_TYPE(XfwWindowActionMenu, xfw_window_action_menu, XFW, WINDOW_ACTION_MENU, GtkMenu)
 
-typedef struct _XfwWindowActionMenu XfwWindowActionMenu;
 typedef struct _XfwWindowActionMenuPrivate XfwWindowActionMenuPrivate;
-typedef struct _XfwWindowActionMenuClass XfwWindowActionMenuClass;
 
 struct _XfwWindowActionMenu {
     GtkMenu parent;
@@ -39,12 +36,6 @@ struct _XfwWindowActionMenu {
     /*< private >*/
     XfwWindowActionMenuPrivate *priv;
 };
-
-struct _XfwWindowActionMenuClass {
-    GtkMenuClass parent_class;
-};
-
-GType xfw_window_action_menu_get_type(void) G_GNUC_CONST;
 
 GtkWidget *xfw_window_action_menu_new(XfwWindow *window);
 

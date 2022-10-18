@@ -29,25 +29,16 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_X11           (xfw_workspace_x11_get_type())
-#define XFW_WORKSPACE_X11(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_X11, XfwWorkspaceX11))
-#define XFW_IS_WORKSPACE_X11(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_X11))
+#define XFW_TYPE_WORKSPACE_X11 (xfw_workspace_x11_get_type())
+G_DECLARE_FINAL_TYPE(XfwWorkspaceX11, xfw_workspace_x11, XFW, WORKSPACE_X11, GObject)
 
-typedef struct _XfwWorkspaceX11 XfwWorkspaceX11;
 typedef struct _XfwWorkspaceX11Private XfwWorkspaceX11Private;
-typedef struct _XfwWorkspaceX11Class XfwWorkspaceX11Class;
 
 struct _XfwWorkspaceX11 {
     GObject parent;
     /*< private >*/
     XfwWorkspaceX11Private *priv;
 };
-
-struct _XfwWorkspaceX11Class {
-    GObjectClass parent_class;
-};
-
-GType xfw_workspace_x11_get_type(void) G_GNUC_CONST;
 
 WnckWorkspace *_xfw_workspace_x11_get_wnck_workspace(XfwWorkspaceX11 *workspace);
 

@@ -28,24 +28,15 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_DUMMY           (xfw_workspace_dummy_get_type())
-#define XFW_WORKSPACE_DUMMY(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_DUMMY, XfwWorkspaceDummy))
-#define XFW_IS_WORKSPACE_DUMMY(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_DUMMY))
+#define XFW_TYPE_WORKSPACE_DUMMY (xfw_workspace_dummy_get_type())
+G_DECLARE_FINAL_TYPE(XfwWorkspaceDummy, xfw_workspace_dummy, XFW, WORKSPACE_DUMMY, GObject)
 
-typedef struct _XfwWorkspaceDummy XfwWorkspaceDummy;
 typedef struct _XfwWorkspaceDummyPrivate XfwWorkspaceDummyPrivate;
-typedef struct _XfwWorkspaceDummyClass XfwWorkspaceDummyClass;
 
 struct _XfwWorkspaceDummy {
     GObject parent;
     /*< private >*/
     XfwWorkspaceDummyPrivate *priv;
 };
-
-struct _XfwWorkspaceDummyClass {
-    GObjectClass parent_class;
-};
-
-GType xfw_workspace_dummy_get_type(void) G_GNUC_CONST;
 
 #endif  /* __XFW_WORKSPACE_DUMMY_H__ */
