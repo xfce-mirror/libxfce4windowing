@@ -30,28 +30,16 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_WAYLAND           (xfw_workspace_wayland_get_type())
-#define XFW_WORKSPACE_WAYLAND(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_WAYLAND, XfwWorkspaceWayland))
-#define XFW_IS_WORKSPACE_WAYLAND(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_WAYLAND))
+#define XFW_TYPE_WORKSPACE_WAYLAND (xfw_workspace_wayland_get_type())
+G_DECLARE_FINAL_TYPE(XfwWorkspaceWayland, xfw_workspace_wayland, XFW, WORKSPACE_WAYLAND, GObject)
 
-typedef struct _XfwWorkspaceWayland XfwWorkspaceWayland;
 typedef struct _XfwWorkspaceWaylandPrivate XfwWorkspaceWaylandPrivate;
-typedef struct _XfwWorkspaceWaylandClass XfwWorkspaceWaylandClass;
 
 struct _XfwWorkspaceWayland {
     GObject parent;
     /*< private >*/
     XfwWorkspaceWaylandPrivate *priv;
 };
-
-struct _XfwWorkspaceWaylandClass {
-    GObjectClass parent_class;
-
-    /* Signals */
-    void (*destroyed)(XfwWorkspaceWayland *workspace);
-};
-
-GType xfw_workspace_wayland_get_type(void) G_GNUC_CONST;
 
 struct ext_workspace_handle_v1 *_xfw_workspace_wayland_get_handle(XfwWorkspaceWayland *workspace);
 void _xfw_workspace_wayland_set_number(XfwWorkspaceWayland *workspace, guint number);
