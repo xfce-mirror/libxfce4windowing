@@ -17,9 +17,9 @@ MKDB_OPTIONS = --xml-mode --output-format=xml
 # Extra options to supply to gtkdoc-fixref
 FIXXREF_OPTIONS = \
 	--extra-dir=$(top_builddir)/docs/reference/libxfce4windowing/html \
-	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/gobject \
 	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/glib \
-	--extra-dir=$(GTK_PREFIX)/share/gtk-doc/html/gdk3 \
+	--extra-dir=$(GOBJECT_PREFIX)/share/gtk-doc/html/gobject \
+	--extra-dir=$(GDK_PREFIX)/share/gtk-doc/html/gdk3 \
 	--extra-dir=$(GTK_PREFIX)/share/gtk-doc/html/gtk3
 
 # Used for dependencies

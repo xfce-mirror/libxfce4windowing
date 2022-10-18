@@ -23,6 +23,7 @@ m4_define([libxfce4windowing_version], [libxfce4windowing_version_major().libxfc
 dnl minimum required versions
 m4_define([glib_minimum_version], [2.74.0])
 m4_define([gtk_minimum_version], [3.22.0])
+m4_define([gdk_pixbuf_minimum_version], [2.36.12])
 m4_define([wnck_minimum_version], [3.14])
 m4_define([intltool_minimum_version], [0.31])
 
@@ -80,7 +81,20 @@ XDT_CHECK_PACKAGE([GLIB], [glib-2.0], [glib_minimum_version])
 XDT_CHECK_PACKAGE([GOBJECT], [gobject-2.0], [glib_minimum_version])
 XDT_CHECK_PACKAGE([GIO_UNIX], [gio-unix-2.0], [glib_minimum_version])
 XDT_CHECK_PACKAGE([GDK], [gdk-3.0], [gtk_minimum_version])
+XDT_CHECK_PACKAGE([GDK_PIXBUF], [gdk-pixbuf-2.0], [gdk_pixbuf_minimum_version])
 XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [gtk_minimum_version])
+
+GLIB_PREFIX="`pkg-config --variable=prefix glib-2.0`"
+GOBJECT_PREFIX="`pkg-config --variable=prefix gobject-2.0`"
+GDK_PREFIX="`pkg-config --variable=prefix gdk-3.0`"
+GDK_PIXBUF_PREFIX="`pkg-config --variable=prefix gdk-pixbuf-2.0`"
+GTK_PREFIX="`pkg-config --variable=prefix gtk-3.0`"
+
+AC_SUBST([GLIB_PREFIX])
+AC_SUBST([GOBJECT_PREFIX])
+AC_SUBST([GDK_PREFIX])
+AC_SUBST([GDK_PIXBUF_PREFIX])
+AC_SUBST([GTK_PREFIX])
 
 XDT_CHECK_OPTIONAL_PACKAGE([GDK_X11], [gdk-x11-3.0], [gtk_minimum_version],
                            [gdk-x11], [X11 backend for GDK])
