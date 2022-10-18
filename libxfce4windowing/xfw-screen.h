@@ -31,15 +31,12 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_SCREEN           (xfw_screen_get_type())
-#define XFW_SCREEN(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_SCREEN, XfwScreen))
-#define XFW_IS_SCREEN(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_SCREEN))
-#define XFW_SCREEN_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE((obj), XFW_TYPE_SCREEN, XfwScreenIface))
+#define XFW_TYPE_SCREEN (xfw_screen_get_type())
+G_DECLARE_INTERFACE(XfwScreen, xfw_screen, XFW, SCREEN, GObject)
 
-typedef struct _XfwScreen XfwScreen;
-typedef struct _XfwScreenIface XfwScreenIface;
+typedef struct _XfwScreenInterface XfwScreenIface;
 
-struct _XfwScreenIface {
+struct _XfwScreenInterface {
     /*< private >*/
     GTypeInterface g_iface;
 
@@ -61,8 +58,6 @@ struct _XfwScreenIface {
 
     void (*set_show_desktop)(XfwScreen *screen, gboolean show);
 };
-
-GType xfw_screen_get_type(void) G_GNUC_CONST;
 
 XfwScreen *xfw_screen_get_default(void);
 

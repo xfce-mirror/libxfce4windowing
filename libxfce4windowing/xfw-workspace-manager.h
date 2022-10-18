@@ -31,17 +31,12 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_MANAGER           (xfw_workspace_manager_get_type())
-#define XFW_WORKSPACE_MANAGER(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_MANAGER, XfwWorkspaceManager))
-#define XFW_IS_WORKSPACE_MANAGER(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_MANAGER))
-#define XFW_WORKSPACE_MANAGER_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE((obj), XFW_TYPE_WORKSPACE_MANAGER, XfwWorkspaceManagerIface))
+#define XFW_TYPE_WORKSPACE_MANAGER (xfw_workspace_manager_get_type())
+G_DECLARE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, XFW, WORKSPACE_MANAGER, GObject)
 
-typedef struct _XfwWorkspaceManager XfwWorkspaceManager;
-typedef struct _XfwWorkspaceManagerIface XfwWorkspaceManagerIface;
+typedef struct _XfwWorkspaceManagerInterface XfwWorkspaceManagerIface;
 
-GType xfw_workspace_manager_get_type() G_GNUC_CONST;
-
-struct _XfwWorkspaceManagerIface {
+struct _XfwWorkspaceManagerInterface {
     /*< private >*/
     GTypeInterface g_iface;
 

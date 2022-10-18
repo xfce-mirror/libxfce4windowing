@@ -51,7 +51,6 @@
 
 #define GDK_SCREEN_XFW_SCREEN_KEY "libxfce4windowing-xfw-screen"
 
-typedef struct _XfwScreenIface XfwScreenInterface;
 G_DEFINE_INTERFACE(XfwScreen, xfw_screen, G_TYPE_OBJECT)
 
 static void
