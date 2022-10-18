@@ -55,6 +55,14 @@ struct _XfwApplicationInterface {
     XfwApplicationInstance *(*get_instance)(XfwApplication *app, XfwWindow *window);
 };
 
+/**
+ * XfwApplicationInstance:
+ * @pid: the process ID.
+ * @name: the instance name, which can often be the same as the application name.
+ * @windows: the list of #XfwWindow belonging to the instance.
+ *
+ * A structure representing an instance of an #XfwApplication.
+ **/
 struct _XfwApplicationInstance {
     gint pid;
     gchar *name;

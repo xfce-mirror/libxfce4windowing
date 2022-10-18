@@ -111,3 +111,15 @@ xfw_window_is_urgent
 xfw_window_is_on_workspace
 xfw_window_is_in_viewport
 </SECTION>
+
+<SECTION>
+<FILE>xfw-application</FILE>
+XfwApplication
+XfwApplicationInstance
+xfw_application_get_id
+xfw_application_get_name
+xfw_application_get_icon
+xfw_application_get_windows
+xfw_application_get_instances
+xfw_application_get_instance
+</SECTION>

@@ -17,6 +17,22 @@
  * MA 02110-1301 USA
  */
 
+/**
+ * SECTION:xfw-application
+ * @title: XfwApplication
+ * @short_description: An object representing a desktop application
+ * @stability: Unstable
+ * @include: libxfce4windowing/libxfce4windowing.h
+ *
+ * #XfwApplication represents an application in the common or abstract sense,
+ * i.e. it can have several windows belonging to different instances, identified
+ * by their process ID.
+ *
+ * Note that #XfwApplication is actually an interface; when obtaining an
+ * instance, an instance of a windowing-environment-specific object that
+ * implements this interface will be returned.
+ **/
+
 #include "config.h"
 
 #include "libxfce4windowing-private.h"
@@ -26,6 +42,12 @@ G_DEFINE_INTERFACE(XfwApplication, xfw_application, G_TYPE_OBJECT)
 
 static void
 xfw_application_default_init(XfwApplicationIface *iface) {
+    /**
+     * XfwApplication::icon-changed:
+     * @app: the object which received the signal.
+     *
+     * Emitted when @app's icon changes.
+     **/
     g_signal_new("icon-changed",
                  XFW_TYPE_APPLICATION,
                  G_SIGNAL_RUN_LAST,
@@ -34,23 +56,46 @@ xfw_application_default_init(XfwApplicationIface *iface) {
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
 
+    /**
+     * XfwApplication:id:
+     *
+     * The #XfwWindow:id of the first window in #XfwApplication:windows.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_uint64("id",
                                                             "id",
                                                             "id",
                                                             0, G_MAXUINT64, 0,
                                                             G_PARAM_READABLE));
+
+    /**
+     * XfwApplication:name:
+     *
+     * The application name.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_string("name",
                                                             "name",
                                                             "name",
                                                             NULL,
                                                             G_PARAM_READABLE));
+
+    /**
+     * XfwApplication:windows:
+     *
+     * The list of #XfwWindow belonging to the application.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_pointer("windows",
                                                              "windows",
                                                              "windows",
                                                              G_PARAM_READABLE));
+
+    /**
+     * XfwApplication:instances:
+     *
+     * The list of #XfwApplicationInstance belonging to the application.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_pointer("instances",
                                                              "instances",
@@ -58,6 +103,15 @@ xfw_application_default_init(XfwApplicationIface *iface) {
                                                              G_PARAM_READABLE));
 }
 
+/**
+ * xfw_application_get_id:
+ * @app: an #XfwApplication.
+ *
+ * Fetches this application's ID, which is the #XfwWindow:id of the first window
+ * in #XfwApplication:windows.
+ *
+ * Return value: A unique integer identifying the application.
+ **/
 guint64
 xfw_application_get_id(XfwApplication *app) {
     XfwApplicationIface *iface;
@@ -66,6 +120,15 @@ xfw_application_get_id(XfwApplication *app) {
     return (*iface->get_id)(app);
 }
 
+/**
+ * xfw_application_get_name:
+ * @app: an #XfwApplication.
+ *
+ * Fetches this application's human-readable name.
+ *
+ * Return value: (not nullable) (transfer none): A UTF-8 formatted string,
+ * owned by @app.
+ **/
 const gchar *
 xfw_application_get_name(XfwApplication *app) {
     XfwApplicationIface *iface;
@@ -74,6 +137,21 @@ xfw_application_get_name(XfwApplication *app) {
     return (*iface->get_name)(app);
 }
 
+/**
+ * xfw_application_get_icon:
+ * @app: an #XfwApplication.
+ * @size: the desired icon size.
+ *
+ * Fetches this application's icon. Depending on the windowing environment,
+ * different methods are used to find an icon for @app, but they may fail and
+ * this function returns %NULL.
+ *
+ * The resulting icon will have a size based on @size but will not be exactly
+ * that size in general, especially on X11.
+ *
+ * Return value: (nullable) (transfer none): The icon owned by @app or %NULL if
+ * none could be found.
+ **/
 GdkPixbuf *
 xfw_application_get_icon(XfwApplication *app, gint size) {
     XfwApplicationIface *iface;
@@ -82,6 +160,16 @@ xfw_application_get_icon(XfwApplication *app, gint size) {
     return (*iface->get_icon)(app, size);
 }
 
+/**
+ * xfw_application_get_windows:
+ * @app: an #XfwApplication.
+ *
+ * Lists all windows belonging to the application.
+ *
+ * Return value: (not nullable) (element-type XfwWindow) (transfer none):
+ * The list of #XfwWindow belonging to @app. The list and its contents are owned
+ * by @app.
+ **/
 GList *
 xfw_application_get_windows(XfwApplication *app) {
     XfwApplicationIface *iface;
@@ -90,6 +178,17 @@ xfw_application_get_windows(XfwApplication *app) {
     return (*iface->get_windows)(app);
 }
 
+/**
+ * xfw_application_get_instances:
+ * @app: an #XfwApplication.
+ *
+ * Lists all instances of the application.
+ *
+ * Return value: (nullable) (element-type XfwApplicationInstance) (transfer none):
+ * The list of #XfwApplicationInstance of @app, or %NULL if listing instances is
+ * not supported on the windowing environment in use. The list and its contents
+ * are owned by @app.
+ **/
 GList *
 xfw_application_get_instances(XfwApplication *app) {
     XfwApplicationIface *iface;
@@ -98,6 +197,19 @@ xfw_application_get_instances(XfwApplication *app) {
     return (*iface->get_instances)(app);
 }
 
+/**
+ * xfw_application_get_instance:
+ * @app: an #XfwApplication.
+ * @window: the application window you want to get the instance of.
+ *
+ * Finds the #XfwApplicationInstance to which @window belongs.
+ *
+ * Return value: (nullable) (transfer none):
+ * The #XfwApplicationInstance to which @window belongs, or %NULL if @window
+ * does not belong to @app, or if listing instances is not supported on the
+ * windowing environment in use. The returned #XfwApplicationInstance is owned
+ * by @app.
+ **/
 XfwApplicationInstance *
 xfw_application_get_instance(XfwApplication *app, XfwWindow *window) {
     XfwApplicationIface *iface;

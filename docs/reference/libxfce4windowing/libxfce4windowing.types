@@ -7,3 +7,4 @@
  xfw_workspace_group_get_type
  xfw_workspace_manager_get_type
  xfw_workspace_state_get_type
+ xfw_application_get_type
