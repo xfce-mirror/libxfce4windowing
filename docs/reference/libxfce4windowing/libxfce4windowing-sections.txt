@@ -11,29 +11,42 @@ xfw_windowing_error_trap_push
 xfw_windowing_error_trap_pop
 xfw_windowing_error_trap_pop_ignored
 xfw_g_desktop_app_info_get
+<SUBSECTION Standard>
+xfw_direction_get_type
+xfw_error_quark
 </SECTION>
 
 <SECTION>
 <FILE>xfw-screen</FILE>
 XfwScreen
+XfwScreenIface
 xfw_screen_get_default
 xfw_screen_get_workspace_manager
 xfw_screen_get_windows
 xfw_screen_get_windows_stacked
 xfw_screen_get_active_window
 xfw_screen_get_show_desktop
+xfw_screen_set_show_desktop
+<SUBSECTION Standard>
+XfwScreenInterface
+XFW_TYPE_SCREEN
 </SECTION>
 
 <SECTION>
 <FILE>xfw-workspace-manager</FILE>
 XfwWorkspaceManager
+XfwWorkspaceManagerIface
 xfw_workspace_manager_list_workspace_groups
+<SUBSECTION Standard>
+XfwWorkspaceManagerInterface
+XFW_TYPE_WORKSPACE_MANAGER
 </SECTION>
 
 <SECTION>
 <FILE>xfw-workspace-group</FILE>
 XfwWorkspaceGroup
 XfwWorkspaceGroupCapabilities
+XfwWorkspaceGroupIface
 xfw_workspace_group_get_capabilities
 xfw_workspace_group_get_workspace_count
 xfw_workspace_group_list_workspaces
@@ -43,6 +56,11 @@ xfw_workspace_group_get_workspace_manager
 xfw_workspace_group_create_workspace
 xfw_workspace_group_move_viewport
 xfw_workspace_group_set_layout
+<SUBSECTION Standard>
+XfwWorkspaceGroupInterface
+XFW_TYPE_WORKSPACE_GROUP
+XFW_TYPE_WORKSPACE_GROUP_CAPABILITIES
+xfw_workspace_group_capabilities_get_type
 </SECTION>
 
 <SECTION>
@@ -50,6 +68,7 @@ xfw_workspace_group_set_layout
 XfwWorkspace
 XfwWorkspaceCapabilities
 XfwWorkspaceState
+XfwWorkspaceIface
 xfw_workspace_get_id
 xfw_workspace_get_name
 xfw_workspace_get_capabilities
@@ -62,6 +81,13 @@ xfw_workspace_get_neighbor
 xfw_workspace_get_geometry
 xfw_workspace_activate
 xfw_workspace_remove
+<SUBSECTION Standard>
+XfwWorkspaceInterface
+XFW_TYPE_WORKSPACE
+XFW_TYPE_WORKSPACE_CAPABILITIES
+XFW_TYPE_WORKSPACE_STATE
+xfw_workspace_capabilities_get_type
+xfw_workspace_state_get_type
 </SECTION>
 
 <SECTION>
@@ -70,6 +96,7 @@ XfwWindow
 XfwWindowCapabilities
 XfwWindowState
 XfwWindowType
+XfwWindowIface
 xfw_window_get_id
 xfw_window_get_name
 xfw_window_get_icon
@@ -110,16 +137,29 @@ xfw_window_is_below
 xfw_window_is_urgent
 xfw_window_is_on_workspace
 xfw_window_is_in_viewport
+<SUBSECTION Standard>
+XfwWindowInterface
+XFW_TYPE_WINDOW
+XFW_TYPE_WINDOW_CAPABILITIES
+XFW_TYPE_WINDOW_STATE
+XFW_TYPE_WINDOW_TYPE
+xfw_window_capabilities_get_type
+xfw_window_state_get_type
+xfw_window_type_get_type
 </SECTION>
 
 <SECTION>
 <FILE>xfw-application</FILE>
 XfwApplication
 XfwApplicationInstance
+XfwApplicationIface
 xfw_application_get_id
 xfw_application_get_name
 xfw_application_get_icon
 xfw_application_get_windows
 xfw_application_get_instances
 xfw_application_get_instance
+<SUBSECTION Standard>
+XfwApplicationInterface
+XFW_TYPE_APPLICATION
 </SECTION>

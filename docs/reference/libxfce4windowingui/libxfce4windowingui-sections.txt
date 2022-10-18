@@ -5,7 +5,9 @@
 <SECTION>
 <FILE>xfw-window-action-menu</FILE>
 <TITLE>XfwWindowActionMenu</TITLE>
+XfwWindowActionMenu
 xfw_window_action_menu_new
 <SUBSECTION Standard>
-XfwWindowActionMenu
+XFW_TYPE_WINDOW_ACTION_MENU
+XfwWindowActionMenuPrivate
 </SECTION>
