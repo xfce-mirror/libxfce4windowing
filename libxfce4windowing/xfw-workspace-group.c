@@ -47,7 +47,6 @@
 #include "xfw-workspace-group.h"
 #include "xfw-workspace-manager.h"
 
-typedef struct _XfwWorkspaceGroupIface XfwWorkspaceGroupInterface;
 G_DEFINE_INTERFACE(XfwWorkspaceGroup, xfw_workspace_group, G_TYPE_OBJECT)
 
 G_DEFINE_FLAGS_TYPE(XfwWorkspaceGroupCapabilities, xfw_workspace_group_capabilities,

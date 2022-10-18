@@ -39,7 +39,6 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-manager.h"
 
-typedef struct _XfwWorkspaceManagerIface XfwWorkspaceManagerInterface;
 G_DEFINE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, G_TYPE_OBJECT)
 
 static void
