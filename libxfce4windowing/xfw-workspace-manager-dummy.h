@@ -30,13 +30,10 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_MANAGER_DUMMY    (xfw_workspace_manager_dummy_get_type())
-#define XFW_WORKSPACE_MANAGER_DUMMY(obj)    (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_MANAGER_DUMMY, XfwWorkspaceManagerDummy))
-#define XFW_IS_WORKSPACE_MANAGER_DUMMY(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_MANAGER_DUMMY))
+#define XFW_TYPE_WORKSPACE_MANAGER_DUMMY (xfw_workspace_manager_dummy_get_type())
+G_DECLARE_FINAL_TYPE(XfwWorkspaceManagerDummy, xfw_workspace_manager_dummy, XFW, WORKSPACE_MANAGER_DUMMY, GObject)
 
-typedef struct _XfwWorkspaceManagerDummy XfwWorkspaceManagerDummy;
 typedef struct _XfwWorkspaceManagerDummyPrivate XfwWorkspaceManagerDummyPrivate;
-typedef struct _XfwWorkspaceManagerDummyClass XfwWorkspaceManagerDummyClass;
 
 struct _XfwWorkspaceManagerDummy {
     GObject parent;
@@ -44,12 +41,6 @@ struct _XfwWorkspaceManagerDummy {
     /*< private >*/
     XfwWorkspaceManagerDummyPrivate *priv;
 };
-
-struct _XfwWorkspaceManagerDummyClass {
-    GObjectClass parent_class;
-};
-
-GType xfw_workspace_manager_dummy_get_type() G_GNUC_CONST;
 
 XfwWorkspaceManager *_xfw_workspace_manager_dummy_new(GdkScreen *screen);
 

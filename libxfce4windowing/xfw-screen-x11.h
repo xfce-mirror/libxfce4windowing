@@ -31,25 +31,16 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_SCREEN_X11           (xfw_screen_x11_get_type())
-#define XFW_SCREEN_X11(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_SCREEN_X11, XfwScreenX11))
-#define XFW_IS_SCREEN_X11(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_SCREEN_X11))
+#define XFW_TYPE_SCREEN_X11 (xfw_screen_x11_get_type())
+G_DECLARE_FINAL_TYPE(XfwScreenX11, xfw_screen_x11, XFW, SCREEN_X11, GObject)
 
-typedef struct _XfwScreenX11 XfwScreenX11;
 typedef struct _XfwScreenX11Private XfwScreenX11Private;
-typedef struct _XfwScreenX11Class XfwScreenX11Class;
 
 struct _XfwScreenX11 {
     GObject parent;
     /*< private >*/
     XfwScreenX11Private *priv;
 };
-
-struct _XfwScreenX11Class {
-    GObjectClass parent_class;
-};
-
-GType xfw_screen_x11_get_type(void) G_GNUC_CONST;
 
 XfwWorkspace *_xfw_screen_x11_workspace_for_wnck_workspace(XfwScreenX11 *screen, WnckWorkspace *wnck_workspace);
 
