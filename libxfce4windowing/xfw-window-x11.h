@@ -28,25 +28,16 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WINDOW_X11           (xfw_window_x11_get_type())
-#define XFW_WINDOW_X11(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WINDOW_X11, XfwWindowX11))
-#define XFW_IS_WINDOW_X11(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WINDOW_X11))
+#define XFW_TYPE_WINDOW_X11 (xfw_window_x11_get_type())
+G_DECLARE_FINAL_TYPE(XfwWindowX11, xfw_window_x11, XFW, WINDOW_X11, GObject)
 
-typedef struct _XfwWindowX11 XfwWindowX11;
 typedef struct _XfwWindowX11Private XfwWindowX11Private;
-typedef struct _XfwWindowX11Class XfwWindowX11Class;
 
 struct _XfwWindowX11 {
     GObject parent;
     /*< private >*/
     XfwWindowX11Private *priv;
 };
-
-struct _XfwWindowX11Class {
-    GObjectClass parent_class;
-};
-
-GType xfw_window_x11_get_type(void) G_GNUC_CONST;
 
 WnckWindow *_xfw_window_x11_get_wnck_window(XfwWindowX11 *window);
 

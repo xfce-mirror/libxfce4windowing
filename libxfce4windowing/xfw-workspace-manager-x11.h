@@ -32,23 +32,15 @@
 G_BEGIN_DECLS
 
 #define XFW_TYPE_WORKSPACE_MANAGER_X11 (xfw_workspace_manager_x11_get_type())
-#define XFW_WORKSPACE_MANAGER_X11(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_MANAGER_X11, XfwWorkspaceManagerX11))
+G_DECLARE_FINAL_TYPE(XfwWorkspaceManagerX11, xfw_workspace_manager_x11, XFW, WORKSPACE_MANAGER_X11, GObject)
 
-typedef struct _XfwWorkspaceManagerX11 XfwWorkspaceManagerX11;
 typedef struct _XfwWorkspaceManagerX11Private XfwWorkspaceManagerX11Private;
-typedef struct _XfwWorkspaceManagerX11Class XfwWorkspaceManagerX11Class;
 
 struct _XfwWorkspaceManagerX11 {
     GObject parent;
     /*< private >*/
     XfwWorkspaceManagerX11Private *priv;
 };
-
-struct _XfwWorkspaceManagerX11Class {
-    GObjectClass parent_class;
-};
-
-GType xfw_workspace_manager_x11_get_type() G_GNUC_CONST;
 
 XfwWorkspaceManager *_xfw_workspace_manager_x11_new(GdkScreen *screen);
 XfwWorkspace *_xfw_workspace_manager_x11_workspace_for_wnck_workspace(XfwWorkspaceManagerX11 *manager, WnckWorkspace *wnck_workspace);

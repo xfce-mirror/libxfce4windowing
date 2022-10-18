@@ -101,8 +101,7 @@ xfw_workspace_group_wayland_class_init(XfwWorkspaceGroupWaylandClass *klass) {
     group_signals[SIGNAL_DESTROYED] = g_signal_new("destroyed",
                                                    XFW_TYPE_WORKSPACE_GROUP_WAYLAND,
                                                    G_SIGNAL_RUN_LAST,
-                                                   G_STRUCT_OFFSET(XfwWorkspaceGroupWaylandClass, destroyed),
-                                                   NULL, NULL,
+                                                   0, NULL, NULL,
                                                    g_cclosure_marshal_VOID__VOID,
                                                    G_TYPE_NONE, 0);
 
