@@ -31,13 +31,10 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_GROUP_DUMMY           (xfw_workspace_group_dummy_get_type())
-#define XFW_WORKSPACE_GROUP_DUMMY(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_GROUP_DUMMY, XfwWorkspaceGroupDummy))
-#define XFW_IS_WORKSPACE_GROUP_DUMMY(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_GROUP_DUMMY))
+#define XFW_TYPE_WORKSPACE_GROUP_DUMMY (xfw_workspace_group_dummy_get_type())
+G_DECLARE_FINAL_TYPE(XfwWorkspaceGroupDummy, xfw_workspace_group_dummy, XFW, WORKSPACE_GROUP_DUMMY, GObject)
 
-typedef struct _XfwWorkspaceGroupDummy XfwWorkspaceGroupDummy;
 typedef struct _XfwWorkspaceGroupDummyPrivate XfwWorkspaceGroupDummyPrivate;
-typedef struct _XfwWorkspaceGroupDummyClass XfwWorkspaceGroupDummyClass;
 
 typedef gboolean (*XfwCreateWorkspaceFunc)(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 typedef gboolean (*XfwMoveViewportFunc)(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
@@ -48,12 +45,6 @@ struct _XfwWorkspaceGroupDummy {
     /*< private >*/
     XfwWorkspaceGroupDummyPrivate *priv;
 };
-
-struct _XfwWorkspaceGroupDummyClass {
-    GObjectClass parent_class;
-};
-
-GType xfw_workspace_group_dummy_get_type(void) G_GNUC_CONST;
 
 void _xfw_workspace_group_dummy_set_workspaces(XfwWorkspaceGroupDummy *group, GList *workspaces);
 void _xfw_workspace_group_dummy_set_active_workspace(XfwWorkspaceGroupDummy *group, XfwWorkspace *workspace);
