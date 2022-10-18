@@ -33,16 +33,13 @@ G_BEGIN_DECLS
 /* fwd decl */
 typedef struct _XfwWorkspaceGroup XfwWorkspaceGroup;
 
-#define XFW_TYPE_WORKSPACE           (xfw_workspace_get_type())
-#define XFW_WORKSPACE(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE, XfwWorkspace))
-#define XFW_IS_WORKSPACE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE))
-#define XFW_WORKSPACE_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE((obj), XFW_TYPE_WORKSPACE, XfwWorkspaceIface))
+#define XFW_TYPE_WORKSPACE (xfw_workspace_get_type())
+G_DECLARE_INTERFACE(XfwWorkspace, xfw_workspace, XFW, WORKSPACE, GObject)
 
 #define XFW_TYPE_WORKSPACE_CAPABILITIES (xfw_workspace_capabilities_get_type())
 #define XFW_TYPE_WORKSPACE_STATE        (xfw_workspace_state_get_type())
 
-typedef struct _XfwWorkspace XfwWorkspace;
-typedef struct _XfwWorkspaceIface XfwWorkspaceIface;
+typedef struct _XfwWorkspaceInterface XfwWorkspaceIface;
 
 /**
  * XfwWorkspaceCapabilities:
@@ -79,7 +76,7 @@ typedef enum {
     XFW_WORKSPACE_STATE_VIRTUAL = (1 << 3),
 } XfwWorkspaceState;
 
-struct _XfwWorkspaceIface {
+struct _XfwWorkspaceInterface {
     /*< private >*/
     GTypeInterface g_iface;
 
@@ -107,7 +104,6 @@ struct _XfwWorkspaceIface {
     gboolean (*remove)(XfwWorkspace *workspace, GError **error);
 };
 
-GType xfw_workspace_get_type(void) G_GNUC_CONST;
 GType xfw_workspace_capabilities_get_type(void) G_GNUC_CONST;
 GType xfw_workspace_state_get_type(void) G_GNUC_CONST;
 
