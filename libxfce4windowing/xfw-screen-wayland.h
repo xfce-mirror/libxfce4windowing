@@ -32,25 +32,16 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_SCREEN_WAYLAND           (xfw_screen_wayland_get_type())
-#define XFW_SCREEN_WAYLAND(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_SCREEN_WAYLAND, XfwScreenWayland))
-#define XFW_IS_SCREEN_WAYLAND(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_SCREEN_WAYLAND))
+#define XFW_TYPE_SCREEN_WAYLAND (xfw_screen_wayland_get_type())
+G_DECLARE_FINAL_TYPE(XfwScreenWayland, xfw_screen_wayland, XFW, SCREEN_WAYLAND, GObject)
 
-typedef struct _XfwScreenWayland XfwScreenWayland;
 typedef struct _XfwScreenWaylandPrivate XfwScreenWaylandPrivate;
-typedef struct _XfwScreenWaylandClass XfwScreenWaylandClass;
 
 struct _XfwScreenWayland {
     GObject parent;
     /*< private >*/
     XfwScreenWaylandPrivate *priv;
 };
-
-struct _XfwScreenWaylandClass {
-    GObjectClass parent_class;
-};
-
-GType xfw_screen_wayland_get_type(void) G_GNUC_CONST;
 
 GdkScreen *_xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen);
 struct wl_seat *_xfw_screen_wayland_get_wl_seat(XfwScreenWayland *screen);

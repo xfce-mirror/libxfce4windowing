@@ -30,25 +30,16 @@
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WINDOW_WAYLAND           (xfw_window_wayland_get_type())
-#define XFW_WINDOW_WAYLAND(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WINDOW_WAYLAND, XfwWindowWayland))
-#define XFW_IS_WINDOW_WAYLAND(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WINDOW_WAYLAND))
+#define XFW_TYPE_WINDOW_WAYLAND (xfw_window_wayland_get_type())
+G_DECLARE_FINAL_TYPE(XfwWindowWayland, xfw_window_wayland, XFW, WINDOW_WAYLAND, GObject)
 
-typedef struct _XfwWindowWayland XfwWindowWayland;
 typedef struct _XfwWindowWaylandPrivate XfwWindowWaylandPrivate;
-typedef struct _XfwWindowWaylandClass XfwWindowWaylandClass;
 
 struct _XfwWindowWayland {
     GObject parent;
     /*< private >*/
     XfwWindowWaylandPrivate *priv;
 };
-
-struct _XfwWindowWaylandClass {
-    GObjectClass parent_class;
-};
-
-GType xfw_window_wayland_get_type(void) G_GNUC_CONST;
 
 struct zwlr_foreign_toplevel_handle_v1 *_xfw_window_wayland_get_handle(XfwWindowWayland *window);
 

@@ -31,23 +31,15 @@
 G_BEGIN_DECLS
 
 #define XFW_TYPE_WORKSPACE_MANAGER_WAYLAND (xfw_workspace_manager_wayland_get_type())
-#define XFW_WORKSPACE_MANAGER_WAYLAND(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_MANAGER_WAYLAND, XfwWorkspaceManagerWayland))
+G_DECLARE_FINAL_TYPE(XfwWorkspaceManagerWayland, xfw_workspace_manager_wayland, XFW, WORKSPACE_MANAGER_WAYLAND, GObject)
 
-typedef struct _XfwWorkspaceManagerWayland XfwWorkspaceManagerWayland;
 typedef struct _XfwWorkspaceManagerWaylandPrivate XfwWorkspaceManagerWaylandPrivate;
-typedef struct _XfwWorkspaceManagerWaylandClass XfwWorkspaceManagerWaylandClass;
 
 struct _XfwWorkspaceManagerWayland {
     GObject parent;
     /*< private >*/
     XfwWorkspaceManagerWaylandPrivate *priv;
 };
-
-struct _XfwWorkspaceManagerWaylandClass {
-    GObjectClass parent_class;
-};
-
-GType xfw_workspace_manager_wayland_get_type() G_GNUC_CONST;
 
 XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(GdkScreen *screen);
 
