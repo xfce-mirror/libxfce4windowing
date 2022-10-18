@@ -15,7 +15,10 @@ DOC_SOURCE_DIR = $(top_srcdir)/libxfce4windowing
 MKDB_OPTIONS = --xml-mode --output-format=xml
 
 # Extra options to supply to gtkdoc-fixref
-FIXXREF_OPTIONS =
+FIXXREF_OPTIONS = \
+	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/gobject \
+	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/glib \
+	--extra-dir=$(GTK_PREFIX)/share/gtk-doc/html/gdk3
 
 # Used for dependencies
 HFILE_GLOB = $(top_srcdir)/libxfce4windowing/*.h

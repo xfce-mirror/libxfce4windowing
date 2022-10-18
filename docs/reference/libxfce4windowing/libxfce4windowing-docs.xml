@@ -21,7 +21,7 @@
     </copyright>
   </bookinfo>
 
-  <part id="libxfce4ui-introduction">
+  <part id="libxfce4windowing-introduction">
     <title>Introduction</title>
     <para>
       Libxfce4windowing abstracts over several windowing concepts between the X11 and Wayland display systems.

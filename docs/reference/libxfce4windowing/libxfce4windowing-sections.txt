@@ -5,10 +5,12 @@
 XFW_ERROR
 XfwErrorCode
 XfwWindowing
+XfwDirection
 xfw_windowing_get
 xfw_windowing_error_trap_push
 xfw_windowing_error_trap_pop
 xfw_windowing_error_trap_pop_ignored
+xfw_g_desktop_app_info_get
 </SECTION>
 
 <SECTION>
