@@ -34,15 +34,12 @@ typedef struct _XfwWorkspaceManager XfwWorkspaceManager;
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_WORKSPACE_GROUP           (xfw_workspace_group_get_type())
-#define XFW_WORKSPACE_GROUP(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WORKSPACE_GROUP, XfwWorkspaceGroup))
-#define XFW_IS_WORKSPACE_GROUP(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WORKSPACE_GROUP))
-#define XFW_WORKSPACE_GROUP_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE((obj), XFW_TYPE_WORKSPACE_GROUP, XfwWorkspaceGroupIface))
+#define XFW_TYPE_WORKSPACE_GROUP (xfw_workspace_group_get_type())
+G_DECLARE_INTERFACE(XfwWorkspaceGroup, xfw_workspace_group, XFW, WORKSPACE_GROUP, GObject)
 
 #define XFW_TYPE_WORKSPACE_GROUP_CAPABILITIES (xfw_workspace_group_capabilities_get_type())
 
-typedef struct _XfwWorkspaceGroup XfwWorkspaceGroup;
-typedef struct _XfwWorkspaceGroupIface XfwWorkspaceGroupIface;
+typedef struct _XfwWorkspaceGroupInterface XfwWorkspaceGroupIface;
 
 /**
  * XfwWorkspaceGroupCapabilities:
@@ -65,10 +62,9 @@ typedef enum {
     XFW_WORKSPACE_GROUP_CAPABILITIES_SET_LAYOUT = (1 << 2),
 } XfwWorkspaceGroupCapabilities;
 
-GType xfw_workspace_group_get_type(void) G_GNUC_CONST;
 GType xfw_workspace_group_capabilities_get_type(void) G_GNUC_CONST;
 
-struct _XfwWorkspaceGroupIface {
+struct _XfwWorkspaceGroupInterface {
     /*< private >*/
     GTypeInterface g_iface;
 
