@@ -34,17 +34,14 @@ G_BEGIN_DECLS
 /* fwd decl */
 typedef struct _XfwScreen XfwScreen;
 
-#define XFW_TYPE_WINDOW           (xfw_window_get_type())
-#define XFW_WINDOW(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), XFW_TYPE_WINDOW, XfwWindow))
-#define XFW_IS_WINDOW(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), XFW_TYPE_WINDOW))
-#define XFW_WINDOW_GET_IFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE((obj), XFW_TYPE_WINDOW, XfwWindowIface))
+#define XFW_TYPE_WINDOW (xfw_window_get_type())
+G_DECLARE_INTERFACE(XfwWindow, xfw_window, XFW, WINDOW, GObject)
 
 #define XFW_TYPE_WINDOW_TYPE         (xfw_window_type_get_type())
 #define XFW_TYPE_WINDOW_STATE        (xfw_window_state_get_type())
 #define XFW_TYPE_WINDOW_CAPABILITIES (xfw_window_capabilities_get_type())
 
-typedef struct _XfwWindow XfwWindow;
-typedef struct _XfwWindowIface XfwWindowIface;
+typedef struct _XfwWindowInterface XfwWindowIface;
 
 /**
  * XfwWindowState:
@@ -150,7 +147,7 @@ typedef enum {
   XFW_WINDOW_TYPE_SPLASHSCREEN = 7,
 } XfwWindowType;
 
-struct _XfwWindowIface {
+struct _XfwWindowInterface {
     /*< private >*/
     GTypeInterface g_iface;
 
@@ -201,7 +198,6 @@ struct _XfwWindowIface {
     gboolean (*is_in_viewport)(XfwWindow *window, XfwWorkspace *workspace);
 };
 
-GType xfw_window_get_type(void) G_GNUC_CONST;
 GType xfw_window_type_get_type(void) G_GNUC_CONST;
 GType xfw_window_state_get_type(void) G_GNUC_CONST;
 GType xfw_window_capabilities_get_type(void) G_GNUC_CONST;

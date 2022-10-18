@@ -49,7 +49,6 @@
 #include "xfw-screen.h"
 #include "xfw-window.h"
 
-typedef struct _XfwWindowIface XfwWindowInterface;
 G_DEFINE_INTERFACE(XfwWindow, xfw_window, G_TYPE_OBJECT)
 
 G_DEFINE_FLAGS_TYPE(XfwWindowState, xfw_window_state,
