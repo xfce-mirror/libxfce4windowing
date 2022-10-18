@@ -39,6 +39,7 @@
     <xi:include href="xml/xfw-workspace-manager.xml"/>
     <xi:include href="xml/xfw-workspace-group.xml"/>
     <xi:include href="xml/xfw-workspace.xml"/>
+    <xi:include href="xml/xfw-window.xml"/>
   </part>
 
   <index id="api-index-full">

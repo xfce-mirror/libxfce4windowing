@@ -46,6 +46,24 @@ typedef struct _XfwScreen XfwScreen;
 typedef struct _XfwWindow XfwWindow;
 typedef struct _XfwWindowIface XfwWindowIface;
 
+/**
+ * XfwWindowState:
+ * @XFW_WINDOW_STATE_NONE: window has no state bits set.
+ * @XFW_WINDOW_STATE_ACTIVE: window is active (and often has the keyboard
+ *                           focus).
+ * @XFW_WINDOW_STATE_MINIMIZED: window is minimized/hidden.
+ * @XFW_WINDOW_STATE_MAXIMIZED: window is maximized.
+ * @XFW_WINDOW_STATE_FULLSCREEN: window is filling the entire screen.
+ * @XFW_WINDOW_STATE_SKIP_PAGER: window should not be shown in pagers.
+ * @XFW_WINDOW_STATE_SKIP_TASKLIST: window should not be shown in task lists.
+ * @XFW_WINDOW_STATE_PINNED: window is shown on al workspaces.
+ * @XFW_WINDOW_STATE_SHADED: window is hidden, except for its title bar.
+ * @XFW_WINDOW_STATE_ABOVE: window is always shown above other windows.
+ * @XFW_WINDOW_STATE_BELOW: window is always shown below other windows.
+ * @XFW_WINDOW_STATE_URGENT: window is attempting to get the user's attention.
+ *
+ * A flags bitfield representing various states the window can hold.
+ **/
 typedef enum {
     XFW_WINDOW_STATE_NONE = 0,
     XFW_WINDOW_STATE_ACTIVE = (1 << 0),
@@ -61,6 +79,33 @@ typedef enum {
     XFW_WINDOW_STATE_URGENT = (1 << 10),
 } XfwWindowState;
 
+/**
+ * XfwWindowCapabilities:
+ * @XFW_WINDOW_CAPABILITIES_NONE: window has no capabilities.
+ * @XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE: window can be minimized/hidden.
+ * @XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE: window can be unminimized/unhidden.
+ * @XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE: window can be maximized.
+ * @XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE: window can be unmaximized/restored.
+ * @XFW_WINDOW_CAPABILITIES_CAN_FULLSCREEN: window can be set fullscreen.
+ * @XFW_WINDOW_CAPABILITIES_CAN_UNFULLSCREEN: window can be unset fullscreen.
+ * @XFW_WINDOW_CAPABILITIES_CAN_SHADE: window can be shaded.
+ * @XFW_WINDOW_CAPABILITIES_CAN_UNSHADE: window can be unshaded.
+ * @XFW_WINDOW_CAPABILITIES_CAN_MOVE: window can be moved.
+ * @XFW_WINDOW_CAPABILITIES_CAN_RESIZE: window can be resized.
+ * @XFW_WINDOW_CAPABILITIES_CAN_PLACE_ABOVE: window can be placed above others.
+ * @XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_ABOVE: always above window can be
+ *                                             returned to the normal stacking
+ *                                             order.
+ * @XFW_WINDOW_CAPABILITIES_CAN_PLACE_BELOW: window can be placed below others.
+ * @XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_BELOW: always below window can be
+ *                                             returned to the normal stacking
+ *                                             order.
+ * @XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE: window can be moved to a
+ *                                                different workspace or can be
+ *                                                pinned and unpinned.
+ *
+ * Flags bitfield that describes actions that can be taken on the window.
+ **/
 typedef enum {
     XFW_WINDOW_CAPABILITIES_NONE = 0,
     XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE = (1 << 0),
@@ -77,9 +122,23 @@ typedef enum {
     XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_ABOVE = (1 << 11),
     XFW_WINDOW_CAPABILITIES_CAN_PLACE_BELOW = (1 << 12),
     XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_BELOW = (1 << 13),
-    XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE = (1 << 14),  /* Includes pin/unpin */
+    XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE = (1 << 14),
 } XfwWindowCapabilities;
 
+/**
+ * XfwWindowType:
+ * @XFW_WINDOW_TYPE_NORMAL: window is a regular window.
+ * @XFW_WINDOW_TYPE_DESKTOP: window is responsible for drawing the desktop.
+ * @XFW_WINDOW_TYPE_DOCK: window is a dock or panel.
+ * @XFW_WINDOW_TYPE_DIALOG: window is a temporary dialog, like an error alert.
+ * @XFW_WINDOW_TYPE_TOOLBAR: window is a detached toolbar.
+ * @XFW_WINDOW_TYPE_MENU: window is a popup menu.
+ * @XFW_WINDOW_TYPE_UTILITY: window is a utility menu, like a tool picker or
+ *                           color palette.
+ * @XFW_WINDOW_TYPE_SPLASHSCREEN: window is an application splash screen.
+ *
+ * Enumeration describing the windows type or function.
+ **/
 typedef enum {
   XFW_WINDOW_TYPE_NORMAL = 0,
   XFW_WINDOW_TYPE_DESKTOP = 1,

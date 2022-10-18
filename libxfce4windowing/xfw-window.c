@@ -17,6 +17,28 @@
  * MA 02110-1301 USA
  */
 
+/**
+ * SECTION:xfw-window
+ * @title: XfwWindow
+ * @short_description: A representation of a toplevel window
+ * @stability: Unstable
+ * @include: libxfce4windowing/libxfce4windowing.h
+ *
+ * #XfwWindow describes a toplevel window on the screen, and provides
+ * access to the window's state, type, and actions that can be performed
+ * on it.
+ *
+ * Other metadata, like the window's title or icon, is also available.
+ *
+ * If the window supports it, actions can be taken, like minimizing,
+ * maximizing, pinning, moving between workspaces, or closing the
+ * window.
+ *
+ * Note that #XfwWindow is actually an interface; when obtaining an instance,
+ * an instance of a windowing-environment-specific object that implements this
+ * interface will be returned.
+ **/
+
 #include "config.h"
 
 #include <limits.h>
@@ -74,6 +96,12 @@ G_DEFINE_ENUM_TYPE(XfwWindowType, xfw_window_type,
 
 static void
 xfw_window_default_init(XfwWindowIface *iface) {
+    /**
+     * XfwWindow::name-changed:
+     * @window: the object which received the signal.
+     *
+     * Emitted when @window's name/title changes.
+     **/
     g_signal_new("name-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -81,6 +109,13 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+
+    /**
+     * XfwWindow::icon-changed:
+     * @window: the object which received the signal.
+     *
+     * Emitted when @window's icon changes.
+     **/
     g_signal_new("icon-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -88,6 +123,14 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+
+    /**
+     * XfwWindow::type-changed:
+     * @window: the object which received the signal.
+     * @old_type: the previous window type.
+     *
+     * Emitted when @window's type changes.
+     **/
     g_signal_new("type-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -96,6 +139,15 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  g_cclosure_marshal_VOID__ENUM,
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WINDOW_TYPE);
+
+    /**
+     * XfwWindow::state-changed:
+     * @window: the object which received the signal.
+     * @changed_mask: bitfield representing which state bits have changed.
+     * @new_state: the new state bitfield.
+     *
+     * Emitted when @window's state changes.
+     **/
     g_signal_new("state-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -105,6 +157,15 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  G_TYPE_NONE, 2,
                  XFW_TYPE_WINDOW_STATE,
                  XFW_TYPE_WINDOW_STATE);
+
+    /**
+     * XfwWindow::capabilities-changed:
+     * @window: the object which received the signal.
+     * @changed_mask: bitfield representing which state bits have changed.
+     * @new_state: the new state bitfield.
+     *
+     * Emitted when @window's capabilities change.
+     **/
     g_signal_new("capabilities-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -114,6 +175,13 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  G_TYPE_NONE, 2,
                  XFW_TYPE_WINDOW_CAPABILITIES,
                  XFW_TYPE_WINDOW_CAPABILITIES);
+
+    /**
+     * XfwWindow::geometry-changed:
+     * @window: the object which received the signal.
+     *
+     * Emitted when @window's position or size changes.
+     **/
     g_signal_new("geometry-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -121,6 +189,13 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+
+    /**
+     * XfwWindow::workspace-changed:
+     * @window: the object which received the signal.
+     *
+     * Emitted when @window is moved to a different worksapce.
+     **/
     g_signal_new("workspace-changed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -128,6 +203,13 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+
+    /**
+     * XfwWindow::closed:
+     * @window: the object which received the signal.
+     *
+     * Emitted when @window is closed.
+     **/
     g_signal_new("closed",
                  XFW_TYPE_WINDOW,
                  G_SIGNAL_RUN_LAST,
@@ -136,24 +218,47 @@ xfw_window_default_init(XfwWindowIface *iface) {
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
 
+    /**
+     * XfwWindow:screen:
+     *
+     * The #XfwScreen instances that owns this window.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("screen",
                                                             "screen",
                                                             "screen",
                                                             XFW_TYPE_SCREEN,
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    /**
+     * XfwWindow:id:
+     *
+     * A windowing-platform dependent window ID.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_uint64("id",
                                                             "id",
                                                             "id",
                                                             0, UINT64_MAX, 0,
                                                             G_PARAM_READABLE));
+
+    /**
+     * XfwWindow:name:
+     *
+     * The window's name or title.
+     */
     g_object_interface_install_property(iface,
                                         g_param_spec_string("name",
                                                             "name",
                                                             "name",
                                                             "",
                                                             G_PARAM_READABLE));
+
+    /**
+     * XfwWindow:type
+     *
+     * The window's type or function.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_enum("type",
                                                           "type",
@@ -161,6 +266,12 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                           XFW_TYPE_WINDOW_TYPE,
                                                           XFW_WINDOW_TYPE_NORMAL,
                                                           G_PARAM_READABLE));
+
+    /**
+     * XfwWindow:state:
+     *
+     * The window's state bitfield.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_flags("state",
                                                            "state",
@@ -168,6 +279,12 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                            XFW_TYPE_WINDOW_STATE,
                                                            XFW_WINDOW_STATE_NONE,
                                                            G_PARAM_READABLE));
+
+    /**
+     * XfwWindow:capabilities:
+     *
+     * The window's capabilities bitfield.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_flags("capabilities",
                                                            "capabilities",
@@ -175,17 +292,36 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                            XFW_TYPE_WINDOW_CAPABILITIES,
                                                            XFW_WINDOW_CAPABILITIES_NONE,
                                                            G_PARAM_READABLE));
+
+    /**
+     * XfwWindow:wokspace:
+     *
+     * The workspace the window is shown on.  May be %NULL if the window is not
+     * on a workspace, or is pinned to all workspaces.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("workspace",
                                                             "workspace",
                                                             "workspace",
                                                             XFW_TYPE_WORKSPACE,
                                                             G_PARAM_READABLE));
+
+    /**
+     * XfwWindow:monitors:
+     *
+     * The list of monitors (if any) that the window is displayed on.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_pointer("monitors",
                                                              "monitors",
                                                              "monitors",
                                                              G_PARAM_READABLE));
+
+    /**
+     * XfwWindow:application:
+     *
+     * The #XfwApplication that owns this window.
+     **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("application",
                                                             "application",
@@ -194,6 +330,14 @@ xfw_window_default_init(XfwWindowIface *iface) {
                                                             G_PARAM_READABLE));
 }
 
+/**
+ * xfw_window_get_id:
+ * @window: an #XfwWindow.
+ *
+ * Fetches the windowing-platform dependent window ID.
+ *
+ * Return value: a 64-bit unsigned integer.
+ **/
 guint64
 xfw_window_get_id(XfwWindow *window) {
     XfwWindowIface *iface;
@@ -202,6 +346,15 @@ xfw_window_get_id(XfwWindow *window) {
     return (*iface->get_id)(window);
 }
 
+/**
+ * xfw_window_get_name:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's name/title.
+ *
+ * Return value: (nullable) (transfer none): a window title, or %NULL if there
+ * is no title.  The returned title should not be modified or freed.
+ **/
 const gchar *
 xfw_window_get_name(XfwWindow *window) {
     XfwWindowIface *iface;
@@ -210,6 +363,15 @@ xfw_window_get_name(XfwWindow *window) {
     return (*iface->get_name)(window);
 }
 
+/**
+ * xfw_window_get_icon:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's icon.
+ *
+ * Return value: (nullable) (transfer none): a #GdkPixbuf, owned by @window,
+ * or %NULL if @window has no icon.
+ **/
 GdkPixbuf *
 xfw_window_get_icon(XfwWindow *window, gint size) {
     XfwWindowIface *iface;
@@ -218,6 +380,14 @@ xfw_window_get_icon(XfwWindow *window, gint size) {
     return (*iface->get_icon)(window, size);
 }
 
+/**
+ * xfw_window_get_type:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's type/function.
+ *
+ * Return value: a member of #XfwWindowType.
+ **/
 XfwWindowType
 xfw_window_get_window_type(XfwWindow *window) {
     XfwWindowIface *iface;
@@ -226,6 +396,14 @@ xfw_window_get_window_type(XfwWindow *window) {
     return (*iface->get_window_type)(window);
 }
 
+/**
+ * xfw_window_get_state:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's state bitfield.
+ *
+ * Return value: a bitfield with zero or more bits from #XfwWindowState set.
+ **/
 XfwWindowState
 xfw_window_get_state(XfwWindow *window) {
     XfwWindowIface *iface;
@@ -234,6 +412,15 @@ xfw_window_get_state(XfwWindow *window) {
     return (*iface->get_state)(window);
 }
 
+/**
+ * xfw_window_get_capabilities:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's capabilities bitfield.
+ *
+ * Return value: a bitfield with zero or more bits from #XfwWindowCapabilities
+ * set.
+ **/
 XfwWindowCapabilities
 xfw_window_get_capabilities(XfwWindow *window) {
     XfwWindowIface *iface;
@@ -242,6 +429,15 @@ xfw_window_get_capabilities(XfwWindow *window) {
     return (*iface->get_capabilities)(window);
 }
 
+/**
+ * xfw_window_get_geometry:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's position and size.
+ *
+ * Return value: (not nullable) (transfer none): A #GdkRectangle representing
+ * @window's geometry, which should not be modified or freed.
+ **/
 GdkRectangle *
 xfw_window_get_geometry(XfwWindow *window) {
     XfwWindowIface *iface;
@@ -250,6 +446,15 @@ xfw_window_get_geometry(XfwWindow *window) {
     return (*iface->get_geometry)(window);
 }
 
+/**
+ * xfw_window_get_screen:
+ * @window: an #XfwWindow.
+ *
+ * Fetches the #XfwScreen instance that owns @window.
+ *
+ * Return value: (not nullable) (transfer none): A #XfwScreen instance, with a
+ * reference owned by @window.
+ **/
 XfwScreen *
 xfw_window_get_screen(XfwWindow *window) {
     XfwWindowIface *iface;
@@ -258,6 +463,16 @@ xfw_window_get_screen(XfwWindow *window) {
     return (*iface->get_screen)(window);
 }
 
+/**
+ * xfw_window_get_workspace:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's workspace, if any.  This may return %NULL if @window is
+ * not on a workspace, or is pinned to all workspaces.
+ *
+ * Return value: (nullable) (transfer none): A #XfwWorkspace instance, with a
+ * reference owned by @window, or %NULL.
+ **/
 XfwWorkspace *
 xfw_window_get_workspace(XfwWindow *window) {
     XfwWindowIface *iface;
@@ -266,6 +481,16 @@ xfw_window_get_workspace(XfwWindow *window) {
     return (*iface->get_workspace)(window);
 }
 
+/**
+ * xfw_window_get_monitors:
+ * @window: an #XfwWindow.
+ *
+ * Fetches the list of monitors @window is displayed on, if any.
+ *
+ * Return value: (nullable) (element-type GdkMonitor) (transfer none): A list
+ * of #GdkMonitor instances, or %NULL.  The list and its contents are owned by
+ * @window and should not be modified or freed.
+ **/
 GList *
 xfw_window_get_monitors(XfwWindow *window) {
     XfwWindowIface *iface;
