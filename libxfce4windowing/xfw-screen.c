@@ -30,7 +30,7 @@
  * have a single screen, even if (API-wise) more than one can be represented.
  *
  * The #XfwScreen instance is the main entry point into this library.  You
- * can obtain an instance using #xfw_screen_get().  From there, you can
+ * can obtain an instance using #xfw_screen_get_default().  From there, you can
  * enumerate toplevel windows, or examine workspace groups and workspaces.
  *
  * Note that #XfwScreen is actually an interface; when obtaining an instance,
@@ -255,7 +255,7 @@ xfw_screen_get_windows_stacked(XfwScreen *screen) {
  *
  * Retrieves the window on @screen that is currently active.
  *
- * Return value: (nullable) (transfer none): an #XfWindow, or %NULL if no
+ * Return value: (nullable) (transfer none): an #XfwWindow, or %NULL if no
  * window is active on @screen.
  **/
 XfwWindow *

@@ -40,16 +40,16 @@
 G_BEGIN_DECLS
 
 /**
- * XfwErrorCode:
+ * XfwError:
  * @XFW_ERROR_UNSUPPORTED: the operation attempted is not supported.
  * @XFW_ERROR_INTERNAL: an internal error has occurred.
  *
  * An error code enum describing possible errors returned by this library.
  **/
-typedef enum _XfwErrorCode {
+typedef enum _XfwError {
     XFW_ERROR_UNSUPPORTED = 0,
     XFW_ERROR_INTERNAL,
-} XfwErrorCode;
+} XfwError;
 
 /**
  * XfwWindowing:
@@ -119,7 +119,7 @@ xfw_windowing_error_trap_push(GdkDisplay *display) {
  *
  * This only does anything on X11.
  *
- * Return value: Returns the error code of the error that occured, or %0 if
+ * Return value: Returns the error code of the error that occured, or `0` if
  * there was no error.
  **/
 static inline gint

@@ -366,6 +366,7 @@ xfw_window_get_name(XfwWindow *window) {
 /**
  * xfw_window_get_icon:
  * @window: an #XfwWindow.
+ * @size: the desired icon size.
  *
  * Fetches @window's icon.
  *

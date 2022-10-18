@@ -3,7 +3,7 @@
 <SECTION>
 <FILE>xfw-util</FILE>
 XFW_ERROR
-XfwErrorCode
+XfwError
 XfwWindowing
 XfwDirection
 xfw_windowing_get

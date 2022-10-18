@@ -98,8 +98,9 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
 
     /**
      * XfwWorkspace::state-changed:
+     * @workspace: the object which received the signal.
      * @changed_mask: a bitfield representing the state bits that have changed.
-     * @new_capabilities: a bitfield of the new state.
+     * @new_state: a bitfield of the new state.
      *
      * Emitted when @workspace's state changes.
      **/
@@ -163,7 +164,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
     /**
-     * XfwWorkspaceIface:state:
+     * XfwWorkspace:state:
      *
      * The #XfwWorkspaceState bitfield for this workspace.
      **/

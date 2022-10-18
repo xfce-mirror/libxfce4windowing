@@ -97,7 +97,7 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
  * Lists all workspace groups known to the workspace manager.
  *
  * Return value: (nullable) (element-type XfwWorkspaceGroup) (transfer none):
- * the list of #XfwWorkspaceGroup managed by @maanger, or %NULL if there are
+ * the list of #XfwWorkspaceGroup managed by @manager, or %NULL if there are
  * no workspace groups.  The list and its contents are owned by @manager.
  **/
 GList *
