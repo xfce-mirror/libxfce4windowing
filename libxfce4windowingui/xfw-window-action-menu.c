@@ -37,10 +37,6 @@
 
 #include "xfw-window-action-menu.h"
 
-#ifndef arrayof
-#define arrayof(ident)  (sizeof((ident)) / sizeof(*(ident)))
-#endif
-
 enum {
     PROP0,
     PROP_WINDOW,
@@ -185,12 +181,12 @@ xfw_window_action_menu_constructed(GObject *obj) {
     GtkWidget *item;
     XfwWindowWorkspaceMoveData *mdata;
 
-    menu->priv->min_item = item = create_image_menu_item("", minimize_icon_names, arrayof(minimize_icon_names));
+    menu->priv->min_item = item = create_image_menu_item("", minimize_icon_names, G_N_ELEMENTS(minimize_icon_names));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_minimize_state), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->max_item = item = create_image_menu_item("", maximize_icon_names, arrayof(maximize_icon_names));
+    menu->priv->max_item = item = create_image_menu_item("", maximize_icon_names, G_N_ELEMENTS(maximize_icon_names));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_maximize_state), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -268,7 +264,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->close_item = item = create_image_menu_item(_("_Close"), close_icon_names, arrayof(close_icon_names));
+    menu->priv->close_item = item = create_image_menu_item(_("_Close"), close_icon_names, G_N_ELEMENTS(close_icon_names));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(close_window), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
