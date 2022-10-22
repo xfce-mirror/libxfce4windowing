@@ -37,6 +37,10 @@
 
 #include "xfw-window-action-menu.h"
 
+#ifndef arrayof
+#define arrayof(ident)  (sizeof((ident)) / sizeof(*(ident)))
+#endif
+
 enum {
     PROP0,
     PROP_WINDOW,
@@ -68,6 +72,24 @@ typedef struct {
         XfwWorkspace *new_workspace;
     } to;
 } XfwWindowWorkspaceMoveData;
+
+static const gchar *minimize_icon_names[] = {
+    "window-minimize-symbolic",
+    "window-minimize-symbolic.symbolic",
+    "window-minimize",
+    "xfce-wm-minimize",
+};
+static const gchar *maximize_icon_names[] = {
+    "window-maximize-symbolic",
+    "window-maximize-symbolic.symbolic",
+    "window-maximize",
+    "xfce-wm-maximize",
+};
+static const gchar *close_icon_names[] = {
+    "window-close-symbolic",
+    "window-close-symbolic.symbolic",
+    "window-close",
+};
 
 static void xfw_window_action_menu_constructed(GObject *obj);
 static void xfw_window_action_menu_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
@@ -123,6 +145,39 @@ xfw_window_action_menu_init(XfwWindowActionMenu *menu) {
     menu->priv = xfw_window_action_menu_get_instance_private(menu);
 }
 
+static GtkWidget *
+create_image_menu_item(const gchar *label_text, const gchar **icon_names, gint n_icon_names) {
+    GtkWidget *item, *img = NULL;
+    gint icon_width, icon_height, icon_size;
+    GtkIconTheme *itheme;
+    GdkPixbuf *icon = NULL;
+
+    gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &icon_width, &icon_height);
+    icon_size = icon_width > icon_height ? icon_width : icon_height;
+
+    itheme = gtk_icon_theme_get_default();
+    for (gint i = 0; i < n_icon_names; ++i) {
+        icon = gtk_icon_theme_load_icon(itheme, icon_names[i], icon_size, 0, NULL);
+        if (icon != NULL) {
+            img = gtk_image_new_from_pixbuf(icon);
+            g_object_unref(icon);
+            gtk_widget_show(img);
+            break;
+        }
+    }
+
+    if (img != NULL) {
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+        item = gtk_image_menu_item_new_with_mnemonic(label_text);
+        gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), img);
+G_GNUC_END_IGNORE_DEPRECATIONS
+    } else {
+        item = gtk_menu_item_new_with_mnemonic(label_text);
+    }
+
+    return item;
+}
+
 static void
 xfw_window_action_menu_constructed(GObject *obj) {
     XfwWindowActionMenu *menu = XFW_WINDOW_ACTION_MENU(obj);
@@ -130,12 +185,12 @@ xfw_window_action_menu_constructed(GObject *obj) {
     GtkWidget *item;
     XfwWindowWorkspaceMoveData *mdata;
 
-    menu->priv->min_item = item = gtk_menu_item_new_with_mnemonic("");
+    menu->priv->min_item = item = create_image_menu_item("", minimize_icon_names, arrayof(minimize_icon_names));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_minimize_state), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->max_item = item = gtk_menu_item_new_with_mnemonic("");
+    menu->priv->max_item = item = create_image_menu_item("", maximize_icon_names, arrayof(maximize_icon_names));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_maximize_state), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -213,7 +268,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->close_item = item = gtk_menu_item_new_with_mnemonic(_("_Close"));
+    menu->priv->close_item = item = create_image_menu_item(_("_Close"), close_icon_names, arrayof(close_icon_names));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(close_window), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
