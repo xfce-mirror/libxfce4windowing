@@ -49,6 +49,8 @@ struct _XfwWindowX11Private {
     XfwApplication *app;
 };
 
+static gint wnck_default_icon_size = WNCK_DEFAULT_ICON_SIZE;
+
 static void xfw_window_x11_window_init(XfwWindowIface *iface);
 static void xfw_window_x11_constructed(GObject *obj);
 static void xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
@@ -298,20 +300,66 @@ static GdkPixbuf *
 xfw_window_x11_get_icon(XfwWindow *window, gint size) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
 
-    size = size < WNCK_DEFAULT_ICON_SIZE ? WNCK_DEFAULT_MINI_ICON_SIZE : WNCK_DEFAULT_ICON_SIZE;
+    if (size > wnck_default_icon_size) {
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+        wnck_set_default_icon_size(size);
+G_GNUC_END_IGNORE_DEPRECATIONS
+        wnck_default_icon_size = size;
+    }
+
     if (priv->icon == NULL || size != priv->icon_size) {
+        GdkPixbuf *icon = NULL;
+
         priv->icon_size = size;
         g_clear_object(&priv->icon);
+
         if (wnck_window_get_icon_is_fallback(priv->wnck_window)) {
             const gchar *icon_name = _xfw_application_x11_get_icon_name(XFW_APPLICATION_X11(priv->app));
             if (icon_name != NULL) {
-                priv->icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), icon_name, size, 0, NULL);
+                icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), icon_name, size, 0, NULL);
             }
-        } else if (size == WNCK_DEFAULT_ICON_SIZE) {
-            priv->icon = g_object_ref(wnck_window_get_icon(priv->wnck_window));
-        } else {
-            priv->icon = g_object_ref(wnck_window_get_mini_icon(priv->wnck_window));
         }
+
+        if (icon == NULL) {
+            icon = wnck_window_get_icon(priv->wnck_window);
+            if (icon != NULL) {
+                g_object_ref(icon);
+            }
+        }
+
+        if (icon == NULL) {
+            icon = wnck_window_get_mini_icon(priv->wnck_window);
+            if (icon != NULL) {
+                g_object_ref(icon);
+            }
+        }
+
+        if (icon != NULL) {
+            gint width = gdk_pixbuf_get_width(icon);
+            gint height = gdk_pixbuf_get_height(icon);
+
+            if (width > size || height > size || (width < size && height < size)) {
+                GdkPixbuf *icon_scaled;
+                gdouble aspect = (gdouble)width / (gdouble)height;
+                gint new_width, new_height;
+
+                if (width == height) {
+                    new_width = new_height = size;
+                } else if (width > height) {
+                    new_width = size;
+                    new_height = size / aspect;
+                } else {
+                    new_width = size / aspect;
+                    new_height = size;
+                }
+
+                icon_scaled = gdk_pixbuf_scale_simple(icon, new_width, new_height, GDK_INTERP_BILINEAR);
+                g_object_unref(icon);
+                icon = icon_scaled;
+            }
+        }
+
+        priv->icon = icon;
     }
 
     return priv->icon;
