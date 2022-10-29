@@ -133,6 +133,9 @@ static void xfw_window_x11_constructed(GObject *obj) {
 
     window->priv->window_type = convert_type(wnck_window_get_window_type(window->priv->wnck_window));
     window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
+    wnck_window_get_geometry(window->priv->wnck_window,
+                             &window->priv->geometry.x, &window->priv->geometry.y,
+                             &window->priv->geometry.width, &window->priv->geometry.height);
     window->priv->capabilities = convert_capabilities(window->priv->wnck_window, wnck_window_get_actions(window->priv->wnck_window));
     window->priv->workspace = _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(window->priv->screen),
                                                                            wnck_window_get_workspace(window->priv->wnck_window));
