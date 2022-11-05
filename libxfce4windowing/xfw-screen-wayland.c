@@ -191,7 +191,9 @@ xfw_screen_wayland_finalize(GObject *obj) {
     }
     g_list_free(screen->priv->windows);
     g_list_free(screen->priv->windows_stacked);
-    g_hash_table_destroy(screen->priv->wl_windows);
+    if (screen->priv->wl_windows != NULL) {
+        g_hash_table_destroy(screen->priv->wl_windows);
+    }
     g_list_free(screen->priv->show_desktop_data.minimized);
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->finalize(obj);
