@@ -548,6 +548,7 @@ toplevel_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
     g_free(window->priv->name);
     window->priv->name = g_strdup(title);
     g_object_notify(G_OBJECT(window), "name");
+    g_signal_emit_by_name(window, "name-changed");
 }
 
 static const struct {
