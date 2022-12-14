@@ -90,7 +90,7 @@ static const gchar *close_icon_names[] = {
 static void xfw_window_action_menu_constructed(GObject *obj);
 static void xfw_window_action_menu_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_window_action_menu_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
-static void xfw_window_action_menu_finalize(GObject *obj);
+static void xfw_window_action_menu_dispose(GObject *obj);
 
 static void toggle_minimize_state(GtkWidget *item, XfwWindow *window);
 static void toggle_maximize_state(GtkWidget *item, XfwWindow *window);
@@ -120,7 +120,7 @@ xfw_window_action_menu_class_init(XfwWindowActionMenuClass *klass) {
     gklass->constructed = xfw_window_action_menu_constructed;
     gklass->set_property = xfw_window_action_menu_set_property;
     gklass->get_property = xfw_window_action_menu_get_property;
-    gklass->finalize = xfw_window_action_menu_finalize;
+    gklass->dispose = xfw_window_action_menu_dispose;
 
     /**
      * XfwWindowActionMenu:window:
@@ -312,14 +312,17 @@ xfw_window_action_menu_get_property(GObject *obj, guint prop_id, GValue *value, 
 }
 
 static void
-xfw_window_action_menu_finalize(GObject *obj) {
+xfw_window_action_menu_dispose(GObject *obj) {
     XfwWindowActionMenu *menu = XFW_WINDOW_ACTION_MENU(obj);
-    g_signal_handlers_disconnect_by_func(menu->priv->window, window_state_changed, menu);
-    g_signal_handlers_disconnect_by_func(menu->priv->window, window_capabilities_changed, menu);
-    g_signal_handlers_disconnect_by_func(menu->priv->window, window_workspace_changed, menu);
-    g_object_unref(menu->priv->window);
 
-    G_OBJECT_CLASS(xfw_window_action_menu_parent_class)->finalize(obj);
+    if (menu->priv->window != NULL) {
+        g_signal_handlers_disconnect_by_func(menu->priv->window, window_state_changed, menu);
+        g_signal_handlers_disconnect_by_func(menu->priv->window, window_capabilities_changed, menu);
+        g_signal_handlers_disconnect_by_func(menu->priv->window, window_workspace_changed, menu);
+        g_clear_object(&menu->priv->window);
+    }
+
+    G_OBJECT_CLASS(xfw_window_action_menu_parent_class)->dispose(obj);
 }
 
 static void
