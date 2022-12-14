@@ -25,6 +25,7 @@
 #endif
 
 #include <glib-object.h>
+#include <gdk/gdk.h>
 
 // Support glib < 2.74
 
@@ -68,6 +69,8 @@ type_name ## _get_type (void) { \
 #endif
 
 G_BEGIN_DECLS
+
+typedef GdkPixbuf *(*XfwGetIconFunc)(GObject *wnck_object);
 
 enum {
     SCREEN_PROP_SCREEN = 0x1000,
@@ -118,6 +121,7 @@ enum {
 };
 
 void _libxfce4windowing_init(void);
+GdkPixbuf *_xfw_wnck_object_get_icon(GObject *wnck_object, const gchar *icon_name, gint size, XfwGetIconFunc get_icon, XfwGetIconFunc get_mini_icon);
 
 void _xfw_screen_install_properties(GObjectClass *gklass);
 void _xfw_workspace_manager_install_properties(GObjectClass *gklass);
