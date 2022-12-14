@@ -198,21 +198,19 @@ static GdkPixbuf *
 xfw_application_x11_get_icon(XfwApplication *app, gint size) {
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(app)->priv;
 
-    size = size < WNCK_DEFAULT_ICON_SIZE ? WNCK_DEFAULT_MINI_ICON_SIZE : WNCK_DEFAULT_ICON_SIZE;
     if (priv->icon == NULL || size != priv->icon_size) {
         GList *wnck_apps = g_hash_table_get_keys(priv->instances);
-        priv->icon_size = size;
-        g_clear_object(&priv->icon);
+        const gchar *icon_name = NULL;
         if (wnck_application_get_icon_is_fallback(wnck_apps->data)) {
-            if (priv->icon_name != NULL) {
-                priv->icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), priv->icon_name, size, 0, NULL);
-            }
-        } else if (size == WNCK_DEFAULT_ICON_SIZE) {
-            priv->icon = g_object_ref(wnck_class_group_get_icon(priv->wnck_group));
-        } else {
-            priv->icon = g_object_ref(wnck_class_group_get_mini_icon(priv->wnck_group));
+            icon_name = priv->icon_name;
         }
         g_list_free(wnck_apps);
+        priv->icon_size = size;
+        g_clear_object(&priv->icon);
+        priv->icon = _xfw_window_x11_get_icon(icon_name, size,
+                                              (GdkPixbuf *(*)(gpointer))wnck_class_group_get_icon,
+                                              (GdkPixbuf *(*)(gpointer))wnck_class_group_get_mini_icon,
+                                              priv->wnck_group);
     }
 
     return priv->icon;

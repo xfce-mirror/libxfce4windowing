@@ -40,5 +40,6 @@ struct _XfwWindowX11 {
 };
 
 WnckWindow *_xfw_window_x11_get_wnck_window(XfwWindowX11 *window);
+GdkPixbuf *_xfw_window_x11_get_icon(const gchar *icon_name, gint size, GdkPixbuf *(*get_icon)(gpointer), GdkPixbuf *(*get_mini_icon)(gpointer), gpointer data);
 
 #endif  /* __XFW_WINDOW_X11_H__ */
