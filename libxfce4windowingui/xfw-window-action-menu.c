@@ -181,6 +181,8 @@ xfw_window_action_menu_constructed(GObject *obj) {
     GtkWidget *item;
     XfwWindowWorkspaceMoveData *mdata;
 
+    G_OBJECT_CLASS(xfw_window_action_menu_parent_class)->constructed(obj);
+
     menu->priv->min_item = item = create_image_menu_item("", minimize_icon_names, G_N_ELEMENTS(minimize_icon_names));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_minimize_state), window);
@@ -309,12 +311,15 @@ xfw_window_action_menu_get_property(GObject *obj, guint prop_id, GValue *value, 
     }
 }
 
-static void xfw_window_action_menu_finalize(GObject *obj) {
+static void
+xfw_window_action_menu_finalize(GObject *obj) {
     XfwWindowActionMenu *menu = XFW_WINDOW_ACTION_MENU(obj);
     g_signal_handlers_disconnect_by_func(menu->priv->window, window_state_changed, menu);
     g_signal_handlers_disconnect_by_func(menu->priv->window, window_capabilities_changed, menu);
     g_signal_handlers_disconnect_by_func(menu->priv->window, window_workspace_changed, menu);
     g_object_unref(menu->priv->window);
+
+    G_OBJECT_CLASS(xfw_window_action_menu_parent_class)->finalize(obj);
 }
 
 static void
