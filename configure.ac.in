@@ -21,7 +21,7 @@ m4_define([libxfce4windowing_version_tag], [git])
 m4_define([libxfce4windowing_version], [libxfce4windowing_version_major().libxfce4windowing_version_minor().libxfce4windowing_version_micro()ifelse(libxfce4windowing_version_nano(), [], [], [.libxfce4windowing_version_nano()])ifelse(libxfce4windowing_version_tag(), [git], [libxfce4windowing_version_tag()-libxfce4windowing_version_build()], [libxfce4windowing_version_tag()])])
 
 dnl minimum required versions
-m4_define([glib_minimum_version], [2.74.0])
+m4_define([glib_minimum_version], [2.66.0])
 m4_define([gtk_minimum_version], [3.22.0])
 m4_define([gdk_pixbuf_minimum_version], [2.36.12])
 m4_define([wnck_minimum_version], [3.14])
