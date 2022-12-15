@@ -26,6 +26,51 @@
 
 #include <glib-object.h>
 
+// Support glib < 2.74
+
+#ifndef G_DEFINE_ENUM_TYPE
+#define G_DEFINE_ENUM_TYPE(TypeName, type_name, ...) \
+GType \
+type_name ## _get_type (void) { \
+  static gsize g_define_type__static = 0; \
+  if (g_once_init_enter (&g_define_type__static)) { \
+    static const GEnumValue enum_values[] = { \
+      __VA_ARGS__ , \
+      { 0, NULL, NULL }, \
+    }; \
+    GType g_define_type = g_enum_register_static (g_intern_static_string (#TypeName), enum_values); \
+    g_once_init_leave (&g_define_type__static, g_define_type); \
+  } \
+  return g_define_type__static; \
+}
+#endif
+
+#ifndef G_DEFINE_FLAGS_TYPE
+#define G_DEFINE_FLAGS_TYPE(TypeName, type_name, ...) \
+GType \
+type_name ## _get_type (void) { \
+  static gsize g_define_type__static = 0; \
+  if (g_once_init_enter (&g_define_type__static)) { \
+    static const GFlagsValue flags_values[] = { \
+      __VA_ARGS__ , \
+      { 0, NULL, NULL }, \
+    }; \
+    GType g_define_type = g_flags_register_static (g_intern_static_string (#TypeName), flags_values); \
+    g_once_init_leave (&g_define_type__static, g_define_type); \
+  } \
+  return g_define_type__static; \
+}
+#endif
+
+#ifndef G_DEFINE_ENUM_VALUE
+#define G_DEFINE_ENUM_VALUE(EnumValue, EnumNick) \
+  { EnumValue, #EnumValue, EnumNick }
+#endif
+
+#ifndef G_CONNECT_DEFAULT
+#define G_CONNECT_DEFAULT 0
+#endif
+
 G_BEGIN_DECLS
 
 enum {
