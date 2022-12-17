@@ -28,9 +28,11 @@
 #include <gdk/gdk.h>
 #include <gio/gdesktopappinfo.h>
 
-// Support glib < 2.74
+// Support glib < 2.74, avoid deprecation warnings when building with xfce4-dev-tools >= 4.17.1
 
-#ifndef G_DEFINE_ENUM_TYPE
+#ifdef G_DEFINE_ENUM_TYPE
+#undef G_DEFINE_ENUM_TYPE
+#endif
 #define G_DEFINE_ENUM_TYPE(TypeName, type_name, ...) \
 GType \
 type_name ## _get_type (void) { \
@@ -45,9 +47,10 @@ type_name ## _get_type (void) { \
   } \
   return g_define_type__static; \
 }
-#endif
 
-#ifndef G_DEFINE_FLAGS_TYPE
+#ifdef G_DEFINE_FLAGS_TYPE
+#undef G_DEFINE_FLAGS_TYPE
+#endif
 #define G_DEFINE_FLAGS_TYPE(TypeName, type_name, ...) \
 GType \
 type_name ## _get_type (void) { \
@@ -62,12 +65,12 @@ type_name ## _get_type (void) { \
   } \
   return g_define_type__static; \
 }
-#endif
 
-#ifndef G_DEFINE_ENUM_VALUE
+#ifdef G_DEFINE_ENUM_VALUE
+#undef G_DEFINE_ENUM_VALUE
+#endif
 #define G_DEFINE_ENUM_VALUE(EnumValue, EnumNick) \
   { EnumValue, #EnumValue, EnumNick }
-#endif
 
 G_BEGIN_DECLS
 
