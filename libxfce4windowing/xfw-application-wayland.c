@@ -90,7 +90,7 @@ static void xfw_application_wayland_constructed(GObject *obj) {
 
     g_hash_table_insert(app_ids, priv->app_id, obj);
 
-    app_info = xfw_g_desktop_app_info_get(priv->app_id);
+    app_info = _xfw_g_desktop_app_info_get(priv->app_id);
     if (app_info != NULL) {
         gchar *name = g_desktop_app_info_get_string(app_info, G_KEY_FILE_DESKTOP_KEY_NAME);
         gchar *icon_name = g_desktop_app_info_get_string(app_info, G_KEY_FILE_DESKTOP_KEY_ICON);
