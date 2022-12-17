@@ -10,7 +10,6 @@ xfw_windowing_get
 xfw_windowing_error_trap_push
 xfw_windowing_error_trap_pop
 xfw_windowing_error_trap_pop_ignored
-xfw_g_desktop_app_info_get
 <SUBSECTION Standard>
 xfw_direction_get_type
 xfw_error_quark
