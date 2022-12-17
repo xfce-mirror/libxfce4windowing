@@ -141,6 +141,7 @@ xfw_application_get_name(XfwApplication *app) {
  * xfw_application_get_icon:
  * @app: an #XfwApplication.
  * @size: the desired icon size.
+ * @scale: the UI scale factor.
  *
  * Fetches this application's icon. Depending on the windowing environment,
  * different methods are used to find an icon for @app, but they may fail and
@@ -153,11 +154,11 @@ xfw_application_get_name(XfwApplication *app) {
  * none could be found.
  **/
 GdkPixbuf *
-xfw_application_get_icon(XfwApplication *app, gint size) {
+xfw_application_get_icon(XfwApplication *app, gint size, gint scale) {
     XfwApplicationIface *iface;
     g_return_val_if_fail(XFW_IS_APPLICATION(app), NULL);
     iface = XFW_APPLICATION_GET_IFACE(app);
-    return (*iface->get_icon)(app, size);
+    return (*iface->get_icon)(app, size, scale);
 }
 
 /**

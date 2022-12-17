@@ -58,7 +58,7 @@ static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue 
 static void xfw_window_wayland_finalize(GObject *obj);
 static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
-static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window, gint size);
+static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window, gint size, gint scale);
 static XfwWindowType xfw_window_wayland_get_window_type(XfwWindow *window);
 static XfwWindowState xfw_window_wayland_get_state(XfwWindow *window);
 static XfwWindowCapabilities xfw_window_wayland_get_capabilities(XfwWindow *window);
@@ -279,10 +279,10 @@ xfw_window_wayland_get_name(XfwWindow *window) {
 }
 
 static GdkPixbuf *
-xfw_window_wayland_get_icon(XfwWindow *window, gint size) {
+xfw_window_wayland_get_icon(XfwWindow *window, gint size, gint scale) {
     XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
     if (wwindow->priv->app != NULL) {
-        return xfw_application_get_icon(wwindow->priv->app, size);
+        return xfw_application_get_icon(wwindow->priv->app, size, scale);
     }
     return NULL;
 }

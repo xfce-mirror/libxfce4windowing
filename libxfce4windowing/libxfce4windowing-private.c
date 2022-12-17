@@ -41,20 +41,25 @@ _libxfce4windowing_init(void) {
 
 #ifdef ENABLE_X11
 GdkPixbuf *
-_xfw_wnck_object_get_icon(GObject *wnck_object, const gchar *icon_name, gint size, XfwGetIconFunc get_icon, XfwGetIconFunc get_mini_icon) {
+_xfw_wnck_object_get_icon(GObject *wnck_object, const gchar *icon_name, gint size, gint scale, XfwGetIconFunc get_icon, XfwGetIconFunc get_mini_icon) {
     GdkPixbuf *icon = NULL;
 
     g_return_val_if_fail(WNCK_IS_WINDOW(wnck_object) || WNCK_IS_CLASS_GROUP(wnck_object), NULL);
 
-    if (size > wnck_default_icon_size) {
+    if (size * scale > wnck_default_icon_size) {
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-        wnck_set_default_icon_size(size);
+        wnck_set_default_icon_size(size * scale);
 G_GNUC_END_IGNORE_DEPRECATIONS
-        wnck_default_icon_size = size;
+        wnck_default_icon_size = size * scale;
     }
 
     if (icon_name != NULL) {
-        icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), icon_name, size, 0, NULL);
+        icon = gtk_icon_theme_load_icon_for_scale(gtk_icon_theme_get_default(),
+                                                  icon_name,
+                                                  size,
+                                                  scale,
+                                                  GTK_ICON_LOOKUP_FORCE_SIZE,
+                                                  NULL);
     }
 
     if (icon == NULL) {

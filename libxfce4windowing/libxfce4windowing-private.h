@@ -125,7 +125,7 @@ enum {
 };
 
 void _libxfce4windowing_init(void);
-GdkPixbuf *_xfw_wnck_object_get_icon(GObject *wnck_object, const gchar *icon_name, gint size, XfwGetIconFunc get_icon, XfwGetIconFunc get_mini_icon);
+GdkPixbuf *_xfw_wnck_object_get_icon(GObject *wnck_object, const gchar *icon_name, gint size, gint scale, XfwGetIconFunc get_icon, XfwGetIconFunc get_mini_icon);
 GDesktopAppInfo *_xfw_g_desktop_app_info_get(const gchar *app_id);
 
 void _xfw_screen_install_properties(GObjectClass *gklass);

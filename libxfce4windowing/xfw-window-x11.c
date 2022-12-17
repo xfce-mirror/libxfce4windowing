@@ -40,6 +40,7 @@ struct _XfwWindowX11Private {
     WnckWindow *wnck_window;
     GdkPixbuf *icon;
     gint icon_size;
+    gint icon_scale;
     XfwWindowType window_type;
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
@@ -56,7 +57,7 @@ static void xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *val
 static void xfw_window_x11_finalize(GObject *obj);
 static guint64 xfw_window_x11_get_id(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
-static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window, gint size);
+static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window, gint size, gint scale);
 static XfwWindowType xfw_window_x11_get_window_type(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
 static XfwWindowCapabilities xfw_window_x11_get_capabilities(XfwWindow *window);
@@ -298,17 +299,20 @@ xfw_window_x11_get_name(XfwWindow *window) {
 }
 
 static GdkPixbuf *
-xfw_window_x11_get_icon(XfwWindow *window, gint size) {
+xfw_window_x11_get_icon(XfwWindow *window, gint size, gint scale) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
 
-    if (priv->icon == NULL || size != priv->icon_size) {
+    if (priv->icon == NULL || size != priv->icon_size || scale != priv->icon_scale) {
         const gchar *icon_name = NULL;
         if (wnck_window_get_icon_is_fallback(priv->wnck_window)) {
             icon_name = _xfw_application_x11_get_icon_name(XFW_APPLICATION_X11(priv->app));
         }
         priv->icon_size = size;
         g_clear_object(&priv->icon);
-        priv->icon = _xfw_wnck_object_get_icon(G_OBJECT(priv->wnck_window), icon_name, size,
+        priv->icon = _xfw_wnck_object_get_icon(G_OBJECT(priv->wnck_window),
+                                               icon_name,
+                                               size,
+                                               scale,
                                                (XfwGetIconFunc)wnck_window_get_icon,
                                                (XfwGetIconFunc)wnck_window_get_mini_icon);
     }
