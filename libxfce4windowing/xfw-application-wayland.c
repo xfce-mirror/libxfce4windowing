@@ -37,6 +37,7 @@ struct _XfwApplicationWaylandPrivate {
     GdkPixbuf *icon;
     gchar *icon_name;
     gint icon_size;
+    gint icon_scale;
     GList *windows;
     GList *instances;
 };
@@ -50,7 +51,7 @@ static void xfw_application_wayland_get_property(GObject *obj, guint prop_id, GV
 static void xfw_application_wayland_finalize(GObject *obj);
 static guint64 xfw_application_wayland_get_id(XfwApplication *app);
 static const gchar *xfw_application_wayland_get_name(XfwApplication *app);
-static GdkPixbuf *xfw_application_wayland_get_icon(XfwApplication *app, gint size);
+static GdkPixbuf *xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale);
 static GList *xfw_application_wayland_get_windows(XfwApplication *app);
 static GList *xfw_application_wayland_get_instances(XfwApplication *app);
 static XfwApplicationInstance *xfw_application_wayland_get_instance(XfwApplication *app, XfwWindow *window);
@@ -203,15 +204,16 @@ xfw_application_wayland_get_name(XfwApplication *app) {
 }
 
 static GdkPixbuf *
-xfw_application_wayland_get_icon(XfwApplication *app, gint size) {
+xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale) {
     XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(app)->priv;
 
-    if (priv->icon_name != NULL && (priv->icon == NULL || size != priv->icon_size)) {
+    if (priv->icon_name != NULL && (priv->icon == NULL || size != priv->icon_size || scale != priv->icon_scale)) {
         GdkScreen *screen = _xfw_screen_wayland_get_gdk_screen(XFW_SCREEN_WAYLAND(xfw_window_get_screen(priv->windows->data)));
         GtkIconTheme *itheme = gtk_icon_theme_get_for_screen(screen);
         GError *error = NULL;
-        GdkPixbuf *icon = gtk_icon_theme_load_icon(itheme, priv->icon_name, size, 0, &error);
+        GdkPixbuf *icon = gtk_icon_theme_load_icon_for_scale(itheme, priv->icon_name, size, scale, 0, &error);
         priv->icon_size = size;
+        priv->icon_scale = scale;
         if (icon != NULL) {
             if (priv->icon != NULL) {
                 g_object_unref(priv->icon);

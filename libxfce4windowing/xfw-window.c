@@ -366,6 +366,7 @@ xfw_window_get_name(XfwWindow *window) {
  * xfw_window_get_icon:
  * @window: an #XfwWindow.
  * @size: the desired icon size.
+ * @scale: the UI scale factor.
  *
  * Fetches @window's icon.
  *
@@ -373,11 +374,11 @@ xfw_window_get_name(XfwWindow *window) {
  * or %NULL if @window has no icon.
  **/
 GdkPixbuf *
-xfw_window_get_icon(XfwWindow *window, gint size) {
+xfw_window_get_icon(XfwWindow *window, gint size, gint scale) {
     XfwWindowIface *iface;
     g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
     iface = XFW_WINDOW_GET_IFACE(window);
-    return (*iface->get_icon)(window, size);
+    return (*iface->get_icon)(window, size, scale);
 }
 
 /**

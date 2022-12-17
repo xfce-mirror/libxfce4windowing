@@ -35,6 +35,7 @@ struct _XfwApplicationX11Private {
     GdkPixbuf *icon;
     gchar *icon_name;
     gint icon_size;
+    gint icon_scale;
     GList *windows;
     GHashTable *instances;
     GList *instance_list;
@@ -49,7 +50,7 @@ static void xfw_application_x11_get_property(GObject *obj, guint prop_id, GValue
 static void xfw_application_x11_finalize(GObject *obj);
 static guint64 xfw_application_x11_get_id(XfwApplication *app);
 static const gchar *xfw_application_x11_get_name(XfwApplication *app);
-static GdkPixbuf *xfw_application_x11_get_icon(XfwApplication *app, gint size);
+static GdkPixbuf *xfw_application_x11_get_icon(XfwApplication *app, gint size, gint scale);
 static GList *xfw_application_x11_get_windows(XfwApplication *app);
 static GList *xfw_application_x11_get_instances(XfwApplication *app);
 static XfwApplicationInstance *xfw_application_x11_get_instance(XfwApplication *app, XfwWindow *window);
@@ -195,10 +196,10 @@ xfw_application_x11_get_name(XfwApplication *app) {
 }
 
 static GdkPixbuf *
-xfw_application_x11_get_icon(XfwApplication *app, gint size) {
+xfw_application_x11_get_icon(XfwApplication *app, gint size, gint scale) {
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(app)->priv;
 
-    if (priv->icon == NULL || size != priv->icon_size) {
+    if (priv->icon == NULL || size != priv->icon_size || scale != priv->icon_scale) {
         GList *wnck_apps = g_hash_table_get_keys(priv->instances);
         const gchar *icon_name = NULL;
         if (wnck_application_get_icon_is_fallback(wnck_apps->data)) {
@@ -207,7 +208,10 @@ xfw_application_x11_get_icon(XfwApplication *app, gint size) {
         g_list_free(wnck_apps);
         priv->icon_size = size;
         g_clear_object(&priv->icon);
-        priv->icon = _xfw_wnck_object_get_icon(G_OBJECT(priv->wnck_group), icon_name, size,
+        priv->icon = _xfw_wnck_object_get_icon(G_OBJECT(priv->wnck_group),
+                                               icon_name,
+                                               size,
+                                               scale,
                                                (XfwGetIconFunc)wnck_class_group_get_icon,
                                                (XfwGetIconFunc)wnck_class_group_get_mini_icon);
     }
