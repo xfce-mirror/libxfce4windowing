@@ -44,6 +44,8 @@ GdkPixbuf *
 _xfw_wnck_object_get_icon(GObject *wnck_object, const gchar *icon_name, gint size, XfwGetIconFunc get_icon, XfwGetIconFunc get_mini_icon) {
     GdkPixbuf *icon = NULL;
 
+    g_return_val_if_fail(WNCK_IS_WINDOW(wnck_object) || WNCK_IS_CLASS_GROUP(wnck_object), NULL);
+
     if (size > wnck_default_icon_size) {
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
         wnck_set_default_icon_size(size);
