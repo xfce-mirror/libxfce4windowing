@@ -48,6 +48,7 @@ INTROSPECTION_SCANNER_ARGS = \
 	--add-include-path=$(srcdir) \
 	--include-uninstalled=$(top_builddir)/libxfce4windowing/Libxfce4windowing-0.0.gir \
 	--warn-all \
+	--identifier-prefix=libxfce4windowingui \
 	--identifier-prefix=Xfw \
 	--c-include=libxfce4windowingui/libxfce4windowingui.h
 INTROSPECTION_COMPILER_ARGS = \

@@ -24,7 +24,7 @@
  * @stability: Stable
  * @include: libxfce4windowingui/libxfce4windowingui.h
  *
- * Variables and functions to check the Libxfce4ui version.
+ * Variables and functions to check the libxfce4windowingui version.
  **/
 
 #ifdef HAVE_CONFIG_H
@@ -63,26 +63,22 @@ const guint libxfce4windowingui_micro_version = LIBXFCE4WINDOWINGUI_MICRO_VERSIO
  * @required_minor: the required minor version.
  * @required_micro: the required micro version.
  *
- * Checks that the <systemitem class="library">libxfce4windowingui</systemitem> library
+ * Checks that the libxfce4windowingui library
  * in use is compatible with the given version. Generally you would pass in
  * the constants #LIBXFCE4WINDOWINGUI_MAJOR_VERSION, #LIBXFCE4WINDOWINGUI_MINOR_VERSION and
  * #LIBXFCE4WINDOWINGUI_MICRO_VERSION as the three arguments to this function; that produces
  * a check that the library in use is compatible with the version of
- * <systemitem class="library">libxfce4windowingui</systemitem> the extension was
- * compiled against.
+ * libxfce4windowingui the extension was compiled against.
  *
- * <example>
- * <title>Checking the runtime version of the Libxfce4ui library</title>
- * <programlisting>
+ * |[<!-- language="C" -->
  * const gchar *mismatch;
  * mismatch = libxfce4windowingui_check_version(LIBXFCE4WINDOWINGUI_MAJOR_VERSION,
- *                                            LIBXFCE4WINDOWINGUI_MINOR_VERSION,
- *                                            LIBXFCE4WINDOWINGUI_MICRO_VERSION);
+ *                                              LIBXFCE4WINDOWINGUI_MINOR_VERSION,
+ *                                              LIBXFCE4WINDOWINGUI_MICRO_VERSION);
  * if (G_UNLIKELY(mismatch != NULL)) {
- *   g_error("Version mismatch: %<!---->s", mismatch);
+ *   g_error("Version mismatch: %s", mismatch);
  * }
- * </programlisting>
- * </example>
+ * ]|
  *
  * Return value: (nullable) (transfer none): %NULL if the library is compatible
  * with the given version, or a string describing the version mismatch. The

@@ -143,6 +143,7 @@ INTROSPECTION_SCANNER_ENV = CC="$(CC)"
 INTROSPECTION_SCANNER_ARGS = \
 	--add-include-path=$(srcdir) \
 	--warn-all \
+	--identifier-prefix=libxfce4windowing \
 	--identifier-prefix=Xfw \
 	--c-include=libxfce4windowing/libxfce4windowing.h
 INTROSPECTION_COMPILER_ARGS = \

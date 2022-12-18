@@ -1,4 +1,4 @@
-<INCLUDE>libxfce4ui/libxfce4ui.h</INCLUDE>
+<INCLUDE>libxfce4windowing/libxfce4windowing.h</INCLUDE>
 
 <SECTION>
 <FILE>libxfce4windowing-config</FILE>

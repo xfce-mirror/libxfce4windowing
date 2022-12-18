@@ -1,3 +1,5 @@
+<INCLUDE>libxfce4windowingui/libxfce4windowingui.h</INCLUDE>
+
 <SECTION>
 <FILE>libxfce4windowingui</FILE>
 </SECTION>
