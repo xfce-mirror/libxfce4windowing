@@ -143,15 +143,10 @@ xfw_application_get_name(XfwApplication *app) {
  * @size: the desired icon size.
  * @scale: the UI scale factor.
  *
- * Fetches this application's icon. Depending on the windowing environment,
- * different methods are used to find an icon for @app, but they may fail and
- * this function returns %NULL.
+ * Fetches @app's icon.
  *
- * The resulting icon will have a size based on @size but will not be exactly
- * that size in general, especially on X11.
- *
- * Return value: (nullable) (transfer none): The icon owned by @app or %NULL if
- * none could be found.
+ * Return value: (nullable) (transfer none): a #GdkPixbuf, owned by @app,
+ * or %NULL if @app has no icon.
  **/
 GdkPixbuf *
 xfw_application_get_icon(XfwApplication *app, gint size, gint scale) {

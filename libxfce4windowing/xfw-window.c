@@ -500,6 +500,15 @@ xfw_window_get_monitors(XfwWindow *window) {
     return (*iface->get_monitors)(window);
 }
 
+/**
+ * xfw_window_get_application:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's application.
+ *
+ * Return value: (transfer none): An #XfwApplication instance, with a
+ * reference owned by @window.
+ **/
 XfwApplication *
 xfw_window_get_application(XfwWindow *window) {
     XfwWindowIface *iface;
