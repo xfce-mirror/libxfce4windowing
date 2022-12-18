@@ -77,22 +77,23 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     }
 
     if (icon != NULL) {
+        gint full_size = size * scale;
         gint width = gdk_pixbuf_get_width(icon);
         gint height = gdk_pixbuf_get_height(icon);
 
-        if (width > size || height > size || (width < size && height < size)) {
+        if (width > full_size || height > full_size || (width < full_size && height < full_size)) {
             GdkPixbuf *icon_scaled;
             gdouble aspect = (gdouble)width / (gdouble)height;
             gint new_width, new_height;
 
             if (width == height) {
-                new_width = new_height = size;
+                new_width = new_height = full_size;
             } else if (width > height) {
-                new_width = size;
-                new_height = size / aspect;
+                new_width = full_size;
+                new_height = full_size / aspect;
             } else {
-                new_width = size / aspect;
-                new_height = size;
+                new_width = full_size / aspect;
+                new_height = full_size;
             }
 
             icon_scaled = gdk_pixbuf_scale_simple(icon, new_width, new_height, GDK_INTERP_BILINEAR);
