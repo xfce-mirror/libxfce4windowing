@@ -30,6 +30,7 @@
 
   <part id="libxfce4windowing-utilities">
     <title>Windowing Utilities</title>
+    <xi:include href="xml/libxfce4windowing-config.xml"/>
     <xi:include href="xml/xfw-util.xml"/>
   </part>
 

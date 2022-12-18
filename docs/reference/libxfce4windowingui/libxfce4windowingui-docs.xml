@@ -28,6 +28,11 @@
     </para>
   </part>
 
+  <part id="libxfce4windowingui-utilities">
+    <title>Windowing Utilities</title>
+    <xi:include href="xml/libxfce4windowingui-config.xml"/>
+  </part>
+
   <part id="libxfce4windowing-widgets">
     <title>Widgets</title>
     <xi:include href="xml/xfw-window-action-menu.xml"/>

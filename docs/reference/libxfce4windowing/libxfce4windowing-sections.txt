@@ -1,6 +1,18 @@
 <INCLUDE>libxfce4ui/libxfce4ui.h</INCLUDE>
 
 <SECTION>
+<FILE>libxfce4windowing-config</FILE>
+LIBXFCE4WINDOWING_MAJOR_VERSION
+LIBXFCE4WINDOWING_MINOR_VERSION
+LIBXFCE4WINDOWING_MICRO_VERSION
+LIBXFCE4WINDOWING_CHECK_VERSION
+libxfce4windowing_major_version
+libxfce4windowing_micro_version
+libxfce4windowing_minor_version
+libxfce4windowing_check_version
+</SECTION>
+
+<SECTION>
 <FILE>xfw-util</FILE>
 XFW_ERROR
 XfwError

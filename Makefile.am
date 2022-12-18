@@ -40,6 +40,7 @@ compile_flags.txt: $(shell find . -name Makefile)
 	for flag in \
 		-DHAVE_CONFIG_H \
 		-DLIBXFCE4WINDOWING_COMPILATION \
+		-DLIBXFCE4WINDOWINGUI_COMPILATION \
 		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 		-I$(top_srcdir) \
 		-I$(top_srcdir)/libxfce4windowing \

@@ -3,6 +3,18 @@
 </SECTION>
 
 <SECTION>
+<FILE>libxfce4windowingui-config</FILE>
+LIBXFCE4WINDOWINGUI_MAJOR_VERSION
+LIBXFCE4WINDOWINGUI_MINOR_VERSION
+LIBXFCE4WINDOWINGUI_MICRO_VERSION
+LIBXFCE4WINDOWINGUI_CHECK_VERSION
+libxfce4windowingui_major_version
+libxfce4windowingui_micro_version
+libxfce4windowingui_minor_version
+libxfce4windowingui_check_version
+</SECTION>
+
+<SECTION>
 <FILE>xfw-window-action-menu</FILE>
 <TITLE>XfwWindowActionMenu</TITLE>
 XfwWindowActionMenu

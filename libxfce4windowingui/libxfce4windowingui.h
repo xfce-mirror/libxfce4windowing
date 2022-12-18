@@ -22,6 +22,7 @@
 
 #define __LIBXFCE4WINDOWINGUI_H_INSIDE__
 
+#include <libxfce4windowingui/libxfce4windowingui-config.h>
 #include <libxfce4windowingui/xfw-window-action-menu.h>
 
 #undef __LIBXFCE4WINDOWINGUI_H_INSIDE__
