@@ -29,6 +29,8 @@ libxfce4windowing_0_x11_sources = \
 	xfw-screen-x11.h \
 	xfw-window-x11.c \
 	xfw-window-x11.h \
+	xfw-wnck-icon.c \
+	xfw-wnck-icon.h \
 	xfw-workspace-manager-x11.c \
 	xfw-workspace-manager-x11.h \
 	xfw-workspace-x11.c \
@@ -95,18 +97,21 @@ libxfce4windowing_0_la_CFLAGS = \
 	$(GOBJECT_CFLAGS) \
 	$(GTK_CFLAGS) \
 	$(LIBWNCK_CFLAGS) \
+	$(LIBX11_CFLAGS) \
 	$(WAYLAND_CLIENT_CFLAGS)
 
 libxfce4windowing_0_la_LDFLAGS = \
 	-version-info $(LIBXFCE4WINDOWING_VERINFO) \
 	-export-symbols-regex "^[^_].*" \
-	-Wl,-no-undefined
+	-Wl,-no-undefined \
+	$(LIBX11_LDFLAGS)
 
 libxfce4windowing_0_la_LIBADD = \
 	$(GOBJECT_LIBS) \
 	$(GIO_UNIX_LIBS) \
 	$(GTK_LIBS) \
 	$(LIBWNCK_LIBS) \
+	$(LIBX11_LIBS) \
 	$(WAYLAND_CLIENT_LIBS)
 
 if WAYLAND_ENABLED
