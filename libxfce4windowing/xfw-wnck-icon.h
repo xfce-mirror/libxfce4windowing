@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Gaël Bonithon <gael@xfce.org>
+ * Copyright (c) 2023 Brian Tarricone <brian@tarricone.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,43 +17,25 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __XFW_APPLICATION_PRIVATE_H__
-#define __XFW_APPLICATION_PRIVATE_H__
+#ifndef __XFW_WNCK_ICON_H__
+#define __XFW_WNCK_ICON_H__
 
 #if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include "xfw-application.h"
+#include <glib-object.h>
+#include <libwnck/libwnck.h>
 
 G_BEGIN_DECLS
 
-struct _XfwApplicationInterface {
-    /*< private >*/
-    GTypeInterface g_iface;
+#define XFW_TYPE_WNCK_ICON (xfw_wnck_icon_get_type())
+G_DECLARE_FINAL_TYPE(XfwWnckIcon, xfw_wnck_icon, XFW, WNCK_ICON, GObject)
 
-    /*< public >*/
+typedef struct _XfwWnckIcon XfwWnckIcon;
 
-    /* Signals */
-    void (*icon_changed)(XfwApplication *app);
-
-    /* Virtual Table */
-    guint64 (*get_id)(XfwApplication *app);
-    const gchar *(*get_name)(XfwApplication *app);
-    GdkPixbuf *(*get_icon)(XfwApplication *app, gint size, gint scale);
-    GIcon *(*get_gicon)(XfwApplication *app);
-    GList *(*get_windows)(XfwApplication *app);
-    GList *(*get_instances)(XfwApplication *app);
-    XfwApplicationInstance *(*get_instance)(XfwApplication *app, XfwWindow *window);
-};
-
-struct _XfwApplicationInstance {
-    /*< private >*/
-    gint pid;
-    gchar *name;
-    GList *windows;
-};
+XfwWnckIcon *_xfw_wnck_icon_new(GObject *wnck_object);
 
 G_END_DECLS
 
-#endif  /* !__XFW_APPLICATION_PRIVATE_H__ */
+#endif  /* __XFW_WNCK_ICON_H__ */

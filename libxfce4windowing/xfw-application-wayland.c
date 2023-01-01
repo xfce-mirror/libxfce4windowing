@@ -52,6 +52,7 @@ static void xfw_application_wayland_finalize(GObject *obj);
 static guint64 xfw_application_wayland_get_id(XfwApplication *app);
 static const gchar *xfw_application_wayland_get_name(XfwApplication *app);
 static GdkPixbuf *xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale);
+static GIcon *xfw_application_wayland_get_gicon(XfwApplication *app);
 static GList *xfw_application_wayland_get_windows(XfwApplication *app);
 static GList *xfw_application_wayland_get_instances(XfwApplication *app);
 static XfwApplicationInstance *xfw_application_wayland_get_instance(XfwApplication *app, XfwWindow *window);
@@ -188,6 +189,7 @@ xfw_application_wayland_iface_init(XfwApplicationIface *iface) {
     iface->get_id = xfw_application_wayland_get_id;
     iface->get_name = xfw_application_wayland_get_name;
     iface->get_icon = xfw_application_wayland_get_icon;
+    iface->get_gicon = xfw_application_wayland_get_gicon;
     iface->get_windows = xfw_application_wayland_get_windows;
     iface->get_instances = xfw_application_wayland_get_instances;
     iface->get_instance = xfw_application_wayland_get_instance;
@@ -211,7 +213,10 @@ xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale) {
         GdkScreen *screen = _xfw_screen_wayland_get_gdk_screen(XFW_SCREEN_WAYLAND(xfw_window_get_screen(priv->windows->data)));
         GtkIconTheme *itheme = gtk_icon_theme_get_for_screen(screen);
         GError *error = NULL;
-        GdkPixbuf *icon = gtk_icon_theme_load_icon_for_scale(itheme, priv->icon_name, size, scale, 0, &error);
+        GdkPixbuf *icon = gtk_icon_theme_load_icon_for_scale(itheme, priv->icon_name,
+                                                             size, scale,
+                                                             GTK_ICON_LOOKUP_FORCE_SIZE,
+                                                             &error);
         priv->icon_size = size;
         priv->icon_scale = scale;
         if (icon != NULL) {
@@ -226,6 +231,17 @@ xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale) {
     }
 
     return priv->icon;
+}
+
+static GIcon *
+xfw_application_wayland_get_gicon(XfwApplication *app) {
+    XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(app)->priv;
+
+    if (priv->icon_name != NULL) {
+        return g_themed_icon_new(priv->icon_name);
+    } else {
+        return g_themed_icon_new_with_default_fallbacks("application-x-executable-symbolic");
+    }
 }
 
 static GList *

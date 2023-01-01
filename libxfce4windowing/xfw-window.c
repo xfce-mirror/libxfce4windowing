@@ -382,6 +382,26 @@ xfw_window_get_icon(XfwWindow *window, gint size, gint scale) {
 }
 
 /**
+ * xfw_window_get_gicon:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's icon as a size-independent #GIcon.
+ *
+ * Return value: (not nullable) (transfer full): a #GIcon, or %NULL
+ * if @window has no icon.  You must release the reference when
+ * you no longer need it.
+ *
+ * Since: 4.19.1
+ **/
+GIcon *
+xfw_window_get_gicon(XfwWindow *window) {
+    XfwWindowIface *iface;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
+    iface = XFW_WINDOW_GET_IFACE(window);
+    return (*iface->get_gicon)(window);
+}
+
+/**
  * xfw_window_get_type:
  * @window: an #XfwWindow.
  *

@@ -21,7 +21,7 @@ m4_define([libxfce4windowing_version_tag], [git])
 m4_define([libxfce4windowing_version], [libxfce4windowing_version_major().libxfce4windowing_version_minor().libxfce4windowing_version_micro()ifelse(libxfce4windowing_version_nano(), [], [], [.libxfce4windowing_version_nano()])ifelse(libxfce4windowing_version_tag(), [git], [libxfce4windowing_version_tag()-libxfce4windowing_version_build()], [libxfce4windowing_version_tag()])])
 
 dnl minimum required versions
-m4_define([glib_minimum_version], [2.66.0])
+m4_define([glib_minimum_version], [2.68.0])
 m4_define([gtk_minimum_version], [3.24.0])
 m4_define([gdk_pixbuf_minimum_version], [2.40.0])
 m4_define([wnck_minimum_version], [3.14])
@@ -102,6 +102,7 @@ AC_SUBST([GDK_PREFIX])
 AC_SUBST([GDK_PIXBUF_PREFIX])
 AC_SUBST([GTK_PREFIX])
 
+XDT_CHECK_LIBX11()
 XDT_CHECK_OPTIONAL_PACKAGE([GDK_X11], [gdk-x11-3.0], [gtk_minimum_version],
                            [gdk-x11], [X11 backend for GDK])
 XDT_CHECK_OPTIONAL_PACKAGE([LIBWNCK], [libwnck-3.0], [wnck_minimum_version],

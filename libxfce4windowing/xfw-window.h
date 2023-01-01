@@ -154,6 +154,7 @@ GType xfw_window_capabilities_get_type(void) G_GNUC_CONST;
 guint64 xfw_window_get_id(XfwWindow *window);
 const gchar *xfw_window_get_name(XfwWindow *window);
 GdkPixbuf *xfw_window_get_icon(XfwWindow *window, gint size, gint scale);
+GIcon *xfw_window_get_gicon(XfwWindow *window);
 XfwWindowType xfw_window_get_window_type(XfwWindow *window);
 XfwWindowState xfw_window_get_state(XfwWindow *window);
 XfwWindowCapabilities xfw_window_get_capabilities(XfwWindow *window);
