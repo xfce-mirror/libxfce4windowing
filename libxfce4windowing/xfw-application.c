@@ -157,6 +157,25 @@ xfw_application_get_icon(XfwApplication *app, gint size, gint scale) {
 }
 
 /**
+ * xfw_application_get_gicon:
+ * @app: an #XfwApplication.
+ *
+ * Fetches @app's icon as a size-independent #GIcon.
+ *
+ * Return value: (nullable) (transfer none): a #GIcon, owned by @app,
+ * or %NULL if @app has no icon.
+ *
+ * Since: 4.19.1
+ **/
+GIcon *
+xfw_application_get_gicon(XfwApplication *app) {
+    XfwApplicationIface *iface;
+    g_return_val_if_fail(XFW_IS_APPLICATION(app), NULL);
+    iface = XFW_APPLICATION_GET_IFACE(app);
+    return (*iface->get_gicon)(app);
+}
+
+/**
  * xfw_application_get_windows:
  * @app: an #XfwApplication.
  *
