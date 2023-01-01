@@ -24,6 +24,10 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
+#ifdef ENABLE_X11
+#include <X11/Xlib.h>
+#endif
+
 #include <glib-object.h>
 #include <gdk/gdk.h>
 #include <gio/gdesktopappinfo.h>
@@ -125,7 +129,7 @@ enum {
 };
 
 void _libxfce4windowing_init(void);
-GdkPixbuf *_xfw_wnck_object_get_icon(GObject *wnck_object, const gchar *icon_name, gint size, gint scale, XfwGetIconFunc get_icon, XfwGetIconFunc get_mini_icon);
+
 GDesktopAppInfo *_xfw_g_desktop_app_info_get(const gchar *app_id);
 
 void _xfw_screen_install_properties(GObjectClass *gklass);
@@ -135,6 +139,15 @@ void _xfw_workspace_install_properties(GObjectClass *gklass);
 void _xfw_window_install_properties(GObjectClass *gklass);
 void _xfw_application_install_properties(GObjectClass *gklass);
 void _xfw_application_instance_free(gpointer data);
+
+
+#ifdef ENABLE_X11
+Window _xfw_wnck_object_get_x11_window(GObject *wnck_object);
+GIcon *_xfw_wnck_object_get_gicon(GObject *wnck_object,
+                                  const gchar *primary_icon_name,
+                                  const gchar *secondary_icon_name,
+                                  const gchar *fallback_icon_name);
+#endif
 
 G_END_DECLS
 
