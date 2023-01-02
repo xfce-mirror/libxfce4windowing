@@ -44,7 +44,7 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-marshal.h"
-#include "xfw-workspace-group.h"
+#include "xfw-workspace-group-private.h"
 #include "xfw-workspace-manager.h"
 
 G_DEFINE_INTERFACE(XfwWorkspaceGroup, xfw_workspace_group, G_TYPE_OBJECT)

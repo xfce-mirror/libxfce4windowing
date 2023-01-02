@@ -55,18 +55,24 @@ libxfce4windowing_0_la_SOURCES = \
 	libxfce4windowing-private.c \
 	libxfce4windowing-private.h \
 	xfw-application.c \
+	xfw-application-private.h \
 	xfw-screen.c \
+	xfw-screen-private.h \
 	xfw-util.c \
 	xfw-window.c \
+	xfw-window-private.h \
 	xfw-workspace-dummy.c \
 	xfw-workspace-dummy.h \
 	xfw-workspace-group-dummy.c \
 	xfw-workspace-group-dummy.h \
+	xfw-workspace-group-private.h \
 	xfw-workspace-group.c \
 	xfw-workspace-manager-dummy.c \
 	xfw-workspace-manager-dummy.h \
 	xfw-workspace-manager.c \
-	xfw-workspace.c
+	xfw-workspace-manager-private.h \
+	xfw-workspace.c \
+	xfw-workspace-private.h
 
 if X11_ENABLED
 libxfce4windowing_0_la_SOURCES += \

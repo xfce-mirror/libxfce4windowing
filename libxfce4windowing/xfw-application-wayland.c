@@ -23,7 +23,7 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-screen-wayland.h"
-#include "xfw-application.h"
+#include "xfw-application-private.h"
 #include "xfw-application-wayland.h"
 
 enum {

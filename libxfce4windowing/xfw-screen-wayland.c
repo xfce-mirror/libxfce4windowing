@@ -27,8 +27,8 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
+#include "xfw-screen-private.h"
 #include "xfw-screen-wayland.h"
-#include "xfw-screen.h"
 #include "xfw-window-wayland.h"
 #include "xfw-workspace-manager-dummy.h"
 #include "xfw-workspace-manager-wayland.h"

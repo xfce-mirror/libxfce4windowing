@@ -44,8 +44,8 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-screen-wayland.h"
+#include "xfw-screen-private.h"
 #include "xfw-screen-x11.h"
-#include "xfw-screen.h"
 #include "xfw-util.h"
 #include "xfw-window.h"
 

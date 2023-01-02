@@ -23,10 +23,10 @@
 #include <libwnck/libwnck.h>
 
 #include "libxfce4windowing-private.h"
-#include "xfw-workspace-manager-dummy.h"
 #include "xfw-workspace-dummy.h"
 #include "xfw-workspace-group-dummy.h"
-#include "xfw-workspace-manager.h"
+#include "xfw-workspace-manager-dummy.h"
+#include "xfw-workspace-manager-private.h"
 
 struct _XfwWorkspaceManagerDummyPrivate {
     GdkScreen *screen;

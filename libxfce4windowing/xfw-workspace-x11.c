@@ -24,8 +24,8 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 #include "xfw-workspace-manager-x11.h"
+#include "xfw-workspace-private.h"
 #include "xfw-workspace-x11.h"
-#include "xfw-workspace.h"
 
 enum {
     PROP0,

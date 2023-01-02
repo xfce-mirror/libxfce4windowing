@@ -25,8 +25,8 @@
 #include "xfw-screen-x11.h"
 #include "xfw-screen.h"
 #include "xfw-util.h"
+#include "xfw-window-private.h"
 #include "xfw-window-x11.h"
-#include "xfw-window.h"
 #include "xfw-workspace-x11.h"
 #include "xfw-application-x11.h"
 

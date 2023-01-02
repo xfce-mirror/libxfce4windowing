@@ -29,8 +29,8 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-group-wayland.h"
+#include "xfw-workspace-manager-private.h"
 #include "xfw-workspace-manager-wayland.h"
-#include "xfw-workspace-manager.h"
 #include "xfw-workspace-wayland.h"
 
 enum {

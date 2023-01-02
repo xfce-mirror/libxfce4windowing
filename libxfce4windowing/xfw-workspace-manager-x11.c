@@ -24,8 +24,8 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-group-dummy.h"
+#include "xfw-workspace-manager-private.h"
 #include "xfw-workspace-manager-x11.h"
-#include "xfw-workspace-manager.h"
 #include "xfw-workspace-x11.h"
 
 struct _XfwWorkspaceManagerX11Private {

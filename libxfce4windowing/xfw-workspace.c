@@ -45,7 +45,7 @@
 #include "xfw-marshal.h"
 #include "xfw-window.h"
 #include "xfw-workspace-group.h"
-#include "xfw-workspace.h"
+#include "xfw-workspace-private.h"
 
 G_DEFINE_INTERFACE(XfwWorkspace, xfw_workspace, G_TYPE_OBJECT)
 

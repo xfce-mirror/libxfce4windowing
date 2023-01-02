@@ -26,8 +26,8 @@
 #include "xfw-util.h"
 #include "xfw-workspace-group-wayland.h"
 #include "xfw-workspace-group.h"
+#include "xfw-workspace-private.h"
 #include "xfw-workspace-wayland.h"
-#include "xfw-workspace.h"
 
 struct _XfwWorkspaceWaylandPrivate {
     XfwWorkspaceGroup *group;

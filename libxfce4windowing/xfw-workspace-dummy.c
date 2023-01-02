@@ -24,7 +24,7 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 #include "xfw-workspace-dummy.h"
-#include "xfw-workspace.h"
+#include "xfw-workspace-private.h"
 
 struct _XfwWorkspaceDummyPrivate {
     XfwWorkspaceGroup *group;

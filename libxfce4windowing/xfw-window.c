@@ -47,7 +47,7 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-marshal.h"
 #include "xfw-screen.h"
-#include "xfw-window.h"
+#include "xfw-window-private.h"
 
 G_DEFINE_INTERFACE(XfwWindow, xfw_window, G_TYPE_OBJECT)
 

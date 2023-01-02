@@ -20,7 +20,7 @@
 #include "config.h"
 
 #include "libxfce4windowing-private.h"
-#include "xfw-application.h"
+#include "xfw-application-private.h"
 #include "xfw-application-x11.h"
 #include "xfw-util.h"
 #include "xfw-window.h"

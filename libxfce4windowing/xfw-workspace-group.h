@@ -64,38 +64,6 @@ typedef enum {
 
 GType xfw_workspace_group_capabilities_get_type(void) G_GNUC_CONST;
 
-struct _XfwWorkspaceGroupInterface {
-    /*< private >*/
-    GTypeInterface g_iface;
-
-    /*< public >*/
-
-    /* Signals */
-    void (*capabilities_changed)(XfwWorkspaceGroup *group,
-                                 XfwWorkspaceGroupCapabilities changed_mask,
-                                 XfwWorkspaceGroupCapabilities new_capabilities);
-    void (*workspace_created)(XfwWorkspaceGroup *group,
-                              XfwWorkspace *workspace);
-    void (*active_workspace_changed)(XfwWorkspaceGroup *group,
-                                     XfwWorkspace *previously_active_workspace);
-    void (*workspace_destroyed)(XfwWorkspaceGroup *group,
-                                XfwWorkspace *workspace);
-    void (*monitors_changed)(XfwWorkspaceGroup *group);
-    void (*viewports_changed)(XfwWorkspaceGroup *group);
-
-    /* Virtual Table */
-    XfwWorkspaceGroupCapabilities (*get_capabilities)(XfwWorkspaceGroup *group);
-    guint (*get_workspace_count)(XfwWorkspaceGroup *group);
-    GList *(*list_workspaces)(XfwWorkspaceGroup *group);
-    XfwWorkspace *(*get_active_workspace)(XfwWorkspaceGroup *group);
-    GList *(*get_monitors)(XfwWorkspaceGroup *group);
-    XfwWorkspaceManager *(*get_workspace_manager)(XfwWorkspaceGroup *group);
-
-    gboolean (*create_workspace)(XfwWorkspaceGroup *group, const gchar *name, GError **error);
-    gboolean (*move_viewport)(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
-    gboolean (*set_layout)(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
-};
-
 XfwWorkspaceGroupCapabilities xfw_workspace_group_get_capabilities(XfwWorkspaceGroup *group);
 guint xfw_workspace_group_get_workspace_count(XfwWorkspaceGroup *group);
 GList *xfw_workspace_group_list_workspaces(XfwWorkspaceGroup *group);

@@ -25,7 +25,7 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 #include "xfw-workspace-group-dummy.h"
-#include "xfw-workspace-group.h"
+#include "xfw-workspace-group-private.h"
 #include "xfw-workspace.h"
 
 enum {

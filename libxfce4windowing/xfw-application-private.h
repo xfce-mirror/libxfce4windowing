@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Brian Tarricone <brian@tarricone.org>
+ * Copyright (c) 2022 Gaël Bonithon <gael@xfce.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,35 +17,35 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __XFW_SCREEN_H__
-#define __XFW_SCREEN_H__
+#ifndef __XFW_APPLICATION_PRIVATE_H__
+#define __XFW_APPLICATION_PRIVATE_H__
 
 #if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <gdk/gdk.h>
-
-#include "xfw-window.h"
-#include "xfw-workspace-manager.h"
+#include "xfw-application.h"
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_SCREEN (xfw_screen_get_type())
-G_DECLARE_INTERFACE(XfwScreen, xfw_screen, XFW, SCREEN, GObject)
+struct _XfwApplicationInterface {
+    /*< private >*/
+    GTypeInterface g_iface;
 
-typedef struct _XfwScreenInterface XfwScreenIface;
+    /*< public >*/
 
-XfwScreen *xfw_screen_get_default(void);
+    /* Signals */
+    void (*icon_changed)(XfwApplication *app);
 
-XfwWorkspaceManager *xfw_screen_get_workspace_manager(XfwScreen *screen);
-GList *xfw_screen_get_windows(XfwScreen *screen);
-GList *xfw_screen_get_windows_stacked(XfwScreen *screen);
-XfwWindow *xfw_screen_get_active_window(XfwScreen *screen);
-gboolean xfw_screen_get_show_desktop(XfwScreen *screen);
-
-void xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show);
+    /* Virtual Table */
+    guint64 (*get_id)(XfwApplication *app);
+    const gchar *(*get_name)(XfwApplication *app);
+    GdkPixbuf *(*get_icon)(XfwApplication *app, gint size, gint scale);
+    GList *(*get_windows)(XfwApplication *app);
+    GList *(*get_instances)(XfwApplication *app);
+    XfwApplicationInstance *(*get_instance)(XfwApplication *app, XfwWindow *window);
+};
 
 G_END_DECLS
 
-#endif  /* !__XFW_SCREEN_H__ */
+#endif  /* !__XFW_APPLICATION_PRIVATE_H__ */

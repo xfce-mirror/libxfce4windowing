@@ -17,35 +17,33 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __XFW_SCREEN_H__
-#define __XFW_SCREEN_H__
+#ifndef __XFW_WORKSPACE_MANAGER_PRIVATE_H__
+#define __XFW_WORKSPACE_MANAGER_PRIVATE_H__
 
 #if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <gdk/gdk.h>
-
-#include "xfw-window.h"
 #include "xfw-workspace-manager.h"
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_SCREEN (xfw_screen_get_type())
-G_DECLARE_INTERFACE(XfwScreen, xfw_screen, XFW, SCREEN, GObject)
+struct _XfwWorkspaceManagerInterface {
+    /*< private >*/
+    GTypeInterface g_iface;
 
-typedef struct _XfwScreenInterface XfwScreenIface;
+    /*< public >*/
 
-XfwScreen *xfw_screen_get_default(void);
+    /* Signals */
+    void (*workspace_group_created)(XfwWorkspaceManager *manager,
+                                    XfwWorkspaceGroup *group);
+    void (*workspace_group_destroyed)(XfwWorkspaceManager *manager,
+                                      XfwWorkspaceGroup *group);
 
-XfwWorkspaceManager *xfw_screen_get_workspace_manager(XfwScreen *screen);
-GList *xfw_screen_get_windows(XfwScreen *screen);
-GList *xfw_screen_get_windows_stacked(XfwScreen *screen);
-XfwWindow *xfw_screen_get_active_window(XfwScreen *screen);
-gboolean xfw_screen_get_show_desktop(XfwScreen *screen);
-
-void xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show);
+    /* Virtual Table */
+    GList *(*list_workspace_groups)(XfwWorkspaceManager *manager);
+};
 
 G_END_DECLS
 
-#endif  /* !__XFW_SCREEN_H__ */
+#endif  /* !__XFW_WORKSPACE_MANAGER_PRIVATE_H__ */

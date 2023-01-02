@@ -36,22 +36,6 @@ G_DECLARE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, XFW, WORKSPACE_M
 
 typedef struct _XfwWorkspaceManagerInterface XfwWorkspaceManagerIface;
 
-struct _XfwWorkspaceManagerInterface {
-    /*< private >*/
-    GTypeInterface g_iface;
-
-    /*< public >*/
-
-    /* Signals */
-    void (*workspace_group_created)(XfwWorkspaceManager *manager,
-                                    XfwWorkspaceGroup *group);
-    void (*workspace_group_destroyed)(XfwWorkspaceManager *manager,
-                                      XfwWorkspaceGroup *group);
-
-    /* Virtual Table */
-    GList *(*list_workspace_groups)(XfwWorkspaceManager *manager);
-};
-
 GList *xfw_workspace_manager_list_workspace_groups(XfwWorkspaceManager *manager);
 
 G_END_DECLS

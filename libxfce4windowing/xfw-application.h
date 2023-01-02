@@ -37,24 +37,6 @@ G_DECLARE_INTERFACE(XfwApplication, xfw_application, XFW, APPLICATION, GObject)
 typedef struct _XfwApplicationInterface XfwApplicationIface;
 typedef struct _XfwApplicationInstance XfwApplicationInstance;
 
-struct _XfwApplicationInterface {
-    /*< private >*/
-    GTypeInterface g_iface;
-
-    /*< public >*/
-
-    /* Signals */
-    void (*icon_changed)(XfwApplication *app);
-
-    /* Virtual Table */
-    guint64 (*get_id)(XfwApplication *app);
-    const gchar *(*get_name)(XfwApplication *app);
-    GdkPixbuf *(*get_icon)(XfwApplication *app, gint size, gint scale);
-    GList *(*get_windows)(XfwApplication *app);
-    GList *(*get_instances)(XfwApplication *app);
-    XfwApplicationInstance *(*get_instance)(XfwApplication *app, XfwWindow *window);
-};
-
 /**
  * XfwApplicationInstance:
  * @pid: the process ID.

@@ -76,34 +76,6 @@ typedef enum {
     XFW_WORKSPACE_STATE_VIRTUAL = (1 << 3),
 } XfwWorkspaceState;
 
-struct _XfwWorkspaceInterface {
-    /*< private >*/
-    GTypeInterface g_iface;
-
-    /*< public >*/
-
-    /* Signals */
-    void (*name_changed)(XfwWorkspace *workspace);
-    void (*capabilities_changed)(XfwWorkspace *workspace, XfwWorkspaceCapabilities changed_mask, XfwWorkspaceCapabilities new_capabilities);
-    void (*state_changed)(XfwWorkspace *workspace, XfwWorkspaceState changed_mask, XfwWorkspaceState new_state);
-
-    /* Virtual Table */
-    const gchar *(*get_id)(XfwWorkspace *workspace);
-    const gchar *(*get_name)(XfwWorkspace *workspace);
-    XfwWorkspaceCapabilities (*get_capabilities)(XfwWorkspace *workspace);
-    XfwWorkspaceState (*get_state)(XfwWorkspace *workspace);
-    guint (*get_number)(XfwWorkspace *workspace);
-    XfwWorkspaceGroup *(*get_workspace_group)(XfwWorkspace *workspace);
-
-    gint (*get_layout_row)(XfwWorkspace *workspace);
-    gint (*get_layout_column)(XfwWorkspace *workspace);
-    XfwWorkspace *(*get_neighbor)(XfwWorkspace *workspace, XfwDirection direction);
-    GdkRectangle *(*get_geometry)(XfwWorkspace *workspace);
-
-    gboolean (*activate)(XfwWorkspace *workspace, GError **error);
-    gboolean (*remove)(XfwWorkspace *workspace, GError **error);
-};
-
 GType xfw_workspace_capabilities_get_type(void) G_GNUC_CONST;
 GType xfw_workspace_state_get_type(void) G_GNUC_CONST;
 

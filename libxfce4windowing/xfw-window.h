@@ -147,57 +147,6 @@ typedef enum {
   XFW_WINDOW_TYPE_SPLASHSCREEN = 7,
 } XfwWindowType;
 
-struct _XfwWindowInterface {
-    /*< private >*/
-    GTypeInterface g_iface;
-
-    /*< public >*/
-
-    /* Signals */
-    void (*name_changed)(XfwWindow *window);
-    void (*icon_changed)(XfwWindow *window);
-    void (*type_changed)(XfwWindow *window, XfwWindowType old_type);
-    void (*state_changed)(XfwWindow *window, XfwWindowState changed_mask, XfwWindowState new_state);
-    void (*capabilities_changed)(XfwWindow *window, XfwWindowCapabilities changed_mask, XfwWindowCapabilities new_capabilities);
-    void (*geometry_changed)(XfwWindow *window);
-    void (*workspace_changed)(XfwWindow *window);
-    void (*closed)(XfwWindow *window);
-
-    /* Virtual Table */
-    guint64 (*get_id)(XfwWindow *window);
-    const gchar *(*get_name)(XfwWindow *window);
-    GdkPixbuf *(*get_icon)(XfwWindow *window, gint size, gint scale);
-    XfwWindowType (*get_window_type)(XfwWindow *window);
-    XfwWindowState (*get_state)(XfwWindow *window);
-    XfwWindowCapabilities (*get_capabilities)(XfwWindow *window);
-    GdkRectangle *(*get_geometry)(XfwWindow *window);
-    XfwScreen *(*get_screen)(XfwWindow *window);
-    XfwWorkspace *(*get_workspace)(XfwWindow *window);
-    GList *(*get_monitors)(XfwWindow *window);
-    XfwApplication *(*get_application)(XfwWindow *window);
-
-    gboolean (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
-    gboolean (*close)(XfwWindow *window, guint64 event_timestamp, GError **error);
-    gboolean (*start_move)(XfwWindow *window, GError **error);
-    gboolean (*start_resize)(XfwWindow *window, GError **error);
-    gboolean (*set_geometry)(XfwWindow *window, const GdkRectangle *rect, GError **error);
-    gboolean (*set_button_geometry)(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error);
-    gboolean (*move_to_workspace)(XfwWindow *window, XfwWorkspace *workspace, GError **error);
-
-    gboolean (*set_minimized)(XfwWindow *window, gboolean is_minimized, GError **error);
-    gboolean (*set_maximized)(XfwWindow *window, gboolean is_maximized, GError **error);
-    gboolean (*set_fullscreen)(XfwWindow *window, gboolean is_fullscreen, GError **error);
-    gboolean (*set_skip_pager)(XfwWindow *window, gboolean is_skip_pager, GError **error);
-    gboolean (*set_skip_tasklist)(XfwWindow *window, gboolean is_skip_tasklist, GError **error);
-    gboolean (*set_pinned)(XfwWindow *window, gboolean is_pinned, GError **error);
-    gboolean (*set_shaded)(XfwWindow *window, gboolean is_shaded, GError **error);
-    gboolean (*set_above)(XfwWindow *window, gboolean is_above, GError **error);
-    gboolean (*set_below)(XfwWindow *window, gboolean is_below, GError **error);
-
-    gboolean (*is_on_workspace)(XfwWindow *window, XfwWorkspace *workspace);
-    gboolean (*is_in_viewport)(XfwWindow *window, XfwWorkspace *workspace);
-};
-
 GType xfw_window_type_get_type(void) G_GNUC_CONST;
 GType xfw_window_state_get_type(void) G_GNUC_CONST;
 GType xfw_window_capabilities_get_type(void) G_GNUC_CONST;

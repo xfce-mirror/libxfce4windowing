@@ -36,7 +36,7 @@
 #include "config.h"
 
 #include "libxfce4windowing-private.h"
-#include "xfw-application.h"
+#include "xfw-application-private.h"
 
 G_DEFINE_INTERFACE(XfwApplication, xfw_application, G_TYPE_OBJECT)
 
