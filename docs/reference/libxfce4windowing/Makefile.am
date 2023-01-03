@@ -39,6 +39,7 @@ IGNORE_HFILES = \
 	xfw-screen-x11.h \
 	xfw-window-wayland.h \
 	xfw-window-x11.h \
+	xfw-wnck-icon.h \
 	xfw-workspace-dummy.h \
 	xfw-workspace-group-dummy.h \
 	xfw-workspace-group-wayland.h \

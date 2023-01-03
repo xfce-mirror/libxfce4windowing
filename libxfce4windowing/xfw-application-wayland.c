@@ -52,6 +52,7 @@ static void xfw_application_wayland_finalize(GObject *obj);
 static guint64 xfw_application_wayland_get_id(XfwApplication *app);
 static const gchar *xfw_application_wayland_get_name(XfwApplication *app);
 static GdkPixbuf *xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale);
+static GIcon *xfw_application_wayland_get_gicon(XfwApplication *app);
 static GList *xfw_application_wayland_get_windows(XfwApplication *app);
 static GList *xfw_application_wayland_get_instances(XfwApplication *app);
 static XfwApplicationInstance *xfw_application_wayland_get_instance(XfwApplication *app, XfwWindow *window);
@@ -188,6 +189,7 @@ xfw_application_wayland_iface_init(XfwApplicationIface *iface) {
     iface->get_id = xfw_application_wayland_get_id;
     iface->get_name = xfw_application_wayland_get_name;
     iface->get_icon = xfw_application_wayland_get_icon;
+    iface->get_gicon = xfw_application_wayland_get_gicon;
     iface->get_windows = xfw_application_wayland_get_windows;
     iface->get_instances = xfw_application_wayland_get_instances;
     iface->get_instance = xfw_application_wayland_get_instance;
@@ -226,6 +228,17 @@ xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale) {
     }
 
     return priv->icon;
+}
+
+static GIcon *
+xfw_application_wayland_get_gicon(XfwApplication *app) {
+    XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(app)->priv;
+
+    if (priv->icon_name != NULL) {
+        return g_themed_icon_new(priv->icon_name);
+    } else {
+        return g_themed_icon_new_with_default_fallbacks("application-x-executable-symbolic");
+    }
 }
 
 static GList *

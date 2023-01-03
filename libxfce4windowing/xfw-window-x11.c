@@ -27,6 +27,7 @@
 #include "xfw-util.h"
 #include "xfw-window-private.h"
 #include "xfw-window-x11.h"
+#include "xfw-wnck-icon.h"
 #include "xfw-workspace-x11.h"
 #include "xfw-application-x11.h"
 
@@ -38,9 +39,12 @@ enum {
 struct _XfwWindowX11Private {
     XfwScreen *screen;
     WnckWindow *wnck_window;
+
+    GIcon *gicon;
     GdkPixbuf *icon;
     gint icon_size;
     gint icon_scale;
+
     XfwWindowType window_type;
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
@@ -58,6 +62,7 @@ static void xfw_window_x11_finalize(GObject *obj);
 static guint64 xfw_window_x11_get_id(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GdkPixbuf *xfw_window_x11_get_icon(XfwWindow *window, gint size, gint scale);
+static GIcon * xfw_window_x11_get_gicon(XfwWindow *window);
 static XfwWindowType xfw_window_x11_get_window_type(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
 static XfwWindowCapabilities xfw_window_x11_get_capabilities(XfwWindow *window);
@@ -243,6 +248,9 @@ xfw_window_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 
+    if (window->priv->gicon != NULL) {
+        g_object_unref(window->priv->gicon);
+    }
     if (window->priv->icon != NULL) {
         g_object_unref(window->priv->icon);
     }
@@ -260,6 +268,7 @@ xfw_window_x11_window_init(XfwWindowIface *iface) {
     iface->get_id = xfw_window_x11_get_id;
     iface->get_name = xfw_window_x11_get_name;
     iface->get_icon = xfw_window_x11_get_icon;
+    iface->get_gicon = xfw_window_x11_get_gicon;
     iface->get_window_type = xfw_window_x11_get_window_type;
     iface->get_state = xfw_window_x11_get_state;
     iface->get_capabilities = xfw_window_x11_get_capabilities;
@@ -303,21 +312,39 @@ xfw_window_x11_get_icon(XfwWindow *window, gint size, gint scale) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
 
     if (priv->icon == NULL || size != priv->icon_size || scale != priv->icon_scale) {
-        const gchar *icon_name = NULL;
-        if (wnck_window_get_icon_is_fallback(priv->wnck_window)) {
-            icon_name = _xfw_application_x11_get_icon_name(XFW_APPLICATION_X11(priv->app));
-        }
-        priv->icon_size = size;
+        GIcon *icon;
+
         g_clear_object(&priv->icon);
-        priv->icon = _xfw_wnck_object_get_icon(G_OBJECT(priv->wnck_window),
-                                               icon_name,
-                                               size,
-                                               scale,
-                                               (XfwGetIconFunc)wnck_window_get_icon,
-                                               (XfwGetIconFunc)wnck_window_get_mini_icon);
+
+        icon = xfw_window_x11_get_gicon(window);
+        if (G_LIKELY(icon != NULL)) {
+            GtkIconInfo *icon_info = gtk_icon_theme_lookup_by_gicon_for_scale(gtk_icon_theme_get_default(),
+                                                                              icon,
+                                                                              size,
+                                                                              scale,
+                                                                              GTK_ICON_LOOKUP_FORCE_SIZE);
+            if (G_LIKELY(icon_info != NULL)) {
+                priv->icon = gtk_icon_info_load_icon(icon_info, NULL);
+                g_object_unref(icon_info);
+            }
+        }
     }
 
     return priv->icon;
+}
+
+static GIcon *
+xfw_window_x11_get_gicon(XfwWindow *window) {
+    XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
+    if (priv->gicon == NULL) {
+        priv->gicon = _xfw_wnck_object_get_gicon(G_OBJECT(priv->wnck_window),
+                                                 NULL,
+                                                 priv->app != NULL ? _xfw_application_x11_get_icon_name(XFW_APPLICATION_X11(priv->app)) : NULL,
+                                                 "window-maximize-symbolic");
+    }
+
+    return g_object_ref(priv->gicon);
 }
 
 static XfwWindowType
@@ -651,12 +678,14 @@ name_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
 static void
 icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     g_clear_object(&window->priv->icon);
+    g_clear_object(&window->priv->gicon);
     g_signal_emit_by_name(window, "icon-changed");
 }
 
 static void
 app_name_changed(XfwApplication *app, GParamSpec *pspec, XfwWindowX11 *window) {
     g_clear_object(&window->priv->icon);
+    g_clear_object(&window->priv->gicon);
     g_signal_emit_by_name(window, "icon-changed");
 }
 
