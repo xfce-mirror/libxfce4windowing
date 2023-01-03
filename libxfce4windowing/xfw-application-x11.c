@@ -24,6 +24,7 @@
 #include "xfw-application-x11.h"
 #include "xfw-util.h"
 #include "xfw-window.h"
+#include "xfw-wnck-icon.h"
 
 enum {
     PROP0,
@@ -32,6 +33,7 @@ enum {
 
 struct _XfwApplicationX11Private {
     WnckClassGroup *wnck_group;
+    GIcon *gicon;
     GdkPixbuf *icon;
     gchar *icon_name;
     gint icon_size;
@@ -51,6 +53,7 @@ static void xfw_application_x11_finalize(GObject *obj);
 static guint64 xfw_application_x11_get_id(XfwApplication *app);
 static const gchar *xfw_application_x11_get_name(XfwApplication *app);
 static GdkPixbuf *xfw_application_x11_get_icon(XfwApplication *app, gint size, gint scale);
+static GIcon *xfw_application_x11_get_gicon(XfwApplication *app);
 static GList *xfw_application_x11_get_windows(XfwApplication *app);
 static GList *xfw_application_x11_get_instances(XfwApplication *app);
 static XfwApplicationInstance *xfw_application_x11_get_instance(XfwApplication *app, XfwWindow *window);
@@ -158,6 +161,9 @@ xfw_application_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(priv->wnck_group, icon_changed, obj);
     g_signal_handlers_disconnect_by_func(priv->wnck_group, name_changed, obj);
 
+    if (priv->gicon != NULL) {
+        g_object_unref(priv->gicon);
+    }
     if (priv->icon != NULL) {
         g_object_unref(priv->icon);
     }
@@ -180,6 +186,7 @@ xfw_application_x11_iface_init(XfwApplicationIface *iface) {
     iface->get_id = xfw_application_x11_get_id;
     iface->get_name = xfw_application_x11_get_name;
     iface->get_icon = xfw_application_x11_get_icon;
+    iface->get_gicon = xfw_application_x11_get_gicon;
     iface->get_windows = xfw_application_x11_get_windows;
     iface->get_instances = xfw_application_x11_get_instances;
     iface->get_instance = xfw_application_x11_get_instance;
@@ -200,23 +207,39 @@ xfw_application_x11_get_icon(XfwApplication *app, gint size, gint scale) {
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(app)->priv;
 
     if (priv->icon == NULL || size != priv->icon_size || scale != priv->icon_scale) {
-        GList *wnck_apps = g_hash_table_get_keys(priv->instances);
-        const gchar *icon_name = NULL;
-        if (wnck_application_get_icon_is_fallback(wnck_apps->data)) {
-            icon_name = priv->icon_name;
-        }
-        g_list_free(wnck_apps);
-        priv->icon_size = size;
+        GIcon *icon;
+
         g_clear_object(&priv->icon);
-        priv->icon = _xfw_wnck_object_get_icon(G_OBJECT(priv->wnck_group),
-                                               icon_name,
-                                               size,
-                                               scale,
-                                               (XfwGetIconFunc)wnck_class_group_get_icon,
-                                               (XfwGetIconFunc)wnck_class_group_get_mini_icon);
+
+        icon = xfw_application_x11_get_gicon(app);
+        if (G_LIKELY(icon != NULL)) {
+            GtkIconInfo *icon_info = gtk_icon_theme_lookup_by_gicon_for_scale(gtk_icon_theme_get_default(),
+                                                                              icon,
+                                                                              size,
+                                                                              scale,
+                                                                              GTK_ICON_LOOKUP_FORCE_SIZE);
+            if (G_LIKELY(icon_info != NULL)) {
+                priv->icon = gtk_icon_info_load_icon(icon_info, NULL);
+                g_object_unref(icon_info);
+            }
+        }
     }
 
     return priv->icon;
+}
+
+static GIcon *
+xfw_application_x11_get_gicon(XfwApplication *app) {
+    XfwApplicationX11Private *priv = XFW_APPLICATION_X11(app)->priv;
+
+    if (priv->gicon == NULL) {
+        priv->gicon = _xfw_wnck_object_get_gicon(G_OBJECT(priv->wnck_group),
+                                                 priv->icon_name,
+                                                 NULL,
+                                                 "application-x-executable-symbolic");
+    }
+
+    return g_object_ref(priv->gicon);
 }
 
 static GList *

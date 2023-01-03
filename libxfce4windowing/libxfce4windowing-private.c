@@ -22,14 +22,17 @@
 #include <glib/gi18n-lib.h>
 #ifdef ENABLE_X11
 #include <libwnck/libwnck.h>
+#include <gdk/gdkx.h>
 #endif
 
 #include "libxfce4windowing-private.h"
+#include "xfw-util.h"
+
+#ifdef ENABLE_X11
+#include "xfw-wnck-icon.h"
+#endif
 
 static gboolean inited = FALSE;
-#ifdef ENABLE_X11
-static gint wnck_default_icon_size = WNCK_DEFAULT_ICON_SIZE;
-#endif
 
 void
 _libxfce4windowing_init(void) {
@@ -40,69 +43,47 @@ _libxfce4windowing_init(void) {
 }
 
 #ifdef ENABLE_X11
-GdkPixbuf *
-_xfw_wnck_object_get_icon(GObject *wnck_object, const gchar *icon_name, gint size, gint scale, XfwGetIconFunc get_icon, XfwGetIconFunc get_mini_icon) {
-    GdkPixbuf *icon = NULL;
+Window
+_xfw_wnck_object_get_x11_window(GObject *wnck_object) {
+    g_return_val_if_fail(WNCK_IS_WINDOW(wnck_object) || WNCK_IS_CLASS_GROUP(wnck_object), None);
+
+    if (WNCK_IS_WINDOW(wnck_object)) {
+        return wnck_window_get_xid(WNCK_WINDOW(wnck_object));
+    } else if (WNCK_IS_CLASS_GROUP(wnck_object)) {
+        GList *windows = wnck_class_group_get_windows(WNCK_CLASS_GROUP(wnck_object));
+        if (windows != NULL) {
+            return wnck_window_get_xid(WNCK_WINDOW(windows->data));
+        } else {
+            return None;
+        }
+    } else {
+        g_assert_not_reached();
+    }
+}
+
+GIcon *
+_xfw_wnck_object_get_gicon(GObject *wnck_object,
+                           const gchar *primary_icon_name,
+                           const gchar *secondary_icon_name,
+                           const gchar *fallback_icon_name)
+{
+    GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
 
     g_return_val_if_fail(WNCK_IS_WINDOW(wnck_object) || WNCK_IS_CLASS_GROUP(wnck_object), NULL);
 
-    if (size * scale > wnck_default_icon_size) {
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-        wnck_set_default_icon_size(size * scale);
-G_GNUC_END_IGNORE_DEPRECATIONS
-        wnck_default_icon_size = size * scale;
-    }
+    if (primary_icon_name != NULL && gtk_icon_theme_has_icon(icon_theme, primary_icon_name)) {
+        return g_themed_icon_new(primary_icon_name);
+    } else {
+        XfwWnckIcon *wnck_icon = _xfw_wnck_icon_new(wnck_object);
 
-    if (icon_name != NULL) {
-        icon = gtk_icon_theme_load_icon_for_scale(gtk_icon_theme_get_default(),
-                                                  icon_name,
-                                                  size,
-                                                  scale,
-                                                  GTK_ICON_LOOKUP_FORCE_SIZE,
-                                                  NULL);
-    }
-
-    if (icon == NULL) {
-        icon = get_icon(wnck_object);
-        if (icon != NULL) {
-            g_object_ref(icon);
+        if (G_LIKELY(wnck_icon != NULL)) {
+            return G_ICON(wnck_icon);
+        } else if (secondary_icon_name != NULL && gtk_icon_theme_has_icon(icon_theme, secondary_icon_name)) {
+            return g_themed_icon_new(secondary_icon_name);
+        } else {
+            return g_themed_icon_new_with_default_fallbacks(fallback_icon_name);
         }
     }
-
-    if (icon == NULL) {
-        icon = get_mini_icon(wnck_object);
-        if (icon != NULL) {
-            g_object_ref(icon);
-        }
-    }
-
-    if (icon != NULL) {
-        gint full_size = size * scale;
-        gint width = gdk_pixbuf_get_width(icon);
-        gint height = gdk_pixbuf_get_height(icon);
-
-        if (width > full_size || height > full_size || (width < full_size && height < full_size)) {
-            GdkPixbuf *icon_scaled;
-            gdouble aspect = (gdouble)width / (gdouble)height;
-            gint new_width, new_height;
-
-            if (width == height) {
-                new_width = new_height = full_size;
-            } else if (width > height) {
-                new_width = full_size;
-                new_height = full_size / aspect;
-            } else {
-                new_width = full_size / aspect;
-                new_height = full_size;
-            }
-
-            icon_scaled = gdk_pixbuf_scale_simple(icon, new_width, new_height, GDK_INTERP_BILINEAR);
-            g_object_unref(icon);
-            icon = icon_scaled;
-        }
-    }
-
-    return icon;
 }
 #endif
 
