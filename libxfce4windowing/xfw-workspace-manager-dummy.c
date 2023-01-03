@@ -19,9 +19,6 @@
 
 #include "config.h"
 
-#include <gdk/gdkx.h>
-#include <libwnck/libwnck.h>
-
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-dummy.h"
 #include "xfw-workspace-group-dummy.h"

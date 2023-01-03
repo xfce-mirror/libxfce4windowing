@@ -43,11 +43,17 @@
 #include <limits.h>
 
 #include "libxfce4windowing-private.h"
-#include "xfw-screen-wayland.h"
 #include "xfw-screen-private.h"
-#include "xfw-screen-x11.h"
 #include "xfw-util.h"
 #include "xfw-window.h"
+
+#ifdef ENABLE_X11
+#include "xfw-screen-x11.h"
+#endif
+
+#ifdef ENABLE_WAYLAND
+#include "xfw-screen-wayland.h"
+#endif
 
 #define GDK_SCREEN_XFW_SCREEN_KEY "libxfce4windowing-xfw-screen"
 
