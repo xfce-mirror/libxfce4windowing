@@ -26,21 +26,23 @@
 
 #include <glib-object.h>
 
+#include "xfw-application-private.h"
 #include "xfw-window-wayland.h"
 
 G_BEGIN_DECLS
 
 #define XFW_TYPE_APPLICATION_WAYLAND (xfw_application_wayland_get_type())
-G_DECLARE_FINAL_TYPE(XfwApplicationWayland, xfw_application_wayland, XFW, APPLICATION_WAYLAND, GObject)
+G_DECLARE_FINAL_TYPE(XfwApplicationWayland, xfw_application_wayland, XFW, APPLICATION_WAYLAND, XfwApplication)
 
 typedef struct _XfwApplicationWaylandPrivate XfwApplicationWaylandPrivate;
 
 struct _XfwApplicationWayland {
-    GObject parent;
+    XfwApplication parent;
     /*< private >*/
     XfwApplicationWaylandPrivate *priv;
 };
 
 XfwApplicationWayland *_xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id);
+GIcon * _xfw_application_wayland_get_gicon_no_fallback(XfwApplicationWayland *app);
 
 #endif  /* __XFW_APPLICATION_WAYLAND_H__ */

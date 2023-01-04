@@ -28,9 +28,9 @@
 
 G_BEGIN_DECLS
 
-struct _XfwWindowInterface {
+struct _XfwWindowClass {
     /*< private >*/
-    GTypeInterface g_iface;
+    GObjectClass parent_class;
 
     /*< public >*/
 
@@ -48,6 +48,7 @@ struct _XfwWindowInterface {
     guint64 (*get_id)(XfwWindow *window);
     const gchar *(*get_name)(XfwWindow *window);
     GdkPixbuf *(*get_icon)(XfwWindow *window, gint size, gint scale);
+    GIcon *(*get_gicon)(XfwWindow *window);
     XfwWindowType (*get_window_type)(XfwWindow *window);
     XfwWindowState (*get_state)(XfwWindow *window);
     XfwWindowCapabilities (*get_capabilities)(XfwWindow *window);
@@ -78,6 +79,9 @@ struct _XfwWindowInterface {
     gboolean (*is_on_workspace)(XfwWindow *window, XfwWorkspace *workspace);
     gboolean (*is_in_viewport)(XfwWindow *window, XfwWorkspace *workspace);
 };
+
+XfwScreen *_xfw_window_get_screen(XfwWindow *window);
+void _xfw_window_invalidate_icon(XfwWindow *window);
 
 G_END_DECLS
 

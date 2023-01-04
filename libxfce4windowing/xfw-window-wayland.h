@@ -27,16 +27,17 @@
 #include <glib-object.h>
 
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
+#include "xfw-window-private.h"
 
 G_BEGIN_DECLS
 
 #define XFW_TYPE_WINDOW_WAYLAND (xfw_window_wayland_get_type())
-G_DECLARE_FINAL_TYPE(XfwWindowWayland, xfw_window_wayland, XFW, WINDOW_WAYLAND, GObject)
+G_DECLARE_FINAL_TYPE(XfwWindowWayland, xfw_window_wayland, XFW, WINDOW_WAYLAND, XfwWindow)
 
 typedef struct _XfwWindowWaylandPrivate XfwWindowWaylandPrivate;
 
 struct _XfwWindowWayland {
-    GObject parent;
+    XfwWindow parent;
     /*< private >*/
     XfwWindowWaylandPrivate *priv;
 };
