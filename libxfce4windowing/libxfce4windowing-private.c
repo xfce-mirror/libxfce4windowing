@@ -125,3 +125,21 @@ _xfw_g_desktop_app_info_get(const gchar *app_id) {
 
     return app_info;
 }
+
+GdkPixbuf *
+_xfw_gicon_load(GIcon *gicon, gint size, gint scale) {
+    GtkIconInfo *icon_info;
+    GdkPixbuf *icon = NULL;
+
+    icon_info = gtk_icon_theme_lookup_by_gicon_for_scale(gtk_icon_theme_get_default(),
+                                                         gicon,
+                                                         size,
+                                                         scale,
+                                                         GTK_ICON_LOOKUP_FORCE_SIZE);
+    if (G_LIKELY(icon_info != NULL)) {
+        icon = gtk_icon_info_load_icon(icon_info, NULL);
+        g_object_unref(icon_info);
+    }
+
+    return icon;
+}

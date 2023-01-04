@@ -35,13 +35,11 @@ G_BEGIN_DECLS
 typedef struct _XfwScreen XfwScreen;
 
 #define XFW_TYPE_WINDOW (xfw_window_get_type())
-G_DECLARE_INTERFACE(XfwWindow, xfw_window, XFW, WINDOW, GObject)
+G_DECLARE_DERIVABLE_TYPE(XfwWindow, xfw_window, XFW, WINDOW, GObject);
 
 #define XFW_TYPE_WINDOW_TYPE         (xfw_window_type_get_type())
 #define XFW_TYPE_WINDOW_STATE        (xfw_window_state_get_type())
 #define XFW_TYPE_WINDOW_CAPABILITIES (xfw_window_capabilities_get_type())
-
-typedef struct _XfwWindowInterface XfwWindowIface;
 
 /**
  * XfwWindowState:
