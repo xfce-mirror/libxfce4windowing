@@ -107,10 +107,10 @@ XfwWindow
 XfwWindowCapabilities
 XfwWindowState
 XfwWindowType
-XfwWindowIface
 xfw_window_get_id
 xfw_window_get_name
 xfw_window_get_icon
+xfw_window_get_gicon
 xfw_window_get_window_type
 xfw_window_get_state
 xfw_window_get_capabilities
@@ -149,7 +149,7 @@ xfw_window_is_urgent
 xfw_window_is_on_workspace
 xfw_window_is_in_viewport
 <SUBSECTION Standard>
-XfwWindowInterface
+XfwWindowClass
 XFW_TYPE_WINDOW
 XFW_TYPE_WINDOW_CAPABILITIES
 XFW_TYPE_WINDOW_STATE
@@ -163,14 +163,14 @@ xfw_window_type_get_type
 <FILE>xfw-application</FILE>
 XfwApplication
 XfwApplicationInstance
-XfwApplicationIface
 xfw_application_get_id
 xfw_application_get_name
 xfw_application_get_icon
+xfw_application_get_gicon
 xfw_application_get_windows
 xfw_application_get_instances
 xfw_application_get_instance
 <SUBSECTION Standard>
-XfwApplicationInterface
+XfwApplicationClass
 XFW_TYPE_APPLICATION
 </SECTION>
