@@ -27,17 +27,18 @@
 #include <glib-object.h>
 #include <libwnck/libwnck.h>
 
+#include "xfw-application-private.h"
 #include "xfw-window-x11.h"
 
 G_BEGIN_DECLS
 
 #define XFW_TYPE_APPLICATION_X11 (xfw_application_x11_get_type())
-G_DECLARE_FINAL_TYPE(XfwApplicationX11, xfw_application_x11, XFW, APPLICATION_X11, GObject)
+G_DECLARE_FINAL_TYPE(XfwApplicationX11, xfw_application_x11, XFW, APPLICATION_X11, XfwApplication)
 
 typedef struct _XfwApplicationX11Private XfwApplicationX11Private;
 
 struct _XfwApplicationX11 {
-    GObject parent;
+    XfwApplication parent;
     /*< private >*/
     XfwApplicationX11Private *priv;
 };

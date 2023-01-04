@@ -32,9 +32,9 @@ G_BEGIN_DECLS
 typedef struct _XfwWindow XfwWindow;
 
 #define XFW_TYPE_APPLICATION (xfw_application_get_type())
-G_DECLARE_INTERFACE(XfwApplication, xfw_application, XFW, APPLICATION, GObject)
+G_DECLARE_DERIVABLE_TYPE(XfwApplication, xfw_application, XFW, APPLICATION, GObject)
 
-typedef struct _XfwApplicationInterface XfwApplicationIface;
+typedef struct _XfwApplicationInstance XfwApplicationInstance;
 
 /**
  * XfwApplicationInstance:
