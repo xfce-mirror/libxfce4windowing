@@ -111,6 +111,7 @@ XfwWindowIface
 xfw_window_get_id
 xfw_window_get_name
 xfw_window_get_icon
+xfw_window_get_gicon
 xfw_window_get_window_type
 xfw_window_get_state
 xfw_window_get_capabilities
@@ -167,6 +168,7 @@ XfwApplicationIface
 xfw_application_get_id
 xfw_application_get_name
 xfw_application_get_icon
+xfw_application_get_gicon
 xfw_application_get_windows
 xfw_application_get_instances
 xfw_application_get_instance
