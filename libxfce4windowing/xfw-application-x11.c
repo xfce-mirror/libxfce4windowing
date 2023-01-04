@@ -24,6 +24,7 @@
 #include "xfw-application-x11.h"
 #include "xfw-util.h"
 #include "xfw-window.h"
+#include "xfw-wnck-icon.h"
 
 enum {
     PROP0,
@@ -32,10 +33,7 @@ enum {
 
 struct _XfwApplicationX11Private {
     WnckClassGroup *wnck_group;
-    GdkPixbuf *icon;
     gchar *icon_name;
-    gint icon_size;
-    gint icon_scale;
     GList *windows;
     GHashTable *instances;
     GList *instance_list;
@@ -43,7 +41,6 @@ struct _XfwApplicationX11Private {
 
 static GHashTable *wnck_groups = NULL;
 
-static void xfw_application_x11_iface_init(XfwApplicationIface *iface);
 static void xfw_application_x11_constructed(GObject *obj);
 static void xfw_application_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_application_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
@@ -51,6 +48,7 @@ static void xfw_application_x11_finalize(GObject *obj);
 static guint64 xfw_application_x11_get_id(XfwApplication *app);
 static const gchar *xfw_application_x11_get_name(XfwApplication *app);
 static GdkPixbuf *xfw_application_x11_get_icon(XfwApplication *app, gint size, gint scale);
+static GIcon *xfw_application_x11_get_gicon(XfwApplication *app);
 static GList *xfw_application_x11_get_windows(XfwApplication *app);
 static GList *xfw_application_x11_get_instances(XfwApplication *app);
 static XfwApplicationInstance *xfw_application_x11_get_instance(XfwApplication *app, XfwWindow *window);
@@ -58,19 +56,27 @@ static XfwApplicationInstance *xfw_application_x11_get_instance(XfwApplication *
 static void icon_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app);
 static void name_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app);
 
-G_DEFINE_TYPE_WITH_CODE(XfwApplicationX11, xfw_application_x11, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwApplicationX11)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_APPLICATION,
-                                              xfw_application_x11_iface_init))
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfwApplicationX11, xfw_application_x11, XFW_TYPE_APPLICATION)
+
 
 static void
 xfw_application_x11_class_init(XfwApplicationX11Class *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
+    XfwApplicationClass *app_class = XFW_APPLICATION_CLASS(klass);
 
     gklass->constructed = xfw_application_x11_constructed;
     gklass->set_property = xfw_application_x11_set_property;
     gklass->get_property = xfw_application_x11_get_property;
     gklass->finalize = xfw_application_x11_finalize;
+
+    app_class->get_id = xfw_application_x11_get_id;
+    app_class->get_name = xfw_application_x11_get_name;
+    app_class->get_icon = xfw_application_x11_get_icon;
+    app_class->get_gicon = xfw_application_x11_get_gicon;
+    app_class->get_windows = xfw_application_x11_get_windows;
+    app_class->get_instances = xfw_application_x11_get_instances;
+    app_class->get_instance = xfw_application_x11_get_instance;
 
     g_object_class_install_property(gklass,
                                     PROP_WNCK_GROUP,
@@ -79,7 +85,6 @@ xfw_application_x11_class_init(XfwApplicationX11Class *klass) {
                                                         "wnck-group",
                                                         WNCK_TYPE_CLASS_GROUP,
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
-    _xfw_application_install_properties(gklass);
 }
 
 static void
@@ -115,28 +120,11 @@ xfw_application_x11_set_property(GObject *obj, guint prop_id, const GValue *valu
 
 static void
 xfw_application_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec) {
-    XfwApplication *app = XFW_APPLICATION(obj);
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(obj)->priv;
 
     switch (prop_id) {
         case PROP_WNCK_GROUP:
             g_value_set_object(value, priv->wnck_group);
-            break;
-
-        case APPLICATION_PROP_ID:
-            g_value_set_uint64(value, xfw_application_x11_get_id(app));
-            break;
-
-        case APPLICATION_PROP_NAME:
-            g_value_set_string(value, xfw_application_x11_get_name(app));
-            break;
-
-        case APPLICATION_PROP_WINDOWS:
-            g_value_set_pointer(value, xfw_application_x11_get_windows(app));
-            break;
-
-        case APPLICATION_PROP_INSTANCES:
-            g_value_set_pointer(value, xfw_application_x11_get_instances(app));
             break;
 
         default:
@@ -158,9 +146,6 @@ xfw_application_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(priv->wnck_group, icon_changed, obj);
     g_signal_handlers_disconnect_by_func(priv->wnck_group, name_changed, obj);
 
-    if (priv->icon != NULL) {
-        g_object_unref(priv->icon);
-    }
     g_free(priv->icon_name);
     for (GList *lp = priv->windows; lp != NULL; lp = lp->next) {
         g_signal_handlers_disconnect_by_data(lp->data, obj);
@@ -175,16 +160,6 @@ xfw_application_x11_finalize(GObject *obj) {
     G_OBJECT_CLASS(xfw_application_x11_parent_class)->finalize(obj);
 }
 
-static void
-xfw_application_x11_iface_init(XfwApplicationIface *iface) {
-    iface->get_id = xfw_application_x11_get_id;
-    iface->get_name = xfw_application_x11_get_name;
-    iface->get_icon = xfw_application_x11_get_icon;
-    iface->get_windows = xfw_application_x11_get_windows;
-    iface->get_instances = xfw_application_x11_get_instances;
-    iface->get_instance = xfw_application_x11_get_instance;
-}
-
 static guint64
 xfw_application_x11_get_id(XfwApplication *app) {
     return xfw_window_get_id(XFW_APPLICATION_X11(app)->priv->windows->data);
@@ -197,26 +172,18 @@ xfw_application_x11_get_name(XfwApplication *app) {
 
 static GdkPixbuf *
 xfw_application_x11_get_icon(XfwApplication *app, gint size, gint scale) {
+    GIcon *gicon = xfw_application_get_gicon(XFW_APPLICATION(app));
+    return _xfw_gicon_load(gicon, size, scale);
+}
+
+static GIcon *
+xfw_application_x11_get_gicon(XfwApplication *app) {
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(app)->priv;
 
-    if (priv->icon == NULL || size != priv->icon_size || scale != priv->icon_scale) {
-        GList *wnck_apps = g_hash_table_get_keys(priv->instances);
-        const gchar *icon_name = NULL;
-        if (wnck_application_get_icon_is_fallback(wnck_apps->data)) {
-            icon_name = priv->icon_name;
-        }
-        g_list_free(wnck_apps);
-        priv->icon_size = size;
-        g_clear_object(&priv->icon);
-        priv->icon = _xfw_wnck_object_get_icon(G_OBJECT(priv->wnck_group),
-                                               icon_name,
-                                               size,
-                                               scale,
-                                               (XfwGetIconFunc)wnck_class_group_get_icon,
-                                               (XfwGetIconFunc)wnck_class_group_get_mini_icon);
-    }
-
-    return priv->icon;
+    return _xfw_wnck_object_get_gicon(G_OBJECT(priv->wnck_group),
+                                      priv->icon_name,
+                                      NULL,
+                                      "application-x-executable-symbolic");
 }
 
 static GList *
@@ -237,7 +204,7 @@ xfw_application_x11_get_instance(XfwApplication *app, XfwWindow *window) {
 
 static void
 icon_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app) {
-    g_clear_object(&app->priv->icon);
+    _xfw_application_invalidate_icon(XFW_APPLICATION(app));
     g_signal_emit_by_name(app, "icon-changed");
 }
 
@@ -253,7 +220,7 @@ name_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app) {
     if (g_strcmp0(icon_name, app->priv->icon_name) != 0) {
         g_free(app->priv->icon_name);
         app->priv->icon_name = icon_name;
-        g_clear_object(&app->priv->icon);
+        _xfw_application_invalidate_icon(XFW_APPLICATION(app));
         g_signal_emit_by_name(app, "icon-changed");
     }
     g_object_notify(G_OBJECT(app), "name");
