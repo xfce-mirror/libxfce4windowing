@@ -163,7 +163,6 @@ xfw_window_type_get_type
 <FILE>xfw-application</FILE>
 XfwApplication
 XfwApplicationInstance
-XfwApplicationIface
 xfw_application_get_id
 xfw_application_get_name
 xfw_application_get_icon
@@ -175,6 +174,6 @@ xfw_application_instance_get_pid
 xfw_application_instance_get_name
 xfw_application_instance_get_windows
 <SUBSECTION Standard>
-XfwApplicationInterface
+XfwApplicationClass
 XFW_TYPE_APPLICATION
 </SECTION>

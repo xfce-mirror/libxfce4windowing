@@ -38,10 +38,48 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-application-private.h"
 
-G_DEFINE_INTERFACE(XfwApplication, xfw_application, G_TYPE_OBJECT)
+#define XFW_APPLICATION_GET_PRIVATE(app) ((XfwApplicationPrivate *)xfw_application_get_instance_private(XFW_APPLICATION(app)))
+
+enum {
+    PROP0,
+    PROP_ID,
+    PROP_NAME,
+    PROP_WINDOWS,
+    PROP_INSTANCES,
+    PROP_GICON,
+};
+
+typedef struct _XfwApplicationPrivate {
+    GIcon *gicon;
+
+    GdkPixbuf *icon;
+    gint icon_size;
+    gint icon_scale;
+} XfwApplicationPrivate;
+
+
+static void xfw_application_set_property(GObject *object,
+                                         guint prop_id,
+                                         const GValue *value,
+                                         GParamSpec *pspec);
+static void xfw_application_get_property(GObject *object,
+                                         guint prop_id,
+                                         GValue *value,
+                                         GParamSpec *pspec);
+static void xfw_application_finalize(GObject *object);
+
+
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE(XfwApplication, xfw_application, G_TYPE_OBJECT)
+
 
 static void
-xfw_application_default_init(XfwApplicationIface *iface) {
+xfw_application_class_init(XfwApplicationClass *klass) {
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    gobject_class->set_property = xfw_application_set_property;
+    gobject_class->get_property = xfw_application_get_property;
+    gobject_class->finalize = xfw_application_finalize;
+
     /**
      * XfwApplication::icon-changed:
      * @app: the object which received the signal.
@@ -51,7 +89,7 @@ xfw_application_default_init(XfwApplicationIface *iface) {
     g_signal_new("icon-changed",
                  XFW_TYPE_APPLICATION,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwApplicationIface, icon_changed),
+                 G_STRUCT_OFFSET(XfwApplicationClass, icon_changed),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
@@ -61,46 +99,116 @@ xfw_application_default_init(XfwApplicationIface *iface) {
      *
      * The #XfwWindow:id of the first window in #XfwApplication:windows.
      **/
-    g_object_interface_install_property(iface,
-                                        g_param_spec_uint64("id",
-                                                            "id",
-                                                            "id",
-                                                            0, G_MAXUINT64, 0,
-                                                            G_PARAM_READABLE));
+    g_object_class_install_property(gobject_class,
+                                    PROP_ID,
+                                    g_param_spec_uint64("id",
+                                                        "id",
+                                                        "id",
+                                                        0, G_MAXUINT64, 0,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwApplication:name:
      *
      * The application name.
      **/
-    g_object_interface_install_property(iface,
-                                        g_param_spec_string("name",
-                                                            "name",
-                                                            "name",
-                                                            NULL,
-                                                            G_PARAM_READABLE));
+    g_object_class_install_property(gobject_class,
+                                    PROP_NAME,
+                                    g_param_spec_string("name",
+                                                        "name",
+                                                        "name",
+                                                        NULL,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwApplication:windows:
      *
      * The list of #XfwWindow belonging to the application.
      **/
-    g_object_interface_install_property(iface,
-                                        g_param_spec_pointer("windows",
-                                                             "windows",
-                                                             "windows",
-                                                             G_PARAM_READABLE));
+    g_object_class_install_property(gobject_class,
+                                    PROP_WINDOWS,
+                                    g_param_spec_pointer("windows",
+                                                         "windows",
+                                                         "windows",
+                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwApplication:instances:
      *
      * The list of #XfwApplicationInstance belonging to the application.
      **/
-    g_object_interface_install_property(iface,
-                                        g_param_spec_pointer("instances",
-                                                             "instances",
-                                                             "instances",
-                                                             G_PARAM_READABLE));
+    g_object_class_install_property(gobject_class,
+                                    PROP_INSTANCES,
+                                    g_param_spec_pointer("instances",
+                                                         "instances",
+                                                         "instances",
+                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwApplication:gicon:
+     *
+     * The #GIcon that represents this application.
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_GICON,
+                                    g_param_spec_object("gicon",
+                                                        "gicon",
+                                                        "gicon",
+                                                        G_TYPE_ICON,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+}
+
+static void
+xfw_application_init(XfwApplication *app) {}
+
+static void
+xfw_application_set_property(GObject *object,
+                             guint prop_id,
+                             const GValue *value,
+                             GParamSpec *pspec)
+{
+    G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+}
+
+static void
+xfw_application_get_property(GObject *object,
+                             guint prop_id,
+                             GValue *value,
+                             GParamSpec *pspec)
+{
+    XfwApplication *app = XFW_APPLICATION(object);
+
+    switch (prop_id) {
+        case PROP_ID:
+            g_value_set_uint64(value, xfw_application_get_id(app));
+            break;
+
+        case PROP_NAME:
+            g_value_set_string(value, xfw_application_get_name(app));
+            break;
+
+        case PROP_WINDOWS:
+            g_value_set_pointer(value, xfw_application_get_windows(app));
+            break;
+
+        case PROP_INSTANCES:
+            g_value_set_pointer(value, xfw_application_get_instances(app));
+            break;
+
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+            break;
+    }
+}
+
+static void
+xfw_application_finalize(GObject *object) {
+    XfwApplicationPrivate *priv = XFW_APPLICATION_GET_PRIVATE(object);
+
+    g_clear_object(&priv->gicon);
+    g_clear_object(&priv->icon);
+
+    G_OBJECT_CLASS(xfw_application_parent_class)->finalize(object);
 }
 
 /**
@@ -114,10 +222,10 @@ xfw_application_default_init(XfwApplicationIface *iface) {
  **/
 guint64
 xfw_application_get_id(XfwApplication *app) {
-    XfwApplicationIface *iface;
+    XfwApplicationClass *klass;
     g_return_val_if_fail(XFW_IS_APPLICATION(app), 0);
-    iface = XFW_APPLICATION_GET_IFACE(app);
-    return (*iface->get_id)(app);
+    klass = XFW_APPLICATION_GET_CLASS(app);
+    return (*klass->get_id)(app);
 }
 
 /**
@@ -131,10 +239,10 @@ xfw_application_get_id(XfwApplication *app) {
  **/
 const gchar *
 xfw_application_get_name(XfwApplication *app) {
-    XfwApplicationIface *iface;
+    XfwApplicationClass *klass;
     g_return_val_if_fail(XFW_IS_APPLICATION(app), NULL);
-    iface = XFW_APPLICATION_GET_IFACE(app);
-    return (*iface->get_name)(app);
+    klass = XFW_APPLICATION_GET_CLASS(app);
+    return (*klass->get_name)(app);
 }
 
 /**
@@ -150,10 +258,26 @@ xfw_application_get_name(XfwApplication *app) {
  **/
 GdkPixbuf *
 xfw_application_get_icon(XfwApplication *app, gint size, gint scale) {
-    XfwApplicationIface *iface;
+    XfwApplicationPrivate *priv;
+
     g_return_val_if_fail(XFW_IS_APPLICATION(app), NULL);
-    iface = XFW_APPLICATION_GET_IFACE(app);
-    return (*iface->get_icon)(app, size, scale);
+
+    priv = XFW_APPLICATION_GET_PRIVATE(app);
+    if (priv->icon == NULL || priv->icon_size != size || priv->icon_scale != scale) {
+        XfwApplicationClass *klass = XFW_APPLICATION_GET_CLASS(app);
+
+        if (priv->icon != NULL) {
+            g_object_unref(priv->icon);
+        }
+        priv->icon = klass->get_icon(app, size, scale);
+
+        if (priv->icon != NULL) {
+            priv->icon_size = size;
+            priv->icon_scale = scale;
+        }
+    }
+
+    return priv->icon;
 }
 
 /**
@@ -162,17 +286,23 @@ xfw_application_get_icon(XfwApplication *app, gint size, gint scale) {
  *
  * Fetches @app's icon as a size-independent #GIcon.
  *
- * Return value: (nullable) (transfer none): a #GIcon, owned by @app,
- * or %NULL if @app has no icon.
+ * Return value: (not nullable) (transfer none): a #GIcon, owned by @app.
  *
  * Since: 4.19.1
  **/
 GIcon *
 xfw_application_get_gicon(XfwApplication *app) {
-    XfwApplicationIface *iface;
+    XfwApplicationPrivate *priv;
+
     g_return_val_if_fail(XFW_IS_APPLICATION(app), NULL);
-    iface = XFW_APPLICATION_GET_IFACE(app);
-    return (*iface->get_gicon)(app);
+
+    priv = XFW_APPLICATION_GET_PRIVATE(app);
+    if (priv->gicon == NULL) {
+        XfwApplicationClass *klass = XFW_APPLICATION_GET_CLASS(app);
+        priv->gicon = klass->get_gicon(app);
+    }
+
+    return priv->gicon;
 }
 
 /**
@@ -187,10 +317,10 @@ xfw_application_get_gicon(XfwApplication *app) {
  **/
 GList *
 xfw_application_get_windows(XfwApplication *app) {
-    XfwApplicationIface *iface;
+    XfwApplicationClass *klass;
     g_return_val_if_fail(XFW_IS_APPLICATION(app), NULL);
-    iface = XFW_APPLICATION_GET_IFACE(app);
-    return (*iface->get_windows)(app);
+    klass = XFW_APPLICATION_GET_CLASS(app);
+    return (*klass->get_windows)(app);
 }
 
 /**
@@ -206,10 +336,10 @@ xfw_application_get_windows(XfwApplication *app) {
  **/
 GList *
 xfw_application_get_instances(XfwApplication *app) {
-    XfwApplicationIface *iface;
+    XfwApplicationClass *klass;
     g_return_val_if_fail(XFW_IS_APPLICATION(app), NULL);
-    iface = XFW_APPLICATION_GET_IFACE(app);
-    return (*iface->get_instances)(app);
+    klass = XFW_APPLICATION_GET_CLASS(app);
+    return (*klass->get_instances)(app);
 }
 
 /**
@@ -227,10 +357,10 @@ xfw_application_get_instances(XfwApplication *app) {
  **/
 XfwApplicationInstance *
 xfw_application_get_instance(XfwApplication *app, XfwWindow *window) {
-    XfwApplicationIface *iface;
+    XfwApplicationClass *klass;
     g_return_val_if_fail(XFW_IS_APPLICATION(app), NULL);
-    iface = XFW_APPLICATION_GET_IFACE(app);
-    return (*iface->get_instance)(app, window);
+    klass = XFW_APPLICATION_GET_CLASS(app);
+    return (*klass->get_instance)(app, window);
 }
 
 /**
@@ -284,11 +414,13 @@ xfw_application_instance_get_windows(XfwApplicationInstance *instance) {
 }
 
 void
-_xfw_application_install_properties(GObjectClass *gklass) {
-    g_object_class_override_property(gklass, APPLICATION_PROP_ID, "id");
-    g_object_class_override_property(gklass, APPLICATION_PROP_NAME, "name");
-    g_object_class_override_property(gklass, APPLICATION_PROP_WINDOWS, "windows");
-    g_object_class_override_property(gklass, APPLICATION_PROP_WINDOWS, "instances");
+_xfw_application_invalidate_icon(XfwApplication *app) {
+    XfwApplicationPrivate *priv = XFW_APPLICATION_GET_PRIVATE(app);
+
+    g_clear_object(&priv->icon);
+    g_clear_object(&priv->gicon);
+    priv->icon_size = 0;
+    priv->icon_scale = 0;
 }
 
 void
