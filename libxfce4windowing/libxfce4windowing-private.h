@@ -109,13 +109,6 @@ enum {
     WORKSPACE_PROP_NUMBER,
 };
 
-enum {
-    APPLICATION_PROP_ID = 0x6000,
-    APPLICATION_PROP_NAME,
-    APPLICATION_PROP_WINDOWS,
-    APPLICATION_PROP_INSTANCES,
-};
-
 void _libxfce4windowing_init(void);
 
 GDesktopAppInfo *_xfw_g_desktop_app_info_get(const gchar *app_id);
@@ -125,7 +118,6 @@ void _xfw_screen_install_properties(GObjectClass *gklass);
 void _xfw_workspace_manager_install_properties(GObjectClass *gklass);
 void _xfw_workspace_group_install_properties(GObjectClass *gklass);
 void _xfw_workspace_install_properties(GObjectClass *gklass);
-void _xfw_application_install_properties(GObjectClass *gklass);
 void _xfw_application_instance_free(gpointer data);
 
 #ifdef ENABLE_X11

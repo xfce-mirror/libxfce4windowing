@@ -28,9 +28,9 @@
 
 G_BEGIN_DECLS
 
-struct _XfwApplicationInterface {
+struct _XfwApplicationClass {
     /*< private >*/
-    GTypeInterface g_iface;
+    GObjectClass parent_class;
 
     /*< public >*/
 
@@ -46,6 +46,8 @@ struct _XfwApplicationInterface {
     GList *(*get_instances)(XfwApplication *app);
     XfwApplicationInstance *(*get_instance)(XfwApplication *app, XfwWindow *window);
 };
+
+void _xfw_application_invalidate_icon(XfwApplication *app);
 
 G_END_DECLS
 
