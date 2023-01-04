@@ -229,8 +229,10 @@ xfw_window_wayland_get_icon(XfwWindow *window, gint size, gint scale) {
 static GIcon *
 xfw_window_wayland_get_gicon(XfwWindow *window) {
     XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
-    if (wwindow->priv->app != NULL) {
-        return xfw_application_get_gicon(wwindow->priv->app);
+    GIcon *gicon = _xfw_application_wayland_get_gicon_no_fallback(XFW_APPLICATION_WAYLAND(wwindow->priv->app));
+
+    if (gicon != NULL) {
+        return gicon;
     } else {
         return g_themed_icon_new_with_default_fallbacks("window-maximize-symbolic");
     }

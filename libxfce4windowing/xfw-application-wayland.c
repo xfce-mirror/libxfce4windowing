@@ -185,10 +185,10 @@ xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale) {
 
 static GIcon *
 xfw_application_wayland_get_gicon(XfwApplication *app) {
-    XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(app)->priv;
+    GIcon *gicon = _xfw_application_wayland_get_gicon_no_fallback(XFW_APPLICATION_WAYLAND(app));
 
-    if (priv->icon_name != NULL) {
-        return g_themed_icon_new(priv->icon_name);
+    if (gicon != NULL) {
+        return gicon;
     } else {
         return g_themed_icon_new_with_default_fallbacks("application-x-executable-symbolic");
     }
@@ -252,4 +252,15 @@ _xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id) {
     g_object_notify(G_OBJECT(app), "windows");
 
     return app;
+}
+
+GIcon *
+_xfw_application_wayland_get_gicon_no_fallback(XfwApplicationWayland *app) {
+    XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(app)->priv;
+
+    if (priv->icon_name != NULL && gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), priv->icon_name)) {
+        return g_themed_icon_new(priv->icon_name);
+    } else {
+        return NULL;
+    }
 }
