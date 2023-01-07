@@ -170,6 +170,9 @@ xfw_application_get_icon
 xfw_application_get_windows
 xfw_application_get_instances
 xfw_application_get_instance
+xfw_application_instance_get_pid
+xfw_application_instance_get_name
+xfw_application_instance_get_windows
 <SUBSECTION Standard>
 XfwApplicationInterface
 XFW_TYPE_APPLICATION

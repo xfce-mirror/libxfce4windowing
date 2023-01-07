@@ -46,6 +46,13 @@ struct _XfwApplicationInterface {
     XfwApplicationInstance *(*get_instance)(XfwApplication *app, XfwWindow *window);
 };
 
+struct _XfwApplicationInstance {
+    /*< private >*/
+    gint pid;
+    gchar *name;
+    GList *windows;
+};
+
 G_END_DECLS
 
 #endif  /* !__XFW_APPLICATION_PRIVATE_H__ */

@@ -214,6 +214,56 @@ xfw_application_get_instance(XfwApplication *app, XfwWindow *window) {
     return (*iface->get_instance)(app, window);
 }
 
+/**
+ * xfw_application_instance_get_pid:
+ * @instance: an #XfwApplicationInstance.
+ *
+ * Fetches @instance's PID.
+ *
+ * Return value: The process ID of @instance, or 0 if none is available.
+ *
+ * Since: 4.19.1
+ **/
+gint
+xfw_application_instance_get_pid(XfwApplicationInstance *instance) {
+    g_return_val_if_fail(instance != NULL, 0);
+    return instance->pid;
+}
+
+/**
+ * xfw_application_instance_get_name:
+ * @instance: an #XfwApplicationInstance.
+ *
+ * Fetches @instance's name, which can often be the same as the application name.
+ *
+ * Return value: (not nullable) (transfer none): A string owned by @instance.
+ *
+ * Since: 4.19.1
+ **/
+const gchar *
+xfw_application_instance_get_name(XfwApplicationInstance *instance) {
+    g_return_val_if_fail(instance != NULL, NULL);
+    return instance->name;
+}
+
+/**
+ * xfw_application_instance_get_windows:
+ * @instance: an #XfwApplicationInstance.
+ *
+ * Lists all windows belonging to the application instance.
+ *
+ * Return value: (not nullable) (element-type XfwWindow) (transfer none):
+ * The list of #XfwWindow belonging to @instance. The list and its contents are owned
+ * by @instance.
+ *
+ * Since: 4.19.1
+ **/
+GList *
+xfw_application_instance_get_windows(XfwApplicationInstance *instance) {
+    g_return_val_if_fail(instance != NULL, NULL);
+    return instance->windows;
+}
+
 void
 _xfw_application_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, APPLICATION_PROP_ID, "id");
