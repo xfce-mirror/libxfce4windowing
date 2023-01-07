@@ -35,21 +35,13 @@ typedef struct _XfwWindow XfwWindow;
 G_DECLARE_INTERFACE(XfwApplication, xfw_application, XFW, APPLICATION, GObject)
 
 typedef struct _XfwApplicationInterface XfwApplicationIface;
-typedef struct _XfwApplicationInstance XfwApplicationInstance;
 
 /**
  * XfwApplicationInstance:
- * @pid: the process ID.
- * @name: the instance name, which can often be the same as the application name.
- * @windows: the list of #XfwWindow belonging to the instance.
  *
- * A structure representing an instance of an #XfwApplication.
+ * An opaque structure representing an instance of an #XfwApplication.
  **/
-struct _XfwApplicationInstance {
-    gint pid;
-    gchar *name;
-    GList *windows;
-};
+typedef struct _XfwApplicationInstance XfwApplicationInstance;
 
 guint64 xfw_application_get_id(XfwApplication *app);
 const gchar *xfw_application_get_name(XfwApplication *app);
@@ -57,6 +49,10 @@ GdkPixbuf *xfw_application_get_icon(XfwApplication *app, gint size, gint scale);
 GList *xfw_application_get_windows(XfwApplication *app);
 GList *xfw_application_get_instances(XfwApplication *app);
 XfwApplicationInstance *xfw_application_get_instance(XfwApplication *app, XfwWindow *window);
+
+gint xfw_application_instance_get_pid(XfwApplicationInstance *instance);
+const gchar *xfw_application_instance_get_name(XfwApplicationInstance *instance);
+GList *xfw_application_instance_get_windows(XfwApplicationInstance *instance);
 
 G_END_DECLS
 
