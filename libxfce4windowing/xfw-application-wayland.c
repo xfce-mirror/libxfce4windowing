@@ -34,41 +34,44 @@ enum {
 struct _XfwApplicationWaylandPrivate {
     gchar *app_id;
     gchar *name;
-    GdkPixbuf *icon;
     gchar *icon_name;
-    gint icon_size;
-    gint icon_scale;
     GList *windows;
     GList *instances;
 };
 
 static GHashTable *app_ids = NULL;
 
-static void xfw_application_wayland_iface_init(XfwApplicationIface *iface);
 static void xfw_application_wayland_constructed(GObject *obj);
 static void xfw_application_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_application_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_application_wayland_finalize(GObject *obj);
 static guint64 xfw_application_wayland_get_id(XfwApplication *app);
 static const gchar *xfw_application_wayland_get_name(XfwApplication *app);
-static GdkPixbuf *xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale);
+static GIcon *xfw_application_wayland_get_gicon(XfwApplication *app);
 static GList *xfw_application_wayland_get_windows(XfwApplication *app);
 static GList *xfw_application_wayland_get_instances(XfwApplication *app);
 static XfwApplicationInstance *xfw_application_wayland_get_instance(XfwApplication *app, XfwWindow *window);
 
-G_DEFINE_TYPE_WITH_CODE(XfwApplicationWayland, xfw_application_wayland, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwApplicationWayland)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_APPLICATION,
-                                              xfw_application_wayland_iface_init))
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfwApplicationWayland, xfw_application_wayland, XFW_TYPE_APPLICATION)
+
 
 static void
 xfw_application_wayland_class_init(XfwApplicationWaylandClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
+    XfwApplicationClass *app_class = XFW_APPLICATION_CLASS(klass);
 
     gklass->constructed = xfw_application_wayland_constructed;
     gklass->set_property = xfw_application_wayland_set_property;
     gklass->get_property = xfw_application_wayland_get_property;
     gklass->finalize = xfw_application_wayland_finalize;
+
+    app_class->get_id = xfw_application_wayland_get_id;
+    app_class->get_name = xfw_application_wayland_get_name;
+    app_class->get_gicon = xfw_application_wayland_get_gicon;
+    app_class->get_windows = xfw_application_wayland_get_windows;
+    app_class->get_instances = xfw_application_wayland_get_instances;
+    app_class->get_instance = xfw_application_wayland_get_instance;
 
     g_object_class_install_property(gklass,
                                     PROP_APP_ID,
@@ -77,7 +80,6 @@ xfw_application_wayland_class_init(XfwApplicationWaylandClass *klass) {
                                                         "app-id",
                                                         NULL,
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
-    _xfw_application_install_properties(gklass);
 }
 
 static void
@@ -128,28 +130,11 @@ xfw_application_wayland_set_property(GObject *obj, guint prop_id, const GValue *
 
 static void
 xfw_application_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec) {
-    XfwApplication *app = XFW_APPLICATION(obj);
     XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(obj)->priv;
 
     switch (prop_id) {
         case PROP_APP_ID:
             g_value_set_string(value, priv->app_id);
-            break;
-
-        case APPLICATION_PROP_ID:
-            g_value_set_uint64(value, xfw_application_wayland_get_id(app));
-            break;
-
-        case APPLICATION_PROP_NAME:
-            g_value_set_string(value, xfw_application_wayland_get_name(app));
-            break;
-
-        case APPLICATION_PROP_WINDOWS:
-            g_value_set_pointer(value, xfw_application_wayland_get_windows(app));
-            break;
-
-        case APPLICATION_PROP_INSTANCES:
-            g_value_set_pointer(value, xfw_application_wayland_get_instances(app));
             break;
 
         default:
@@ -170,9 +155,6 @@ xfw_application_wayland_finalize(GObject *obj) {
 
     g_free(priv->app_id);
     g_free(priv->name);
-    if (priv->icon != NULL) {
-        g_object_unref(priv->icon);
-    }
     g_free(priv->icon_name);
     for (GList *lp = priv->windows; lp != NULL; lp = lp->next) {
         g_signal_handlers_disconnect_by_data(lp->data, obj);
@@ -181,16 +163,6 @@ xfw_application_wayland_finalize(GObject *obj) {
     g_list_free(priv->instances);
 
     G_OBJECT_CLASS(xfw_application_wayland_parent_class)->finalize(obj);
-}
-
-static void
-xfw_application_wayland_iface_init(XfwApplicationIface *iface) {
-    iface->get_id = xfw_application_wayland_get_id;
-    iface->get_name = xfw_application_wayland_get_name;
-    iface->get_icon = xfw_application_wayland_get_icon;
-    iface->get_windows = xfw_application_wayland_get_windows;
-    iface->get_instances = xfw_application_wayland_get_instances;
-    iface->get_instance = xfw_application_wayland_get_instance;
 }
 
 static guint64
@@ -203,29 +175,15 @@ xfw_application_wayland_get_name(XfwApplication *app) {
     return XFW_APPLICATION_WAYLAND(app)->priv->name;
 }
 
-static GdkPixbuf *
-xfw_application_wayland_get_icon(XfwApplication *app, gint size, gint scale) {
-    XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(app)->priv;
+static GIcon *
+xfw_application_wayland_get_gicon(XfwApplication *app) {
+    GIcon *gicon = _xfw_application_wayland_get_gicon_no_fallback(XFW_APPLICATION_WAYLAND(app));
 
-    if (priv->icon_name != NULL && (priv->icon == NULL || size != priv->icon_size || scale != priv->icon_scale)) {
-        GdkScreen *screen = _xfw_screen_wayland_get_gdk_screen(XFW_SCREEN_WAYLAND(xfw_window_get_screen(priv->windows->data)));
-        GtkIconTheme *itheme = gtk_icon_theme_get_for_screen(screen);
-        GError *error = NULL;
-        GdkPixbuf *icon = gtk_icon_theme_load_icon_for_scale(itheme, priv->icon_name, size, scale, 0, &error);
-        priv->icon_size = size;
-        priv->icon_scale = scale;
-        if (icon != NULL) {
-            if (priv->icon != NULL) {
-                g_object_unref(priv->icon);
-            }
-            priv->icon = icon;
-        } else {
-            g_message("Failed to load icon for app '%s': %s", priv->app_id, error->message);
-            g_error_free(error);
-        }
+    if (gicon != NULL) {
+        return gicon;
+    } else {
+        return g_themed_icon_new_with_default_fallbacks(XFW_APPLICATION_FALLBACK_ICON_NAME);
     }
-
-    return priv->icon;
 }
 
 static GList *
@@ -286,4 +244,15 @@ _xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id) {
     g_object_notify(G_OBJECT(app), "windows");
 
     return app;
+}
+
+GIcon *
+_xfw_application_wayland_get_gicon_no_fallback(XfwApplicationWayland *app) {
+    XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(app)->priv;
+
+    if (priv->icon_name != NULL && gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), priv->icon_name)) {
+        return g_themed_icon_new(priv->icon_name);
+    } else {
+        return NULL;
+    }
 }
