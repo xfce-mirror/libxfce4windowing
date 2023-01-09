@@ -175,7 +175,7 @@ xfw_application_x11_get_gicon(XfwApplication *app) {
     return _xfw_wnck_object_get_gicon(G_OBJECT(priv->wnck_group),
                                       priv->icon_name,
                                       NULL,
-                                      "application-x-executable-symbolic");
+                                      XFW_APPLICATION_FALLBACK_ICON_NAME);
 }
 
 static GList *

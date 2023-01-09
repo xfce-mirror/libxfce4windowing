@@ -245,7 +245,7 @@ xfw_window_x11_get_gicon(XfwWindow *window) {
     return _xfw_wnck_object_get_gicon(G_OBJECT(priv->wnck_window),
                                       NULL,
                                       priv->app != NULL ? _xfw_application_x11_get_icon_name(XFW_APPLICATION_X11(priv->app)) : NULL,
-                                      "window-maximize-symbolic");
+                                      XFW_WINDOW_FALLBACK_ICON_NAME);
 }
 
 static XfwWindowType

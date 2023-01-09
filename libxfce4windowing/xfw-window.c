@@ -521,10 +521,12 @@ xfw_window_get_name(XfwWindow *window) {
  * @size: the desired icon size.
  * @scale: the UI scale factor.
  *
- * Fetches @window's icon.
+ * Fetches @window's icon.  If @window has no icon, a fallback icon may be
+ * returned.  Whether or not the returned icon is a fallback icon can be
+ * determined using #xfw_window_icon_is_fallback().
  *
  * Return value: (nullable) (transfer none): a #GdkPixbuf, owned by @window,
- * or %NULL if @window has no icon.
+ * or %NULL if @window has no icon and a fallback cannot be rendered.
  **/
 GdkPixbuf *
 xfw_window_get_icon(XfwWindow *window, gint size, gint scale) {
@@ -555,7 +557,10 @@ xfw_window_get_icon(XfwWindow *window, gint size, gint scale) {
  * xfw_window_get_gicon:
  * @window: an #XfwWindow.
  *
- * Fetches @window's icon as a size-independent #GIcon.
+ * Fetches @window's icon as a size-independent #GIcon.  If an icon cannot be
+ * found, a #GIcon representing a fallback icon will be returned.  Whether or
+ * not the returned icon is a fallback icon can be determined using
+ * #xfw_window_icon_is_fallback().
  *
  * Return value: (not nullable) (transfer none): a #GIcon, owned by @window.
  *
@@ -574,6 +579,30 @@ xfw_window_get_gicon(XfwWindow *window) {
     }
 
     return priv->gicon;
+}
+
+/**
+ * xfw_window_icon_is_fallback:
+ * @window: an #XfwWindow.
+ *
+ * Determines if @window does not have an icon, and thus a fallback icon
+ * will be returned from #xfw_window_get_icon() and #xfw_window_get_gicon().
+ *
+ * Return value: %TRUE or %FALSE, depending on if @window's icon uses a
+ * fallback icon or not.
+ *
+ * Since: 4.19.1
+ **/
+gboolean
+xfw_window_icon_is_fallback(XfwWindow *window) {
+    GIcon *gicon = xfw_window_get_gicon(window);
+
+    if (G_IS_THEMED_ICON(gicon)) {
+        return g_strv_contains(g_themed_icon_get_names(G_THEMED_ICON(gicon)),
+                               XFW_WINDOW_FALLBACK_ICON_NAME);
+    } else {
+        return FALSE;
+    }
 }
 
 /**
