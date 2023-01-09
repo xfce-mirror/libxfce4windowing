@@ -251,10 +251,12 @@ xfw_application_get_name(XfwApplication *app) {
  * @size: the desired icon size.
  * @scale: the UI scale factor.
  *
- * Fetches @app's icon.
+ * Fetches @app's icon.  If @app has no icon, a fallback icon may be
+ * returned.  Whether or not the returned icon is a fallback icon can be
+ * determined using #xfw_application_icon_is_fallback().
  *
  * Return value: (nullable) (transfer none): a #GdkPixbuf, owned by @app,
- * or %NULL if @app has no icon.
+ * or %NULL if @app has no icon and a fallback cannot be rendered.
  **/
 GdkPixbuf *
 xfw_application_get_icon(XfwApplication *app, gint size, gint scale) {
@@ -285,7 +287,10 @@ xfw_application_get_icon(XfwApplication *app, gint size, gint scale) {
  * xfw_application_get_gicon:
  * @app: an #XfwApplication.
  *
- * Fetches @app's icon as a size-independent #GIcon.
+ * Fetches @app's icon as a size-independent #GIcon.  If an icon cannot be
+ * found, a #GIcon representing a fallback icon will be returned.  Whether or
+ * not the returned icon is a fallback icon can be determined using
+ * #xfw_application_icon_is_fallback().
  *
  * Return value: (not nullable) (transfer none): a #GIcon, owned by @app.
  *
@@ -304,6 +309,36 @@ xfw_application_get_gicon(XfwApplication *app) {
     }
 
     return priv->gicon;
+}
+
+/**
+ * xfw_application_icon_is_fallback:
+ * @app: an #XfwApplication.
+ *
+ * Determines if @app does not have an icon, and thus a fallback icon
+ * will be returned from #xfw_application_get_icon() and
+ * #xfw_application_get_gicon().
+ *
+ * Return value: %TRUE or %FALSE, depending on if @app's icon uses a
+ * fallback icon or not.
+ *
+ * Since: 4.19.1
+ **/
+gboolean
+xfw_application_icon_is_fallback(XfwApplication *app) {
+    GIcon *gicon = xfw_application_get_gicon(app);
+
+    if (G_IS_THEMED_ICON(gicon)) {
+        const gchar *const *names = g_themed_icon_get_names(G_THEMED_ICON(gicon));
+
+        for (gsize i = 0; names[i] != NULL; ++i) {
+            if (g_strcmp0(names[i], XFW_APPLICATION_FALLBACK_ICON_NAME)) {
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
 }
 
 /**
