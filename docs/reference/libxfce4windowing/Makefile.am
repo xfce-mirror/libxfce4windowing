@@ -33,12 +33,15 @@ CFILE_GLOB = $(top_srcdir)/libxfce4windowing/*.c
 IGNORE_HFILES = \
 	libxfce4windowing-private.h \
 	xfw-marshal.h \
+	xfw-application-private.h \
 	xfw-application-wayland.h \
 	xfw-application-x11.h \
 	xfw-screen-wayland.h \
 	xfw-screen-x11.h \
+	xfw-window-private.h \
 	xfw-window-wayland.h \
 	xfw-window-x11.h \
+	xfw-wnck-icon.h \
 	xfw-workspace-dummy.h \
 	xfw-workspace-group-dummy.h \
 	xfw-workspace-group-wayland.h \

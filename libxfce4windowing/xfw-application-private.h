@@ -26,11 +26,13 @@
 
 #include "xfw-application.h"
 
+#define XFW_APPLICATION_FALLBACK_ICON_NAME  "application-x-executable-symbolic"
+
 G_BEGIN_DECLS
 
-struct _XfwApplicationInterface {
+struct _XfwApplicationClass {
     /*< private >*/
-    GTypeInterface g_iface;
+    GObjectClass parent_class;
 
     /*< public >*/
 
@@ -40,7 +42,7 @@ struct _XfwApplicationInterface {
     /* Virtual Table */
     guint64 (*get_id)(XfwApplication *app);
     const gchar *(*get_name)(XfwApplication *app);
-    GdkPixbuf *(*get_icon)(XfwApplication *app, gint size, gint scale);
+    GIcon *(*get_gicon)(XfwApplication *app);
     GList *(*get_windows)(XfwApplication *app);
     GList *(*get_instances)(XfwApplication *app);
     XfwApplicationInstance *(*get_instance)(XfwApplication *app, XfwWindow *window);
@@ -52,6 +54,8 @@ struct _XfwApplicationInstance {
     gchar *name;
     GList *windows;
 };
+
+void _xfw_application_invalidate_icon(XfwApplication *app);
 
 G_END_DECLS
 
