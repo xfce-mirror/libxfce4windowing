@@ -56,7 +56,6 @@ static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue 
 static void xfw_window_wayland_finalize(GObject *obj);
 static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
-static GdkPixbuf *xfw_window_wayland_get_icon(XfwWindow *window, gint size, gint scale);
 static GIcon *xfw_window_wayland_get_gicon(XfwWindow *window);
 static XfwWindowType xfw_window_wayland_get_window_type(XfwWindow *window);
 static XfwWindowState xfw_window_wayland_get_state(XfwWindow *window);
@@ -118,7 +117,6 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
 
     window_class->get_id = xfw_window_wayland_get_id;
     window_class->get_name = xfw_window_wayland_get_name;
-    window_class->get_icon = xfw_window_wayland_get_icon;
     window_class->get_gicon = xfw_window_wayland_get_gicon;
     window_class->get_window_type = xfw_window_wayland_get_window_type;
     window_class->get_state = xfw_window_wayland_get_state;
@@ -218,12 +216,6 @@ xfw_window_wayland_get_id(XfwWindow *window) {
 static const gchar *
 xfw_window_wayland_get_name(XfwWindow *window) {
     return XFW_WINDOW_WAYLAND(window)->priv->name;
-}
-
-static GdkPixbuf *
-xfw_window_wayland_get_icon(XfwWindow *window, gint size, gint scale) {
-    GIcon *gicon = xfw_window_get_gicon(XFW_WINDOW(window));
-    return _xfw_gicon_load(gicon, size, scale);
 }
 
 static GIcon *

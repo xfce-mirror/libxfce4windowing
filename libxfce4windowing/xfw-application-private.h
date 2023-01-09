@@ -40,7 +40,6 @@ struct _XfwApplicationClass {
     /* Virtual Table */
     guint64 (*get_id)(XfwApplication *app);
     const gchar *(*get_name)(XfwApplication *app);
-    GdkPixbuf *(*get_icon)(XfwApplication *app, gint size, gint scale);
     GIcon *(*get_gicon)(XfwApplication *app);
     GList *(*get_windows)(XfwApplication *app);
     GList *(*get_instances)(XfwApplication *app);
