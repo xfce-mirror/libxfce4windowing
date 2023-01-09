@@ -1,3 +1,15 @@
+4.19.1 (2023-01-09)
+======
+- Allow callers to determine if a returned icon is a fallback icon
+- Remove duplicate _get_icon() code
+- Return correct fallback icon for XfwWindowWayland
+- Cache GIcon and GdkPixbuf in XfwApplication
+- Cache GIcon and GdkPixbuf in XfwWindow
+- Add xfw_(window|application)_get_gicon()
+- XfwApplication: Make XfwApplicationInstance opaque
+- Fix build when X11 disabled
+
+
 4.19.0 (2023-01-02)
 ======
 - Initial release
