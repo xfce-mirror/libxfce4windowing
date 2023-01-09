@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Gaël Bonithon <gael@xfce.org>
+ * Copyright (c) 2023 Brian Tarricone <brian@tarricone.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,32 +17,25 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __XFW_APPLICATION_WAYLAND_H__
-#define __XFW_APPLICATION_WAYLAND_H__
+#ifndef __XFW_WNCK_ICON_H__
+#define __XFW_WNCK_ICON_H__
 
 #if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
 #include <glib-object.h>
-
-#include "xfw-application-private.h"
-#include "xfw-window-wayland.h"
+#include <libwnck/libwnck.h>
 
 G_BEGIN_DECLS
 
-#define XFW_TYPE_APPLICATION_WAYLAND (xfw_application_wayland_get_type())
-G_DECLARE_FINAL_TYPE(XfwApplicationWayland, xfw_application_wayland, XFW, APPLICATION_WAYLAND, XfwApplication)
+#define XFW_TYPE_WNCK_ICON (xfw_wnck_icon_get_type())
+G_DECLARE_FINAL_TYPE(XfwWnckIcon, xfw_wnck_icon, XFW, WNCK_ICON, GObject)
 
-typedef struct _XfwApplicationWaylandPrivate XfwApplicationWaylandPrivate;
+typedef struct _XfwWnckIcon XfwWnckIcon;
 
-struct _XfwApplicationWayland {
-    XfwApplication parent;
-    /*< private >*/
-    XfwApplicationWaylandPrivate *priv;
-};
+XfwWnckIcon *_xfw_wnck_icon_new(GObject *wnck_object);
 
-XfwApplicationWayland *_xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id);
-GIcon * _xfw_application_wayland_get_gicon_no_fallback(XfwApplicationWayland *app);
+G_END_DECLS
 
-#endif  /* __XFW_APPLICATION_WAYLAND_H__ */
+#endif  /* __XFW_WNCK_ICON_H__ */
