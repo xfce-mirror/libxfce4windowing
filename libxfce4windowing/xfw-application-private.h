@@ -26,6 +26,8 @@
 
 #include "xfw-application.h"
 
+#define XFW_APPLICATION_FALLBACK_ICON_NAME  "application-x-executable-symbolic"
+
 G_BEGIN_DECLS
 
 struct _XfwApplicationClass {

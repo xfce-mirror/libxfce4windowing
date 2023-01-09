@@ -226,7 +226,7 @@ xfw_window_wayland_get_gicon(XfwWindow *window) {
     if (gicon != NULL) {
         return gicon;
     } else {
-        return g_themed_icon_new_with_default_fallbacks("window-maximize-symbolic");
+        return g_themed_icon_new_with_default_fallbacks(XFW_WINDOW_FALLBACK_ICON_NAME);
     }
 }
 

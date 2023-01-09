@@ -47,6 +47,7 @@ guint64 xfw_application_get_id(XfwApplication *app);
 const gchar *xfw_application_get_name(XfwApplication *app);
 GdkPixbuf *xfw_application_get_icon(XfwApplication *app, gint size, gint scale);
 GIcon *xfw_application_get_gicon(XfwApplication *app);
+gboolean xfw_application_icon_is_fallback(XfwApplication *app);
 GList *xfw_application_get_windows(XfwApplication *app);
 GList *xfw_application_get_instances(XfwApplication *app);
 XfwApplicationInstance *xfw_application_get_instance(XfwApplication *app, XfwWindow *window);
