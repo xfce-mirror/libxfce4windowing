@@ -264,12 +264,13 @@ xfw_application_get_icon(XfwApplication *app, gint size, gint scale) {
 
     priv = XFW_APPLICATION_GET_PRIVATE(app);
     if (priv->icon == NULL || priv->icon_size != size || priv->icon_scale != scale) {
-        XfwApplicationClass *klass = XFW_APPLICATION_GET_CLASS(app);
+        GIcon *gicon;
 
         if (priv->icon != NULL) {
             g_object_unref(priv->icon);
         }
-        priv->icon = klass->get_icon(app, size, scale);
+        gicon = xfw_application_get_gicon(app);
+        priv->icon = _xfw_gicon_load(gicon, size, scale);
 
         if (priv->icon != NULL) {
             priv->icon_size = size;

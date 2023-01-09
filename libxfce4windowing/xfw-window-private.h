@@ -47,7 +47,6 @@ struct _XfwWindowClass {
     /* Virtual Table */
     guint64 (*get_id)(XfwWindow *window);
     const gchar *(*get_name)(XfwWindow *window);
-    GdkPixbuf *(*get_icon)(XfwWindow *window, gint size, gint scale);
     GIcon *(*get_gicon)(XfwWindow *window);
     XfwWindowType (*get_window_type)(XfwWindow *window);
     XfwWindowState (*get_state)(XfwWindow *window);

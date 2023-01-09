@@ -534,12 +534,13 @@ xfw_window_get_icon(XfwWindow *window, gint size, gint scale) {
 
     priv = XFW_WINDOW_GET_PRIVATE(window);
     if (priv->icon == NULL || priv->icon_size != size || priv->icon_scale != scale) {
-        XfwWindowClass *klass = XFW_WINDOW_GET_CLASS(window);
+        GIcon *gicon;
 
         if (priv->icon != NULL) {
             g_object_unref(priv->icon);
         }
-        priv->icon = klass->get_icon(window, size, scale);
+        gicon = xfw_window_get_gicon(window);
+        priv->icon = _xfw_gicon_load(gicon, size, scale);
 
         if (priv->icon != NULL) {
             priv->icon_size = size;
