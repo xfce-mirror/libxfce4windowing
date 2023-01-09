@@ -577,6 +577,35 @@ xfw_window_get_gicon(XfwWindow *window) {
 }
 
 /**
+ * xfw_window_icon_is_fallback:
+ * @window: an #XfwWindow.
+ *
+ * Determines if @window does not have an icon, and thus a fallback icon
+ * will be returned from #xfw_window_get_icon() and #xfw_window_get_gicon().
+ *
+ * Return value: %TRUE or %FALSE, depending on if @window's icon uses a
+ * fallback icon or not.
+ *
+ * Since: 4.19.1
+ **/
+gboolean
+xfw_window_icon_is_fallback(XfwWindow *window) {
+    GIcon *gicon = xfw_window_get_gicon(window);
+
+    if (G_IS_THEMED_ICON(gicon)) {
+        const gchar *const *names = g_themed_icon_get_names(G_THEMED_ICON(gicon));
+
+        for (gsize i = 0; names[i] != NULL; ++i) {
+            if (g_strcmp0(names[i], XFW_WINDOW_FALLBACK_ICON_NAME)) {
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
+}
+
+/**
  * xfw_window_get_type:
  * @window: an #XfwWindow.
  *

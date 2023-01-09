@@ -307,6 +307,36 @@ xfw_application_get_gicon(XfwApplication *app) {
 }
 
 /**
+ * xfw_application_icon_is_fallback:
+ * @app: an #XfwApplication.
+ *
+ * Determines if @app does not have an icon, and thus a fallback icon
+ * will be returned from #xfw_application_get_icon() and
+ * #xfw_application_get_gicon().
+ *
+ * Return value: %TRUE or %FALSE, depending on if @app's icon uses a
+ * fallback icon or not.
+ *
+ * Since: 4.19.1
+ **/
+gboolean
+xfw_application_icon_is_fallback(XfwApplication *app) {
+    GIcon *gicon = xfw_application_get_gicon(app);
+
+    if (G_IS_THEMED_ICON(gicon)) {
+        const gchar *const *names = g_themed_icon_get_names(G_THEMED_ICON(gicon));
+
+        for (gsize i = 0; names[i] != NULL; ++i) {
+            if (g_strcmp0(names[i], XFW_APPLICATION_FALLBACK_ICON_NAME)) {
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
+}
+
+/**
  * xfw_application_get_windows:
  * @app: an #XfwApplication.
  *

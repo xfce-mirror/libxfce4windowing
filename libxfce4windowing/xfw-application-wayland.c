@@ -182,7 +182,7 @@ xfw_application_wayland_get_gicon(XfwApplication *app) {
     if (gicon != NULL) {
         return gicon;
     } else {
-        return g_themed_icon_new_with_default_fallbacks("application-x-executable-symbolic");
+        return g_themed_icon_new_with_default_fallbacks(XFW_APPLICATION_FALLBACK_ICON_NAME);
     }
 }
 

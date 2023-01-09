@@ -26,6 +26,8 @@
 
 #include "xfw-window.h"
 
+#define XFW_WINDOW_FALLBACK_ICON_NAME  "window-maximize-symbolic"
+
 G_BEGIN_DECLS
 
 struct _XfwWindowClass {
