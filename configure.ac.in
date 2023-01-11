@@ -147,6 +147,10 @@ if test x"$enable_wayland" != x"no"; then
 fi
 AM_CONDITIONAL([WAYLAND_ENABLED], [test x"$enable_wayland" = x"yes"])
 
+if test x"$enable_x11" = x"no" -a x"$enable_wayland" = x"no"; then
+    AC_MSG_ERROR([At least one windowing backend must be enabled])
+fi
+
 GTK_DOC_CHECK([1.30])
 
 GOBJECT_INTROSPECTION_CHECK([1.66.0])
