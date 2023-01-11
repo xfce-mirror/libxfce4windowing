@@ -387,7 +387,9 @@ xfw_wnck_object_get_net_wm_icon(GObject *wnck_object)
     dpy = gdk_x11_display_get_xdisplay(display);
 
     xid = _xfw_wnck_object_get_x11_window(wnck_object);
-    g_return_val_if_fail(xid != None, NULL);
+    if (xid == None) {
+        return NULL;
+    }
 
     xfw_windowing_error_trap_push(display);
 
@@ -553,7 +555,9 @@ xfw_wnck_object_get_wmhints_icon(GObject *wnck_object)
     dpy = gdk_x11_display_get_xdisplay(display);
 
     xid = _xfw_wnck_object_get_x11_window(wnck_object);
-    g_return_val_if_fail(xid != None, NULL);
+    if (xid == None) {
+        return NULL;
+    }
 
     xfw_windowing_error_trap_push(display);
     hints = XGetWMHints(dpy, xid);
