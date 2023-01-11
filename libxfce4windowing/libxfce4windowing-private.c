@@ -24,6 +24,7 @@
 #include <libwnck/libwnck.h>
 #include <gdk/gdkx.h>
 #endif
+#include <gtk/gtk.h>
 
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
