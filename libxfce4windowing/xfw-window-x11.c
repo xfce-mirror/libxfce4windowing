@@ -276,16 +276,25 @@ xfw_window_x11_get_workspace(XfwWindow *window) {
 static GList *
 xfw_window_x11_get_monitors(XfwWindow *window) {
     XfwWindowX11 *xwindow = XFW_WINDOW_X11(window);
-    GdkMonitor *monitor = NULL;
-    GdkWindow *gwindow = gtk_widget_get_window(GTK_WIDGET(window));
 
-    if (gwindow != NULL) {
-        GdkDisplay *display = gdk_display_get_default();
+    if (xwindow->priv->monitors == NULL) {
+        GdkDisplay *display = gdk_screen_get_display(xfw_screen_get_gdk_screen(_xfw_window_get_screen(window)));
+        GdkRectangle *geom = &xwindow->priv->geometry;
+        gint points[4][2] = {
+            { geom->x,                   geom->y },
+            { geom->x + geom->width - 1, geom->y },
+            { geom->x,                   geom->y + geom->height - 1 },
+            { geom->x + geom->width - 1, geom->y + geom->height - 1 },
+        };
 
-        monitor = gdk_display_get_monitor_at_window(display, gwindow);
-        if (xwindow->priv->monitors == NULL || monitor != xwindow->priv->monitors->data) {
-            xwindow->priv->monitors = g_list_remove(xwindow->priv->monitors, xwindow->priv->monitors->data);
-            xwindow->priv->monitors = g_list_prepend(xwindow->priv->monitors, monitor);
+        for (gsize i = 0; i < G_N_ELEMENTS(points); ++i) {
+            gint x = points[i][0];
+            gint y = points[i][1];
+            GdkMonitor *monitor = gdk_display_get_monitor_at_point(display, x, y);
+
+            if (g_list_find(xwindow->priv->monitors, monitor) == NULL) {
+                xwindow->priv->monitors = g_list_append(xwindow->priv->monitors, monitor);
+            }
         }
     }
 
@@ -622,6 +631,8 @@ actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, Wn
 
 static void
 geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
+    g_list_free(window->priv->monitors);
+    window->priv->monitors = NULL;
     wnck_window_get_geometry(wnck_window,
                              &window->priv->geometry.x, &window->priv->geometry.y,
                              &window->priv->geometry.width, &window->priv->geometry.height);
