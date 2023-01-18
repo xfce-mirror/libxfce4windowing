@@ -19,6 +19,7 @@
 
 #include "config.h"
 
+#include <glib/gi18n-lib.h>
 #include <libwnck/libwnck.h>
 
 #include "libxfce4windowing-private.h"
@@ -71,6 +72,7 @@ static gboolean xfw_window_x11_start_resize(XfwWindow *window, GError **error);
 static gboolean xfw_window_x11_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_x11_set_button_geometry(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
+static gboolean xfw_window_x11_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error);
 static gboolean xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
 static gboolean xfw_window_x11_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -130,6 +132,7 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     window_class->set_geometry = xfw_window_x11_set_geometry;
     window_class->set_button_geometry = xfw_window_x11_set_button_geometry;
     window_class->move_to_workspace = xfw_window_x11_move_to_workspace;
+    window_class->move_to_monitor = xfw_window_x11_move_to_monitor;
     window_class->set_minimized = xfw_window_x11_set_minimized;
     window_class->set_maximized = xfw_window_x11_set_maximized;
     window_class->set_fullscreen = xfw_window_x11_set_fullscreen;
@@ -392,6 +395,26 @@ xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GEr
     wnck_workspace = _xfw_workspace_x11_get_wnck_workspace(XFW_WORKSPACE_X11(workspace));
     wnck_window_move_to_workspace(XFW_WINDOW_X11(window)->priv->wnck_window, wnck_workspace);
     return TRUE;
+}
+
+static gboolean
+xfw_window_x11_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error) {
+    XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
+    if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_MOVE) == 0) {
+        if (error != NULL) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, _("This window cannot be moved"));
+        }
+        return FALSE;
+    } else {
+        GdkMonitor *new_gmonitor = xfw_monitor_get_gdk_monitor(monitor);
+        GdkDisplay *display = gdk_monitor_get_display(new_gmonitor);
+        GdkMonitor *cur_gmonitor = g_list_length(priv->monitors) == 1
+            ? xfw_monitor_get_gdk_monitor(XFW_MONITOR(priv->monitors->data))
+            : gdk_display_get_monitor_at_point(display, priv->geometry.x, priv->geometry.y);
+
+        return _xfw_window_move_to_monitor(window, cur_gmonitor, new_gmonitor, error);
+    }
 }
 
 static gboolean
