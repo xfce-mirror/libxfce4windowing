@@ -19,6 +19,7 @@
 
 #include "config.h"
 
+#include <glib/gi18n-lib.h>
 #include <libwnck/libwnck.h>
 
 #include "libxfce4windowing-private.h"
@@ -71,6 +72,7 @@ static gboolean xfw_window_x11_start_resize(XfwWindow *window, GError **error);
 static gboolean xfw_window_x11_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_x11_set_button_geometry(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
+static gboolean xfw_window_x11_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error);
 static gboolean xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
 static gboolean xfw_window_x11_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -130,6 +132,7 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     window_class->set_geometry = xfw_window_x11_set_geometry;
     window_class->set_button_geometry = xfw_window_x11_set_button_geometry;
     window_class->move_to_workspace = xfw_window_x11_move_to_workspace;
+    window_class->move_to_monitor = xfw_window_x11_move_to_monitor;
     window_class->set_minimized = xfw_window_x11_set_minimized;
     window_class->set_maximized = xfw_window_x11_set_maximized;
     window_class->set_fullscreen = xfw_window_x11_set_fullscreen;
@@ -392,6 +395,65 @@ xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GEr
     wnck_workspace = _xfw_workspace_x11_get_wnck_workspace(XFW_WORKSPACE_X11(workspace));
     wnck_window_move_to_workspace(XFW_WINDOW_X11(window)->priv->wnck_window, wnck_workspace);
     return TRUE;
+}
+
+static gboolean
+xfw_window_x11_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error) {
+    XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
+    if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_MOVE) == 0) {
+        if (error != NULL) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, _("This window cannot be moved"));
+        }
+        return FALSE;
+    } else {
+        GdkMonitor *gmonitor = xfw_monitor_get_gdk_monitor(monitor);
+        GdkDisplay *display = gdk_monitor_get_display(gmonitor);
+        GdkMonitor *cur_monitor = gdk_display_get_monitor_at_point(display, priv->geometry.x, priv->geometry.y);
+        GdkRectangle new_mon_geom;
+        gint new_mon_scale_factor;
+        gint xoff, yoff;
+        gint newx, newy;
+
+        if (G_LIKELY(cur_monitor != NULL)) {
+            gint cur_mon_scale_factor = gdk_monitor_get_scale_factor(cur_monitor);
+            GdkRectangle cur_mon_geom;
+
+            gdk_monitor_get_geometry(cur_monitor, &cur_mon_geom);
+            xoff = priv->geometry.x - cur_mon_geom.x * cur_mon_scale_factor;
+            yoff = priv->geometry.y - cur_mon_geom.y * cur_mon_scale_factor;
+        } else {
+            xoff = 0;
+            yoff = 0;
+        }
+
+        gdk_monitor_get_geometry(gmonitor, &new_mon_geom);
+        new_mon_scale_factor = gdk_monitor_get_scale_factor(gmonitor);
+        new_mon_geom.x *= new_mon_scale_factor;
+        new_mon_geom.y *= new_mon_scale_factor;
+        new_mon_geom.width *= new_mon_scale_factor;
+        new_mon_geom.height *= new_mon_scale_factor;
+
+        if (xoff + priv->geometry.width > new_mon_geom.width) {
+            newx = new_mon_geom.x + MAX(0, priv->geometry.width - new_mon_geom.width);
+        } else {
+            newx = new_mon_geom.x + xoff;
+        }
+        if (yoff + priv->geometry.height > new_mon_geom.height) {
+            newy = new_mon_geom.y + MAX(0, priv->geometry.height - new_mon_geom.height);
+        } else {
+            newy = new_mon_geom.y + yoff;
+        }
+
+        wnck_window_set_geometry(priv->wnck_window,
+                                 0,  // Use WMHints gravity
+                                 WNCK_WINDOW_CHANGE_X | WNCK_WINDOW_CHANGE_Y,
+                                 newx,
+                                 newy,
+                                 priv->geometry.width,
+                                 priv->geometry.height);
+        return TRUE;
+    }
 }
 
 static gboolean
