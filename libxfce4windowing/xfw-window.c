@@ -795,6 +795,31 @@ xfw_window_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError 
     return (*klass->move_to_workspace)(window, workspace, error);
 }
 
+/**
+ * xfw_window_move_to_monitor:
+ * @window: an #XfwWindow.
+ * @monitor: an #XfwMonitor.
+ * @error: an optional #GError return location.
+ *
+ * Attempts to move @window from its current location, to @monitor.  This
+ * function will try to put @window at the same horizontal and vertical offset
+ * on the new monitor as on the old, but due to size constraints (or the window
+ * manager's preference), placement may not be exact.
+ *
+ * Return value: %TRUE if the request to move the window was successfully sent,
+ * %FALSE otherwise (in which case @error may be set).
+ *
+ * Since: 4.19.2
+ **/
+gboolean
+xfw_window_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error) {
+    XfwWindowClass *klass;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
+    g_return_val_if_fail(XFW_IS_MONITOR(monitor), FALSE);
+    klass = XFW_WINDOW_GET_CLASS(window);
+    return (*klass->move_to_monitor)(window, monitor, error);
+}
+
 #define STATE_SETTER(state) \
     gboolean \
     xfw_window_set_ ## state(XfwWindow *window, gboolean is_ ## state, GError **error) { \
@@ -868,4 +893,93 @@ _xfw_window_invalidate_icon(XfwWindow *window) {
     g_clear_object(&priv->gicon);
     priv->icon_size = 0;
     priv->icon_scale = 0;
+}
+
+static inline void
+scale_rect(GdkRectangle *rect, gint factor) {
+    rect->x *= factor;
+    rect->y *= factor;
+    rect->width *= factor;
+    rect->height *= factor;
+}
+
+/**
+ * _xfw_window_position_on_new_monitor:
+ * @window: an #XfwWindow.
+ * @cur_monitor: current #GdkMonitor, or %NULL if unknown.
+ * @new_monitor: new #GdkMonitor.
+ * @new_x: return location for x coordinate, in device pixels.
+ * @new_y: return location for y coordinate, in device pixels.
+ **/
+void
+_xfw_window_position_on_new_monitor(XfwWindow *window,
+                                    GdkMonitor *cur_monitor,
+                                    GdkMonitor *new_monitor,
+                                    gint *new_x,
+                                    gint *new_y)
+{
+    if (G_UNLIKELY(cur_monitor == NULL)) {
+        *new_x = 0;
+        *new_y = 0;
+    } else {
+        GdkRectangle *window_geom = xfw_window_get_geometry(window);
+        gint cur_mon_scale_factor = gdk_monitor_get_scale_factor(cur_monitor);
+        gint new_mon_scale_factor = gdk_monitor_get_scale_factor(new_monitor);
+        GdkRectangle cur_mon_geom;
+        GdkRectangle new_mon_geom;
+        gint xbefore, xafter, ybefore, yafter;
+        gdouble xproportion, yproportion;
+
+        gdk_monitor_get_workarea(cur_monitor, &cur_mon_geom);
+        scale_rect(&cur_mon_geom, cur_mon_scale_factor);
+        gdk_monitor_get_workarea(new_monitor, &new_mon_geom);
+        scale_rect(&new_mon_geom, new_mon_scale_factor);
+
+        xbefore = window_geom->x - cur_mon_geom.x;
+        ybefore = window_geom->y - cur_mon_geom.y;
+
+        xafter = cur_mon_geom.width - window_geom->width - xbefore;
+        yafter = cur_mon_geom.height - window_geom->height - ybefore;
+
+        xproportion = (gdouble)xbefore / (gdouble)xafter;
+        yproportion = (gdouble)ybefore / (gdouble)yafter;
+
+        *new_x = window_geom->x * xproportion;
+        *new_y = window_geom->y * yproportion;
+    }
+}
+
+gboolean
+_xfw_window_move_to_monitor(XfwWindow *window,
+                            GdkMonitor *cur_monitor,
+                            GdkMonitor *new_monitor,
+                            GError **error)
+{
+    gboolean ret;
+    GdkRectangle new_geom = {
+        .x = 0,
+        .y = 0,
+        .width = -1,
+        .height = -1,
+    };
+    gboolean is_maximized = xfw_window_is_maximized(window);
+    gboolean is_minimized = xfw_window_is_minimized(window);
+
+    if (is_minimized) {
+        xfw_window_set_minimized(window, FALSE, NULL);
+    }
+
+    if (!is_maximized) {
+        _xfw_window_position_on_new_monitor(window, cur_monitor, new_monitor, &new_geom.x, &new_geom.y);
+    }
+
+    ret = xfw_window_set_geometry(window, &new_geom, error);
+
+    if (is_maximized) {
+        xfw_window_set_maximized(window, TRUE, NULL);
+    } else if (is_minimized) {
+        xfw_window_set_minimized(window, TRUE, NULL);
+    }
+
+    return ret;
 }

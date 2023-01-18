@@ -74,6 +74,7 @@ static gboolean xfw_window_wayland_start_resize(XfwWindow *window, GError **erro
 static gboolean xfw_window_wayland_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_wayland_set_button_geometry(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_wayland_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
+static gboolean xfw_window_wayland_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error);
 static gboolean xfw_window_wayland_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_wayland_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
 static gboolean xfw_window_wayland_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -138,6 +139,7 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
     window_class->set_geometry = xfw_window_wayland_set_geometry;
     window_class->set_button_geometry = xfw_window_wayland_set_button_geometry;
     window_class->move_to_workspace = xfw_window_wayland_move_to_workspace;
+    window_class->move_to_monitor = xfw_window_wayland_move_to_monitor;
     window_class->set_minimized = xfw_window_wayland_set_minimized;
     window_class->set_maximized = xfw_window_wayland_set_maximized;
     window_class->set_fullscreen = xfw_window_wayland_set_fullscreen;
@@ -372,6 +374,14 @@ static gboolean
 xfw_window_wayland_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error) {
     if (error != NULL) {
         *error = g_error_new(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Moving windows between workspaces is not supported on Wayland");
+    }
+    return FALSE;
+}
+
+static gboolean
+xfw_window_wayland_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error) {
+    if (error != NULL) {
+        *error = g_error_new(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Moving windows between monitors is not supported on Wayland");
     }
     return FALSE;
 }
