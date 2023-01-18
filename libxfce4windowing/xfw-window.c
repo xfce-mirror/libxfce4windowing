@@ -795,6 +795,31 @@ xfw_window_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError 
     return (*klass->move_to_workspace)(window, workspace, error);
 }
 
+/**
+ * xfw_window_move_to_monitor:
+ * @window: an #XfwWindow.
+ * @monitor: an #XfwMonitor.
+ * @error: an optional #GError return location.
+ *
+ * Attempts to move @window from its current location, to @monitor.  This
+ * function will try to put @window at the same horizontal and vertical offset
+ * on the new monitor as on the old, but due to size constraints (or the window
+ * manager's preference), placement may not be exact.
+ *
+ * Return value: %TRUE if the request to move the window was successfully sent,
+ * %FALSE otherwise (in which case @error may be set).
+ *
+ * Since: 4.19.2
+ **/
+gboolean
+xfw_window_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error) {
+    XfwWindowClass *klass;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
+    g_return_val_if_fail(XFW_IS_MONITOR(monitor), FALSE);
+    klass = XFW_WINDOW_GET_CLASS(window);
+    return (*klass->move_to_monitor)(window, monitor, error);
+}
+
 #define STATE_SETTER(state) \
     gboolean \
     xfw_window_set_ ## state(XfwWindow *window, gboolean is_ ## state, GError **error) { \
