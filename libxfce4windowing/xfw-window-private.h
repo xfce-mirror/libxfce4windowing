@@ -66,6 +66,7 @@ struct _XfwWindowClass {
     gboolean (*set_geometry)(XfwWindow *window, const GdkRectangle *rect, GError **error);
     gboolean (*set_button_geometry)(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error);
     gboolean (*move_to_workspace)(XfwWindow *window, XfwWorkspace *workspace, GError **error);
+    gboolean (*move_to_monitor)(XfwWindow *window, XfwMonitor *monitor, GError **error);
 
     gboolean (*set_minimized)(XfwWindow *window, gboolean is_minimized, GError **error);
     gboolean (*set_maximized)(XfwWindow *window, gboolean is_maximized, GError **error);
