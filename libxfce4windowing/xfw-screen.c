@@ -33,7 +33,7 @@
  * can obtain an instance using #xfw_screen_get_default().  From there, you can
  * enumerate toplevel windows, or examine workspace groups and workspaces.
  *
- * Note that #XfwScreen is actually an interface; when obtaining an instance,
+ * Note that #XfwScreen is an abstract class; when obtaining an instance,
  * an instance of a windowing-environment-specific object that implements
  * this interface will be returned.
  **/
@@ -55,12 +55,41 @@
 #include "xfw-screen-wayland.h"
 #endif
 
+#define XFW_SCREEN_GET_PRIVATE(screen) ((XfwScreenPrivate *)xfw_screen_get_instance_private(XFW_SCREEN(screen)))
 #define GDK_SCREEN_XFW_SCREEN_KEY "libxfce4windowing-xfw-screen"
 
-G_DEFINE_INTERFACE(XfwScreen, xfw_screen, G_TYPE_OBJECT)
+typedef struct _XfwScreenPrivate {
+    GdkScreen *gscreen;
+} XfwScreenPrivate;
+
+enum {
+    PROP0,
+    PROP_SCREEN,
+    PROP_WORKSPACE_MANAGER,
+    PROP_ACTIVE_WINDOW,
+    PROP_SHOW_DESKTOP,
+};
+
+static void xfw_screen_set_property(GObject *object,
+                                    guint prop_id,
+                                    const GValue *value,
+                                    GParamSpec *pspec);
+static void xfw_screen_get_property(GObject *object,
+                                    guint prop_id,
+                                    GValue *value,
+                                    GParamSpec *pspec);
+
+
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE(XfwScreen, xfw_screen, G_TYPE_OBJECT)
+
 
 static void
-xfw_screen_default_init(XfwScreenIface *iface) {
+xfw_screen_class_init(XfwScreenClass *klass) {
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    gobject_class->set_property = xfw_screen_set_property;
+    gobject_class->get_property = xfw_screen_get_property;
+
     /**
      * XfwScreen::window-opened:
      * @screen: the object which received the signal.
@@ -71,7 +100,7 @@ xfw_screen_default_init(XfwScreenIface *iface) {
     g_signal_new("window-opened",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwScreenIface, window_opened),
+                 G_STRUCT_OFFSET(XfwScreenClass, window_opened),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
@@ -91,7 +120,7 @@ xfw_screen_default_init(XfwScreenIface *iface) {
     g_signal_new("active-window-changed",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwScreenIface, active_window_changed),
+                 G_STRUCT_OFFSET(XfwScreenClass, active_window_changed),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
@@ -110,7 +139,7 @@ xfw_screen_default_init(XfwScreenIface *iface) {
     g_signal_new("window-stacking-changed",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwScreenIface, window_stacking_changed),
+                 G_STRUCT_OFFSET(XfwScreenClass, window_stacking_changed),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
@@ -125,7 +154,7 @@ xfw_screen_default_init(XfwScreenIface *iface) {
     g_signal_new("window-closed",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwScreenIface, window_closed),
+                 G_STRUCT_OFFSET(XfwScreenClass, window_closed),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
@@ -142,7 +171,7 @@ xfw_screen_default_init(XfwScreenIface *iface) {
     g_signal_new("window-manager-changed",
                  XFW_TYPE_SCREEN,
                  G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwScreenIface, window_manager_changed),
+                 G_STRUCT_OFFSET(XfwScreenClass, window_manager_changed),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
@@ -152,12 +181,13 @@ xfw_screen_default_init(XfwScreenIface *iface) {
      *
      * The #GdkScreen instance used to construct this #XfwScreen.
      **/
-    g_object_interface_install_property(iface,
-                                        g_param_spec_object("screen",
-                                                            "screen",
-                                                            "screen",
-                                                            GDK_TYPE_SCREEN,
-                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+    g_object_class_install_property(gobject_class,
+                                    PROP_SCREEN,
+                                    g_param_spec_object("screen",
+                                                        "screen",
+                                                        "screen",
+                                                        GDK_TYPE_SCREEN,
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 
     /**
      * XfwScreen:workspace-manager:
@@ -165,36 +195,90 @@ xfw_screen_default_init(XfwScreenIface *iface) {
      * The #XfwWorkspaceManager that manages and describes workspace groups
      * and workspaces on this screen instance.
      **/
-    g_object_interface_install_property(iface,
-                                        g_param_spec_object("workspace-manager",
-                                                            "workspace-manager",
-                                                            "workspace-manager",
-                                                            XFW_TYPE_WORKSPACE_MANAGER,
-                                                            G_PARAM_READABLE));
+    g_object_class_install_property(gobject_class,
+                                    PROP_WORKSPACE_MANAGER,
+                                    g_param_spec_object("workspace-manager",
+                                                        "workspace-manager",
+                                                        "workspace-manager",
+                                                        XFW_TYPE_WORKSPACE_MANAGER,
+                                                        G_PARAM_READABLE));
 
     /**
      * XfwScreen:active-window:
      *
      * The currently-active window.
      **/
-    g_object_interface_install_property(iface,
-                                        g_param_spec_object("active-window",
-                                                            "active-window",
-                                                            "active-window",
-                                                            XFW_TYPE_WINDOW,
-                                                            G_PARAM_READABLE));
+    g_object_class_install_property(gobject_class,
+                                    PROP_ACTIVE_WINDOW,
+                                    g_param_spec_object("active-window",
+                                                        "active-window",
+                                                        "active-window",
+                                                        XFW_TYPE_WINDOW,
+                                                        G_PARAM_READABLE));
 
     /**
      * XfwScreen:show-desktop:
      *
      * Whether or not to show the desktop.
      **/
-    g_object_interface_install_property(iface,
-                                        g_param_spec_boolean("show-desktop",
-                                                             "show-desktop",
-                                                             "show-desktop",
-                                                             FALSE,
-                                                             G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY));
+    g_object_class_install_property(gobject_class,
+                                    PROP_SHOW_DESKTOP,
+                                    g_param_spec_boolean("show-desktop",
+                                                         "show-desktop",
+                                                         "show-desktop",
+                                                         FALSE,
+                                                         G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY));
+}
+
+static void
+xfw_screen_init(XfwScreen *screen) {}
+
+static void
+xfw_screen_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec) {
+    XfwScreen *screen = XFW_SCREEN(object);
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
+
+    switch (prop_id) {
+        case PROP_SCREEN:
+            priv->gscreen = g_value_get_object(value);
+            break;
+
+        case PROP_SHOW_DESKTOP:
+            xfw_screen_set_show_desktop(screen, g_value_get_boolean(value));
+            break;
+
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+            break;
+    }
+}
+
+static void
+xfw_screen_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec) {
+    XfwScreen *screen = XFW_SCREEN(object);
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
+
+    switch (prop_id) {
+        case PROP_SCREEN:
+            g_value_set_object(value, priv->gscreen);
+            break;
+
+        case PROP_WORKSPACE_MANAGER:
+            g_value_set_object(value, xfw_screen_get_workspace_manager(screen));
+            break;
+
+        case PROP_ACTIVE_WINDOW:
+            g_value_set_object(value, xfw_screen_get_active_window(screen));
+            break;
+
+        case PROP_SHOW_DESKTOP:
+            g_value_set_boolean(value, xfw_screen_get_show_desktop(screen));
+            break;
+
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+            break;
+    }
 }
 
 /**
@@ -209,10 +293,10 @@ xfw_screen_default_init(XfwScreenIface *iface) {
  **/
 XfwWorkspaceManager *
 xfw_screen_get_workspace_manager(XfwScreen *screen) {
-    XfwScreenIface *iface;
+    XfwScreenClass *klass;
     g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
-    iface = XFW_SCREEN_GET_IFACE(screen);
-    return (*iface->get_workspace_manager)(screen);
+    klass = XFW_SCREEN_GET_CLASS(screen);
+    return (*klass->get_workspace_manager)(screen);
 }
 
 /**
@@ -229,10 +313,10 @@ xfw_screen_get_workspace_manager(XfwScreen *screen) {
  **/
 GList *
 xfw_screen_get_windows(XfwScreen *screen) {
-    XfwScreenIface *iface;
+    XfwScreenClass *klass;
     g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
-    iface = XFW_SCREEN_GET_IFACE(screen);
-    return (*iface->get_windows)(screen);
+    klass = XFW_SCREEN_GET_CLASS(screen);
+    return (*klass->get_windows)(screen);
 }
 
 /**
@@ -248,10 +332,10 @@ xfw_screen_get_windows(XfwScreen *screen) {
  **/
 GList *
 xfw_screen_get_windows_stacked(XfwScreen *screen) {
-    XfwScreenIface *iface;
+    XfwScreenClass *klass;
     g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
-    iface = XFW_SCREEN_GET_IFACE(screen);
-    return (*iface->get_windows_stacked)(screen);
+    klass = XFW_SCREEN_GET_CLASS(screen);
+    return (*klass->get_windows_stacked)(screen);
 }
 
 /**
@@ -265,10 +349,10 @@ xfw_screen_get_windows_stacked(XfwScreen *screen) {
  **/
 XfwWindow *
 xfw_screen_get_active_window(XfwScreen *screen) {
-    XfwScreenIface *iface;
+    XfwScreenClass *klass;
     g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
-    iface = XFW_SCREEN_GET_IFACE(screen);
-    return (*iface->get_active_window)(screen);
+    klass = XFW_SCREEN_GET_CLASS(screen);
+    return (*klass->get_active_window)(screen);
 }
 
 /**
@@ -279,10 +363,10 @@ xfw_screen_get_active_window(XfwScreen *screen) {
  **/
 gboolean
 xfw_screen_get_show_desktop(XfwScreen *screen) {
-    XfwScreenIface *iface;
+    XfwScreenClass *klass;
     g_return_val_if_fail(XFW_IS_SCREEN(screen), FALSE);
-    iface = XFW_SCREEN_GET_IFACE(screen);
-    return (*iface->get_show_desktop)(screen);
+    klass = XFW_SCREEN_GET_CLASS(screen);
+    return (*klass->get_show_desktop)(screen);
 }
 
 /**
@@ -302,10 +386,10 @@ xfw_screen_get_show_desktop(XfwScreen *screen) {
  **/
 void
 xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show) {
-    XfwScreenIface *iface;
+    XfwScreenClass *klass;
     g_return_if_fail(XFW_IS_SCREEN(screen));
-    iface = XFW_SCREEN_GET_IFACE(screen);
-    (*iface->set_show_desktop)(screen, show);
+    klass = XFW_SCREEN_GET_CLASS(screen);
+    (*klass->set_show_desktop)(screen, show);
 }
 
 static void
@@ -362,10 +446,19 @@ xfw_screen_get_default(void) {
     return xfw_screen_get(gdk_screen_get_default());
 }
 
-void
-_xfw_screen_install_properties(GObjectClass *gklass) {
-    g_object_class_override_property(gklass, SCREEN_PROP_SCREEN, "screen");
-    g_object_class_override_property(gklass, SCREEN_PROP_WORKSPACE_MANAGER, "workspace-manager");
-    g_object_class_override_property(gklass, SCREEN_PROP_ACTIVE_WINDOW, "active-window");
-    g_object_class_override_property(gklass, SCREEN_PROP_SHOW_DESKTOP, "show-desktop");
+/**
+ * xfw_screen_get_gdk_screen:
+ * @screen: a #XfwScreen.
+ *
+ * Retrieves the underlying #GdkScreen of @screen.
+ *
+ * Return value: (not nullable) (transfer none): A #GdkScreen instance,
+ * unowned.
+ *
+ * Since: 4.19.2
+ **/
+GdkScreen *
+xfw_screen_get_gdk_screen(XfwScreen *screen) {
+    g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
+    return XFW_SCREEN_GET_PRIVATE(screen)->gscreen;
 }

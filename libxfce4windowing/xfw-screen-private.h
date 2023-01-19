@@ -28,9 +28,9 @@
 
 G_BEGIN_DECLS
 
-struct _XfwScreenInterface {
+struct _XfwScreenClass {
     /*< private >*/
-    GTypeInterface g_iface;
+    GObjectClass parent_class;
 
     /*< public >*/
 
