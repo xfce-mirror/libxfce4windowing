@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Brian Tarricone <brian@tarricone.org>
+ * Copyright (c) 2023 Brian Tarricone <brian@tarricone.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,20 +17,30 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __LIBXFCE4WINDOWING_H__
-#define __LIBXFCE4WINDOWING_H__
+#ifndef __XFW_MONITOR_PRIVATE_H__
+#define __XFW_MONITOR_PRIVATE_H__
 
-#define __LIBXFCE4WINDOWING_H_INSIDE__
+#if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
+#error "Only libxfce4windowing.h can be included directly"
+#endif
 
-#include <libxfce4windowing/libxfce4windowing-config.h>
-#include <libxfce4windowing/xfw-monitor.h>
-#include <libxfce4windowing/xfw-screen.h>
-#include <libxfce4windowing/xfw-util.h>
-#include <libxfce4windowing/xfw-window.h>
-#include <libxfce4windowing/xfw-workspace-group.h>
-#include <libxfce4windowing/xfw-workspace-manager.h>
-#include <libxfce4windowing/xfw-workspace.h>
+#include <gdk/gdk.h>
 
-#undef __LIBXFCE4WINDOWING_H_INSIDE__
+#include "xfw-monitor.h"
 
-#endif  /* !__LIBXFCE4WINDOWING_H__ */
+G_BEGIN_DECLS
+
+struct _XfwMonitorClass {
+    /*< private >*/
+    GObjectClass parent_class;
+
+    /*< public >*/
+
+    /* Signals */
+
+    /* Virtual Table */
+};
+
+G_END_DECLS
+
+#endif  /* __XFW_MONITOR_PRIVATE_H__ */
