@@ -158,7 +158,11 @@ xfw_window_x11_init(XfwWindowX11 *window) {
 
 static void xfw_window_x11_constructed(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
-    XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
+    XfwScreen *screen;
+
+    G_OBJECT_CLASS(xfw_window_x11_parent_class)->constructed(obj);
+
+    screen = _xfw_window_get_screen(XFW_WINDOW(window));
 
     window->priv->window_type = convert_type(wnck_window_get_window_type(window->priv->wnck_window));
     window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
