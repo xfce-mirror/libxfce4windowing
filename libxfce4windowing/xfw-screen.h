@@ -26,6 +26,7 @@
 
 #include <gdk/gdk.h>
 
+#include "xfw-monitor.h"
 #include "xfw-window.h"
 #include "xfw-workspace-manager.h"
 
@@ -37,8 +38,10 @@ G_DECLARE_DERIVABLE_TYPE(XfwScreen, xfw_screen, XFW, SCREEN, GObject)
 XfwScreen *xfw_screen_get_default(void);
 
 GdkScreen *xfw_screen_get_gdk_screen(XfwScreen *screen);
+GList *xfw_screen_get_monitors(XfwScreen *screen);
 
 XfwWorkspaceManager *xfw_screen_get_workspace_manager(XfwScreen *screen);
+
 GList *xfw_screen_get_windows(XfwScreen *screen);
 GList *xfw_screen_get_windows_stacked(XfwScreen *screen);
 XfwWindow *xfw_screen_get_active_window(XfwScreen *screen);

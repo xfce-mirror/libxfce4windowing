@@ -1,3 +1,4 @@
+libxfce4windowing/xfw-monitor.c
 libxfce4windowing/xfw-wnck-icon.c
 libxfce4windowing/xfw-workspace-dummy.c
 libxfce4windowingui/xfw-window-action-menu.c

@@ -40,6 +40,7 @@ struct _XfwScreenClass {
     void (*window_stacking_changed)(XfwScreen *screen);
     void (*window_closed)(XfwScreen *screen, XfwWindow *window);
     void (*window_manager_changed)(XfwScreen *screen);
+    void (*monitors_changed)(XfwScreen *screen);
 
     /* Virtual Table */
     XfwWorkspaceManager *(*get_workspace_manager)(XfwScreen *screen);

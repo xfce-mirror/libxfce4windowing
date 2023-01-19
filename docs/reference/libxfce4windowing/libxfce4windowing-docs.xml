@@ -37,6 +37,7 @@
   <part id="libxfce4windowing-core">
     <title>Core Library Interface</title>
     <xi:include href="xml/xfw-screen.xml"/>
+    <xi:include href="xml/xfw-monitor.xml"/>
     <xi:include href="xml/xfw-workspace-manager.xml"/>
     <xi:include href="xml/xfw-workspace-group.xml"/>
     <xi:include href="xml/xfw-workspace.xml"/>
