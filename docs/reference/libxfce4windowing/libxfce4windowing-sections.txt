@@ -32,6 +32,7 @@ xfw_error_quark
 XfwScreen
 xfw_screen_get_default
 xfw_screen_get_gdk_screen
+xfw_screen_get_monitors
 xfw_screen_get_workspace_manager
 xfw_screen_get_windows
 xfw_screen_get_windows_stacked
@@ -41,6 +42,17 @@ xfw_screen_set_show_desktop
 <SUBSECTION Standard>
 XfwScreenClass
 XFW_TYPE_SCREEN
+</SECTION>
+
+<SECTION>
+<FILE>xfw-monitor</FILE>
+XfwMonitor
+xfw_monitor_get_gdk_monitor
+xfw_monitor_get_number
+xfw_monitor_get_friendly_name
+<SUBSECTION Standard>
+XfwMonitorClass
+XFW_TYPE_MONITOR
 </SECTION>
 
 <SECTION>

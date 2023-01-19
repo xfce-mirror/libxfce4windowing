@@ -60,16 +60,19 @@
 
 typedef struct _XfwScreenPrivate {
     GdkScreen *gscreen;
+    GList *monitors;
 } XfwScreenPrivate;
 
 enum {
     PROP0,
     PROP_SCREEN,
+    PROP_MONITORS,
     PROP_WORKSPACE_MANAGER,
     PROP_ACTIVE_WINDOW,
     PROP_SHOW_DESKTOP,
 };
 
+static void xfw_screen_constructed(GObject *object);
 static void xfw_screen_set_property(GObject *object,
                                     guint prop_id,
                                     const GValue *value,
@@ -78,6 +81,11 @@ static void xfw_screen_get_property(GObject *object,
                                     guint prop_id,
                                     GValue *value,
                                     GParamSpec *pspec);
+static void xfw_screen_dispose(GObject *object);
+static void xfw_screen_finalize(GObject *object);
+
+static void xfw_screen_gdk_screen_monitors_changed(GdkScreen *gscreen,
+                                                   XfwScreen *screen);
 
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE(XfwScreen, xfw_screen, G_TYPE_OBJECT)
@@ -87,8 +95,11 @@ static void
 xfw_screen_class_init(XfwScreenClass *klass) {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
+    gobject_class->constructed = xfw_screen_constructed;
     gobject_class->set_property = xfw_screen_set_property;
     gobject_class->get_property = xfw_screen_get_property;
+    gobject_class->dispose = xfw_screen_dispose;
+    gobject_class->finalize = xfw_screen_finalize;
 
     /**
      * XfwScreen::window-opened:
@@ -177,6 +188,21 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                  G_TYPE_NONE, 0);
 
     /**
+     * XfwScreen::monitors-changed:
+     * @screen: the object which received the signal.
+     *
+     * Emitted when the number, size, or position of the monitors attached
+     * to @screen changes.
+     **/
+    g_signal_new("monitors-changed",
+                 XFW_TYPE_SCREEN,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwScreenClass, monitors_changed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__VOID,
+                 G_TYPE_NONE, 0);
+
+    /**
      * XfwScreen:screen:
      *
      * The #GdkScreen instance used to construct this #XfwScreen.
@@ -188,6 +214,18 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                                                         "screen",
                                                         GDK_TYPE_SCREEN,
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    /**
+     * XfwScreen:monitors:
+     *
+     * The #XfwMonitor instances connected to this #XfwScreen.
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_MONITORS,
+                                    g_param_spec_pointer("monitors",
+                                                         "monitors",
+                                                         "monitors",
+                                                         G_PARAM_READABLE));
 
     /**
      * XfwScreen:workspace-manager:
@@ -234,6 +272,16 @@ static void
 xfw_screen_init(XfwScreen *screen) {}
 
 static void
+xfw_screen_constructed(GObject *object) {
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(object);
+
+    G_OBJECT_CLASS(xfw_screen_parent_class)->constructed(object);
+
+    g_signal_connect(priv->gscreen, "monitors-changed",
+                     G_CALLBACK(xfw_screen_gdk_screen_monitors_changed), object);
+}
+
+static void
 xfw_screen_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec) {
     XfwScreen *screen = XFW_SCREEN(object);
     XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
@@ -263,6 +311,10 @@ xfw_screen_get_property(GObject *object, guint prop_id, GValue *value, GParamSpe
             g_value_set_object(value, priv->gscreen);
             break;
 
+        case PROP_MONITORS:
+            g_value_set_pointer(value, xfw_screen_get_monitors(screen));
+            break;
+
         case PROP_WORKSPACE_MANAGER:
             g_value_set_object(value, xfw_screen_get_workspace_manager(screen));
             break;
@@ -279,6 +331,38 @@ xfw_screen_get_property(GObject *object, guint prop_id, GValue *value, GParamSpe
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
             break;
     }
+}
+
+static void
+xfw_screen_dispose(GObject *object) {
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(object);
+
+    if (priv->gscreen != NULL) {
+        g_signal_handlers_disconnect_by_func(priv->gscreen,
+                                             G_CALLBACK(xfw_screen_gdk_screen_monitors_changed),
+                                             object);
+        priv->gscreen = NULL;
+    }
+
+    G_OBJECT_CLASS(xfw_screen_parent_class)->dispose(object);
+}
+
+static void
+xfw_screen_finalize(GObject *object) {
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(object);
+
+    g_list_free_full(priv->monitors, g_object_unref);
+
+    G_OBJECT_CLASS(xfw_screen_parent_class)->finalize(object);
+}
+
+static void
+xfw_screen_gdk_screen_monitors_changed(GdkScreen *gscreen, XfwScreen *screen) {
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
+
+    g_list_free_full(priv->monitors, g_object_unref);
+    priv->monitors = NULL;
+    g_signal_emit_by_name(screen, "monitors-changed");
 }
 
 /**
@@ -461,4 +545,44 @@ GdkScreen *
 xfw_screen_get_gdk_screen(XfwScreen *screen) {
     g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
     return XFW_SCREEN_GET_PRIVATE(screen)->gscreen;
+}
+
+/**
+ * xfw_screen_get_monitors:
+ * @screen: a #XfwScreen.
+ *
+ * Fetches the list of #XfwMonitor attached to @screen.
+ *
+ * Return value: (not nullable) (transfer none) (element-type XfwMonitor):
+ * A #GList of #XfwMonitor, owned by @screen.  The list should not be modified
+ * or freed.
+ *
+ * Since: 4.19.2
+ **/
+GList *
+xfw_screen_get_monitors(XfwScreen *screen) {
+    XfwScreenPrivate *priv;
+
+    g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
+
+    priv = XFW_SCREEN_GET_PRIVATE(screen);
+
+    if (priv->monitors == NULL) {
+        GdkDisplay *display = gdk_screen_get_display(priv->gscreen);
+        gint n_monitors = gdk_display_get_n_monitors(display);
+
+        for (gint i = 0; i < n_monitors; ++i) {
+            GdkMonitor *monitor = gdk_display_get_monitor(display, i);
+            priv->monitors = g_list_prepend(priv->monitors,
+                                            g_object_new(XFW_TYPE_MONITOR,
+                                                         "screen", screen,
+                                                         "monitor", monitor,
+                                                         "number", (guint)i,
+                                                         NULL));
+        }
+
+        priv->monitors = g_list_reverse(priv->monitors);
+    }
+
+    return priv->monitors;
 }
