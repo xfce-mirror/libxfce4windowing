@@ -51,6 +51,7 @@ struct _XfwWindowX11Private {
 static void xfw_window_x11_constructed(GObject *obj);
 static void xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
+static void xfw_window_x11_dispose(GObject *obj);
 static void xfw_window_x11_finalize(GObject *obj);
 
 static guint64 xfw_window_x11_get_id(XfwWindow *window);
@@ -82,6 +83,8 @@ static gboolean xfw_window_x11_set_below(XfwWindow *window, gboolean is_below, G
 static gboolean xfw_window_x11_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace);
 static gboolean xfw_window_x11_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace);
 
+static void xfw_window_x11_monitors_changed(XfwScreen *screen, XfwWindowX11 *window);
+
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void app_name_changed(XfwApplication *app, GParamSpec *pspec, XfwWindowX11 *window);
@@ -107,6 +110,7 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     gklass->constructed = xfw_window_x11_constructed;
     gklass->set_property = xfw_window_x11_set_property;
     gklass->get_property = xfw_window_x11_get_property;
+    gklass->dispose = xfw_window_x11_dispose;
     gklass->finalize = xfw_window_x11_finalize;
 
     window_class->get_id = xfw_window_x11_get_id;
@@ -174,6 +178,9 @@ static void xfw_window_x11_constructed(GObject *obj) {
     g_signal_connect(window->priv->wnck_window, "actions-changed", G_CALLBACK(actions_changed), window);
     g_signal_connect(window->priv->wnck_window, "geometry-changed", G_CALLBACK(geometry_changed), window);
     g_signal_connect(window->priv->wnck_window, "workspace-changed", G_CALLBACK(workspace_changed), window);
+
+    g_signal_connect(screen, "monitors-changed",
+                     G_CALLBACK(xfw_window_x11_monitors_changed), window);
 }
 
 static void
@@ -205,6 +212,20 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
             break;
     }
 }
+
+static void
+xfw_window_x11_dispose(GObject *obj) {
+    XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(obj));
+
+    if (screen != NULL) {
+        g_signal_handlers_disconnect_by_func(screen,
+                                             G_CALLBACK(xfw_window_x11_monitors_changed),
+                                             obj);
+    }
+
+    G_OBJECT_CLASS(xfw_window_x11_parent_class)->dispose(obj);
+}
+
 
 static void
 xfw_window_x11_finalize(GObject *obj) {
@@ -290,9 +311,10 @@ xfw_window_x11_get_monitors(XfwWindow *window) {
         for (gsize i = 0; i < G_N_ELEMENTS(points); ++i) {
             gint x = points[i][0];
             gint y = points[i][1];
-            GdkMonitor *monitor = gdk_display_get_monitor_at_point(display, x, y);
+            GdkMonitor *gmonitor = gdk_display_get_monitor_at_point(display, x, y);
+            XfwMonitor *monitor = _xfw_screen_get_monitor_for_gdk_monitor(_xfw_window_get_screen(window), gmonitor);
 
-            if (g_list_find(xwindow->priv->monitors, monitor) == NULL) {
+            if (monitor != NULL && g_list_find(xwindow->priv->monitors, monitor) == NULL) {
                 xwindow->priv->monitors = g_list_append(xwindow->priv->monitors, monitor);
             }
         }
@@ -572,6 +594,13 @@ static gboolean
 xfw_window_x11_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace) {
     return wnck_window_is_in_viewport(XFW_WINDOW_X11(window)->priv->wnck_window,
                                       _xfw_workspace_x11_get_wnck_workspace(XFW_WORKSPACE_X11(workspace)));
+}
+
+static void
+xfw_window_x11_monitors_changed(XfwScreen *screen, XfwWindowX11 *window) {
+    g_list_free(window->priv->monitors);
+    window->priv->monitors = NULL;
+    g_object_notify(G_OBJECT(window), "monitors");
 }
 
 static void

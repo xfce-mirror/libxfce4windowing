@@ -708,9 +708,9 @@ xfw_window_get_workspace(XfwWindow *window) {
  * xfw_window_get_monitors:
  * @window: an #XfwWindow.
  *
- * Fetches the list of monitors @window is displayed on, if any.
+ * Fetches the list of #XfwMonitor @window is displayed on, if any.
  *
- * Return value: (nullable) (element-type GdkMonitor) (transfer none): A list
+ * Return value: (nullable) (element-type XfwMonitor) (transfer none): A list
  * of #GdkMonitor instances, or %NULL.  The list and its contents are owned by
  * @window and should not be modified or freed.
  **/
