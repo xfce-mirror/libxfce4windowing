@@ -167,6 +167,8 @@ static void
 xfw_window_wayland_constructed(GObject *obj) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
 
+    G_OBJECT_CLASS(xfw_window_wayland_parent_class)->constructed(obj);
+
     g_signal_connect(_xfw_window_get_screen(XFW_WINDOW(window)), "monitors-changed",
                      G_CALLBACK(xfw_window_wayland_monitors_changed), window);
 
