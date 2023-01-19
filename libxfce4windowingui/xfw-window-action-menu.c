@@ -44,6 +44,7 @@ enum {
 
 struct _XfwWindowActionMenuPrivate {
     XfwWindow *window;
+    GdkScreen *gscreen;
 
     GtkWidget *min_item;
     GtkWidget *max_item;
@@ -58,6 +59,8 @@ struct _XfwWindowActionMenuPrivate {
     GtkWidget *move_down_item;
     GtkWidget *move_ws_item;
     GtkWidget *move_ws_submenu;
+    GtkWidget *move_monitor_item;
+    GtkWidget *move_monitor_submenu;
     GtkWidget *close_item;
 };
 
@@ -68,6 +71,11 @@ typedef struct {
         XfwWorkspace *new_workspace;
     } to;
 } XfwWindowWorkspaceMoveData;
+
+typedef struct {
+    XfwWindow *window;
+    XfwMonitor *monitor;
+} XfwWindowMonitorMoveData;
 
 static const gchar *minimize_icon_names[] = {
     "window-minimize-symbolic",
@@ -102,15 +110,18 @@ static void resize_window(GtkWidget *item, XfwWindow *window);
 static void toggle_above_state(GtkWidget *item, XfwWindow *window);
 static void toggle_pinned_state(GtkWidget *item, XfwWindow *window);
 static void move_window_workspace(GtkWidget *item, XfwWindowWorkspaceMoveData *data);
+static void move_window_monitor(GtkWidget *item, XfwWindowMonitorMoveData *mdata);
 static void close_window(GtkWidget *item, XfwWindow *window);
 
-static void free_move_data(gpointer data, GClosure *closure);
+static void free_ws_move_data(gpointer data, GClosure *closure);
+static void free_monitor_move_data(gpointer data, GClosure *closure);
 
 static void update_menu_items(XfwWindowActionMenu *menu);
 
 static void window_state_changed(XfwWindow *window, XfwWindowState changed_mask, XfwWindowState new_state, XfwWindowActionMenu *menu);
 static void window_capabilities_changed(XfwWindow *window, XfwWindowCapabilities changed_mask, XfwWindowCapabilities new_capabilities, XfwWindowActionMenu *menu);
 static void window_workspace_changed(XfwWindow *window, XfwWindowActionMenu *menu);
+static void screen_monitors_changed(GdkScreen *gscreen, XfwWindowActionMenu *menu);
 
 
 G_DEFINE_TYPE_WITH_PRIVATE(XfwWindowActionMenu, xfw_window_action_menu, GTK_TYPE_MENU)
@@ -194,8 +205,12 @@ static void
 xfw_window_action_menu_constructed(GObject *obj) {
     XfwWindowActionMenu *menu = XFW_WINDOW_ACTION_MENU(obj);
     XfwWindow *window = menu->priv->window;
+    XfwScreen *xfw_screen = xfw_window_get_screen(window);
+    GdkScreen *gscreen = xfw_screen_get_gdk_screen(xfw_screen);
     GtkWidget *item;
     XfwWindowWorkspaceMoveData *mdata;
+
+    menu->priv->gscreen = gscreen;
 
     G_OBJECT_CLASS(xfw_window_action_menu_parent_class)->constructed(obj);
 
@@ -247,7 +262,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     mdata->to.direction = XFW_DIRECTION_LEFT;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
-                          free_move_data, 0);
+                          free_ws_move_data, 0);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     menu->priv->move_right_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace R_ight"));
@@ -256,7 +271,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     mdata->to.direction = XFW_DIRECTION_RIGHT;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
-                          free_move_data, 0);
+                          free_ws_move_data, 0);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     menu->priv->move_up_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Up"));
@@ -265,7 +280,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     mdata->to.direction = XFW_DIRECTION_UP;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
-                          free_move_data, 0);
+                          free_ws_move_data, 0);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     menu->priv->move_down_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Down"));
@@ -274,7 +289,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     mdata->to.direction = XFW_DIRECTION_DOWN;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
-                          free_move_data, 0);
+                          free_ws_move_data, 0);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     menu->priv->move_ws_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Another _Workspace"));
@@ -282,6 +297,12 @@ xfw_window_action_menu_constructed(GObject *obj) {
 
     menu->priv->move_ws_submenu = gtk_menu_new();
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), menu->priv->move_ws_submenu);
+
+    menu->priv->move_monitor_item = item = gtk_menu_item_new_with_mnemonic(_("Move to _Another Monitor"));
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+
+    menu->priv->move_monitor_submenu = gtk_menu_new();
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), menu->priv->move_monitor_submenu);
 
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -299,6 +320,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     g_signal_connect(menu->priv->window, "state-changed", G_CALLBACK(window_state_changed), menu);
     g_signal_connect(menu->priv->window, "capabilities-changed", G_CALLBACK(window_capabilities_changed), menu);
     g_signal_connect(menu->priv->window, "workspace-changed", G_CALLBACK(window_workspace_changed), menu);
+    g_signal_connect(gscreen, "monitors-changed", G_CALLBACK(screen_monitors_changed), menu);
 
     update_menu_items(menu);
 }
@@ -342,6 +364,11 @@ xfw_window_action_menu_dispose(GObject *obj) {
         g_signal_handlers_disconnect_by_func(menu->priv->window, window_capabilities_changed, menu);
         g_signal_handlers_disconnect_by_func(menu->priv->window, window_workspace_changed, menu);
         g_clear_object(&menu->priv->window);
+    }
+
+    if (menu->priv->gscreen != NULL) {
+        g_signal_handlers_disconnect_by_func(menu->priv->gscreen, screen_monitors_changed, menu);
+        menu->priv->gscreen = NULL;
     }
 
     G_OBJECT_CLASS(xfw_window_action_menu_parent_class)->dispose(obj);
@@ -400,12 +427,17 @@ move_window_workspace(GtkWidget *item, XfwWindowWorkspaceMoveData *data) {
 }
 
 static void
+move_window_monitor(GtkWidget *item, XfwWindowMonitorMoveData *mdata) {
+    xfw_window_move_to_monitor(mdata->window, mdata->monitor, NULL);
+}
+
+static void
 close_window(GtkWidget *item, XfwWindow *window) {
     xfw_window_close(window, gtk_get_current_event_time(), NULL);
 }
 
 static void
-free_move_data(gpointer data, GClosure *closure) {
+free_ws_move_data(gpointer data, GClosure *closure) {
     XfwWindowWorkspaceMoveData *mdata = data;
     if (mdata->to.direction != XFW_DIRECTION_UP
         && mdata->to.direction != XFW_DIRECTION_DOWN
@@ -418,6 +450,15 @@ free_move_data(gpointer data, GClosure *closure) {
 }
 
 static void
+free_monitor_move_data(gpointer data, GClosure *closure) {
+    XfwWindowMonitorMoveData *mdata = data;
+    g_object_unref(mdata->window);
+    g_object_unref(mdata->monitor);
+    g_free(mdata);
+}
+
+
+static void
 set_item_mnemonic(GtkWidget *item, const gchar *text) {
     GtkLabel *label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(item)));
     gtk_label_set_text_with_mnemonic(label, text);
@@ -425,7 +466,7 @@ set_item_mnemonic(GtkWidget *item, const gchar *text) {
 }
 
 static void
-update_move_submenu(XfwWindowActionMenu *menu) {
+update_move_ws_submenu(XfwWindowActionMenu *menu) {
     GtkWidget *submenu = menu->priv->move_ws_submenu, *item;
     GList *children;
     XfwWindowCapabilities caps = xfw_window_get_capabilities(menu->priv->window);
@@ -470,7 +511,7 @@ update_move_submenu(XfwWindowActionMenu *menu) {
             }
             g_signal_connect_data(G_OBJECT(item), "activate",
                                   G_CALLBACK(move_window_workspace), mdata,
-                                  free_move_data, 0);
+                                  free_ws_move_data, 0);
             gtk_menu_shell_append(GTK_MENU_SHELL(submenu), item);
         }
 
@@ -478,6 +519,60 @@ update_move_submenu(XfwWindowActionMenu *menu) {
         gtk_widget_show_all(menu->priv->move_ws_submenu);
     } else {
         gtk_widget_hide(menu->priv->move_ws_item);
+    }
+}
+
+static void
+update_move_monitor_submenu(XfwWindowActionMenu *menu) {
+    GList *monitors = xfw_screen_get_monitors(xfw_window_get_screen(menu->priv->window));
+    gint n_monitors = g_list_length(monitors);
+    GtkWidget *submenu = menu->priv->move_monitor_submenu;
+    GList *children;
+
+    children = gtk_container_get_children(GTK_CONTAINER(submenu));
+    for (GList *l = children; l != NULL; l = l->next) {
+        gtk_container_remove(GTK_CONTAINER(submenu), GTK_WIDGET(l->data));
+    }
+    g_list_free(children);
+
+    if (n_monitors < 2) {
+        gtk_widget_hide(menu->priv->move_monitor_item);
+    } else {
+        GList *window_monitors = xfw_window_get_monitors(menu->priv->window);
+        gint n = 1;
+
+        for (GList *l = monitors; l != NULL; l = l->next, ++n) {
+            XfwMonitor *monitor = XFW_MONITOR(l->data);
+            const gchar *name = xfw_monitor_get_friendly_name(monitor);
+            gchar *label;
+            GtkWidget *item;
+            XfwWindowMonitorMoveData *mdata;
+
+            if (G_LIKELY(name != NULL)) {
+                label = g_strdup_printf(_("Monitor %d (%s)"), n, name);
+            } else {
+                label = g_strdup_printf(_("Monitor %d"), n);
+            }
+
+            item = gtk_menu_item_new_with_label(label);
+            if (g_list_find(window_monitors, monitor) != NULL) {
+                gtk_widget_set_sensitive(item, FALSE);
+            }
+            gtk_menu_shell_append(GTK_MENU_SHELL(submenu), item);
+
+            mdata = g_new0(XfwWindowMonitorMoveData, 1);
+            mdata->window = g_object_ref(menu->priv->window);
+            mdata->monitor = g_object_ref(monitor);
+            g_signal_connect_data(item, "activate",
+                                  G_CALLBACK(move_window_monitor),
+                                  mdata, free_monitor_move_data,
+                                  0);
+
+            g_free(label);
+        }
+
+        gtk_widget_show(menu->priv->move_monitor_item);
+        gtk_widget_show_all(submenu);
     }
 }
 
@@ -540,7 +635,8 @@ update_menu_items(XfwWindowActionMenu *menu) {
         gtk_widget_hide(menu->priv->move_down_item);
     }
 
-    update_move_submenu(menu);
+    update_move_ws_submenu(menu);
+    update_move_monitor_submenu(menu);
 }
 
 static void
@@ -555,6 +651,11 @@ window_capabilities_changed(XfwWindow *window, XfwWindowCapabilities changed_mas
 
 static void
 window_workspace_changed(XfwWindow *window, XfwWindowActionMenu *menu) {
+    update_menu_items(menu);
+}
+
+static void
+screen_monitors_changed(GdkScreen *gscreen, XfwWindowActionMenu *menu) {
     update_menu_items(menu);
 }
 
