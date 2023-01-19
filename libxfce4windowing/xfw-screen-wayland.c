@@ -104,10 +104,13 @@ xfw_screen_wayland_init(XfwScreenWayland *screen) {
 static void
 xfw_screen_wayland_constructed(GObject *obj) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(obj);
-    GdkScreen *gscreen = xfw_screen_get_gdk_screen(XFW_SCREEN(screen));
+    GdkScreen *gscreen;
     GdkDisplay *gdk_display;
     struct wl_display *wl_display;
 
+    G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->constructed(obj);
+
+    gscreen = xfw_screen_get_gdk_screen(XFW_SCREEN(screen));
     gdk_display = gdk_screen_get_display(gscreen);
     wl_display = gdk_wayland_display_get_wl_display(GDK_WAYLAND_DISPLAY(gdk_display));
     screen->priv->wl_registry = wl_display_get_registry(wl_display);

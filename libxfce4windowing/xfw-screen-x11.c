@@ -85,7 +85,11 @@ xfw_screen_x11_init(XfwScreenX11 *screen) {
 static void
 xfw_screen_x11_constructed(GObject *obj) {
     XfwScreenX11 *screen = XFW_SCREEN_X11(obj);
-    GdkScreen *gscreen = xfw_screen_get_gdk_screen(XFW_SCREEN(screen));
+    GdkScreen *gscreen;
+
+    G_OBJECT_CLASS(xfw_screen_x11_parent_class)->constructed(obj);
+
+    gscreen = xfw_screen_get_gdk_screen(XFW_SCREEN(screen));
 
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     screen->priv->wnck_screen = g_object_ref(wnck_screen_get(gdk_x11_screen_get_screen_number(gscreen)));
