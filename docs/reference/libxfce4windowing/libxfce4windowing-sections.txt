@@ -30,8 +30,8 @@ xfw_error_quark
 <SECTION>
 <FILE>xfw-screen</FILE>
 XfwScreen
-XfwScreenIface
 xfw_screen_get_default
+xfw_screen_get_gdk_screen
 xfw_screen_get_workspace_manager
 xfw_screen_get_windows
 xfw_screen_get_windows_stacked
@@ -39,7 +39,7 @@ xfw_screen_get_active_window
 xfw_screen_get_show_desktop
 xfw_screen_set_show_desktop
 <SUBSECTION Standard>
-XfwScreenInterface
+XfwScreenClass
 XFW_TYPE_SCREEN
 </SECTION>
 

@@ -27,17 +27,18 @@
 #include <glib-object.h>
 #include <libwnck/libwnck.h>
 
+#include "xfw-screen-private.h"
 #include "xfw-workspace.h"
 
 G_BEGIN_DECLS
 
 #define XFW_TYPE_SCREEN_X11 (xfw_screen_x11_get_type())
-G_DECLARE_FINAL_TYPE(XfwScreenX11, xfw_screen_x11, XFW, SCREEN_X11, GObject)
+G_DECLARE_FINAL_TYPE(XfwScreenX11, xfw_screen_x11, XFW, SCREEN_X11, XfwScreen)
 
 typedef struct _XfwScreenX11Private XfwScreenX11Private;
 
 struct _XfwScreenX11 {
-    GObject parent;
+    XfwScreen parent;
     /*< private >*/
     XfwScreenX11Private *priv;
 };
