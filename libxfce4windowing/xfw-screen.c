@@ -586,3 +586,17 @@ xfw_screen_get_monitors(XfwScreen *screen) {
 
     return priv->monitors;
 }
+
+XfwMonitor *
+_xfw_screen_get_monitor_for_gdk_monitor(XfwScreen *screen, GdkMonitor *monitor) {
+    for (GList *l = xfw_screen_get_monitors(screen); l != NULL; l = l->next) {
+        XfwMonitor *xmonitor = XFW_MONITOR(l->data);
+
+        if (xfw_monitor_get_gdk_monitor(xmonitor) == monitor) {
+            return xmonitor;
+        }
+    }
+
+    g_critical("Unable to match GdkMonitor with XfwMonitor");
+    return NULL;
+}
