@@ -1,4 +1,5 @@
  xfw_screen_get_type
+ xfw_monitor_get_type
  xfw_window_capabilities_get_type
  xfw_window_get_type
  xfw_window_state_get_type
