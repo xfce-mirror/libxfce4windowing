@@ -52,6 +52,8 @@ struct _XfwScreenClass {
     void (*set_show_desktop)(XfwScreen *screen, gboolean show);
 };
 
+XfwMonitor *_xfw_screen_get_monitor_for_gdk_monitor(XfwScreen *screen, GdkMonitor *monitor);
+
 G_END_DECLS
 
 #endif  /* !__XFW_SCREEN_PRIVATE_H__ */
