@@ -586,3 +586,62 @@ xfw_screen_get_monitors(XfwScreen *screen) {
 
     return priv->monitors;
 }
+
+static inline XfwMonitor *
+find_monitor_fuzzy(GList *monitors, GdkMonitor *monitor) {
+    GdkRectangle geom;
+
+    gdk_monitor_get_geometry(monitor, &geom);
+
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        XfwMonitor *xmonitor = XFW_MONITOR(l->data);
+        GdkRectangle this_geom;
+
+        gdk_monitor_get_geometry(xfw_monitor_get_gdk_monitor(xmonitor), &this_geom);
+        if (gdk_rectangle_equal(&geom, &this_geom)) {
+            return xmonitor;
+        }
+    }
+
+    return NULL;
+}
+
+static inline XfwMonitor *
+find_monitor(GList *monitors, GdkMonitor *monitor) {
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        XfwMonitor *xmonitor = XFW_MONITOR(l->data);
+
+        if (xfw_monitor_get_gdk_monitor(xmonitor) == monitor) {
+            return xmonitor;
+        }
+    }
+
+    return NULL;
+}
+
+XfwMonitor *
+_xfw_screen_get_monitor_for_gdk_monitor(XfwScreen *screen, GdkMonitor *monitor) {
+    XfwMonitor *xmonitor = find_monitor(xfw_screen_get_monitors(screen), monitor);
+
+    if (G_UNLIKELY(xmonitor == NULL)) {
+        // This shouldn't happen, but I think sometimes
+        // GdkScreen::monitors-changed fails to fire in time.
+        XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
+
+        g_list_free(priv->monitors);
+        priv->monitors = NULL;
+        xmonitor = find_monitor(xfw_screen_get_monitors(screen), monitor);
+    }
+
+    if (G_UNLIKELY(xmonitor == NULL)) {
+        // I really don't get how it's possible to get here, but this will be
+        // our last-ditch effort.
+        xmonitor = find_monitor_fuzzy(xfw_screen_get_monitors(screen), monitor);
+    }
+
+    if (G_UNLIKELY(xmonitor == NULL)) {
+        g_critical("Unable to match GdkMonitor with XfwMonitor");
+    }
+
+    return xmonitor;
+}
