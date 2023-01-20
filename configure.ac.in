@@ -74,11 +74,16 @@ AC_SUBST([LIBXFCE4WINDOWINGUI_VERSION_MAJOR])
 AC_SUBST([LIBXFCE4WINDOWINGUI_VERSION_MINOR])
 AC_SUBST([LIBXFCE4WINDOWINGUI_VERSION_MICRO])
 
-dnl check for standard header files
+dnl check for standard header files and libs
 AC_CHECK_HEADERS([ctype.h errno.h fcntl.h math.h pwd.h signal.h \
                   string.h sys/param.h sys/stat.h  \
                   sys/types.h time.h \
                   unistd.h])
+AC_CHECK_LIB([m], [sqrt], [math_libs=-lm], [math_libs=])
+
+MATH_LIBS="$math_libs"
+AC_SUBST([MATH_LIBS])
+
 dnl Check for i18n support
 XDT_I18N()
 
@@ -197,6 +202,13 @@ if test "x$have_gnuc_visibility" = "xyes"; then
   CPPFLAGS="$CPPFLAGS -DHAVE_GNUC_VISIBILITY"
 fi
 AM_CONDITIONAL([HAVE_GNUC_VISIBILITY], [test "x$have_gnuc_visibility" = "xyes"])
+
+AC_ARG_WITH([pnp-ids-path],
+            AS_HELP_STRING([--with-pnp-ids-path], [Path to the pnp.ids file (default=\${datadir}/hwdata/pnp.ids)]),
+            [pnp_ids_path=$withval],
+            [pnp_ids_path="\${datadir}/hwdata/pnp.ids"])
+PNP_IDS_PATH="$pnp_ids_path"
+AC_SUBST([PNP_IDS_PATH])
 
 AC_CONFIG_FILES([
 Makefile
