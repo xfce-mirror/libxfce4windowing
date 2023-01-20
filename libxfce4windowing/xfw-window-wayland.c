@@ -46,6 +46,7 @@ struct _XfwWindowWaylandPrivate {
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
     GdkRectangle geometry;  // unfortunately unsupported
+    GList *outputs;
     GList *monitors;
     XfwApplication *app;
 };
@@ -53,7 +54,9 @@ struct _XfwWindowWaylandPrivate {
 static void xfw_window_wayland_constructed(GObject *obj);
 static void xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
+static void xfw_window_wayland_dispose(GObject *obj);
 static void xfw_window_wayland_finalize(GObject *obj);
+
 static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GIcon *xfw_window_wayland_get_gicon(XfwWindow *window);
@@ -71,6 +74,7 @@ static gboolean xfw_window_wayland_start_resize(XfwWindow *window, GError **erro
 static gboolean xfw_window_wayland_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_wayland_set_button_geometry(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_wayland_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
+static gboolean xfw_window_wayland_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error);
 static gboolean xfw_window_wayland_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_wayland_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
 static gboolean xfw_window_wayland_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -82,6 +86,8 @@ static gboolean xfw_window_wayland_set_above(XfwWindow *window, gboolean is_abov
 static gboolean xfw_window_wayland_set_below(XfwWindow *window, gboolean is_below, GError **error);
 static gboolean xfw_window_wayland_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace);
 static gboolean xfw_window_wayland_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace);
+
+static void xfw_window_wayland_monitors_changed(XfwScreen *screen, XfwWindowWayland *window);
 
 static void toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *app_id);
 static void toplevel_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *title);
@@ -113,6 +119,7 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
     gklass->constructed = xfw_window_wayland_constructed;
     gklass->set_property = xfw_window_wayland_set_property;
     gklass->get_property = xfw_window_wayland_get_property;
+    gklass->dispose = xfw_window_wayland_dispose;
     gklass->finalize = xfw_window_wayland_finalize;
 
     window_class->get_id = xfw_window_wayland_get_id;
@@ -132,6 +139,7 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
     window_class->set_geometry = xfw_window_wayland_set_geometry;
     window_class->set_button_geometry = xfw_window_wayland_set_button_geometry;
     window_class->move_to_workspace = xfw_window_wayland_move_to_workspace;
+    window_class->move_to_monitor = xfw_window_wayland_move_to_monitor;
     window_class->set_minimized = xfw_window_wayland_set_minimized;
     window_class->set_maximized = xfw_window_wayland_set_maximized;
     window_class->set_fullscreen = xfw_window_wayland_set_fullscreen;
@@ -160,6 +168,12 @@ xfw_window_wayland_init(XfwWindowWayland *window) {
 static void
 xfw_window_wayland_constructed(GObject *obj) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
+
+    G_OBJECT_CLASS(xfw_window_wayland_parent_class)->constructed(obj);
+
+    g_signal_connect(_xfw_window_get_screen(XFW_WINDOW(window)), "monitors-changed",
+                     G_CALLBACK(xfw_window_wayland_monitors_changed), window);
+
     zwlr_foreign_toplevel_handle_v1_add_listener(window->priv->handle, &toplevel_handle_listener, window);
 }
 
@@ -194,6 +208,19 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
 }
 
 static void
+xfw_window_wayland_dispose(GObject *obj) {
+    XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(obj));
+
+    if (screen != NULL) {
+        g_signal_handlers_disconnect_by_func(screen,
+                                             G_CALLBACK(xfw_window_wayland_monitors_changed),
+                                             obj);
+    }
+
+    G_OBJECT_CLASS(xfw_window_wayland_parent_class)->dispose(obj);
+}
+
+static void
 xfw_window_wayland_finalize(GObject *obj) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
 
@@ -201,6 +228,7 @@ xfw_window_wayland_finalize(GObject *obj) {
     g_free(window->priv->app_id);
     g_free(window->priv->name);
     g_list_free(window->priv->monitors);
+    g_list_free(window->priv->outputs);
     if (window->priv->app) {
         g_object_unref(window->priv->app);
     }
@@ -260,7 +288,30 @@ xfw_window_wayland_get_workspace(XfwWindow *window) {
 
 static GList *
 xfw_window_wayland_get_monitors(XfwWindow *window) {
-    return XFW_WINDOW_WAYLAND(window)->priv->monitors;
+    XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
+
+    if (wwindow->priv->monitors == NULL) {
+        for (GList *ol = wwindow->priv->outputs; ol != NULL; ol = ol->next) {
+            struct wl_output *output = ol->data;
+
+            for (GList *ml = xfw_screen_get_monitors(_xfw_window_get_screen(XFW_WINDOW(window)));
+                 ml != NULL;
+                 ml = ml->next)
+            {
+                XfwMonitor *monitor = XFW_MONITOR(ml->data);
+                GdkMonitor *gmonitor = xfw_monitor_get_gdk_monitor(monitor);
+
+                if (output == gdk_wayland_monitor_get_wl_output(gmonitor)) {
+                    wwindow->priv->monitors = g_list_prepend(wwindow->priv->monitors, monitor);
+                    break;
+                }
+            }
+        }
+
+        wwindow->priv->monitors = g_list_reverse(wwindow->priv->monitors);
+    }
+
+    return wwindow->priv->monitors;
 }
 
 static XfwApplication *
@@ -325,6 +376,14 @@ static gboolean
 xfw_window_wayland_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error) {
     if (error != NULL) {
         *error = g_error_new(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Moving windows between workspaces is not supported on Wayland");
+    }
+    return FALSE;
+}
+
+static gboolean
+xfw_window_wayland_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error) {
+    if (error != NULL) {
+        *error = g_error_new(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "Moving windows between monitors is not supported on Wayland");
     }
     return FALSE;
 }
@@ -469,6 +528,13 @@ xfw_window_wayland_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace) {
 }
 
 static void
+xfw_window_wayland_monitors_changed(XfwScreen *screen, XfwWindowWayland *window) {
+    g_list_free(window->priv->monitors);
+    window->priv->monitors = NULL;
+    g_object_notify(G_OBJECT(window), "monitors");
+}
+
+static void
 toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *app_id) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
 
@@ -573,37 +639,27 @@ toplevel_parent(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
 static void
 toplevel_output_enter(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_output *output) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
-    GdkDisplay *display = gdk_display_get_default();
-    GdkMonitor *monitor;
-    gint n_monitors = gdk_display_get_n_monitors(display);
 
-    for (gint n = 0; n < n_monitors; n++) {
-        monitor = gdk_display_get_monitor(display, n);
-        if (output == gdk_wayland_monitor_get_wl_output(monitor)) {
-            window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
-            break;
-        }
+    if (g_list_find(window->priv->outputs, output) == NULL) {
+        window->priv->outputs = g_list_append(window->priv->outputs, output);
+        g_list_free(window->priv->monitors);
+        window->priv->monitors = NULL;
+        g_object_notify(G_OBJECT(window), "monitors");
     }
-
-    g_object_notify(G_OBJECT(window), "monitors");
 }
 
 static void
 toplevel_output_leave(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_output *output) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
-    GdkDisplay *display = gdk_display_get_default();
-    GdkMonitor *monitor;
-    gint n_monitors = gdk_display_get_n_monitors(display);
+    GList *link;
 
-    for (gint n = 0; n < n_monitors; n++) {
-        monitor = gdk_display_get_monitor(display, n);
-        if (output == gdk_wayland_monitor_get_wl_output(monitor)) {
-            window->priv->monitors = g_list_remove(window->priv->monitors, monitor);
-            break;
-        }
+    link = g_list_find(window->priv->outputs, output);
+    if (G_LIKELY(link != NULL)) {
+        window->priv->outputs = g_list_remove_link(window->priv->outputs, link);
+        g_list_free(window->priv->monitors);
+        window->priv->monitors = NULL;
+        g_object_notify(G_OBJECT(window), "monitors");
     }
-
-    g_object_notify(G_OBJECT(window), "monitors");
 }
 
 static void

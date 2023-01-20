@@ -28,9 +28,9 @@
 
 G_BEGIN_DECLS
 
-struct _XfwScreenInterface {
+struct _XfwScreenClass {
     /*< private >*/
-    GTypeInterface g_iface;
+    GObjectClass parent_class;
 
     /*< public >*/
 
@@ -40,6 +40,7 @@ struct _XfwScreenInterface {
     void (*window_stacking_changed)(XfwScreen *screen);
     void (*window_closed)(XfwScreen *screen, XfwWindow *window);
     void (*window_manager_changed)(XfwScreen *screen);
+    void (*monitors_changed)(XfwScreen *screen);
 
     /* Virtual Table */
     XfwWorkspaceManager *(*get_workspace_manager)(XfwScreen *screen);
@@ -50,6 +51,8 @@ struct _XfwScreenInterface {
 
     void (*set_show_desktop)(XfwScreen *screen, gboolean show);
 };
+
+XfwMonitor *_xfw_screen_get_monitor_for_gdk_monitor(XfwScreen *screen, GdkMonitor *monitor);
 
 G_END_DECLS
 
