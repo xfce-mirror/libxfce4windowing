@@ -23,6 +23,7 @@
 #define __LIBXFCE4WINDOWING_H_INSIDE__
 
 #include <libxfce4windowing/libxfce4windowing-config.h>
+#include <libxfce4windowing/xfw-monitor.h>
 #include <libxfce4windowing/xfw-screen.h>
 #include <libxfce4windowing/xfw-util.h>
 #include <libxfce4windowing/xfw-window.h>
