@@ -19,6 +19,7 @@
 
 #include "config.h"
 
+#include <glib/gi18n-lib.h>
 #include <libwnck/libwnck.h>
 
 #include "libxfce4windowing-private.h"
@@ -51,6 +52,7 @@ struct _XfwWindowX11Private {
 static void xfw_window_x11_constructed(GObject *obj);
 static void xfw_window_x11_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
+static void xfw_window_x11_dispose(GObject *obj);
 static void xfw_window_x11_finalize(GObject *obj);
 
 static guint64 xfw_window_x11_get_id(XfwWindow *window);
@@ -70,6 +72,7 @@ static gboolean xfw_window_x11_start_resize(XfwWindow *window, GError **error);
 static gboolean xfw_window_x11_set_geometry(XfwWindow *window, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_x11_set_button_geometry(XfwWindow *window, GdkWindow *relative_to, const GdkRectangle *rect, GError **error);
 static gboolean xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError **error);
+static gboolean xfw_window_x11_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error);
 static gboolean xfw_window_x11_set_minimized(XfwWindow *window, gboolean is_minimized, GError **error);
 static gboolean xfw_window_x11_set_maximized(XfwWindow *window, gboolean is_maximized, GError **error);
 static gboolean xfw_window_x11_set_fullscreen(XfwWindow *window, gboolean is_fullscreen, GError **error);
@@ -81,6 +84,8 @@ static gboolean xfw_window_x11_set_above(XfwWindow *window, gboolean is_above, G
 static gboolean xfw_window_x11_set_below(XfwWindow *window, gboolean is_below, GError **error);
 static gboolean xfw_window_x11_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace);
 static gboolean xfw_window_x11_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace);
+
+static void xfw_window_x11_monitors_changed(XfwScreen *screen, XfwWindowX11 *window);
 
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
@@ -107,6 +112,7 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     gklass->constructed = xfw_window_x11_constructed;
     gklass->set_property = xfw_window_x11_set_property;
     gklass->get_property = xfw_window_x11_get_property;
+    gklass->dispose = xfw_window_x11_dispose;
     gklass->finalize = xfw_window_x11_finalize;
 
     window_class->get_id = xfw_window_x11_get_id;
@@ -126,6 +132,7 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     window_class->set_geometry = xfw_window_x11_set_geometry;
     window_class->set_button_geometry = xfw_window_x11_set_button_geometry;
     window_class->move_to_workspace = xfw_window_x11_move_to_workspace;
+    window_class->move_to_monitor = xfw_window_x11_move_to_monitor;
     window_class->set_minimized = xfw_window_x11_set_minimized;
     window_class->set_maximized = xfw_window_x11_set_maximized;
     window_class->set_fullscreen = xfw_window_x11_set_fullscreen;
@@ -154,7 +161,11 @@ xfw_window_x11_init(XfwWindowX11 *window) {
 
 static void xfw_window_x11_constructed(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
-    XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
+    XfwScreen *screen;
+
+    G_OBJECT_CLASS(xfw_window_x11_parent_class)->constructed(obj);
+
+    screen = _xfw_window_get_screen(XFW_WINDOW(window));
 
     window->priv->window_type = convert_type(wnck_window_get_window_type(window->priv->wnck_window));
     window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
@@ -174,6 +185,9 @@ static void xfw_window_x11_constructed(GObject *obj) {
     g_signal_connect(window->priv->wnck_window, "actions-changed", G_CALLBACK(actions_changed), window);
     g_signal_connect(window->priv->wnck_window, "geometry-changed", G_CALLBACK(geometry_changed), window);
     g_signal_connect(window->priv->wnck_window, "workspace-changed", G_CALLBACK(workspace_changed), window);
+
+    g_signal_connect(screen, "monitors-changed",
+                     G_CALLBACK(xfw_window_x11_monitors_changed), window);
 }
 
 static void
@@ -205,6 +219,18 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
             break;
     }
 }
+
+static void
+xfw_window_x11_dispose(GObject *obj) {
+    XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(obj));
+
+    if (screen != NULL) {
+        g_signal_handlers_disconnect_by_func(screen, xfw_window_x11_monitors_changed, obj);
+    }
+
+    G_OBJECT_CLASS(xfw_window_x11_parent_class)->dispose(obj);
+}
+
 
 static void
 xfw_window_x11_finalize(GObject *obj) {
@@ -276,16 +302,26 @@ xfw_window_x11_get_workspace(XfwWindow *window) {
 static GList *
 xfw_window_x11_get_monitors(XfwWindow *window) {
     XfwWindowX11 *xwindow = XFW_WINDOW_X11(window);
-    GdkMonitor *monitor = NULL;
-    GdkWindow *gwindow = gtk_widget_get_window(GTK_WIDGET(window));
 
-    if (gwindow != NULL) {
-        GdkDisplay *display = gdk_display_get_default();
+    if (xwindow->priv->monitors == NULL) {
+        GdkDisplay *display = gdk_screen_get_display(xfw_screen_get_gdk_screen(_xfw_window_get_screen(window)));
+        GdkRectangle *geom = &xwindow->priv->geometry;
+        gint points[4][2] = {
+            { geom->x,                   geom->y },
+            { geom->x + geom->width - 1, geom->y },
+            { geom->x,                   geom->y + geom->height - 1 },
+            { geom->x + geom->width - 1, geom->y + geom->height - 1 },
+        };
 
-        monitor = gdk_display_get_monitor_at_window(display, gwindow);
-        if (xwindow->priv->monitors == NULL || monitor != xwindow->priv->monitors->data) {
-            xwindow->priv->monitors = g_list_remove(xwindow->priv->monitors, xwindow->priv->monitors->data);
-            xwindow->priv->monitors = g_list_prepend(xwindow->priv->monitors, monitor);
+        for (gsize i = 0; i < G_N_ELEMENTS(points); ++i) {
+            gint x = points[i][0];
+            gint y = points[i][1];
+            GdkMonitor *gmonitor = gdk_display_get_monitor_at_point(display, x, y);
+            XfwMonitor *monitor = _xfw_screen_get_monitor_for_gdk_monitor(_xfw_window_get_screen(window), gmonitor);
+
+            if (monitor != NULL && g_list_find(xwindow->priv->monitors, monitor) == NULL) {
+                xwindow->priv->monitors = g_list_append(xwindow->priv->monitors, monitor);
+            }
         }
     }
 
@@ -357,6 +393,26 @@ xfw_window_x11_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GEr
     wnck_workspace = _xfw_workspace_x11_get_wnck_workspace(XFW_WORKSPACE_X11(workspace));
     wnck_window_move_to_workspace(XFW_WINDOW_X11(window)->priv->wnck_window, wnck_workspace);
     return TRUE;
+}
+
+static gboolean
+xfw_window_x11_move_to_monitor(XfwWindow *window, XfwMonitor *monitor, GError **error) {
+    XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
+
+    if ((priv->capabilities & XFW_WINDOW_CAPABILITIES_CAN_MOVE) == 0) {
+        if (error != NULL) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, _("This window cannot be moved"));
+        }
+        return FALSE;
+    } else {
+        GdkMonitor *new_gmonitor = xfw_monitor_get_gdk_monitor(monitor);
+        GdkDisplay *display = gdk_monitor_get_display(new_gmonitor);
+        GdkMonitor *cur_gmonitor = g_list_length(priv->monitors) == 1
+            ? xfw_monitor_get_gdk_monitor(XFW_MONITOR(priv->monitors->data))
+            : gdk_display_get_monitor_at_point(display, priv->geometry.x, priv->geometry.y);
+
+        return _xfw_window_move_to_monitor(window, cur_gmonitor, new_gmonitor, error);
+    }
 }
 
 static gboolean
@@ -566,6 +622,13 @@ xfw_window_x11_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace) {
 }
 
 static void
+xfw_window_x11_monitors_changed(XfwScreen *screen, XfwWindowX11 *window) {
+    g_list_free(window->priv->monitors);
+    window->priv->monitors = NULL;
+    g_object_notify(G_OBJECT(window), "monitors");
+}
+
+static void
 name_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     g_object_notify(G_OBJECT(window), "name");
     g_signal_emit_by_name(window, "name-changed");
@@ -622,6 +685,8 @@ actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, Wn
 
 static void
 geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
+    g_list_free(window->priv->monitors);
+    window->priv->monitors = NULL;
     wnck_window_get_geometry(wnck_window,
                              &window->priv->geometry.x, &window->priv->geometry.y,
                              &window->priv->geometry.width, &window->priv->geometry.height);
