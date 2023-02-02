@@ -1,0 +1,99 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# Quentin PAGÈS, 2023
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-01-10 00:45+0100\n"
+"PO-Revision-Date: 2022-12-22 11:42+0000\n"
+"Last-Translator: Quentin PAGÈS, 2023\n"
+"Language-Team: Occitan (post 1500) (https://www.transifex.com/xfce/teams/16840/oc/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: oc\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: ../libxfce4windowing/xfw-wnck-icon.c:257
+msgid "The provided window does not have a _NET_WM_ICON or WMHints icon"
+msgstr ""
+
+#: ../libxfce4windowing/xfw-wnck-icon.c:626
+msgid "Failed to find or load an icon for the window"
+msgstr ""
+
+#: ../libxfce4windowing/xfw-workspace-dummy.c:147
+msgid "Workspace 0"
+msgstr "Espaci de trabalh 0"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:216
+msgid "_Move"
+msgstr "_Desplaçar"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:221
+msgid "_Resize"
+msgstr "_Redimensionar"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:229
+msgid "Always on _Top"
+msgstr "Totjorn al _dessús"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:234
+msgid "_Always on Visible Workspace"
+msgstr "_Totjorn visible sus l’espaci de trabalh"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:239
+msgid "_Only on This Workspace"
+msgstr "_Sonque sus aqueste espaci de trabalh"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:244
+msgid "Move to Workspace _Left"
+msgstr "Desplaçar a l’espaci de _drecha"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:253
+msgid "Move to Workspace R_ight"
+msgstr "Desplaçar a l’espaci _d'esquèrra"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:262
+msgid "Move to Workspace _Up"
+msgstr "Desplaçar a l’espaci d’en_naut"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:271
+msgid "Move to Workspace _Down"
+msgstr "Desplaçar a l’espaci de _bas"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:280
+msgid "Move to Another _Workspace"
+msgstr "Desplaçar a un autre espaci"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:289
+msgid "_Close"
+msgstr "_Tampar"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#, c-format
+msgid "Workspace %d"
+msgstr "Espaci de trabalh %d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:490
+msgid "Mi_nimize"
+msgstr "Mi_nimizar"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:490
+msgid "Unmi_nimize"
+msgstr ""
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:495
+msgid "Ma_ximize"
+msgstr "Ma_ximizar"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:495
+msgid "Unma_ximize"
+msgstr ""
