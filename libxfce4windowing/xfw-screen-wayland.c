@@ -34,7 +34,6 @@
 #include "xfw-workspace-manager-wayland.h"
 
 struct _XfwScreenWaylandPrivate {
-    GdkScreen *gdk_screen;
     struct wl_registry *wl_registry;
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
     struct wl_seat *wl_seat;
@@ -50,18 +49,16 @@ struct _XfwScreenWaylandPrivate {
     } show_desktop_data;
 };
 
-static void xfw_screen_wayland_screen_init(XfwScreenIface *iface);
 static void xfw_screen_wayland_constructed(GObject *obj);
-static void xfw_screen_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
-static void xfw_screen_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_screen_wayland_finalize(GObject *obj);
+
 static XfwWorkspaceManager *xfw_screen_wayland_get_workspace_manager(XfwScreen *screen);
 static GList *xfw_screen_wayland_get_windows(XfwScreen *screen);
 static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen);
 static XfwWindow *xfw_screen_wayland_get_active_window(XfwScreen *screen);
 static gboolean xfw_screen_wayland_get_show_desktop(XfwScreen *screen);
-
 static void xfw_screen_wayland_set_show_desktop(XfwScreen *screen, gboolean show);
+
 static void show_desktop_disconnect(gpointer object, gpointer data);
 
 static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
@@ -79,21 +76,24 @@ const struct zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_listener
     .finished = toplevel_manager_finished,
 };
 
-G_DEFINE_TYPE_WITH_CODE(XfwScreenWayland, xfw_screen_wayland, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwScreenWayland)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_SCREEN,
-                                              xfw_screen_wayland_screen_init))
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfwScreenWayland, xfw_screen_wayland, XFW_TYPE_SCREEN)
+
 
 static void
 xfw_screen_wayland_class_init(XfwScreenWaylandClass *klass) {
     GObjectClass *gklass = G_OBJECT_CLASS(klass);
+    XfwScreenClass *screen_class = XFW_SCREEN_CLASS(klass);
 
     gklass->constructed = xfw_screen_wayland_constructed;
-    gklass->set_property = xfw_screen_wayland_set_property;
-    gklass->get_property = xfw_screen_wayland_get_property;
     gklass->finalize = xfw_screen_wayland_finalize;
 
-    _xfw_screen_install_properties(gklass);
+    screen_class->get_workspace_manager = xfw_screen_wayland_get_workspace_manager;
+    screen_class->get_windows = xfw_screen_wayland_get_windows;
+    screen_class->get_windows_stacked = xfw_screen_wayland_get_windows_stacked;
+    screen_class->get_active_window = xfw_screen_wayland_get_active_window;
+    screen_class->get_show_desktop = xfw_screen_wayland_get_show_desktop;
+    screen_class->set_show_desktop = xfw_screen_wayland_set_show_desktop;
 }
 
 static void
@@ -104,10 +104,14 @@ xfw_screen_wayland_init(XfwScreenWayland *screen) {
 static void
 xfw_screen_wayland_constructed(GObject *obj) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(obj);
+    GdkScreen *gscreen;
     GdkDisplay *gdk_display;
     struct wl_display *wl_display;
 
-    gdk_display = gdk_screen_get_display(screen->priv->gdk_screen);
+    G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->constructed(obj);
+
+    gscreen = xfw_screen_get_gdk_screen(XFW_SCREEN(screen));
+    gdk_display = gdk_screen_get_display(gscreen);
     wl_display = gdk_wayland_display_get_wl_display(GDK_WAYLAND_DISPLAY(gdk_display));
     screen->priv->wl_registry = wl_display_get_registry(wl_display);
     wl_registry_add_listener(screen->priv->wl_registry, &registry_listener, screen);
@@ -122,57 +126,12 @@ xfw_screen_wayland_constructed(GObject *obj) {
         screen->priv->wl_registry = NULL;
     }
 
-    screen->priv->workspace_manager = _xfw_workspace_manager_wayland_new(screen->priv->gdk_screen);
+    screen->priv->workspace_manager = _xfw_workspace_manager_wayland_new(gscreen);
     if (screen->priv->workspace_manager == NULL) {
-        screen->priv->workspace_manager = _xfw_workspace_manager_dummy_new(screen->priv->gdk_screen);
+        screen->priv->workspace_manager = _xfw_workspace_manager_dummy_new(gscreen);
     }
 }
 
-static void
-xfw_screen_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec) {
-    XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(obj);
-
-    switch (prop_id) {
-        case SCREEN_PROP_SCREEN:
-            screen->priv->gdk_screen = g_value_get_object(value);
-            break;
-
-        case SCREEN_PROP_SHOW_DESKTOP:
-            xfw_screen_wayland_set_show_desktop(XFW_SCREEN(screen), g_value_get_boolean(value));
-            break;
-
-        default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
-            break;
-    }
-}
-
-static void
-xfw_screen_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec) {
-    XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(obj);
-
-    switch (prop_id) {
-        case SCREEN_PROP_SCREEN:
-            g_value_set_object(value, screen->priv->gdk_screen);
-            break;
-
-        case SCREEN_PROP_WORKSPACE_MANAGER:
-            g_value_set_object(value, screen->priv->workspace_manager);
-            break;
-
-        case SCREEN_PROP_ACTIVE_WINDOW:
-            g_value_set_object(value, xfw_screen_wayland_get_active_window(XFW_SCREEN(screen)));
-            break;
-
-        case SCREEN_PROP_SHOW_DESKTOP:
-            g_value_set_boolean(value, xfw_screen_wayland_get_show_desktop(XFW_SCREEN(screen)));
-            break;
-
-        default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
-            break;
-    }
-}
 
 static void
 xfw_screen_wayland_finalize(GObject *obj) {
@@ -197,17 +156,6 @@ xfw_screen_wayland_finalize(GObject *obj) {
     g_list_free(screen->priv->show_desktop_data.minimized);
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->finalize(obj);
-}
-
-static void
-xfw_screen_wayland_screen_init(XfwScreenIface *iface) {
-    iface->get_workspace_manager = xfw_screen_wayland_get_workspace_manager;
-    iface->get_windows = xfw_screen_wayland_get_windows;
-    iface->get_windows_stacked = xfw_screen_wayland_get_windows_stacked;
-    iface->get_active_window = xfw_screen_wayland_get_active_window;
-    iface->get_show_desktop = xfw_screen_wayland_get_show_desktop;
-
-    iface->set_show_desktop = xfw_screen_wayland_set_show_desktop;
 }
 
 static XfwWorkspaceManager *
@@ -377,11 +325,6 @@ toplevel_manager_finished(void *data, struct zwlr_foreign_toplevel_manager_v1 *w
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(data);
     zwlr_foreign_toplevel_manager_v1_destroy(screen->priv->toplevel_manager);
     screen->priv->toplevel_manager = NULL;
-}
-
-GdkScreen *
-_xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen) {
-    return screen->priv->gdk_screen;
 }
 
 struct wl_seat *

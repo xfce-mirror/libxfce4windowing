@@ -27,23 +27,23 @@
 #include <glib-object.h>
 #include <wayland-client.h>
 
+#include "xfw-screen-private.h"
 #include "xfw-window.h"
 #include "xfw-workspace.h"
 
 G_BEGIN_DECLS
 
 #define XFW_TYPE_SCREEN_WAYLAND (xfw_screen_wayland_get_type())
-G_DECLARE_FINAL_TYPE(XfwScreenWayland, xfw_screen_wayland, XFW, SCREEN_WAYLAND, GObject)
+G_DECLARE_FINAL_TYPE(XfwScreenWayland, xfw_screen_wayland, XFW, SCREEN_WAYLAND, XfwScreen)
 
 typedef struct _XfwScreenWaylandPrivate XfwScreenWaylandPrivate;
 
 struct _XfwScreenWayland {
-    GObject parent;
+    XfwScreen parent;
     /*< private >*/
     XfwScreenWaylandPrivate *priv;
 };
 
-GdkScreen *_xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen);
 struct wl_seat *_xfw_screen_wayland_get_wl_seat(XfwScreenWayland *screen);
 void _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *window);
 XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window);

@@ -37,6 +37,7 @@
   <part id="libxfce4windowing-core">
     <title>Core Library Interface</title>
     <xi:include href="xml/xfw-screen.xml"/>
+    <xi:include href="xml/xfw-monitor.xml"/>
     <xi:include href="xml/xfw-workspace-manager.xml"/>
     <xi:include href="xml/xfw-workspace-group.xml"/>
     <xi:include href="xml/xfw-workspace.xml"/>
@@ -51,6 +52,10 @@
   <index id="api-index-4-19-1">
     <title>Index of new symbols in 4.19.1</title>
     <xi:include href="xml/api-index-4.19.1.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-4-19-2">
+    <title>Index of new symbols in 4.19.2</title>
+    <xi:include href="xml/api-index-4.19.2.xml"><xi:fallback /></xi:include>
   </index>
   <!--
   <index id="api-index-deprecated">
