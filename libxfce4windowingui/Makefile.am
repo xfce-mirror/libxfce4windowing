@@ -18,6 +18,7 @@ libxfce4windowingui_0_la_SOURCES = \
 	xfw-window-action-menu.c
 
 libxfce4windowingui_0_la_CFLAGS = \
+	-I$(top_builddir) \
 	-I$(top_srcdir) \
 	-DLIBXFCE4WINDOWINGUI_COMPILATION \
 	-DLOCALEDIR=\"$(localedir)\" \
