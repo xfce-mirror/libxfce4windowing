@@ -12,7 +12,6 @@ depcomp
 gtk-doc.m4
 gtk-doc.make
 install-sh
-intltool-*.in
 libtool
 *.pc
 ltmain.sh
@@ -20,10 +19,18 @@ m4/*
 !m4/introspection.m4
 !m4/vapigen.m4
 missing
+ABOUT-NLS
 po/Makefile.in.in
 po/POTFILES
 po/stamp-it
-po/.intltool-merge-cache*
+po/Makevars.template
+po/Rules-quot
+po/boldquot.sed
+po/en@boldquot.header
+po/en@quot.header
+po/insert-header.sin
+po/quot.sed
+po/remove-potcdate.sin
 stamp-h1
 test-driver
 .deps/
@@ -35,6 +42,9 @@ ChangeLog
 mkinstalldirs
 .libs/
 po/*.gmo
+po/*.pot
+po/remove-potcdate.sed
+po/stamp-po
 *.la
 *.lo
 *.o

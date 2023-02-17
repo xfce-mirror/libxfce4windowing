@@ -1,0 +1,16 @@
+DOMAIN = $(PACKAGE)
+
+subdir = po
+top_builddir = ..
+
+XGETTEXT_OPTIONS = --keyword=_ --keyword=N_
+MSGMERGE_OPTIONS =
+MSGINIT_OPTIONS =
+
+COPYRIGHT_HOLDER = The Xfce development team.
+PACKAGE_GNU = no
+
+USE_MSGCTXT = no
+
+PO_DEPENDS_ON_POT = no
+DIST_DEPENDS_ON_UPDATE_PO = no
