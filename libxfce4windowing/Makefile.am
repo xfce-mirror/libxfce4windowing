@@ -87,6 +87,7 @@ libxfce4windowing_0_la_SOURCES += \
 endif
 
 libxfce4windowing_0_la_CFLAGS = \
+	-I$(top_builddir) \
 	-I$(top_srcdir) \
 	-DLIBXFCE4WINDOWING_COMPILATION \
 	-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
