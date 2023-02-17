@@ -116,7 +116,7 @@ if test x"$enable_x11" != x"no"; then
     if test x"$GDK_X11_FOUND" = x"yes" -a x"$LIBWNCK_FOUND" = x"yes"; then
         enable_x11="yes"
         AC_DEFINE([ENABLE_X11], [1], [Set if X11 support is enabled])
-    elif test x"enable_x11" = x"yes"; then
+    elif test x"$enable_x11" = x"yes"; then
         AC_MSG_ERROR([X11 support was requested, but required dependencies were not found])
     else
         enable_x11="no"
