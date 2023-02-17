@@ -1,5 +1,4 @@
 if WAYLAND_ENABLED
-
 noinst_LTLIBRARIES = \
 	libwayland-protocols.la
 
@@ -9,7 +8,7 @@ libwayland_protocols_built_sources = \
 	wlr-foreign-toplevel-management-unstable-v1.c \
 	wlr-foreign-toplevel-management-unstable-v1-client.h
 
-libwayland_protocols_la_SOURCES = \
+nodist_libwayland_protocols_la_SOURCES = \
 	$(libwayland_protocols_built_sources)
 
 libwayland_protocols_la_CFLAGS = \
@@ -41,5 +40,5 @@ EXTRA_DIST = \
 	ext-workspace-v1-20220919.xml \
 	wlr-foreign-toplevel-management-unstable-v1.xml
 
-# required for make distcheck
+# required for make distcheck (gtk-doc)
 dist-hook: all
