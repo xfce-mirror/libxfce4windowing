@@ -19,6 +19,7 @@ libxfce4windowingui_0_la_SOURCES = \
 
 libxfce4windowingui_0_la_CFLAGS = \
 	-I$(top_srcdir) \
+	-I.. \
 	-DLIBXFCE4WINDOWINGUI_COMPILATION \
 	-DLOCALEDIR=\"$(localedir)\" \
 	-DDATADIR=\"$(datadir)\" \

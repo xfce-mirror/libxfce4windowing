@@ -88,6 +88,7 @@ endif
 
 libxfce4windowing_0_la_CFLAGS = \
 	-I$(top_srcdir) \
+	-I.. \
 	-DLIBXFCE4WINDOWING_COMPILATION \
 	-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 	-DLOCALEDIR=\"$(localedir)\" \
