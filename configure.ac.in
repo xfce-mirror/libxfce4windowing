@@ -25,7 +25,6 @@ m4_define([glib_minimum_version], [2.68.0])
 m4_define([gtk_minimum_version], [3.24.0])
 m4_define([gdk_pixbuf_minimum_version], [2.40.0])
 m4_define([wnck_minimum_version], [3.14])
-m4_define([intltool_minimum_version], [0.31])
 
 dnl init autoconf
 AC_INIT([libxfce4windowing], [libxfce4windowing_version], [https://gitlab.xfce.org/kelnos/libxfce4windowing])
@@ -46,7 +45,6 @@ AC_PROG_CC()
 LT_PATH_LD([])
 AM_PROG_CC_C_O()
 AC_PROG_INSTALL()
-IT_PROG_INTLTOOL([intltool_minimum_version], [no-xml])
 
 dnl prepare libtool
 LT_PREREQ([2.4])
@@ -79,8 +77,11 @@ AC_CHECK_HEADERS([ctype.h errno.h fcntl.h math.h pwd.h signal.h \
                   string.h sys/param.h sys/stat.h  \
                   sys/types.h time.h \
                   unistd.h])
-dnl Check for i18n support
-XDT_I18N()
+
+AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["$PACKAGE"], [Name of default gettext domain])
+AC_SUBST([GETTEXT_PACKAGE])
+AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT_VERSION([0.19.8])
 
 dnl required
 XDT_CHECK_PACKAGE([GLIB], [glib-2.0], [glib_minimum_version])
