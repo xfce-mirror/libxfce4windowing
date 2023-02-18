@@ -81,13 +81,6 @@ G_BEGIN_DECLS
 typedef GdkPixbuf *(*XfwGetIconFunc)(GObject *wnck_object);
 
 enum {
-    SCREEN_PROP_SCREEN = 0x1000,
-    SCREEN_PROP_WORKSPACE_MANAGER,
-    SCREEN_PROP_ACTIVE_WINDOW,
-    SCREEN_PROP_SHOW_DESKTOP,
-};
-
-enum {
     WORKSPACE_MANAGER_PROP_SCREEN = 0x2000,
 };
 
@@ -114,7 +107,6 @@ void _libxfce4windowing_init(void);
 GDesktopAppInfo *_xfw_g_desktop_app_info_get(const gchar *app_id);
 GdkPixbuf *_xfw_gicon_load(GIcon *gicon, gint size, gint scale);
 
-void _xfw_screen_install_properties(GObjectClass *gklass);
 void _xfw_workspace_manager_install_properties(GObjectClass *gklass);
 void _xfw_workspace_group_install_properties(GObjectClass *gklass);
 void _xfw_workspace_install_properties(GObjectClass *gklass);
