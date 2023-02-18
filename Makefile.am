@@ -9,16 +9,9 @@ SUBDIRS = \
 
 EXTRA_DIST = \
 	README.md \
-	intltool-extract.in \
-	intltool-merge.in \
-	intltool-update.in \
 	m4/introspection.m4
 
-DISTCLEANFILES = \
-	intltool-extract \
-	intltool-merge \
-	intltool-update \
-	po/.intltool-merge-cache.lock
+DISTCLEANFILES =
 
 distuninstallcheck_listfiles = \
 	find . -type f -print | grep -v ./share/icons/hicolor/icon-theme.cache
