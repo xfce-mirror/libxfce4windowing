@@ -8,17 +8,9 @@ dnl
 dnl version info
 m4_define([libxfce4windowing_verinfo], [0:0:0])
 m4_define([libxfce4windowing_version_api], [0])
-
 m4_define([libxfce4windowingui_verinfo], [0:0:0])
 m4_define([libxfce4windowingui_version_api], [0])
-
-m4_define([libxfce4windowing_version_major], [4])
-m4_define([libxfce4windowing_version_minor], [19])
-m4_define([libxfce4windowing_version_micro], [1])
-m4_define([libxfce4windowing_version_nano], []) dnl leave this empty to have no nano version
-m4_define([libxfce4windowing_version_build], [@REVISION@])
-m4_define([libxfce4windowing_version_tag], [git])
-m4_define([libxfce4windowing_version], [libxfce4windowing_version_major().libxfce4windowing_version_minor().libxfce4windowing_version_micro()ifelse(libxfce4windowing_version_nano(), [], [], [.libxfce4windowing_version_nano()])ifelse(libxfce4windowing_version_tag(), [git], [libxfce4windowing_version_tag()-libxfce4windowing_version_build()], [libxfce4windowing_version_tag()])])
+XDT_VERSION_INIT([4.19.1], [git])
 
 dnl minimum required versions
 m4_define([glib_minimum_version], [2.68.0])
@@ -27,7 +19,7 @@ m4_define([gdk_pixbuf_minimum_version], [2.40.0])
 m4_define([wnck_minimum_version], [3.14])
 
 dnl init autoconf
-AC_INIT([libxfce4windowing], [libxfce4windowing_version], [https://gitlab.xfce.org/xfce/libxfce4windowing])
+AC_INIT([libxfce4windowing], [xdt_version], [https://gitlab.xfce.org/xfce/libxfce4windowing])
 AC_PREREQ([2.69])
 AC_CONFIG_MACRO_DIRS([m4])
 
@@ -53,14 +45,14 @@ LT_INIT([disable-static])
 dnl version info
 LIBXFCE4WINDOWING_VERINFO=libxfce4windowing_verinfo()
 LIBXFCE4WINDOWING_VERSION_API=libxfce4windowing_version_api()
-LIBXFCE4WINDOWING_VERSION_MAJOR=libxfce4windowing_version_major()
-LIBXFCE4WINDOWING_VERSION_MINOR=libxfce4windowing_version_minor()
-LIBXFCE4WINDOWING_VERSION_MICRO=libxfce4windowing_version_micro()
+LIBXFCE4WINDOWING_VERSION_MAJOR=xdt_version_major()
+LIBXFCE4WINDOWING_VERSION_MINOR=xdt_version_minor()
+LIBXFCE4WINDOWING_VERSION_MICRO=xdt_version_micro()
 LIBXFCE4WINDOWINGUI_VERINFO=libxfce4windowingui_verinfo()
 LIBXFCE4WINDOWINGUI_VERSION_API=libxfce4windowingui_version_api()
-LIBXFCE4WINDOWINGUI_VERSION_MAJOR=libxfce4windowing_version_major()
-LIBXFCE4WINDOWINGUI_VERSION_MINOR=libxfce4windowing_version_minor()
-LIBXFCE4WINDOWINGUI_VERSION_MICRO=libxfce4windowing_version_micro()
+LIBXFCE4WINDOWINGUI_VERSION_MAJOR=xdt_version_major()
+LIBXFCE4WINDOWINGUI_VERSION_MINOR=xdt_version_minor()
+LIBXFCE4WINDOWINGUI_VERSION_MICRO=xdt_version_micro()
 AC_SUBST([LIBXFCE4WINDOWING_VERINFO])
 AC_SUBST([LIBXFCE4WINDOWING_VERSION_API])
 AC_SUBST([LIBXFCE4WINDOWING_VERSION_MAJOR])
