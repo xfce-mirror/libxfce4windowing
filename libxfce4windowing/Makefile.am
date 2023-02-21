@@ -8,6 +8,7 @@ libxfce4windowing_0_headers = \
 	libxfce4windowing.h \
 	libxfce4windowing-config.h \
 	xfw-application.h \
+	xfw-monitor.h \
 	xfw-screen.h \
 	xfw-util.h \
 	xfw-window.h \
@@ -58,6 +59,8 @@ libxfce4windowing_0_la_SOURCES = \
 	libxfce4windowing-private.h \
 	xfw-application.c \
 	xfw-application-private.h \
+	xfw-monitor.c \
+	xfw-monitor-private.h \
 	xfw-screen.c \
 	xfw-screen-private.h \
 	xfw-util.c \
@@ -94,6 +97,7 @@ libxfce4windowing_0_la_CFLAGS = \
 	-DLOCALEDIR=\"$(localedir)\" \
 	-DDATADIR=\"$(datadir)\" \
 	-DSYSCONFDIR=\"$(sysconfdir)\" \
+	-DPNP_IDS_PATH=\"$(PNP_IDS_PATH)\" \
 	$(GIO_UNIX_CFLAGS) \
 	$(GOBJECT_CFLAGS) \
 	$(GTK_CFLAGS) \
@@ -108,6 +112,7 @@ libxfce4windowing_0_la_LDFLAGS = \
 	$(LIBX11_LDFLAGS)
 
 libxfce4windowing_0_la_LIBADD = \
+	$(MATH_LIBS) \
 	$(GOBJECT_LIBS) \
 	$(GIO_UNIX_LIBS) \
 	$(GTK_LIBS) \

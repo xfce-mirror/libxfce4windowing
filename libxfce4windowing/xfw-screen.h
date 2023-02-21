@@ -26,24 +26,27 @@
 
 #include <gdk/gdk.h>
 
+#include "xfw-monitor.h"
 #include "xfw-window.h"
 #include "xfw-workspace-manager.h"
 
 G_BEGIN_DECLS
 
 #define XFW_TYPE_SCREEN (xfw_screen_get_type())
-G_DECLARE_INTERFACE(XfwScreen, xfw_screen, XFW, SCREEN, GObject)
-
-typedef struct _XfwScreenInterface XfwScreenIface;
+G_DECLARE_DERIVABLE_TYPE(XfwScreen, xfw_screen, XFW, SCREEN, GObject)
 
 XfwScreen *xfw_screen_get_default(void);
 
+GdkScreen *xfw_screen_get_gdk_screen(XfwScreen *screen);
+GList *xfw_screen_get_monitors(XfwScreen *screen);
+
 XfwWorkspaceManager *xfw_screen_get_workspace_manager(XfwScreen *screen);
+
 GList *xfw_screen_get_windows(XfwScreen *screen);
 GList *xfw_screen_get_windows_stacked(XfwScreen *screen);
 XfwWindow *xfw_screen_get_active_window(XfwScreen *screen);
-gboolean xfw_screen_get_show_desktop(XfwScreen *screen);
 
+gboolean xfw_screen_get_show_desktop(XfwScreen *screen);
 void xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show);
 
 G_END_DECLS
