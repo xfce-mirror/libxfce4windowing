@@ -40,6 +40,9 @@ _libxfce4windowing_init(void) {
     if (!inited) {
         inited = TRUE;
         bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+#ifdef HAVE_BIND_TEXTDOMAIN_CODESET
+        bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+#endif
     }
 }
 
