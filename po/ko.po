@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Seong-ho Cho <darkcircle.0426@gmail.com>, 2022
+# Seong-ho Cho <darkcircle.0426@gmail.com>, 2023
 # 
 #, fuzzy
 msgid ""
@@ -13,7 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-01-10 00:45+0100\n"
 "PO-Revision-Date: 2022-12-22 11:42+0000\n"
-"Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>, 2022\n"
+"Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>, 2023\n"
 "Language-Team: Korean (https://www.transifex.com/xfce/teams/16840/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,11 +23,11 @@ msgstr ""
 
 #: ../libxfce4windowing/xfw-wnck-icon.c:257
 msgid "The provided window does not have a _NET_WM_ICON or WMHints icon"
-msgstr ""
+msgstr "제공한 창에는 _NET_WM_ICON 또는 WMHints 아이콘이 없습니다"
 
 #: ../libxfce4windowing/xfw-wnck-icon.c:626
 msgid "Failed to find or load an icon for the window"
-msgstr ""
+msgstr "창 아이콘 찾기 또는 불러오기 실패"
 
 #: ../libxfce4windowing/xfw-workspace-dummy.c:147
 msgid "Workspace 0"
