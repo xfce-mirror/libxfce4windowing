@@ -33,6 +33,13 @@
 
 #define IMGDATA_TYPE  "bmp"
 
+#if (!GLIB_CHECK_VERSION(2,68,0))
+static inline gpointer g_memdup2(gconstpointer mem, guint byte_size)
+{
+    return g_memdup(mem, byte_size);
+}
+#endif
+
 typedef struct
 {
     gint width;
