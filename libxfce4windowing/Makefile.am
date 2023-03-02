@@ -81,11 +81,6 @@ libxfce4windowing_0_la_SOURCES += \
 	$(libxfce4windowing_0_x11_sources)
 endif
 
-if WAYLAND_ENABLED
-libxfce4windowing_0_la_SOURCES += \
-	$(libxfce4windowing_0_wayland_sources)
-endif
-
 libxfce4windowing_0_la_CFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
@@ -98,8 +93,7 @@ libxfce4windowing_0_la_CFLAGS = \
 	$(GOBJECT_CFLAGS) \
 	$(GTK_CFLAGS) \
 	$(LIBWNCK_CFLAGS) \
-	$(LIBX11_CFLAGS) \
-	$(WAYLAND_CLIENT_CFLAGS)
+	$(LIBX11_CFLAGS)
 
 libxfce4windowing_0_la_LDFLAGS = \
 	-version-info $(LIBXFCE4WINDOWING_VERINFO) \
@@ -112,12 +106,19 @@ libxfce4windowing_0_la_LIBADD = \
 	$(GIO_UNIX_LIBS) \
 	$(GTK_LIBS) \
 	$(LIBWNCK_LIBS) \
-	$(LIBX11_LIBS) \
-	$(WAYLAND_CLIENT_LIBS)
+	$(LIBX11_LIBS)
 
 if WAYLAND_ENABLED
+
+libxfce4windowing_0_la_SOURCES += \
+	$(libxfce4windowing_0_wayland_sources)
+
 libxfce4windowing_0_la_LIBADD += \
 	$(top_builddir)/protocols/libwayland-protocols.la
+
+libxfce4windowing_0_la_LIBADD += $(WAYLAND_CLIENT_LIBS)
+libxfce4windowing_0_la_CFLAGS += $(WAYLAND_CLIENT_CFLAGS)
+
 endif
 
 pkgconfigdir = $(libdir)/pkgconfig
