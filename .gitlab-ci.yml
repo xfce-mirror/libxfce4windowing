@@ -17,3 +17,21 @@ build-no-wayland:
   stage: build
   script:
     - make
+
+meson-no-x11:
+  before_script:
+    - apt install -y meson ninja
+  stage: build
+  script:
+    - mkdir -p build
+    - meson -Dx11=disabled ..
+    - ninja
+
+meson-no-x11:
+  before_script:
+    - apt install -y meson ninja
+  stage: build
+  script:
+    - mkdir -p build
+    - meson -Dwayland=disabled ..
+    - ninja
