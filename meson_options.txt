@@ -1,0 +1,11 @@
+option('x11', type: 'feature', value: 'auto',
+  description: 'Whether to build support for X11')
+option('wayland', type : 'feature', value : 'auto',
+  description: 'Whether to build support for Wayland')
+option('gtk_doc', type: 'boolean', value: true,
+  description: 'whether to generate GTK Doc')
+option('introspection', type: 'boolean', value: true,
+  description: 'whether introspection support is requested')
+option('xf_debug', type: 'combo', value: 'minimum',
+  choices: ['no', 'minimum', 'yes', 'full'],
+  description: 'whether to build with debugging support')
