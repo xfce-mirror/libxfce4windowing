@@ -93,11 +93,11 @@ XDT_CHECK_PACKAGE([GDK], [gdk-3.0], [gtk_minimum_version])
 XDT_CHECK_PACKAGE([GDK_PIXBUF], [gdk-pixbuf-2.0], [gdk_pixbuf_minimum_version])
 XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [gtk_minimum_version])
 
-GLIB_PREFIX="`pkg-config --variable=prefix glib-2.0`"
-GOBJECT_PREFIX="`pkg-config --variable=prefix gobject-2.0`"
-GDK_PREFIX="`pkg-config --variable=prefix gdk-3.0`"
-GDK_PIXBUF_PREFIX="`pkg-config --variable=prefix gdk-pixbuf-2.0`"
-GTK_PREFIX="`pkg-config --variable=prefix gtk+-3.0`"
+GLIB_PREFIX="`$PKG_CONFIG --variable=prefix glib-2.0`"
+GOBJECT_PREFIX="`$PKG_CONFIG --variable=prefix gobject-2.0`"
+GDK_PREFIX="`$PKG_CONFIG --variable=prefix gdk-3.0`"
+GDK_PIXBUF_PREFIX="`$PKG_CONFIG --variable=prefix gdk-pixbuf-2.0`"
+GTK_PREFIX="`$PKG_CONFIG --variable=prefix gtk+-3.0`"
 
 AC_SUBST([GLIB_PREFIX])
 AC_SUBST([GOBJECT_PREFIX])
