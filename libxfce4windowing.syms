@@ -1,0 +1,6 @@
+libxfce4windowing_1_0 {
+	global:
+		[^_]*;
+	local:
+		*;
+};

@@ -76,3 +76,4 @@ protocols/*.c
 protocols/*.h
 
 compile_flags.txt
+build*
