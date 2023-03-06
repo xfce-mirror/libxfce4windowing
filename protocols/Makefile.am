@@ -1,4 +1,4 @@
-if WAYLAND_ENABLED
+if ENABLE_WAYLAND
 
 noinst_LTLIBRARIES = \
 	libwayland-protocols.la
