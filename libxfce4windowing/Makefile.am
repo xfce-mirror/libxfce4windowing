@@ -76,12 +76,12 @@ libxfce4windowing_0_la_SOURCES = \
 	xfw-workspace.c \
 	xfw-workspace-private.h
 
-if X11_ENABLED
+if ENABLE_X11
 libxfce4windowing_0_la_SOURCES += \
 	$(libxfce4windowing_0_x11_sources)
 endif
 
-if WAYLAND_ENABLED
+if ENABLE_WAYLAND
 libxfce4windowing_0_la_SOURCES += \
 	$(libxfce4windowing_0_wayland_sources)
 endif
@@ -115,7 +115,7 @@ libxfce4windowing_0_la_LIBADD = \
 	$(LIBX11_LIBS) \
 	$(WAYLAND_CLIENT_LIBS)
 
-if WAYLAND_ENABLED
+if ENABLE_WAYLAND
 libxfce4windowing_0_la_LIBADD += \
 	$(top_builddir)/protocols/libwayland-protocols.la
 endif

@@ -13,10 +13,12 @@ m4_define([libxfce4windowingui_version_api], [0])
 XDT_VERSION_INIT([4.19.1], [git])
 
 dnl minimum required versions
+m4_define([libx11_minimum_version], [1.6.7])
 m4_define([glib_minimum_version], [2.68.0])
 m4_define([gtk_minimum_version], [3.24.0])
 m4_define([gdk_pixbuf_minimum_version], [2.40.0])
 m4_define([wnck_minimum_version], [3.14])
+m4_define([wayland_minimum_version], [1.15])
 
 dnl init autoconf
 AC_INIT([libxfce4windowing], [xdt_version], [https://gitlab.xfce.org/xfce/libxfce4windowing])
@@ -97,54 +99,28 @@ AC_SUBST([GDK_PREFIX])
 AC_SUBST([GDK_PIXBUF_PREFIX])
 AC_SUBST([GTK_PREFIX])
 
-AC_ARG_ENABLE([x11],
-              AS_HELP_STRING([--disable-x11], [Whether to build support for X11 (default=auto)]),
-              [enable_x11=$enableval],
-              [enable_x11=auto])
-XDT_CHECK_LIBX11()
-XDT_CHECK_OPTIONAL_PACKAGE([GDK_X11], [gdk-x11-3.0], [gtk_minimum_version],
-                           [gdk-x11], [X11 backend for GDK])
-XDT_CHECK_OPTIONAL_PACKAGE([LIBWNCK], [libwnck-3.0], [wnck_minimum_version],
-                           [libwnck], [X11 WNCK library])
+XDT_CHECK_OPTIONAL_FEATURE([X11],
+                           [x11],
+                           [
+                               XDT_FEATURE_DEPENDENCY([LIBX11], [x11], [libx11_minimum_version])
+                               XDT_FEATURE_DEPENDENCY([GDK_X11], [gdk-x11-3.0], [gtk_minimum_version])
+                               XDT_FEATURE_DEPENDENCY([LIBWNCK], [libwnck-3.0], [wnck_minimum_version])
+                           ],
+                           [the X11 windowing system])
+XDT_CHECK_OPTIONAL_FEATURE([WAYLAND],
+                           [wayland],
+                           [
+                               XDT_FEATURE_DEPENDENCY([GDK_WAYLAND], [gdk-wayland-3.0], [gtk_minimum_version])
+                               XDT_FEATURE_DEPENDENCY([WAYLAND_SCANNER], [wayland-scanner], [wayland_minimum_version])
+                               XDT_FEATURE_DEPENDENCY([WAYLAND_CLIENT], [wayland-client], [wayland_minimum_version])
+                           ],
+                           [the Wayland windowing system])
 
-if test x"$enable_x11" != x"no"; then
-    if test x"$GDK_X11_FOUND" = x"yes" -a x"$LIBWNCK_FOUND" = x"yes"; then
-        enable_x11="yes"
-        AC_DEFINE([ENABLE_X11], [1], [Set if X11 support is enabled])
-    elif test x"$enable_x11" = x"yes"; then
-        AC_MSG_ERROR([X11 support was requested, but required dependencies were not found])
-    else
-        enable_x11="no"
-    fi
-fi
-AM_CONDITIONAL([X11_ENABLED], [test x"$enable_x11" = x"yes"])
-
-AC_ARG_ENABLE([wayland],
-              AS_HELP_STRING([--disable-wayland], [Whether to build support for Wayland (default=auto)]),
-              [enable_wayland=$enableval],
-              [enable_wayland=auto])
-XDT_CHECK_OPTIONAL_PACKAGE([GDK_WAYLAND], [gdk-wayland-3.0], [gtk_minimum_version],
-                           [gdk-wayland], [Wayland backend for GDK])
-XDT_CHECK_OPTIONAL_PACKAGE([WAYLAND_SCANNER], [wayland-scanner], [1.15],
-                           [wayland-scanner], [Wayland protocol code generator])
-XDT_CHECK_OPTIONAL_PACKAGE([WAYLAND_CLIENT], [wayland-client], [1.15],
-                           [wayland-client], [Wayland client library])
-
-if test x"$enable_wayland" != x"no"; then
-    if test x"$GDK_WAYLAND_FOUND" = x"yes" -a x"$WAYLAND_SCANNER_FOUND" = x"yes" -a x"$WAYLAND_CLIENT_FOUND" = x"yes"; then
-        enable_wayland="yes"
-        AC_DEFINE([ENABLE_WAYLAND], [1], [Set if Wayland support is enabled])
-    elif test x"$enable_wayland" = x"yes"; then
-        AC_MSG_ERROR([Wayland support was requested, but required dependencies were not found])
-    else
-        enable_wayland="no"
-    fi
-fi
-AM_CONDITIONAL([WAYLAND_ENABLED], [test x"$enable_wayland" = x"yes"])
-
-if test x"$enable_x11" = x"no" -a x"$enable_wayland" = x"no"; then
+if test x"$ENABLE_X11" != x"yes" -a x"$ENABLE_WAYLAND" != x"yes"; then
     AC_MSG_ERROR([At least one windowing backend must be enabled])
 fi
+
+XDT_CHECK_PACKAGE_BINARY([WAYLAND_SCANNER], [wayland-scanner], [wayland_scanner], [wayland-scanner])
 
 GTK_DOC_CHECK([1.30])
 
@@ -212,8 +188,8 @@ AC_OUTPUT
 
 echo
 echo "Build Configuration:"
-echo "* X11 support:                   $enable_x11"
-echo "* Wayland support:               $enable_wayland"
+echo "* X11 support:                   $ENABLE_X11"
+echo "* Wayland support:               $ENABLE_WAYLAND"
 echo "* Debug support:                 $enable_debug"
 echo "* GObject Introspection support: $enable_introspection"
 echo "* Documentation support:         $enable_gtk_doc"
