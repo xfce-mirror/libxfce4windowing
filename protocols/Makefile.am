@@ -23,10 +23,10 @@ libwayland_protocols_la_LIBADD = \
 
 
 %.c: %.xml
-	$(AM_V_GEN) wayland-scanner private-code $< $@
+	$(AM_V_GEN) $(WAYLAND_SCANNER) private-code $< $@
 
 %-client.h: %.xml
-	$(AM_V_GEN) wayland-scanner client-header $< $@
+	$(AM_V_GEN) $(WAYLAND_SCANNER) client-header $< $@
 
 
 CLEANFILES = \
