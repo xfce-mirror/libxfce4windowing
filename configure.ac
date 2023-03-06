@@ -120,6 +120,9 @@ if test x"$ENABLE_X11" != x"yes" -a x"$ENABLE_WAYLAND" != x"yes"; then
     AC_MSG_ERROR([At least one windowing backend must be enabled])
 fi
 
+AS_IF([test x"$ENABLE_WAYLAND" = x"yes"],
+      [XDT_CHECK_PACKAGE_BINARY([WAYLAND_SCANNER], [wayland-scanner], [wayland_scanner], [wayland-scanner])])
+
 GTK_DOC_CHECK([1.30])
 
 GOBJECT_INTROSPECTION_CHECK([1.66.0])
