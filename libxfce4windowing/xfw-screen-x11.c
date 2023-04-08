@@ -96,7 +96,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     for (GList *l = wnck_screen_get_windows(screen->priv->wnck_screen); l != NULL; l = l->next) {
         XfwWindowX11 *window = g_object_new(XFW_TYPE_WINDOW_X11,
                                             "screen", screen,
-                                            "wnck-screen", l->data,
+                                            "wnck-window", l->data,
                                             NULL);
         screen->priv->windows = g_list_prepend(screen->priv->windows, window);
         g_hash_table_insert(screen->priv->wnck_windows, l->data, window);
