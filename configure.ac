@@ -21,6 +21,7 @@ m4_define([wnck_minimum_version], [3.14])
 m4_define([wayland_minimum_version], [1.15])
 
 dnl init autoconf
+AC_COPYRIGHT([Copyright (c) 2022-2023 The Xfce development team. All rights reserved.])
 AC_INIT([libxfce4windowing], [xdt_version], [https://gitlab.xfce.org/xfce/libxfce4windowing])
 AC_PREREQ([2.69])
 AC_CONFIG_MACRO_DIRS([m4])
