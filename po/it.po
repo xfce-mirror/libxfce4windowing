@@ -4,8 +4,8 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
+# nortio <savi.napolitano@gmail.com>, 2023
 # Dmytro Tokayev, 2023
-# napsav <savi.napolitano@gmail.com>, 2023
 # 
 #, fuzzy
 msgid ""
@@ -14,8 +14,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-01-10 00:45+0100\n"
 "PO-Revision-Date: 2022-12-22 11:42+0000\n"
-"Last-Translator: napsav <savi.napolitano@gmail.com>, 2023\n"
-"Language-Team: Italian (https://www.transifex.com/xfce/teams/16840/it/)\n"
+"Last-Translator: Dmytro Tokayev, 2023\n"
+"Language-Team: Italian (https://app.transifex.com/xfce/teams/16840/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -50,7 +50,7 @@ msgstr "Sempre in _Primo Piano"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:234
 msgid "_Always on Visible Workspace"
-msgstr "Sempre nello Spazio di Lavoro _Visibile"
+msgstr "Sempre nello spazio di lavoro _visibile"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:239
 msgid "_Only on This Workspace"
@@ -58,23 +58,23 @@ msgstr "_Solo in questo spazio di lavoro"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:244
 msgid "Move to Workspace _Left"
-msgstr "Sposta nello Spazio di lavoro a _Sinistra"
+msgstr "Sposta nello spazio di lavoro a _sinistra"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:253
 msgid "Move to Workspace R_ight"
-msgstr "Sposta nello Spazio di lavoro a _Destra"
+msgstr "Sposta nello spazio di lavoro a _destra"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:262
 msgid "Move to Workspace _Up"
-msgstr "Sposta nello Spazio di lavoro _Superiore"
+msgstr "Sposta nello spazio di lavoro _superiore"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:271
 msgid "Move to Workspace _Down"
-msgstr "Sposta nello Spazio di lavoro _Inferiore"
+msgstr "Sposta nello spazio di lavoro _inferiore"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:280
 msgid "Move to Another _Workspace"
-msgstr "Sposta in un altro _Spazio di lavoro"
+msgstr "Sposta in un altro _spazio di lavoro"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:289
 msgid "_Close"
