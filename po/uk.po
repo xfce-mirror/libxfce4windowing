@@ -14,7 +14,7 @@ msgstr ""
 "POT-Creation-Date: 2023-01-10 00:45+0100\n"
 "PO-Revision-Date: 2022-12-22 11:42+0000\n"
 "Last-Translator: Gordon Freeman, 2023\n"
-"Language-Team: Ukrainian (https://www.transifex.com/xfce/teams/16840/uk/)\n"
+"Language-Team: Ukrainian (https://app.transifex.com/xfce/teams/16840/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -23,7 +23,7 @@ msgstr ""
 
 #: ../libxfce4windowing/xfw-wnck-icon.c:257
 msgid "The provided window does not have a _NET_WM_ICON or WMHints icon"
-msgstr ""
+msgstr "Надане вікно не має значка _NET_WM_ICON або WMHints"
 
 #: ../libxfce4windowing/xfw-wnck-icon.c:626
 msgid "Failed to find or load an icon for the window"
@@ -84,16 +84,16 @@ msgstr "Робоча область %d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"
-msgstr ""
+msgstr "З_горнути"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Unmi_nimize"
-msgstr ""
+msgstr "Розг_орнути"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:495
 msgid "Ma_ximize"
-msgstr ""
+msgstr "На весь _екран"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:495
 msgid "Unma_ximize"
-msgstr ""
+msgstr "Зви_чайний розмір"
