@@ -148,7 +148,7 @@ xfw_application_x11_finalize(GObject *obj) {
     for (GList *lp = priv->windows; lp != NULL; lp = lp->next) {
         g_signal_handlers_disconnect_by_data(lp->data, obj);
     }
-    g_list_free_full(priv->windows, g_object_unref);
+    g_list_free(priv->windows);
     g_hash_table_destroy(priv->instances);
     g_list_free(priv->instance_list);
 
@@ -231,7 +231,6 @@ window_closed(XfwWindowX11 *window, XfwApplicationX11 *app) {
     g_signal_handlers_disconnect_by_data(window, app);
 
     app->priv->windows = g_list_remove(app->priv->windows, window);
-    g_object_unref(window);
     g_object_notify(G_OBJECT(app), "windows");
 
     instance->windows = g_list_remove(instance->windows, window);
@@ -240,6 +239,11 @@ window_closed(XfwWindowX11 *window, XfwApplicationX11 *app) {
         app->priv->instance_list = g_list_remove(app->priv->instance_list, instance);
         g_object_notify(G_OBJECT(app), "instances");
     }
+}
+
+static void
+toggle_notify(gpointer data, GObject *object, gboolean is_last_ref) {
+  g_object_remove_toggle_ref(object, toggle_notify, data);
 }
 
 XfwApplicationX11 *
@@ -262,7 +266,10 @@ _xfw_application_x11_get(WnckClassGroup *wnck_group, XfwWindowX11 *window) {
         g_object_ref(app);
     }
 
-    app->priv->windows = g_list_prepend(app->priv->windows, g_object_ref(window));
+    // avoid reference cycle
+    g_object_add_toggle_ref(G_OBJECT(window), toggle_notify, app);
+
+    app->priv->windows = g_list_prepend(app->priv->windows, window);
     g_signal_connect(window, "closed", G_CALLBACK(window_closed), app);
     g_object_notify(G_OBJECT(app), "windows");
 
