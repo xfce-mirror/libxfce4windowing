@@ -156,9 +156,6 @@ xfw_application_wayland_finalize(GObject *obj) {
     g_free(priv->app_id);
     g_free(priv->name);
     g_free(priv->icon_name);
-    for (GList *lp = priv->windows; lp != NULL; lp = lp->next) {
-        g_signal_handlers_disconnect_by_data(lp->data, obj);
-    }
     g_list_free(priv->windows);
     g_list_free(priv->instances);
 
@@ -220,7 +217,7 @@ window_application_changed(XfwWindowWayland *window, GParamSpec *pspec, XfwAppli
 
 static void
 toggle_notify(gpointer data, GObject *object, gboolean is_last_ref) {
-  g_object_remove_toggle_ref(object, toggle_notify, data);
+    g_object_remove_toggle_ref(object, toggle_notify, data);
 }
 
 XfwApplicationWayland *

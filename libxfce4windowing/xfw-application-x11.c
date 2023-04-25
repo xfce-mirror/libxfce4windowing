@@ -145,9 +145,6 @@ xfw_application_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(priv->wnck_group, name_changed, obj);
 
     g_free(priv->icon_name);
-    for (GList *lp = priv->windows; lp != NULL; lp = lp->next) {
-        g_signal_handlers_disconnect_by_data(lp->data, obj);
-    }
     g_list_free(priv->windows);
     g_hash_table_destroy(priv->instances);
     g_list_free(priv->instance_list);
@@ -243,7 +240,7 @@ window_closed(XfwWindowX11 *window, XfwApplicationX11 *app) {
 
 static void
 toggle_notify(gpointer data, GObject *object, gboolean is_last_ref) {
-  g_object_remove_toggle_ref(object, toggle_notify, data);
+    g_object_remove_toggle_ref(object, toggle_notify, data);
 }
 
 XfwApplicationX11 *
