@@ -39,6 +39,7 @@ struct _XfwWorkspaceInterface {
     void (*name_changed)(XfwWorkspace *workspace);
     void (*capabilities_changed)(XfwWorkspace *workspace, XfwWorkspaceCapabilities changed_mask, XfwWorkspaceCapabilities new_capabilities);
     void (*state_changed)(XfwWorkspace *workspace, XfwWorkspaceState changed_mask, XfwWorkspaceState new_state);
+    void (*group_changed)(XfwWorkspace *workspace, XfwWorkspaceGroup *previous_group);
 
     /* Virtual Table */
     const gchar *(*get_id)(XfwWorkspace *workspace);
@@ -55,6 +56,7 @@ struct _XfwWorkspaceInterface {
 
     gboolean (*activate)(XfwWorkspace *workspace, GError **error);
     gboolean (*remove)(XfwWorkspace *workspace, GError **error);
+    gboolean (*assign_to_workspace_group)(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
 };
 
 G_END_DECLS

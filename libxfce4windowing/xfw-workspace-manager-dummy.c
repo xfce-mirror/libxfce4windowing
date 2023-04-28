@@ -37,6 +37,7 @@ static void xfw_workspace_manager_dummy_set_property(GObject *obj, guint prop_id
 static void xfw_workspace_manager_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_dummy_finalize(GObject *obj);
 static GList *xfw_workspace_manager_dummy_list_workspace_groups(XfwWorkspaceManager *manager);
+static GList *xfw_workspace_manager_dummy_list_workspaces(XfwWorkspaceManager *manager);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerDummy, xfw_workspace_manager_dummy, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceManagerDummy)
@@ -56,6 +57,7 @@ xfw_workspace_manager_dummy_class_init(XfwWorkspaceManagerDummyClass *klass) {
 static void
 xfw_workspace_manager_dummy_manager_init(XfwWorkspaceManagerIface *iface) {
     iface->list_workspace_groups = xfw_workspace_manager_dummy_list_workspace_groups;
+    iface->list_workspaces = xfw_workspace_manager_dummy_list_workspaces;
 }
 
 static void
@@ -78,9 +80,8 @@ xfw_workspace_manager_dummy_constructed(GObject *obj) {
                          "set-layout-func", NULL,
                          NULL);
     manager->priv->groups = g_list_append(NULL, group);
-    manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY,
-                                                                 "group", group,
-                                                                 NULL));
+    manager->priv->workspaces = g_list_append(NULL, g_object_new(XFW_TYPE_WORKSPACE_DUMMY, NULL));
+    _xfw_workspace_dummy_set_workspace_group(XFW_WORKSPACE_DUMMY(manager->priv->workspaces->data), XFW_WORKSPACE_GROUP(group));
     _xfw_workspace_group_dummy_set_workspaces(group, manager->priv->workspaces);
     _xfw_workspace_group_dummy_set_active_workspace(group, XFW_WORKSPACE(manager->priv->workspaces->data));
 }
@@ -128,6 +129,11 @@ xfw_workspace_manager_dummy_finalize(GObject *obj) {
 static GList *
 xfw_workspace_manager_dummy_list_workspace_groups(XfwWorkspaceManager *manager) {
     return XFW_WORKSPACE_MANAGER_DUMMY(manager)->priv->groups;
+}
+
+static GList *
+xfw_workspace_manager_dummy_list_workspaces(XfwWorkspaceManager *manager) {
+    return XFW_WORKSPACE_MANAGER_DUMMY(manager)->priv->workspaces;
 }
 
 XfwWorkspaceManager *
