@@ -25,7 +25,7 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkwayland.h>
 
-#include "protocols/ext-workspace-v1-20220919-client.h"
+#include "protocols/ext-workspace-v1-20230427-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
@@ -47,7 +47,6 @@ struct _XfwWorkspaceGroupWaylandPrivate {
     XfwWorkspaceGroupCapabilities capabilities;
     GList *workspaces;
     XfwWorkspace *active_workspace;
-    GHashTable *wl_workspaces;
     GList *monitors;
 };
 
@@ -68,10 +67,11 @@ static gboolean xfw_workspace_group_wayland_create_workspace(XfwWorkspaceGroup *
 static gboolean xfw_workspace_group_wayland_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
 static gboolean xfw_workspace_group_wayland_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
 
-static void group_capabilities(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_array *capabilities);
+static void group_capabilities(void *data, struct ext_workspace_group_handle_v1 *group, uint32_t capabilities);
 static void group_output_enter(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_output *output);
 static void group_output_leave(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_output *output);
-static void group_workspace(void *data, struct ext_workspace_group_handle_v1 *group, struct ext_workspace_handle_v1 *workspace);
+static void group_workspace_enter(void *data, struct ext_workspace_group_handle_v1 *group, struct ext_workspace_handle_v1 *workspace);
+static void group_workspace_leave(void *data, struct ext_workspace_group_handle_v1 *group, struct ext_workspace_handle_v1 *workspace);
 static void group_removed(void *data, struct ext_workspace_group_handle_v1 *group);
 
 static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupWayland *group);
@@ -81,7 +81,8 @@ static const struct ext_workspace_group_handle_v1_listener group_listener = {
     .capabilities = group_capabilities,
     .output_enter = group_output_enter,
     .output_leave = group_output_leave,
-    .workspace = group_workspace,
+    .workspace_enter = group_workspace_enter,
+    .workspace_leave = group_workspace_leave,
     .removed = group_removed,
 };
 
@@ -116,7 +117,6 @@ xfw_workspace_group_wayland_init(XfwWorkspaceGroupWayland *group) {
 static void
 xfw_workspace_group_wayland_constructed(GObject *obj) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
-    group->priv->wl_workspaces = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
     ext_workspace_group_handle_v1_add_listener(group->priv->handle, &group_listener, group);
 }
 
@@ -183,7 +183,6 @@ xfw_workspace_group_wayland_finalize(GObject *obj) {
     ext_workspace_group_handle_v1_destroy(group->priv->handle);
 
     g_list_free(group->priv->workspaces);
-    g_hash_table_destroy(group->priv->wl_workspaces);
 
     display = gdk_screen_get_display(group->priv->screen);
     g_signal_handlers_disconnect_by_func(display, monitor_added, group);
@@ -267,17 +266,14 @@ xfw_workspace_group_wayland_set_layout(XfwWorkspaceGroup *group, gint rows, gint
 }
 
 static void
-group_capabilities(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct wl_array *wl_capabilities) {
+group_capabilities(void *data, struct ext_workspace_group_handle_v1 *wl_group, uint32_t wl_capabilities) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
     XfwWorkspaceGroupCapabilities old_capabilities = group->priv->capabilities;
     XfwWorkspaceGroupCapabilities changed_mask;
     XfwWorkspaceGroupCapabilities new_capabilities = XFW_WORKSPACE_GROUP_CAPABILITIES_NONE;
-    enum ext_workspace_group_handle_v1_ext_workspace_group_capabilities_v1 *item;
 
-    wl_array_for_each(item, wl_capabilities) {
-        if (*item == EXT_WORKSPACE_GROUP_HANDLE_V1_EXT_WORKSPACE_GROUP_CAPABILITIES_V1_CREATE_WORKSPACE) {
-            new_capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE;
-        }
+    if ((wl_capabilities & EXT_WORKSPACE_GROUP_HANDLE_V1_EXT_WORKSPACE_GROUP_CAPABILITIES_V1_CREATE_WORKSPACE) != 0) {
+        new_capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE;
     }
 
     group->priv->capabilities = new_capabilities;
@@ -319,58 +315,29 @@ group_output_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, s
 }
 
 static void
-workspace_destroyed(XfwWorkspace *workspace, XfwWorkspaceGroupWayland *group) {
-    guint old_number = UINT_MAX;
-    GList *l;
-
-    g_signal_handlers_disconnect_by_func(workspace, workspace_destroyed, group);
-
-    l = group->priv->workspaces;
-    while (l != NULL) {
-        XfwWorkspace *cur_workspace = XFW_WORKSPACE(l->data);
-        guint cur_number = xfw_workspace_get_number(cur_workspace);
-        l = l->next;
-
-        if (cur_workspace == workspace) {
-            old_number = cur_number;
-            group->priv->workspaces = g_list_remove_link(group->priv->workspaces, l);
-            g_list_free_1(l);
-        } else if (old_number < cur_number) {
-            _xfw_workspace_wayland_set_number(XFW_WORKSPACE_WAYLAND(cur_workspace), cur_number - 1);
-        }
+group_workspace_enter(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct ext_workspace_handle_v1 *wl_workspace) {
+    XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(wl_proxy_get_user_data((struct wl_proxy *)wl_workspace));
+    if (g_list_find(group->priv->workspaces, workspace) == NULL) {
+        group->priv->workspaces = g_list_append(group->priv->workspaces, workspace);
+        g_signal_emit_by_name(group, "workspace-added", workspace);
     }
-
-    g_signal_emit_by_name(group, "workspace-destroyed", workspace);
-    g_hash_table_remove(group->priv->wl_workspaces, _xfw_workspace_wayland_get_handle(XFW_WORKSPACE_WAYLAND(workspace)));
 }
 
 static void
-group_workspace(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct ext_workspace_handle_v1 *wl_workspace) {
+group_workspace_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct ext_workspace_handle_v1 *wl_workspace) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
-    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_WAYLAND,
-                                                                        "group", group,
-                                                                        "handle", wl_workspace,
-                                                                        NULL));
-    _xfw_workspace_wayland_set_number(workspace, g_list_length(group->priv->workspaces));
-    g_hash_table_insert(group->priv->wl_workspaces, wl_workspace, workspace);
-    group->priv->workspaces = g_list_append(group->priv->workspaces, workspace);
-    g_signal_connect(workspace, "destroyed", G_CALLBACK(workspace_destroyed), group);
-    g_signal_emit_by_name(group, "workspace-created", workspace);
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(wl_proxy_get_user_data((struct wl_proxy *)wl_workspace));
+    GList *link = g_list_find(group->priv->workspaces, workspace);
+    if (link != NULL) {
+        group->priv->workspaces = g_list_delete_link(group->priv->workspaces, link);
+        g_signal_emit_by_name(group, "workspace-removed", workspace);
+    }
 }
 
 static void
 group_removed(void *data, struct ext_workspace_group_handle_v1 *wl_group) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
-    GList *l = group->priv->workspaces;
-
-    // NB: use a while loop here instead of a for loop because we have to advance
-    // the 'l' pointer _before_ calling workspace_destroyed().
-    while (l != NULL) {
-        XfwWorkspace *workspace = XFW_WORKSPACE(l->data);
-        l = l->next;
-        workspace_destroyed(workspace, group);
-    }
-
     g_signal_emit(group, group_signals[SIGNAL_DESTROYED], 0);
 }
 
@@ -389,6 +356,11 @@ static void
 monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupWayland *group) {
     group->priv->monitors = g_list_remove(group->priv->monitors, monitor);
     g_signal_emit_by_name(group, "monitors-changed");
+}
+
+struct ext_workspace_group_handle_v1 *
+_xfw_workspace_group_wayland_get_handle(XfwWorkspaceGroupWayland *group) {
+    return group->priv->handle;
 }
 
 void
