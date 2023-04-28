@@ -688,7 +688,7 @@ static const struct {
 static XfwWindowState
 convert_state(WnckWindow *wnck_window, WnckWindowState wnck_state) {
     XfwWindowState state = XFW_WINDOW_STATE_NONE;
-    for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
+    for (size_t i = 0; i < G_N_ELEMENTS(state_converters); ++i) {
         if ((wnck_state & state_converters[i].wnck_state_bits) != 0) {
             state |= state_converters[i].state_bit;
         }
@@ -735,7 +735,7 @@ convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions)
 {
     WnckWindowState wnck_state = wnck_window_get_state(wnck_window);
     XfwWindowCapabilities capabilities = XFW_WINDOW_CAPABILITIES_NONE;
-    for (size_t i = 0; i < sizeof(capabilities_converters) / sizeof(*capabilities_converters); ++i) {
+    for (size_t i = 0; i < G_N_ELEMENTS(capabilities_converters); ++i) {
         if ((wnck_actions & capabilities_converters[i].wnck_actions_bits) != 0) {
             if ((
                     capabilities_converters[i].need_wnck_state_bits_present

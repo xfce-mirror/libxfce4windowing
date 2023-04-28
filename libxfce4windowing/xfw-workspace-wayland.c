@@ -347,7 +347,7 @@ workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct
     enum ext_workspace_handle_v1_state *item;
 
     wl_array_for_each(item, wl_state) {
-        for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
+        for (size_t i = 0; i < G_N_ELEMENTS(state_converters); ++i) {
             if (state_converters[i].wl_state == *item) {
                 new_state |= state_converters[i].state_bit;
                 break;
@@ -390,7 +390,7 @@ workspace_capabilities(void *data, struct ext_workspace_handle_v1 *wl_workspace,
     enum ext_workspace_handle_v1_ext_workspace_capabilities_v1 *item;
 
     wl_array_for_each(item, wl_capabilities) {
-        for (size_t i = 0; i < sizeof(capabilities_converters) / sizeof(*capabilities_converters); ++i) {
+        for (size_t i = 0; i < G_N_ELEMENTS(capabilities_converters); ++i) {
             if (capabilities_converters[i].wl_capability == *item) {
                 new_capabilities |= capabilities_converters[i].capability_bit;
                 break;

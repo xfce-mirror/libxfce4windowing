@@ -527,7 +527,7 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
     XfwWindowCapabilities new_capabilities = XFW_WINDOW_CAPABILITIES_NONE;
 
     wl_array_for_each(item, wl_state) {
-        for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
+        for (size_t i = 0; i < G_N_ELEMENTS(state_converters); ++i) {
             if (state_converters[i].wl_state == *item) {
                 new_state |= state_converters[i].state_bit;
                 break;
@@ -540,7 +540,7 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
     g_object_notify(G_OBJECT(window), "state");
     g_signal_emit_by_name(window, "state-changed", changed_mask, new_state);
 
-    for (size_t i = 0; i < sizeof(capabilities_converters) / sizeof(*capabilities_converters); ++i) {
+    for (size_t i = 0; i < G_N_ELEMENTS(capabilities_converters); ++i) {
         if ((new_state & capabilities_converters[i].state_bit) != 0) {
             new_capabilities |= capabilities_converters[i].capabilities_bit_if_present;
         } else {
