@@ -26,6 +26,8 @@
 
 #include <glib-object.h>
 
+#include "xfw-workspace-group.h"
+
 G_BEGIN_DECLS
 
 #define XFW_TYPE_WORKSPACE_DUMMY (xfw_workspace_dummy_get_type())
@@ -38,5 +40,7 @@ struct _XfwWorkspaceDummy {
     /*< private >*/
     XfwWorkspaceDummyPrivate *priv;
 };
+
+void _xfw_workspace_dummy_set_workspace_group(XfwWorkspaceDummy *workspace, XfwWorkspaceGroup *group);
 
 #endif  /* __XFW_WORKSPACE_DUMMY_H__ */

@@ -21,8 +21,9 @@
 
 #include <limits.h>
 
+#include "protocols/ext-workspace-v1-20230427-client.h"
+
 #include "libxfce4windowing-private.h"
-#include "protocols/ext-workspace-v1-20220919-client.h"
 #include "xfw-util.h"
 #include "xfw-workspace-group-wayland.h"
 #include "xfw-workspace-group.h"
@@ -70,11 +71,12 @@ static XfwWorkspace *xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace,
 static GdkRectangle *xfw_workspace_x11_get_geometry(XfwWorkspace *workspace);
 static gboolean xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
+static gboolean xfw_workspace_wayland_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
 
 static void workspace_name(void *data, struct ext_workspace_handle_v1 *workspace, const char *name);
 static void workspace_coordinates(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *coordinates);
-static void workspace_state(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *state);
-static void workspace_capabilities(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *capabilities);
+static void workspace_state(void *data, struct ext_workspace_handle_v1 *workspace, uint32_t state);
+static void workspace_capabilities(void *data, struct ext_workspace_handle_v1 *workspace, uint32_t capabilities);
 static void workspace_removed(void *data, struct ext_workspace_handle_v1 *workspace);
 
 static const struct ext_workspace_handle_v1_listener workspace_listener = {
@@ -141,6 +143,7 @@ xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_geometry = xfw_workspace_x11_get_geometry;
     iface->activate = xfw_workspace_wayland_activate;
     iface->remove = xfw_workspace_wayland_remove;
+    iface->assign_to_workspace_group = xfw_workspace_wayland_assign_to_workspace_group;
 }
 
 static void
@@ -152,9 +155,6 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
             break;
 
         case WORKSPACE_PROP_GROUP:
-            workspace->priv->group = g_value_get_object(value);
-            break;
-
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
         case WORKSPACE_PROP_CAPABILITIES:
@@ -317,6 +317,22 @@ xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error) {
     }
 }
 
+static gboolean
+xfw_workspace_wayland_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error) {
+    XfwWorkspaceWayland *wworkspace = XFW_WORKSPACE_WAYLAND(workspace);
+
+    if ((wworkspace->priv->capabilities & XFW_WORKSPACE_CAPABILITIES_ASSIGN) != 0) {
+        ext_workspace_handle_v1_assign(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle,
+                                       _xfw_workspace_group_wayland_get_handle(XFW_WORKSPACE_GROUP_WAYLAND(group)));
+        return TRUE;
+    } else {
+        if (error != NULL) {
+            *error = g_error_new_literal(XFW_ERROR, XFW_ERROR_UNSUPPORTED, "This workspace does not support group assignment");
+        }
+        return FALSE;
+    }
+}
+
 static void
 workspace_name(void *data, struct ext_workspace_handle_v1 *wl_workspace, const char *name) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
@@ -339,19 +355,16 @@ static const struct {
 };
 
 static void
-workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct wl_array *wl_state) {
+workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, uint32_t wl_state) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
     XfwWorkspaceState old_state = workspace->priv->state;
     XfwWorkspaceState changed_mask;
     XfwWorkspaceState new_state = XFW_WORKSPACE_STATE_NONE;
-    enum ext_workspace_handle_v1_state *item;
 
-    wl_array_for_each(item, wl_state) {
-        for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
-            if (state_converters[i].wl_state == *item) {
-                new_state |= state_converters[i].state_bit;
-                break;
-            }
+    for (size_t i = 0; i < sizeof(state_converters) / sizeof(*state_converters); ++i) {
+        if ((state_converters[i].wl_state & wl_state) != 0) {
+            new_state |= state_converters[i].state_bit;
+            break;
         }
     }
 
@@ -378,27 +391,26 @@ static const struct {
     XfwWorkspaceCapabilities capability_bit;
 } capabilities_converters[] = {
     { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_ACTIVATE, XFW_WORKSPACE_CAPABILITIES_ACTIVATE },
+    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_DEACTIVATE, XFW_WORKSPACE_CAPABILITIES_DEACTIVATE },
     { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_REMOVE, XFW_WORKSPACE_CAPABILITIES_REMOVE },
+    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_ASSIGN, XFW_WORKSPACE_CAPABILITIES_ASSIGN },
 };
 
 static void
-workspace_capabilities(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct wl_array *wl_capabilities) {
+workspace_capabilities(void *data, struct ext_workspace_handle_v1 *wl_workspace, uint32_t wl_capabilities) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
     XfwWorkspaceCapabilities old_capabilities = workspace->priv->capabilities;
     XfwWorkspaceCapabilities changed_mask;
     XfwWorkspaceCapabilities new_capabilities = XFW_WORKSPACE_CAPABILITIES_NONE;
-    enum ext_workspace_handle_v1_ext_workspace_capabilities_v1 *item;
 
-    wl_array_for_each(item, wl_capabilities) {
-        for (size_t i = 0; i < sizeof(capabilities_converters) / sizeof(*capabilities_converters); ++i) {
-            if (capabilities_converters[i].wl_capability == *item) {
-                new_capabilities |= capabilities_converters[i].capability_bit;
-                break;
-            }
+    for (size_t i = 0; i < sizeof(capabilities_converters) / sizeof(*capabilities_converters); ++i) {
+        if ((capabilities_converters[i].wl_capability & wl_capabilities) != 0) {
+            new_capabilities |= capabilities_converters[i].capability_bit;
+            break;
         }
     }
-    workspace->priv->capabilities = new_capabilities;
 
+    workspace->priv->capabilities = new_capabilities;
     changed_mask = old_capabilities ^ new_capabilities;
     g_object_notify(G_OBJECT(workspace), "capabilities");
     g_signal_emit_by_name(workspace, "capabilities-changed", changed_mask, new_capabilities);
@@ -420,5 +432,14 @@ _xfw_workspace_wayland_set_number(XfwWorkspaceWayland *workspace, guint number) 
     if (number != workspace->priv->number) {
         workspace->priv->number = number;
         g_object_notify(G_OBJECT(workspace), "number");
+    }
+}
+
+void
+_xfw_workspace_wayland_set_workspace_group(XfwWorkspaceWayland *workspace, XfwWorkspaceGroup *group) {
+    if (group != workspace->priv->group) {
+        XfwWorkspaceGroup *previous_group = workspace->priv->group;
+        workspace->priv->group = group;
+        g_signal_emit_by_name(workspace, "group-changed", previous_group);
     }
 }
