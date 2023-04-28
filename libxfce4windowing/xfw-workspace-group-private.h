@@ -38,14 +38,14 @@ struct _XfwWorkspaceGroupInterface {
     void (*capabilities_changed)(XfwWorkspaceGroup *group,
                                  XfwWorkspaceGroupCapabilities changed_mask,
                                  XfwWorkspaceGroupCapabilities new_capabilities);
-    void (*workspace_created)(XfwWorkspaceGroup *group,
-                              XfwWorkspace *workspace);
     void (*active_workspace_changed)(XfwWorkspaceGroup *group,
                                      XfwWorkspace *previously_active_workspace);
-    void (*workspace_destroyed)(XfwWorkspaceGroup *group,
-                                XfwWorkspace *workspace);
     void (*monitors_changed)(XfwWorkspaceGroup *group);
     void (*viewports_changed)(XfwWorkspaceGroup *group);
+    void (*workspace_added)(XfwWorkspaceGroup *group,
+                            XfwWorkspace *workspace);
+    void (*workspace_removed)(XfwWorkspaceGroup *group,
+                              XfwWorkspace *workspace);
 
     /* Virtual Table */
     XfwWorkspaceGroupCapabilities (*get_capabilities)(XfwWorkspaceGroup *group);

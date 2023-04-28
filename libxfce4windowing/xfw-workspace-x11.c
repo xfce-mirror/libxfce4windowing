@@ -55,6 +55,7 @@ static XfwWorkspace *xfw_workspace_x11_get_neighbor(XfwWorkspace *workspace, Xfw
 static GdkRectangle *xfw_workspace_x11_get_geometry(XfwWorkspace *workspace);
 static gboolean xfw_workspace_x11_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error);
+static gboolean xfw_workspace_x11_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
 
 static void name_changed(WnckWorkspace *wnck_workspace, XfwWorkspaceX11 *workspace);
 
@@ -103,9 +104,6 @@ xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value,
             break;
 
         case WORKSPACE_PROP_GROUP:
-            workspace->priv->group = g_value_get_object(value);
-            break;
-
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
         case WORKSPACE_PROP_CAPABILITIES:
@@ -183,6 +181,7 @@ xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_geometry = xfw_workspace_x11_get_geometry;
     iface->activate = xfw_workspace_x11_activate;
     iface->remove = xfw_workspace_x11_remove;
+    iface->assign_to_workspace_group = xfw_workspace_x11_assign_to_workspace_group;
 }
 
 static const gchar *
@@ -310,6 +309,13 @@ xfw_workspace_x11_remove(XfwWorkspace *workspace, GError **error) {
     }
 }
 
+static gboolean
+xfw_workspace_x11_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error) {
+    // On X11 there is only ever one group, and workspaces are always
+    // members of it, so this always succeeds.
+    return TRUE;
+}
+
 static void
 name_changed(WnckWorkspace *wnck_workspace, XfwWorkspaceX11 *workspace) {
     g_object_notify(G_OBJECT(workspace), "id");
@@ -320,4 +326,13 @@ name_changed(WnckWorkspace *wnck_workspace, XfwWorkspaceX11 *workspace) {
 WnckWorkspace *
 _xfw_workspace_x11_get_wnck_workspace(XfwWorkspaceX11 *workspace) {
     return workspace->priv->wnck_workspace;
+}
+
+void
+_xfw_workspace_x11_set_workspace_group(XfwWorkspaceX11 *workspace, XfwWorkspaceGroup *group) {
+    if (group != workspace->priv->group) {
+        XfwWorkspaceGroup *previous_group = workspace->priv->group;
+        workspace->priv->group = group;
+        g_signal_emit_by_name(workspace, "group-changed", previous_group);
+    }
 }

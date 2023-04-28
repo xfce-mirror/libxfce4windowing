@@ -37,6 +37,7 @@ G_DECLARE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, XFW, WORKSPACE_M
 typedef struct _XfwWorkspaceManagerInterface XfwWorkspaceManagerIface;
 
 GList *xfw_workspace_manager_list_workspace_groups(XfwWorkspaceManager *manager);
+GList *xfw_workspace_manager_list_workspaces(XfwWorkspaceManager *manager);
 
 G_END_DECLS
 
