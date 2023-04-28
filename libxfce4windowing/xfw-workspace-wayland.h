@@ -26,7 +26,7 @@
 
 #include <glib-object.h>
 
-#include "protocols/ext-workspace-v1-20220919-client.h"
+#include "protocols/ext-workspace-v1-20230427-client.h"
 
 G_BEGIN_DECLS
 

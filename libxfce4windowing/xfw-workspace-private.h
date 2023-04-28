@@ -55,6 +55,7 @@ struct _XfwWorkspaceInterface {
 
     gboolean (*activate)(XfwWorkspace *workspace, GError **error);
     gboolean (*remove)(XfwWorkspace *workspace, GError **error);
+    gboolean (*assign_to_workspace_group)(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
 };
 
 G_END_DECLS

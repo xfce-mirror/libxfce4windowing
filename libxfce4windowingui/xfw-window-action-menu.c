@@ -107,6 +107,7 @@ static void close_window(GtkWidget *item, XfwWindow *window);
 static void free_move_data(gpointer data, GClosure *closure);
 
 static void update_menu_items(XfwWindowActionMenu *menu);
+static void update_move_submenu(XfwWindowActionMenu *menu);
 
 static void window_state_changed(XfwWindow *window, XfwWindowState changed_mask, XfwWindowState new_state, XfwWindowActionMenu *menu);
 static void window_capabilities_changed(XfwWindow *window, XfwWindowCapabilities changed_mask, XfwWindowCapabilities new_capabilities, XfwWindowActionMenu *menu);
@@ -193,6 +194,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 static void
 xfw_window_action_menu_constructed(GObject *obj) {
     XfwWindowActionMenu *menu = XFW_WINDOW_ACTION_MENU(obj);
+    XfwWorkspaceManager *manager = xfw_screen_get_workspace_manager(xfw_window_get_screen(menu->priv->window));
     XfwWindow *window = menu->priv->window;
     GtkWidget *item;
     XfwWindowWorkspaceMoveData *mdata;
@@ -295,6 +297,9 @@ xfw_window_action_menu_constructed(GObject *obj) {
 
     gtk_widget_show_all(GTK_WIDGET(menu));
     gtk_widget_hide(GTK_WIDGET(menu));
+
+    g_signal_connect_swapped(manager, "workspace-created", G_CALLBACK(update_move_submenu), menu);
+    g_signal_connect_swapped(manager, "workspace-destroyed", G_CALLBACK(update_move_submenu), menu);
 
     g_signal_connect(menu->priv->window, "state-changed", G_CALLBACK(window_state_changed), menu);
     g_signal_connect(menu->priv->window, "capabilities-changed", G_CALLBACK(window_capabilities_changed), menu);
@@ -428,9 +433,9 @@ static void
 update_move_submenu(XfwWindowActionMenu *menu) {
     GtkWidget *submenu = menu->priv->move_ws_submenu, *item;
     GList *children;
+    XfwWorkspaceManager *manager = xfw_screen_get_workspace_manager(xfw_window_get_screen(menu->priv->window));
     XfwWindowCapabilities caps = xfw_window_get_capabilities(menu->priv->window);
     XfwWorkspace *workspace = xfw_window_get_workspace(menu->priv->window);
-    XfwWorkspaceGroup *group;
 
     children = gtk_container_get_children(GTK_CONTAINER(submenu));
     for (GList *l = children; l != NULL; l = l->next) {
@@ -438,16 +443,10 @@ update_move_submenu(XfwWindowActionMenu *menu) {
     }
     g_list_free(children);
 
-    if (workspace != NULL) {
-        group = xfw_workspace_get_workspace_group(workspace);
-    } else {
-        // FIXME: assumes a single group, might be something better we can do here
-        XfwWorkspaceManager *manager = xfw_screen_get_workspace_manager(xfw_window_get_screen(menu->priv->window));
-        group = XFW_WORKSPACE_GROUP(xfw_workspace_manager_list_workspace_groups(manager)->data);
-    }
-
-    if ((caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0 && xfw_workspace_group_get_workspace_count(group) > 1) {
-        for (GList *l = xfw_workspace_group_list_workspaces(group);
+    if ((caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0 &&
+        g_list_length(xfw_workspace_manager_list_workspaces(manager)) > 1)
+    {
+        for (GList *l = xfw_workspace_manager_list_workspaces(manager);
              l != NULL;
              l = l->next)
         {
