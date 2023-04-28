@@ -114,16 +114,32 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                  XFW_TYPE_WORKSPACE_STATE);
 
     /**
+     * XfwWorkspace::group-changed:
+     * @workspace: the object which received the signal.
+     * @previous_group: the group @workspace was previously in, or %NULL.
+     *
+     * Emitted when @workspace is assigned to an #XfwWorkspaceGroup.
+     **/
+    g_signal_new("group-changed",
+                 XFW_TYPE_WORKSPACE,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceIface, group_changed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_WORKSPACE_GROUP);
+
+    /**
      * XfwWorkspace:group:
      *
-     * The #XfwWorkspaceGroup that this workspace is a member of.
+     * The #XfwWorkspaceGroup that this workspace is a member of, if any.
      **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("group",
                                                             "group",
                                                             "group",
                                                             XFW_TYPE_WORKSPACE_GROUP,
-                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                            G_PARAM_READABLE));
 
     /**
      * XfwWorkspace:id:
@@ -264,6 +280,11 @@ xfw_workspace_get_state(XfwWorkspace *workspace) {
  *
  * The number can be used to order workspaces in a UI representation.
  *
+ * On X11, this number should be stable across runs of your application.
+ *
+ * On Wayland, this number depends on the order in which the compositor
+ * advertises the workspaces.  This order may be stable, but may not be.
+ *
  * Return value: a non-negative, 0-indexed integer.
  **/
 guint
@@ -278,10 +299,11 @@ xfw_workspace_get_number(XfwWorkspace *workspace) {
  * xfw_workspace_get_workspace_group:
  * @workspace: an #XfwWorkspace.
  *
- * Fetches the group this workspace belongs to.
+ * Fetches the group this workspace belongs to, if any.
  *
- * Return value: (not nullable) (transfer none): a #XfwWorkspaceGroup
- * instance, owned by @workspace.
+ * Return value: (nullable) (transfer none): a #XfwWorkspaceGroup
+ * instance, owned by @workspace, or %NULL if the workspace is not a member of
+ * any groups.
  **/
 XfwWorkspaceGroup *
 xfw_workspace_get_workspace_group(XfwWorkspace *workspace) {
@@ -411,6 +433,29 @@ xfw_workspace_remove(XfwWorkspace *workspace, GError **error) {
     g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), FALSE);
     iface = XFW_WORKSPACE_GET_IFACE(workspace);
     return (*iface->remove)(workspace, error);
+}
+
+/**
+ * xfw_workspace_assign_to_workspace_group:
+ * @workspace: an #XfwWorkspace.
+ * @group: an #XfwWorkspaceGroup.
+ * @error: (out callee-allocates): a location to store a possible error.
+ *
+ * Attempts to assign @workspace to @group.
+ *
+ * On failure, @error (if provided) will be set to a description of the error
+ * that occurred.
+ *
+ * Return value: %TRUE if workspace assignment succeeded, %FALSE otherwise.
+ * If %FALSE, and @error is non-%NULL, an error will be returned that must be
+ * freed using g_error_free().
+ **/
+gboolean
+xfw_workspace_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error) {
+    XfwWorkspaceIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE(workspace), FALSE);
+    iface = XFW_WORKSPACE_GET_IFACE(workspace);
+    return (*iface->assign_to_workspace_group)(workspace, group, error);
 }
 
 void

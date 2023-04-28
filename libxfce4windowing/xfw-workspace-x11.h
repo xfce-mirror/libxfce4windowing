@@ -27,6 +27,8 @@
 #include <glib-object.h>
 #include <libwnck/libwnck.h>
 
+#include "xfw-workspace-group.h"
+
 G_BEGIN_DECLS
 
 #define XFW_TYPE_WORKSPACE_X11 (xfw_workspace_x11_get_type())
@@ -40,6 +42,7 @@ struct _XfwWorkspaceX11 {
     XfwWorkspaceX11Private *priv;
 };
 
+void _xfw_workspace_x11_set_workspace_group(XfwWorkspaceX11 *workspace, XfwWorkspaceGroup *group);
 WnckWorkspace *_xfw_workspace_x11_get_wnck_workspace(XfwWorkspaceX11 *workspace);
 
 G_END_DECLS
