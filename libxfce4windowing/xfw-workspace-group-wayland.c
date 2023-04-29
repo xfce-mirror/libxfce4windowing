@@ -292,6 +292,7 @@ group_output_enter(void *data, struct ext_workspace_group_handle_v1 *wl_group, s
             g_list_find(group->priv->monitors, monitor) == NULL)
         {
             group->priv->monitors = g_list_append(group->priv->monitors, monitor);
+            g_signal_emit_by_name(group, "monitor-added", monitor);
             g_signal_emit_by_name(group, "monitors-changed");
             break;
         }
@@ -303,8 +304,10 @@ group_output_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, s
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
 
     for (GList *l = group->priv->monitors; l != NULL; l = l->next) {
-        if (gdk_wayland_monitor_get_wl_output(GDK_MONITOR(l->data)) == output) {
+        GdkMonitor *monitor = GDK_MONITOR(l->data);
+        if (gdk_wayland_monitor_get_wl_output(monitor) == output) {
             group->priv->monitors = g_list_delete_link(group->priv->monitors, l);
+            g_signal_emit_by_name(group, "monitor-removed", monitor);
             g_signal_emit_by_name(group, "monitors-changed");
             break;
         }

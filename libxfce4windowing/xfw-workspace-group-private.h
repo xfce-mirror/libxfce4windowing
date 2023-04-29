@@ -44,6 +44,10 @@ struct _XfwWorkspaceGroupInterface {
                                      XfwWorkspace *previously_active_workspace);
     void (*workspace_destroyed)(XfwWorkspaceGroup *group,
                                 XfwWorkspace *workspace);
+    void (*monitor_added)(XfwWorkspaceGroup *group,
+                          GdkMonitor *monitor);
+    void (*monitor_removed)(XfwWorkspaceGroup *group,
+                            GdkMonitor *monitor);
     void (*monitors_changed)(XfwWorkspaceGroup *group);
     void (*viewports_changed)(XfwWorkspaceGroup *group);
 

@@ -310,6 +310,7 @@ monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *
     for (int i = 0; i < n_monitors; ++i) {
         if (gdk_display_get_monitor(display, i) == monitor) {
             group->priv->monitors = g_list_insert(group->priv->monitors, monitor, i);
+            g_signal_emit_by_name(group, "monitor-added", monitor);
             g_signal_emit_by_name(group, "monitors-changed");
             break;
         }
@@ -319,6 +320,7 @@ monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *
 static void
 monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group) {
     group->priv->monitors = g_list_remove(group->priv->monitors, monitor);
+    g_signal_emit_by_name(group, "monitor-removed", monitor);
     g_signal_emit_by_name(group, "monitors-changed");
 }
 

@@ -125,6 +125,38 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  XFW_TYPE_WORKSPACE);
 
     /**
+     * XfwWorkspaceGroup::monitor-added:
+     * @group: the object which received the signal.
+     * @monitor: a #GdkMonitor.
+     *
+     * Emitted when @group is added to a new monitor.
+     **/
+    g_signal_new("monitor-added",
+                 XFW_TYPE_WORKSPACE_GROUP,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, monitor_added),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 GDK_TYPE_MONITOR);
+
+    /**
+     * XfwWorkspaceGroup::monitor-removed:
+     * @group: the object which received the signal.
+     * @monitor: a #GdkMonitor.
+     *
+     * Emitted when @group is removed from a monitor.
+     **/
+    g_signal_new("monitor-removed",
+                 XFW_TYPE_WORKSPACE_GROUP,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, monitor_removed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 GDK_TYPE_MONITOR);
+
+    /**
      * XfwWorkspaceGroup::monitors-changed:
      * @group: the object which received the signal.
      *
