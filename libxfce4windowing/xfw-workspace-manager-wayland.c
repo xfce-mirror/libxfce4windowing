@@ -25,7 +25,7 @@
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 
-#include "protocols/ext-workspace-v1-20220919-client.h"
+#include "protocols/ext-workspace-v1-20230427-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-group-wayland.h"
@@ -44,6 +44,7 @@ struct _XfwWorkspaceManagerWaylandPrivate {
     struct ext_workspace_manager_v1 *handle;
     GdkScreen *screen;
     GList *groups;
+    GList *workspaces;
 };
 
 static void xfw_workspace_manager_wayland_manager_init(XfwWorkspaceManagerIface *iface);
@@ -52,11 +53,13 @@ static void xfw_workspace_manager_wayland_set_property(GObject *obj, guint prop_
 static void xfw_workspace_manager_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_workspace_manager_wayland_finalize(GObject *obj);
 static GList *xfw_workspace_manager_wayland_list_workspace_groups(XfwWorkspaceManager *manager);
+static GList *xfw_workspace_manager_wayland_list_workspaces(XfwWorkspaceManager *manager);
 
 static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
 static void registry_global_remove(void *data, struct wl_registry *registry, uint32_t id);
 
 static void manager_workspace_group(void *data, struct ext_workspace_manager_v1 *manager, struct ext_workspace_group_handle_v1 *group);
+static void manager_workspace(void *data, struct ext_workspace_manager_v1 *manager, struct ext_workspace_handle_v1 *workspace);
 static void manager_done(void *data, struct ext_workspace_manager_v1 *manager);
 static void manager_finished(void *data, struct ext_workspace_manager_v1 *manager);
 
@@ -67,6 +70,7 @@ static const struct wl_registry_listener registry_listener = {
 };
 static const struct ext_workspace_manager_v1_listener manager_listener = {
     .workspace_group = manager_workspace_group,
+    .workspace = manager_workspace,
     .done = manager_done,
     .finished = manager_finished,
 };
@@ -103,6 +107,7 @@ xfw_workspace_manager_wayland_class_init(XfwWorkspaceManagerWaylandClass *klass)
 static void
 xfw_workspace_manager_wayland_manager_init(XfwWorkspaceManagerIface *iface) {
     iface->list_workspace_groups = xfw_workspace_manager_wayland_list_workspace_groups;
+    iface->list_workspaces = xfw_workspace_manager_wayland_list_workspaces;
 }
 
 static void
@@ -167,6 +172,7 @@ xfw_workspace_manager_wayland_finalize(GObject *obj) {
     XfwWorkspaceManagerWayland *manager = XFW_WORKSPACE_MANAGER_WAYLAND(obj);
     XfwWorkspaceManagerWaylandPrivate *priv = manager->priv;
 
+    g_list_free_full(priv->workspaces, g_object_unref);
     g_list_free_full(priv->groups, g_object_unref);
 
     ext_workspace_manager_v1_destroy(priv->handle);
@@ -177,8 +183,14 @@ xfw_workspace_manager_wayland_finalize(GObject *obj) {
 
 static GList *
 xfw_workspace_manager_wayland_list_workspace_groups(XfwWorkspaceManager *manager) {
-    XfwWorkspaceManagerWayland *xmanager = XFW_WORKSPACE_MANAGER_WAYLAND(manager);
-    return xmanager->priv->groups;
+    XfwWorkspaceManagerWayland *wmanager = XFW_WORKSPACE_MANAGER_WAYLAND(manager);
+    return wmanager->priv->groups;
+}
+
+static GList *
+xfw_workspace_manager_wayland_list_workspaces(XfwWorkspaceManager *manager) {
+    XfwWorkspaceManagerWayland *wmanager = XFW_WORKSPACE_MANAGER_WAYLAND(manager);
+    return wmanager->priv->workspaces;
 }
 
 static void
@@ -217,6 +229,41 @@ manager_workspace_group(void *data, struct ext_workspace_manager_v1 *manager, st
     wmanager->priv->groups = g_list_append(wmanager->priv->groups, group);
     g_signal_connect(group, "destroyed", G_CALLBACK(group_destroyed), wmanager);
     g_signal_emit_by_name(wmanager, "workspace-group-created", group);
+}
+
+static void
+workspace_destroyed(XfwWorkspace *workspace, XfwWorkspaceManagerWayland *manager) {
+    GList *cur;
+
+    g_signal_handlers_disconnect_by_data(workspace, manager);
+
+    cur = g_list_find(manager->priv->workspaces, workspace);
+    if (cur != NULL) {
+        GList *link = cur;
+        cur = cur->next;
+        manager->priv->workspaces = g_list_delete_link(manager->priv->workspaces, link);
+
+        for (; cur != NULL; cur = cur->next) {
+            XfwWorkspace *cur_workspace = XFW_WORKSPACE(cur->data);
+            guint cur_number = xfw_workspace_get_number(cur_workspace);
+            _xfw_workspace_wayland_set_number(XFW_WORKSPACE_WAYLAND(cur_workspace), cur_number - 1);
+        }
+    }
+
+    g_signal_emit_by_name(manager, "workspace-destroyed", workspace);
+    g_object_unref(workspace);
+}
+
+static void
+manager_workspace(void *data, struct ext_workspace_manager_v1 *manager, struct ext_workspace_handle_v1 *wl_workspace) {
+    XfwWorkspaceManagerWayland *wmanager = XFW_WORKSPACE_MANAGER_WAYLAND(data);
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_WAYLAND,
+                                                                        "handle", wl_workspace,
+                                                                        NULL));
+    _xfw_workspace_wayland_set_number(workspace, g_list_length(wmanager->priv->workspaces));
+    wmanager->priv->workspaces = g_list_append(wmanager->priv->workspaces, workspace);
+    g_signal_connect(workspace, "destroyed", G_CALLBACK(workspace_destroyed), manager);
+    g_signal_emit_by_name(manager, "workspace-created", workspace);
 }
 
 static void
