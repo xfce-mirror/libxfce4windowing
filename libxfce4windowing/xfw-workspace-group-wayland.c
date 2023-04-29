@@ -74,9 +74,6 @@ static void group_output_leave(void *data, struct ext_workspace_group_handle_v1 
 static void group_workspace(void *data, struct ext_workspace_group_handle_v1 *group, struct ext_workspace_handle_v1 *workspace);
 static void group_removed(void *data, struct ext_workspace_group_handle_v1 *group);
 
-static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupWayland *group);
-static void monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupWayland *group);
-
 static const struct ext_workspace_group_handle_v1_listener group_listener = {
     .capabilities = group_capabilities,
     .output_enter = group_output_enter,
@@ -178,16 +175,11 @@ xfw_workspace_group_wayland_get_property(GObject *obj, guint prop_id, GValue *va
 static void
 xfw_workspace_group_wayland_finalize(GObject *obj) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
-    GdkDisplay *display;
 
     ext_workspace_group_handle_v1_destroy(group->priv->handle);
 
     g_list_free(group->priv->workspaces);
     g_hash_table_destroy(group->priv->wl_workspaces);
-
-    display = gdk_screen_get_display(group->priv->screen);
-    g_signal_handlers_disconnect_by_func(display, monitor_added, group);
-    g_signal_handlers_disconnect_by_func(display, monitor_removed, group);
     g_list_free(group->priv->monitors);
 
     G_OBJECT_CLASS(xfw_workspace_group_wayland_parent_class)->finalize(obj);
@@ -372,23 +364,6 @@ group_removed(void *data, struct ext_workspace_group_handle_v1 *wl_group) {
     }
 
     g_signal_emit(group, group_signals[SIGNAL_DESTROYED], 0);
-}
-
-static void
-monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupWayland *group) {
-    int n_monitors = gdk_display_get_n_monitors(display);
-    for (int i = 0; i < n_monitors; ++i) {
-        if (gdk_display_get_monitor(display, i) == monitor) {
-            group->priv->monitors = g_list_insert(group->priv->monitors, monitor, i);
-            break;
-        }
-    }
-}
-
-static void
-monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupWayland *group) {
-    group->priv->monitors = g_list_remove(group->priv->monitors, monitor);
-    g_signal_emit_by_name(group, "monitors-changed");
 }
 
 void
