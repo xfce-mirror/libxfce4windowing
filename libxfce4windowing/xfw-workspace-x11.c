@@ -33,6 +33,7 @@ enum {
 };
 
 struct _XfwWorkspaceX11Private {
+    gchar *id;
     XfwWorkspaceGroup *group;
     WnckWorkspace *wnck_workspace;
     GdkRectangle geometry;
@@ -163,6 +164,8 @@ xfw_workspace_x11_finalize(GObject *obj) {
 
     g_signal_handlers_disconnect_by_func(workspace->priv->wnck_workspace, name_changed, workspace);
 
+    g_free(workspace->priv->id);
+
     // to be released last
     g_object_unref(workspace->priv->wnck_workspace);
 
@@ -187,7 +190,24 @@ xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface) {
 
 static const gchar *
 xfw_workspace_x11_get_id(XfwWorkspace *workspace) {
-    return wnck_workspace_get_name(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
+    // On X11, specific workspaces are never destroyed, per se; the number of total workspaces can be changed,
+    // and making that number smaller means destroying the workspaces at the end of the list.  This means that
+    // our IDs -- the workspace index number -- are technically not stable, but in practice, they are, as we'll
+    // never have a case where a new workspace is inserted in the middle of exisitng workspaces, or a workspace
+    // in the middle is destroyed.
+    //
+    // When more than one workspace is destroyed at the same time (that is, when the number of workspaces is set
+    // to at least 2 less than the currnet number), libwnck will notify us in ascending order of their destruction.
+    // Even then, we want to keep the IDs stable: technically, if there are 10 workspaces, and the number is
+    // decreased to 5, workspace with ID 5 will get destroyed first, and then the workspace with ID 6 -- for a
+    // brief moment, before it's destroyed as well -- should technically become ID 5.  But that would likely break
+    // callers when they try to remove data associated when ID 6, 7, 8, and 9 get destroyed, so we will not change
+    // the IDs once created.
+    XfwWorkspaceX11 *xworkspace = XFW_WORKSPACE_X11(workspace);
+    if (xworkspace->priv->id == NULL) {
+        xworkspace->priv->id = g_strdup_printf("%u", wnck_workspace_get_number(xworkspace->priv->wnck_workspace));
+    }
+    return xworkspace->priv->id;
 }
 
 static const gchar *
