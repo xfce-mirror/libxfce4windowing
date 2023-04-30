@@ -4,8 +4,8 @@ noinst_LTLIBRARIES = \
 	libwayland-protocols.la
 
 libwayland_protocols_built_sources = \
-	ext-workspace-v1-20220919.c \
-	ext-workspace-v1-20220919-client.h \
+	ext-workspace-v1-20230427.c \
+	ext-workspace-v1-20230427-client.h \
 	wlr-foreign-toplevel-management-unstable-v1.c \
 	wlr-foreign-toplevel-management-unstable-v1-client.h
 
@@ -38,7 +38,7 @@ BUILT_SOURCES = \
 endif
 
 EXTRA_DIST = \
-	ext-workspace-v1-20220919.xml \
+	ext-workspace-v1-20230427.xml \
 	wlr-foreign-toplevel-management-unstable-v1.xml
 
 # required for make distcheck (gtk-doc)

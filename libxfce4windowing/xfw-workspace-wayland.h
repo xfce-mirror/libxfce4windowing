@@ -26,7 +26,9 @@
 
 #include <glib-object.h>
 
-#include "protocols/ext-workspace-v1-20220919-client.h"
+#include "protocols/ext-workspace-v1-20230427-client.h"
+
+#include "xfw-workspace-group.h"
 
 G_BEGIN_DECLS
 
@@ -43,5 +45,6 @@ struct _XfwWorkspaceWayland {
 
 struct ext_workspace_handle_v1 *_xfw_workspace_wayland_get_handle(XfwWorkspaceWayland *workspace);
 void _xfw_workspace_wayland_set_number(XfwWorkspaceWayland *workspace, guint number);
+void _xfw_workspace_wayland_set_workspace_group(XfwWorkspaceWayland *workspace, XfwWorkspaceGroup *group);
 
 #endif  /* __XFW_WORKSPACE_WAYLAND_H__ */
