@@ -201,9 +201,7 @@ xfw_window_wayland_finalize(GObject *obj) {
     g_free(window->priv->app_id);
     g_free(window->priv->name);
     g_list_free(window->priv->monitors);
-    if (window->priv->app) {
-        g_object_unref(window->priv->app);
-    }
+    g_object_unref(window->priv->app);
 
     G_OBJECT_CLASS(xfw_window_wayland_parent_class)->finalize(obj);
 }
@@ -619,6 +617,12 @@ toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel) {
         XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
 
         window->priv->created_emitted = TRUE;
+
+        // nothing in the protocol ensures that the app id is set and we need an app
+        if (window->priv->app == NULL) {
+            toplevel_app_id(window, window->priv->handle, NULL);
+        }
+
         g_signal_emit_by_name(screen, "window-opened", window);
         if (window->priv->state & XFW_WINDOW_STATE_ACTIVE) {
             _xfw_screen_wayland_set_active_window(XFW_SCREEN_WAYLAND(screen), XFW_WINDOW(window));
