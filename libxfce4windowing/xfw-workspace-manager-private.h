@@ -39,9 +39,14 @@ struct _XfwWorkspaceManagerInterface {
                                     XfwWorkspaceGroup *group);
     void (*workspace_group_destroyed)(XfwWorkspaceManager *manager,
                                       XfwWorkspaceGroup *group);
+    void (*workspace_created)(XfwWorkspaceManager *manager,
+                              XfwWorkspace *workspace);
+    void (*workspace_destroyed)(XfwWorkspaceManager *manager,
+                                XfwWorkspace *workspace);
 
     /* Virtual Table */
     GList *(*list_workspace_groups)(XfwWorkspaceManager *manager);
+    GList *(*list_workspaces)(XfwWorkspaceManager *manager);
 };
 
 G_END_DECLS
