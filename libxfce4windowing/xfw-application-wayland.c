@@ -52,6 +52,8 @@ static GList *xfw_application_wayland_get_windows(XfwApplication *app);
 static GList *xfw_application_wayland_get_instances(XfwApplication *app);
 static XfwApplicationInstance *xfw_application_wayland_get_instance(XfwApplication *app, XfwWindow *window);
 
+static void toggle_notify(gpointer app, GObject *window, gboolean is_last_ref);
+
 
 G_DEFINE_TYPE_WITH_PRIVATE(XfwApplicationWayland, xfw_application_wayland, XFW_TYPE_APPLICATION)
 
@@ -216,8 +218,15 @@ window_application_changed(XfwWindowWayland *window, GParamSpec *pspec, XfwAppli
 }
 
 static void
-toggle_notify(gpointer data, GObject *object, gboolean is_last_ref) {
-    g_object_remove_toggle_ref(object, toggle_notify, data);
+weak_notify(gpointer window, GObject *app) {
+    g_signal_handlers_disconnect_by_data(window, app);
+    g_object_remove_toggle_ref(window, toggle_notify, app);
+}
+
+static void
+toggle_notify(gpointer app, GObject *window, gboolean is_last_ref) {
+    g_object_weak_unref(app, weak_notify, window);
+    g_object_remove_toggle_ref(window, toggle_notify, app);
 }
 
 XfwApplicationWayland *
@@ -240,6 +249,7 @@ _xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id) {
 
     // avoid reference cycle
     g_object_add_toggle_ref(G_OBJECT(window), toggle_notify, app);
+    g_object_weak_ref(G_OBJECT(app), weak_notify, window);
 
     app->priv->windows = g_list_prepend(app->priv->windows, window);
     g_signal_connect(window, "closed", G_CALLBACK(window_closed), app);

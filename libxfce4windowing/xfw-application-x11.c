@@ -54,6 +54,7 @@ static XfwApplicationInstance *xfw_application_x11_get_instance(XfwApplication *
 
 static void icon_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app);
 static void name_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app);
+static void toggle_notify(gpointer app, GObject *window, gboolean is_last_ref);
 
 
 G_DEFINE_TYPE_WITH_PRIVATE(XfwApplicationX11, xfw_application_x11, XFW_TYPE_APPLICATION)
@@ -239,8 +240,15 @@ window_closed(XfwWindowX11 *window, XfwApplicationX11 *app) {
 }
 
 static void
-toggle_notify(gpointer data, GObject *object, gboolean is_last_ref) {
-    g_object_remove_toggle_ref(object, toggle_notify, data);
+weak_notify(gpointer window, GObject *app) {
+    g_signal_handlers_disconnect_by_data(window, app);
+    g_object_remove_toggle_ref(window, toggle_notify, app);
+}
+
+static void
+toggle_notify(gpointer app, GObject *window, gboolean is_last_ref) {
+    g_object_weak_unref(app, weak_notify, window);
+    g_object_remove_toggle_ref(window, toggle_notify, app);
 }
 
 XfwApplicationX11 *
@@ -265,6 +273,7 @@ _xfw_application_x11_get(WnckClassGroup *wnck_group, XfwWindowX11 *window) {
 
     // avoid reference cycle
     g_object_add_toggle_ref(G_OBJECT(window), toggle_notify, app);
+    g_object_weak_ref(G_OBJECT(app), weak_notify, window);
 
     app->priv->windows = g_list_prepend(app->priv->windows, window);
     g_signal_connect(window, "closed", G_CALLBACK(window_closed), app);
