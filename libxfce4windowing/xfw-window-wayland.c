@@ -470,10 +470,14 @@ static void
 toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *app_id) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
 
+    if (app_id == NULL || *app_id == '\0' || g_strcmp0(app_id, window->priv->app_id) == 0) {
+        return;
+    }
+
     _xfw_window_invalidate_icon(XFW_WINDOW(window));
 
     g_free(window->priv->app_id);
-    window->priv->app_id = (app_id != NULL && *app_id != '\0') ? g_strdup(app_id) : g_strdup("UnknownAppID");
+    window->priv->app_id = g_strdup(app_id);
 
     if (window->priv->app != NULL) {
         g_object_unref(window->priv->app);
@@ -620,7 +624,7 @@ toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel) {
 
         // nothing in the protocol ensures that the app id is set and we need an app
         if (window->priv->app == NULL) {
-            toplevel_app_id(window, window->priv->handle, NULL);
+            toplevel_app_id(window, window->priv->handle, "UnknownAppID");
         }
 
         g_signal_emit_by_name(screen, "window-opened", window);
