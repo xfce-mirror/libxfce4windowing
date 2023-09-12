@@ -1,0 +1,99 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Xfce
+# This file is distributed under the same license as the libxfce4windowing.main package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# scootergrisen, 2023
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: libxfce4windowing.main\n"
+"Report-Msgid-Bugs-To: https://gitlab.xfce.org/\n"
+"POT-Creation-Date: 2023-05-30 00:46+0200\n"
+"PO-Revision-Date: 2022-12-22 11:42+0000\n"
+"Last-Translator: scootergrisen, 2023\n"
+"Language-Team: Danish (https://app.transifex.com/xfce/teams/16840/da/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: da\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: libxfce4windowing/xfw-wnck-icon.c:257
+msgid "The provided window does not have a _NET_WM_ICON or WMHints icon"
+msgstr "Vinduet har ikke et _NET_WM_ICON- eller WMHints-ikon"
+
+#: libxfce4windowing/xfw-wnck-icon.c:630
+msgid "Failed to find or load an icon for the window"
+msgstr "Kunne ikke finde eller indlæse et ikon til vinduet"
+
+#: libxfce4windowing/xfw-workspace-dummy.c:147
+msgid "Workspace 0"
+msgstr "Arbejdsområde 0"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:216
+msgid "_Move"
+msgstr "_Flyt"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:221
+msgid "_Resize"
+msgstr "_Tilpas størrelse"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:229
+msgid "Always on _Top"
+msgstr "Altid _øverst"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:234
+msgid "_Always on Visible Workspace"
+msgstr "_Altid på synligt arbejdsområde"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:239
+msgid "_Only on This Workspace"
+msgstr "Kun på _dette arbejdsområde"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:244
+msgid "Move to Workspace _Left"
+msgstr "Flyt til arbejdsområdet til _venstre"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:253
+msgid "Move to Workspace R_ight"
+msgstr "Flyt til arbejdsområdet til _højre"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:262
+msgid "Move to Workspace _Up"
+msgstr "Flyt til arbejdsområdet _ovenfor"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:271
+msgid "Move to Workspace _Down"
+msgstr "Flyt til arbejdsområdet _nedenfor"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:280
+msgid "Move to Another _Workspace"
+msgstr "Flyt til et andet _arbejdsområde"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:289
+msgid "_Close"
+msgstr "_Luk"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:462
+#, c-format
+msgid "Workspace %d"
+msgstr "Arbejdsområde %d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:490
+msgid "Mi_nimize"
+msgstr "_Minimer"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:490
+msgid "Unmi_nimize"
+msgstr "_Afminimer"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:495
+msgid "Ma_ximize"
+msgstr "_Maksimer"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:495
+msgid "Unma_ximize"
+msgstr "_Afmaksimer"
