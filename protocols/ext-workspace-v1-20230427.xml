@@ -54,13 +54,27 @@
       <description summary="a workspace group has been created">
         This event is emitted whenever a new workspace group has been created.
 
-        All initial details of the workspace group (workspaces, outputs) will be
+        All initial details of the workspace group (outputs) will be
         sent immediately after this event via the corresponding events in
-        ext_workspace_group_handle_v1.
+        ext_workspace_group_handle_v1 and ext_workspace_handle_v1.
       </description>
       <arg name="workspace_group" type="new_id" interface="ext_workspace_group_handle_v1"/>
     </event>
 
+
+    <event name="workspace">
+      <description summary="workspace has been created">
+        This event is emitted whenever a new workspace has been created.
+
+        All initial details of the workspace (name, coordinates, state) will
+        be sent immediately after this event via the corresponding events in
+        ext_workspace_handle_v1.
+
+        Workspaces start off unassigned to any workspace group.
+      </description>
+      <arg name="workspace" type="new_id" interface="ext_workspace_handle_v1"/>
+    </event>
+  
     <request name="commit">
       <description summary="all requests about the workspaces have been sent">
         The client must send this request after it has finished sending other
@@ -75,12 +89,12 @@
     </request>
 
     <event name="done">
-      <description summary="all information about the workspace groups has been sent">
-        This event is sent after all changes in all workspace groups have been
+      <description summary="all information about the workspaces and workspace groups has been sent">
+        This event is sent after all changes in all workspaces and workspace groups have been
         sent.
 
         This allows changes to one or more ext_workspace_group_handle_v1
-        properties and their assigned ext_workspace_handle_v1 properties
+        properties and ext_workspace_handle_v1 properties
         to be seen as atomic, even if they happen via multiple events.
         In particular, an output moving from one workspace group to
         another sends an output_enter event and an output_leave event to the two
@@ -103,7 +117,8 @@
       <description summary="stop sending events">
         Indicates the client no longer wishes to receive events for new
         workspace groups. However the compositor may emit further workspace
-        events, until the finished event is emitted.
+        events, until the finished event is emitted. The compositor is expected
+        to send the finished event eventually once the stop request has been processed.
 
         The client must not send any more requests after this one.
       </description>
@@ -112,7 +127,7 @@
 
   <interface name="ext_workspace_group_handle_v1" version="1">
     <description summary="a workspace group assigned to a set of outputs">
-      A ext_workspace_group_handle_v1 object represents a a workspace group
+      A ext_workspace_group_handle_v1 object represents a workspace group
       that is assigned a set of outputs and contains a number of workspaces.
 
       The set of outputs assigned to the workspace group is conveyed to the client via
@@ -125,7 +140,7 @@
       outputs.
     </description>
 
-    <enum name="ext_workspace_group_capabilities_v1">
+    <enum name="ext_workspace_group_capabilities_v1" bitfield="true">
       <entry name="create_workspace" value="1" summary="create_workspace request is available"/>
     </enum>
 
@@ -144,11 +159,8 @@
         Compositors must send this event once after creation of an
         ext_workspace_group_handle_v1 . When the capabilities change, compositors
         must send this event again.
-
-        The capabilities are sent as an array of 32-bit unsigned integers in
-        native endianness.
       </description>
-      <arg name="capabilities" type="array" summary="array of 32-bit capabilities"/>
+      <arg name="capabilities" type="uint" summary="capabilities" enum="ext_workspace_group_capabilities_v1"/>
     </event>
 
     <event name="output_enter">
@@ -167,19 +179,21 @@
       <arg name="output" type="object" interface="wl_output"/>
     </event>
 
-    <event name="workspace">
+    <event name="workspace_enter">
       <description summary="workspace added to workspace group">
-        This event is emitted whenever a new workspace has been created.
-        A workspace can only be a member of a single workspace group and cannot
-        be re-assigned.
-
-        All initial details of the workspace (name, coordinates, state) will
-        be sent immediately after this event via the corresponding events in
-        ext_workspace_handle_v1.
+        This event is emitted whenever a workspace is assigned to this group.
+        A workspace may only ever be assigned to a single group at a single point
+        in time, but can be re-assigned during it's lifetime.
       </description>
-      <arg name="workspace" type="new_id" interface="ext_workspace_handle_v1"/>
+      <arg name="workspace" type="object" interface="ext_workspace_handle_v1"/>
     </event>
 
+    <event name="workspace_leave">
+      <description summary="workspace removed from workspace group">
+        This event is emitted whenever a workspace is remove from this group.
+      </description>
+      <arg name="workspace" type="object" interface="ext_workspace_handle_v1"/>
+    </event>
     <event name="removed">
       <description summary="this workspace group has been destroyed">
         This event means the ext_workspace_group_handle_v1 has been destroyed.
@@ -188,13 +202,14 @@
         inert so any requests will be ignored except the destroy request.
 
         The compositor must remove all workspaces belonging to a workspace group
-        before removing the workspace group.
+        via a workspace_leave event before removing the workspace group.
       </description>
     </event>
 
     <request name="create_workspace">
       <description summary="create a new workspace">
-        Request that the compositor create a new workspace with the given name.
+        Request that the compositor create a new workspace with the given name
+        and assign it to this group.
 
         There is no guarantee that the compositor will create a new workspace,
         or that the created workspace will have the provided name.
@@ -207,7 +222,7 @@
         Destroys the ext_workspace_group_handle_v1 object.
 
         This request should be called either when the client does not want to
-        use the workspace group object any more or after the remove event to finalize
+        use the workspace group object any more or after the removed event to finalize
         the destruction of the object.
       </description>
     </request>
@@ -215,7 +230,7 @@
 
   <interface name="ext_workspace_handle_v1" version="1">
     <description summary="a workspace handing a group of surfaces">
-      A ext_workspace_handle_v1 object represents a a workspace that handles a
+      A ext_workspace_handle_v1 object represents a workspace that handles a
       group of surfaces.
 
       Each workspace has a name, conveyed to the client with the name event; a
@@ -268,20 +283,20 @@
         created and each time the workspace state changes, either because of a
         compositor action or because of a request in this protocol.
 
-        Missing states convey the opposite meaning, e.g. a missing active entry
-        in the array means the workspace is currently inactive.
+        Missing states convey the opposite meaning, e.g. an unset active bit
+        the workspace is currently inactive.
       </description>
-      <arg name="state" type="array"/>
+      <arg name="state" type="uint" enum="state"/>
     </event>
 
-    <enum name="state">
+    <enum name="state" bitfield="true">
       <description summary="types of states on the workspace">
         The different states that a workspace can have.
       </description>
 
-      <entry name="active" value="0" summary="the workspace is active"/>
-      <entry name="urgent" value="1" summary="the workspace requests attention"/>
-      <entry name="hidden" value="2">
+      <entry name="active" value="1" summary="the workspace is active"/>
+      <entry name="urgent" value="2" summary="the workspace requests attention"/>
+      <entry name="hidden" value="4">
         <description summary="the workspace is not visible">
           The workspace is not visible in its workspace group, and clients
           attempting to visualize the compositor workspace state should not
@@ -290,10 +305,11 @@
       </entry>
     </enum>
 
-   <enum name="ext_workspace_capabilities_v1">
+   <enum name="ext_workspace_capabilities_v1" bitfield="true">
       <entry name="activate" value="1" summary="activate request is available"/>
       <entry name="deactivate" value="2" summary="deactivate request is available"/>
-      <entry name="remove" value="3" summary="remove request is available"/>
+      <entry name="remove" value="4" summary="remove request is available"/>
+      <entry name="assign" value="8" summary="assign request is available"/>
     </enum>
 
     <event name="capabilities">
@@ -311,11 +327,8 @@
         Compositors must send this event once after creation of an
         ext_workspace_handle_v1 . When the capabilities change, compositors
         must send this event again.
-
-        The capabilities are sent as an array of 32-bit unsigned integers in
-        native endianness.
       </description>
-      <arg name="capabilities" type="array" summary="array of 32-bit capabilities"/>
+      <arg name="capabilities" type="uint" summary="capabilities" enum="ext_workspace_capabilities_v1"/>
     </event>
 
     <event name="removed">
@@ -354,6 +367,15 @@
 
         There is no guarantee the workspace will be actually deactivated.
       </description>
+    </request>
+
+    <request name="assign">
+      <description summary="assign workspace to group">
+        Requests that this workspace is assigned to the given workspace group.
+
+        There is no guarantee the workspace will be assigned.
+      </description>
+      <arg name="workspace_group" type="object" interface="ext_workspace_group_handle_v1"/>
     </request>
 
     <request name="remove">
