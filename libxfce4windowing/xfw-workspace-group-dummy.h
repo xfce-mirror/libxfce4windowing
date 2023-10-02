@@ -49,4 +49,6 @@ struct _XfwWorkspaceGroupDummy {
 void _xfw_workspace_group_dummy_set_workspaces(XfwWorkspaceGroupDummy *group, GList *workspaces);
 void _xfw_workspace_group_dummy_set_active_workspace(XfwWorkspaceGroupDummy *group, XfwWorkspace *workspace);
 
+G_END_DECLS
+
 #endif  /* __XFW_WORKSPACE_GROUP_DUMMY_H__ */

@@ -44,4 +44,6 @@ struct _XfwWorkspaceGroupWayland {
 
 void _xfw_workspace_group_wayland_set_active_workspace(XfwWorkspaceGroupWayland *group, XfwWorkspace *workspace);
 
+G_END_DECLS
+
 #endif  /* __XFW_WORKSPACE_GROUP_WAYLAND_H__ */

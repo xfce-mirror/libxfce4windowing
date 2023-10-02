@@ -44,4 +44,6 @@ struct _XfwScreenX11 {
 
 XfwWorkspace *_xfw_screen_x11_workspace_for_wnck_workspace(XfwScreenX11 *screen, WnckWorkspace *wnck_workspace);
 
+G_END_DECLS
+
 #endif  /* __XFW_SCREEN_X11_H__ */

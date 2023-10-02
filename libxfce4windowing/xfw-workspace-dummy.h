@@ -39,4 +39,6 @@ struct _XfwWorkspaceDummy {
     XfwWorkspaceDummyPrivate *priv;
 };
 
+G_END_DECLS
+
 #endif  /* __XFW_WORKSPACE_DUMMY_H__ */

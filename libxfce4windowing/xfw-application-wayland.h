@@ -45,4 +45,6 @@ struct _XfwApplicationWayland {
 XfwApplicationWayland *_xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id);
 GIcon * _xfw_application_wayland_get_gicon_no_fallback(XfwApplicationWayland *app);
 
+G_END_DECLS
+
 #endif  /* __XFW_APPLICATION_WAYLAND_H__ */

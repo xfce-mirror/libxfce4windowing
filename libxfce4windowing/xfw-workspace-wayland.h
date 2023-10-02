@@ -44,4 +44,6 @@ struct _XfwWorkspaceWayland {
 struct ext_workspace_handle_v1 *_xfw_workspace_wayland_get_handle(XfwWorkspaceWayland *workspace);
 void _xfw_workspace_wayland_set_number(XfwWorkspaceWayland *workspace, guint number);
 
+G_END_DECLS
+
 #endif  /* __XFW_WORKSPACE_WAYLAND_H__ */

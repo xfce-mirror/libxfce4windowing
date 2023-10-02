@@ -44,4 +44,6 @@ struct _XfwWindowWayland {
 
 struct zwlr_foreign_toplevel_handle_v1 *_xfw_window_wayland_get_handle(XfwWindowWayland *window);
 
+G_END_DECLS
+
 #endif  /* __XFW_WINDOW_WAYLAND_H__ */
