@@ -230,7 +230,7 @@ xfw_window_wayland_get_gicon(XfwWindow *window) {
 
 static XfwWindowType
 xfw_window_wayland_get_window_type(XfwWindow *window) {
-    g_message("Window types are not supported on Wayland");
+    _xfw_g_message_once("Window types are not supported on Wayland");
     return XFW_WINDOW_TYPE_NORMAL;
 }
 
@@ -246,7 +246,7 @@ xfw_window_wayland_get_capabilities(XfwWindow *window) {
 
 static GdkRectangle *
 xfw_window_wayland_get_geometry(XfwWindow *window) {
-    g_message("xfw_window_get_geometry() unsupported on Wayland");
+    _xfw_g_message_once("xfw_window_get_geometry() unsupported on Wayland");
     return &XFW_WINDOW_WAYLAND(window)->priv->geometry;
 }
 
