@@ -220,7 +220,7 @@ static GList *xfw_screen_wayland_get_windows(XfwScreen *screen) {
 }
 
 static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen) {
-    g_message("Wayland does not support discovering window stacking; windows returned are unordered");
+    _xfw_g_message_once("Wayland does not support discovering window stacking; windows returned are unordered");
     return XFW_SCREEN_WAYLAND(screen)->priv->windows_stacked;
 }
 
@@ -404,7 +404,7 @@ _xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *wi
         XfwWorkspaceGroup *group = XFW_WORKSPACE_GROUP(xfw_workspace_manager_list_workspace_groups(screen->priv->workspace_manager)->data);
         return XFW_WORKSPACE(xfw_workspace_group_list_workspaces(group)->data);
     } else {
-        g_message("Window<->Workspace association is not available on Wayland");
+        _xfw_g_message_once("Window<->Workspace association is not available on Wayland");
         return NULL;
     }
 }

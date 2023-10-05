@@ -76,6 +76,27 @@ type_name ## _get_type (void) { \
 #define G_DEFINE_ENUM_VALUE(EnumValue, EnumNick) \
   { EnumValue, #EnumValue, EnumNick }
 
+/* copied and adapted from g_warning_once (GLib 2.78) */
+#if defined(G_HAVE_ISO_VARARGS) && !G_ANALYZER_ANALYZING
+#define _xfw_g_message_once(...) \
+  G_STMT_START { \
+    static int G_PASTE (__XfwGMessageOnceBoolean, __LINE__) = 0;  /* (atomic) */ \
+    if (g_atomic_int_compare_and_exchange (&G_PASTE (__XfwGMessageOnceBoolean, __LINE__), \
+                                           0, 1)) \
+      g_message (__VA_ARGS__); \
+  } G_STMT_END
+#elif defined(G_HAVE_GNUC_VARARGS)  && !G_ANALYZER_ANALYZING
+#define _xfw_g_message_once(format...) \
+  G_STMT_START { \
+    static int G_PASTE (__XfwGMessageOnceBoolean, __LINE__) = 0;  /* (atomic) */ \
+    if (g_atomic_int_compare_and_exchange (&G_PASTE (__XfwGMessageOnceBoolean, __LINE__), \
+                                           0, 1)) \
+      g_message (format); \
+  } G_STMT_END
+#else
+#define _xfw_g_message_once g_message
+#endif
+
 G_BEGIN_DECLS
 
 typedef GdkPixbuf *(*XfwGetIconFunc)(GObject *wnck_object);
