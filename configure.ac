@@ -122,7 +122,17 @@ if test x"$ENABLE_X11" != x"yes" -a x"$ENABLE_WAYLAND" != x"yes"; then
 fi
 
 AS_IF([test x"$ENABLE_WAYLAND" = x"yes"],
-      [XDT_CHECK_PACKAGE_BINARY([WAYLAND_SCANNER], [wayland-scanner], [wayland_scanner], [wayland-scanner])])
+      [
+          XDT_CHECK_PACKAGE_BINARY([WAYLAND_SCANNER], [wayland-scanner], [wayland_scanner], [wayland-scanner])
+
+          WLR_PROTOCOLS_PKGDATADIR=`$PKG_CONFIG --variable=pkgdatadir wlr-protocols 2>/dev/null || true`
+          if test x"$WLR_PROTOCOLS_PKGDATADIR" = x""; then
+              WLR_PROTOCOLS_PKGDATADIR="$ac_abs_confdir/protocols/wlr-protocols"
+          fi
+          AC_MSG_CHECKING([for wlr-protocols])
+          AC_MSG_RESULT([$WLR_PROTOCOLS_PKGDATADIR])
+          AC_SUBST([WLR_PROTOCOLS_PKGDATADIR])
+      ])
 
 GTK_DOC_CHECK([1.30])
 
