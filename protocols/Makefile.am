@@ -21,6 +21,11 @@ libwayland_protocols_la_LDFLAGS = \
 libwayland_protocols_la_LIBADD = \
 	$(WAYLAND_CLIENT_LIBS)
 
+%.c: $(WLR_PROTOCOLS_PKGDATADIR)/unstable/%.xml
+	$(AM_V_GEN) $(WAYLAND_SCANNER) private-code $< $@
+
+%-client.h: $(WLR_PROTOCOLS_PKGDATADIR)/unstable/%.xml
+	$(AM_V_GEN) $(WAYLAND_SCANNER) client-header $< $@
 
 %.c: %.xml
 	$(AM_V_GEN) $(WAYLAND_SCANNER) private-code $< $@
@@ -39,7 +44,7 @@ endif
 
 EXTRA_DIST = \
 	ext-workspace-v1-20220919.xml \
-	wlr-foreign-toplevel-management-unstable-v1.xml
+	wlr-protocols/unstable/wlr-foreign-toplevel-management-unstable-v1.xml
 
 # required for make distcheck (gtk-doc)
 dist-hook: all
