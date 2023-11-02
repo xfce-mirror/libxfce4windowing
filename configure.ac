@@ -128,6 +128,9 @@ AS_IF([test x"$ENABLE_WAYLAND" = x"yes"],
           WLR_PROTOCOLS_PKGDATADIR=`$PKG_CONFIG --variable=pkgdatadir wlr-protocols 2>/dev/null || true`
           if test x"$WLR_PROTOCOLS_PKGDATADIR" = x""; then
               WLR_PROTOCOLS_PKGDATADIR="$ac_abs_confdir/protocols/wlr-protocols"
+              if test "$(echo "$WLR_PROTOCOLS_PKGDATADIR/"*)" = "$WLR_PROTOCOLS_PKGDATADIR/*"; then
+                  AC_MSG_ERROR([$WLR_PROTOCOLS_PKGDATADIR seems empty, did you clone the wlr-protocols submodule?])
+              fi
           fi
           AC_MSG_CHECKING([for wlr-protocols])
           AC_MSG_RESULT([$WLR_PROTOCOLS_PKGDATADIR])
