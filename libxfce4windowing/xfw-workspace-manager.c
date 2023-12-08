@@ -75,6 +75,39 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
                  G_TYPE_NONE, 1,
                  XFW_TYPE_WORKSPACE_GROUP);
 
+
+    /**
+     * XfwWorkspaceManager::workspace-created:
+     * @manager: the object which received the signal.
+     * @workspace: (not nullable): the newly-created workspace.
+     *
+     * Emitted when a new workspace is created.
+     **/
+    g_signal_new("workspace-created",
+                 XFW_TYPE_WORKSPACE_MANAGER,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_created),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_WORKSPACE);
+
+    /**
+     * XfwWorkspaceManager::workspace-destroyed:
+     * @group: the object which received the signal.
+     * @workspace: (not nullable): the workspace that was destroyed.
+     *
+     * Emitted when a workspace is destroyed.
+     **/
+    g_signal_new("workspace-destroyed",
+                 XFW_TYPE_WORKSPACE_MANAGER,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceManagerIface, workspace_destroyed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_WORKSPACE);
+
     /**
      * XfwWorkspaceManager:screen:
      *
@@ -106,6 +139,25 @@ xfw_workspace_manager_list_workspace_groups(XfwWorkspaceManager *manager) {
     iface = XFW_WORKSPACE_MANAGER_GET_IFACE(manager);
     return (*iface->list_workspace_groups)(manager);
 }
+
+/**
+ * xfw_workspace_manager_list_workspaces:
+ * @manager: an #XfwWorkspaceManager.
+ *
+ * List all workspaces known to the workspace manager.
+ *
+ * Return value: (nullable) (element-type XfwWorkspace) (transfer none):
+ * the list of #XfwWorkspace managed by @manager, or %NULL if there are
+ * no workspaces.  The list and its contents are owned by @manager.
+ **/
+GList *
+xfw_workspace_manager_list_workspaces(XfwWorkspaceManager *manager) {
+    XfwWorkspaceManagerIface *iface;
+    g_return_val_if_fail(XFW_IS_WORKSPACE_MANAGER(manager), NULL);
+    iface = XFW_WORKSPACE_MANAGER_GET_IFACE(manager);
+    return (*iface->list_workspaces)(manager);
+}
+
 
 void
 _xfw_workspace_manager_install_properties(GObjectClass *gklass) {
