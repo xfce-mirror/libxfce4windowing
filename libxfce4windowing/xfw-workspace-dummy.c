@@ -46,6 +46,7 @@ XfwWorkspace *xfw_workspace_dummy_get_neighbor(XfwWorkspace *workspace, XfwDirec
 static GdkRectangle *xfw_workspace_dummy_get_geometry(XfwWorkspace *workspace);
 static gboolean xfw_workspace_dummy_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_dummy_remove(XfwWorkspace *workspace, GError **error);
+static gboolean xfw_workspace_dummy_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceDummy, xfw_workspace_dummy, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceDummy)
@@ -67,13 +68,8 @@ xfw_workspace_dummy_init(XfwWorkspaceDummy *workspace) {
 
 static void
 xfw_workspace_dummy_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec) {
-    XfwWorkspaceDummy *workspace = XFW_WORKSPACE_DUMMY(obj);
-
     switch (prop_id) {
         case WORKSPACE_PROP_GROUP:
-            workspace->priv->group = g_value_get_object(value);
-            break;
-
         case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_NAME:
         case WORKSPACE_PROP_CAPABILITIES:
@@ -135,6 +131,7 @@ xfw_workspace_dummy_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_geometry = xfw_workspace_dummy_get_geometry;
     iface->activate = xfw_workspace_dummy_activate;
     iface->remove = xfw_workspace_dummy_remove;
+    iface->assign_to_workspace_group = xfw_workspace_dummy_assign_to_workspace_group;
 }
 
 static const gchar *
@@ -198,4 +195,18 @@ xfw_workspace_dummy_remove(XfwWorkspace *workspace, GError **error) {
         *error = g_error_new_literal(XFW_ERROR, 0, "Cannot remove workspace as it is the only one left");
     }
     return FALSE;
+}
+
+static gboolean
+xfw_workspace_dummy_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error) {
+    return TRUE;
+}
+
+void
+_xfw_workspace_dummy_set_workspace_group(XfwWorkspaceDummy *workspace, XfwWorkspaceGroup *group) {
+    if (group != workspace->priv->group) {
+        XfwWorkspaceGroup *previous_group = workspace->priv->group;
+        workspace->priv->group = group;
+        g_signal_emit_by_name(workspace, "group-changed", previous_group);
+    }
 }
