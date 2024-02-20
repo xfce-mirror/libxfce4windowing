@@ -37,6 +37,7 @@ struct _XfwWindowClass {
     /*< public >*/
 
     /* Signals */
+    void (*class_changed)(XfwWindow *window);
     void (*name_changed)(XfwWindow *window);
     void (*icon_changed)(XfwWindow *window);
     void (*type_changed)(XfwWindow *window, XfwWindowType old_type);
@@ -48,6 +49,7 @@ struct _XfwWindowClass {
 
     /* Virtual Table */
     guint64 (*get_id)(XfwWindow *window);
+    const gchar *const *(*get_class_ids)(XfwWindow *window);
     const gchar *(*get_name)(XfwWindow *window);
     GIcon *(*get_gicon)(XfwWindow *window);
     XfwWindowType (*get_window_type)(XfwWindow *window);

@@ -55,6 +55,7 @@ enum {
     PROP0,
     PROP_SCREEN,
     PROP_ID,
+    PROP_CLASS_IDS,
     PROP_NAME,
     PROP_TYPE,
     PROP_STATE,
@@ -137,6 +138,22 @@ xfw_window_class_init(XfwWindowClass *klass) {
     gobject_class->set_property = xfw_window_set_property;
     gobject_class->get_property = xfw_window_get_property;
     gobject_class->finalize = xfw_window_finalize;
+
+    /**
+     * XfwWindow::class-changed:
+     * @window: the object which received the signal.
+     *
+     * Emitted when at least one of the @window's class ids changes.
+     *
+     * Since: 4.19.3
+     **/
+    g_signal_new("class-changed",
+                 XFW_TYPE_WINDOW,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWindowClass, class_changed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__VOID,
+                 G_TYPE_NONE, 0);
 
     /**
      * XfwWindow::name-changed:
@@ -287,6 +304,21 @@ xfw_window_class_init(XfwWindowClass *klass) {
                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
+     * XfwWindow:class-ids:
+     *
+     * The window's class ids.
+     *
+     * Since: 4.19.3
+     */
+    g_object_class_install_property(gobject_class,
+                                    PROP_CLASS_IDS,
+                                    g_param_spec_boxed("class-ids",
+                                                       "class-ids",
+                                                       "class-ids",
+                                                       G_TYPE_STRV,
+                                                       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
      * XfwWindow:name:
      *
      * The window's name or title.
@@ -434,6 +466,10 @@ xfw_window_get_property(GObject *object,
             g_value_set_uint64(value, xfw_window_get_id(window));
             break;
 
+        case PROP_CLASS_IDS:
+            g_value_set_boxed(value, xfw_window_get_class_ids(window));
+            break;
+
         case PROP_NAME:
             g_value_set_string(value, xfw_window_get_name(window));
             break;
@@ -496,6 +532,28 @@ xfw_window_get_id(XfwWindow *window) {
     g_return_val_if_fail(XFW_IS_WINDOW(window), 0);
     klass = XFW_WINDOW_GET_CLASS(window);
     return (*klass->get_id)(window);
+}
+
+/**
+ * xfw_window_get_class_ids:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's class ids. On X11 this should contain the group and instance
+ * names of the [WM_CLASS property](https://x.org/releases/X11R7.6/doc/xorg-docs/specs/ICCCM/icccm.html#wm_class_property).
+ * On Wayland, it's likely to be limited to the [application ID](https://wayland.app/protocols/wlr-foreign-toplevel-management-unstable-v1#zwlr_foreign_toplevel_handle_v1:event:app_id),
+ * which should correspond to the basename of the application's desktop file.
+ *
+ * Return value: (array zero-terminated=1) (element-type utf8) (transfer none):
+ * a %NULL-terminated array of strings owned by the #XfwWindow.
+ *
+ * Since: 4.19.3
+ **/
+const gchar *const *
+xfw_window_get_class_ids(XfwWindow *window) {
+    XfwWindowClass *klass;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
+    klass = XFW_WINDOW_GET_CLASS(window);
+    return (*klass->get_class_ids)(window);
 }
 
 /**
