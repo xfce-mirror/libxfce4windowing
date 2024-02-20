@@ -41,6 +41,7 @@ struct _XfwWindowWaylandPrivate {
     gboolean created_emitted;
 
     guint64 id;
+    const gchar **class_ids;
     gchar *app_id;
     gchar *name;
     XfwWindowState state;
@@ -54,7 +55,9 @@ static void xfw_window_wayland_constructed(GObject *obj);
 static void xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_window_wayland_finalize(GObject *obj);
+
 static guint64 xfw_window_wayland_get_id(XfwWindow *window);
+static const gchar *const *xfw_window_wayland_get_class_ids(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GIcon *xfw_window_wayland_get_gicon(XfwWindow *window);
 static XfwWindowType xfw_window_wayland_get_window_type(XfwWindow *window);
@@ -116,6 +119,7 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
     gklass->finalize = xfw_window_wayland_finalize;
 
     window_class->get_id = xfw_window_wayland_get_id;
+    window_class->get_class_ids = xfw_window_wayland_get_class_ids;
     window_class->get_name = xfw_window_wayland_get_name;
     window_class->get_gicon = xfw_window_wayland_get_gicon;
     window_class->get_window_type = xfw_window_wayland_get_window_type;
@@ -155,6 +159,7 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
 static void
 xfw_window_wayland_init(XfwWindowWayland *window) {
     window->priv = xfw_window_wayland_get_instance_private(window);
+    window->priv->class_ids = g_new0(const gchar *, 2);
 }
 
 static void
@@ -198,6 +203,7 @@ xfw_window_wayland_finalize(GObject *obj) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
 
     zwlr_foreign_toplevel_handle_v1_destroy(window->priv->handle);
+    g_free(window->priv->class_ids);
     g_free(window->priv->app_id);
     g_free(window->priv->name);
     g_list_free(window->priv->monitors);
@@ -209,6 +215,11 @@ xfw_window_wayland_finalize(GObject *obj) {
 static guint64
 xfw_window_wayland_get_id(XfwWindow *window) {
     return XFW_WINDOW_WAYLAND(window)->priv->id;
+}
+
+static const gchar *const *
+xfw_window_wayland_get_class_ids(XfwWindow *window) {
+    return XFW_WINDOW_WAYLAND(window)->priv->class_ids;
 }
 
 static const gchar *
@@ -478,6 +489,7 @@ toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
 
     g_free(window->priv->app_id);
     window->priv->app_id = g_strdup(app_id);
+    window->priv->class_ids[0] = window->priv->app_id;
 
     if (window->priv->app != NULL) {
         g_object_unref(window->priv->app);
@@ -486,6 +498,8 @@ toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
     g_object_notify(G_OBJECT(window), "application");
 
     g_signal_emit_by_name(window, "icon-changed");
+    g_object_notify(G_OBJECT(window), "class-ids");
+    g_signal_emit_by_name(window, "class-changed");
 }
 
 static void
