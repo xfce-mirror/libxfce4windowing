@@ -43,6 +43,7 @@
 enum {
     PROP0,
     PROP_ID,
+    PROP_CLASS_ID,
     PROP_NAME,
     PROP_WINDOWS,
     PROP_INSTANCES,
@@ -105,6 +106,21 @@ xfw_application_class_init(XfwApplicationClass *klass) {
                                                         "id",
                                                         "id",
                                                         0, G_MAXUINT64, 0,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwApplication:class-id:
+     *
+     * The application class id.
+     *
+     * Since: 4.19.3
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_CLASS_ID,
+                                    g_param_spec_string("class-id",
+                                                        "class-id",
+                                                        "class-id",
+                                                        "",
                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
@@ -183,6 +199,10 @@ xfw_application_get_property(GObject *object,
             g_value_set_uint64(value, xfw_application_get_id(app));
             break;
 
+        case PROP_CLASS_ID:
+            g_value_set_string(value, xfw_application_get_class_id(app));
+            break;
+
         case PROP_NAME:
             g_value_set_string(value, xfw_application_get_name(app));
             break;
@@ -226,6 +246,28 @@ xfw_application_get_id(XfwApplication *app) {
     g_return_val_if_fail(XFW_IS_APPLICATION(app), 0);
     klass = XFW_APPLICATION_GET_CLASS(app);
     return (*klass->get_id)(app);
+}
+
+/**
+ * xfw_application_get_class_id:
+ * @app: an #XfwApplication.
+ *
+ * Fetches this application's class id. On X11 this should be the class name of
+ * the [WM_CLASS property](https://x.org/releases/X11R7.6/doc/xorg-docs/specs/ICCCM/icccm.html#wm_class_property).
+ * On Wayland, it's the [application ID](https://wayland.app/protocols/wlr-foreign-toplevel-management-unstable-v1#zwlr_foreign_toplevel_handle_v1:event:app_id),
+ * which should correspond to the basename of the application's desktop file.
+ *
+ * Return value: (not nullable) (transfer none): A UTF-8 formatted string,
+ * owned by @app.
+ *
+ * Since: 4.19.3
+ **/
+const gchar *
+xfw_application_get_class_id(XfwApplication *app) {
+    XfwApplicationClass *klass;
+    g_return_val_if_fail(XFW_IS_APPLICATION(app), NULL);
+    klass = XFW_APPLICATION_GET_CLASS(app);
+    return (*klass->get_class_id)(app);
 }
 
 /**

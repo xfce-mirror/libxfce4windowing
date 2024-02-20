@@ -39,6 +39,7 @@ enum {
 struct _XfwWindowX11Private {
     WnckWindow *wnck_window;
 
+    const gchar **class_ids;
     XfwWindowType window_type;
     XfwWindowState state;
     XfwWindowCapabilities capabilities;
@@ -54,6 +55,7 @@ static void xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *val
 static void xfw_window_x11_finalize(GObject *obj);
 
 static guint64 xfw_window_x11_get_id(XfwWindow *window);
+static const gchar *const *xfw_window_x11_get_class_ids(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GIcon * xfw_window_x11_get_gicon(XfwWindow *window);
 static XfwWindowType xfw_window_x11_get_window_type(XfwWindow *window);
@@ -82,6 +84,7 @@ static gboolean xfw_window_x11_set_below(XfwWindow *window, gboolean is_below, G
 static gboolean xfw_window_x11_is_on_workspace(XfwWindow *window, XfwWorkspace *workspace);
 static gboolean xfw_window_x11_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace);
 
+static void class_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void name_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void icon_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void app_name_changed(XfwApplication *app, GParamSpec *pspec, XfwWindowX11 *window);
@@ -110,6 +113,7 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     gklass->finalize = xfw_window_x11_finalize;
 
     window_class->get_id = xfw_window_x11_get_id;
+    window_class->get_class_ids = xfw_window_x11_get_class_ids;
     window_class->get_name = xfw_window_x11_get_name;
     window_class->get_gicon = xfw_window_x11_get_gicon;
     window_class->get_window_type = xfw_window_x11_get_window_type;
@@ -155,7 +159,16 @@ xfw_window_x11_init(XfwWindowX11 *window) {
 static void xfw_window_x11_constructed(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
     XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
+    const gchar *class_name = wnck_window_get_class_group_name(window->priv->wnck_window);
+    const gchar *instance_name = wnck_window_get_class_instance_name(window->priv->wnck_window);
 
+    window->priv->class_ids = g_new0(const gchar *, 3);
+    if (class_name != NULL && *class_name != '\0') {
+        window->priv->class_ids[0] = class_name;
+        window->priv->class_ids[1] = instance_name;
+    } else {
+        window->priv->class_ids[0] = instance_name;
+    }
     window->priv->window_type = convert_type(wnck_window_get_window_type(window->priv->wnck_window));
     window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
     wnck_window_get_geometry(window->priv->wnck_window,
@@ -166,6 +179,7 @@ static void xfw_window_x11_constructed(GObject *obj) {
                                                                            wnck_window_get_workspace(window->priv->wnck_window));
     window->priv->app = XFW_APPLICATION(_xfw_application_x11_get(wnck_window_get_class_group(window->priv->wnck_window), window));
 
+    g_signal_connect(window->priv->wnck_window, "class-changed", G_CALLBACK(class_changed), window);
     g_signal_connect(window->priv->wnck_window, "name-changed", G_CALLBACK(name_changed), window);
     g_signal_connect(window->priv->wnck_window, "icon-changed", G_CALLBACK(icon_changed), window);
     g_signal_connect(window->priv->app, "notify::name", G_CALLBACK(app_name_changed), window);
@@ -210,6 +224,7 @@ static void
 xfw_window_x11_finalize(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
 
+    g_signal_handlers_disconnect_by_func(window->priv->wnck_window, class_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, name_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, icon_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->app, app_name_changed, window);
@@ -219,6 +234,7 @@ xfw_window_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 
+    g_free (window->priv->class_ids);
     g_list_free(window->priv->monitors);
     g_object_unref(window->priv->app);
 
@@ -231,6 +247,11 @@ xfw_window_x11_finalize(GObject *obj) {
 static guint64
 xfw_window_x11_get_id(XfwWindow *window) {
     return wnck_window_get_xid(XFW_WINDOW_X11(window)->priv->wnck_window);
+}
+
+static const gchar *const *
+xfw_window_x11_get_class_ids(XfwWindow *window) {
+    return XFW_WINDOW_X11(window)->priv->class_ids;
 }
 
 static const gchar *
@@ -549,6 +570,21 @@ static gboolean
 xfw_window_x11_is_in_viewport(XfwWindow *window, XfwWorkspace *workspace) {
     return wnck_window_is_in_viewport(XFW_WINDOW_X11(window)->priv->wnck_window,
                                       _xfw_workspace_x11_get_wnck_workspace(XFW_WORKSPACE_X11(workspace)));
+}
+
+static void
+class_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
+    const gchar *class_name = wnck_window_get_class_group_name(wnck_window);
+    const gchar *instance_name = wnck_window_get_class_instance_name(wnck_window);
+    if (class_name != NULL && *class_name != '\0') {
+        window->priv->class_ids[0] = class_name;
+        window->priv->class_ids[1] = instance_name;
+    } else {
+        window->priv->class_ids[0] = instance_name;
+        window->priv->class_ids[1] = NULL;
+    }
+    g_object_notify(G_OBJECT(window), "class-ids");
+    g_signal_emit_by_name(window, "class-changed");
 }
 
 static void
