@@ -275,21 +275,7 @@ xfw_window_x11_get_workspace(XfwWindow *window) {
 
 static GList *
 xfw_window_x11_get_monitors(XfwWindow *window) {
-    XfwWindowX11 *xwindow = XFW_WINDOW_X11(window);
-    GdkMonitor *monitor = NULL;
-    GdkWindow *gwindow = gtk_widget_get_window(GTK_WIDGET(window));
-
-    if (gwindow != NULL) {
-        GdkDisplay *display = gdk_display_get_default();
-
-        monitor = gdk_display_get_monitor_at_window(display, gwindow);
-        if (xwindow->priv->monitors == NULL || monitor != xwindow->priv->monitors->data) {
-            xwindow->priv->monitors = g_list_remove(xwindow->priv->monitors, xwindow->priv->monitors->data);
-            xwindow->priv->monitors = g_list_prepend(xwindow->priv->monitors, monitor);
-        }
-    }
-
-    return xwindow->priv->monitors;
+    return XFW_WINDOW_X11(window)->priv->monitors;
 }
 
 static XfwApplication *
@@ -622,10 +608,25 @@ actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, Wn
 
 static void
 geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
+    XfwWindowX11 *xwindow = XFW_WINDOW_X11(window);
+    GdkMonitor *monitor;
+    gint x, y;
+
     wnck_window_get_geometry(wnck_window,
                              &window->priv->geometry.x, &window->priv->geometry.y,
                              &window->priv->geometry.width, &window->priv->geometry.height);
     g_signal_emit_by_name(window, "geometry-changed");
+
+    x = xwindow->priv->geometry.x + xwindow->priv->geometry.width / 2;
+    y = xwindow->priv->geometry.y + xwindow->priv->geometry.height / 2;
+    monitor = gdk_display_get_monitor_at_point(gdk_display_get_default(), x, y);
+    if (xwindow->priv->monitors == NULL || monitor != xwindow->priv->monitors->data) {
+        if (xwindow->priv->monitors != NULL) {
+            xwindow->priv->monitors = g_list_remove(xwindow->priv->monitors, xwindow->priv->monitors->data);
+        }
+        xwindow->priv->monitors = g_list_prepend(xwindow->priv->monitors, monitor);
+        g_object_notify(G_OBJECT(window), "monitors");
+    }
 }
 
 static void
