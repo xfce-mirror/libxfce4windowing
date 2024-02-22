@@ -45,7 +45,9 @@ typedef struct _XfwWorkspaceInterface XfwWorkspaceIface;
  * XfwWorkspaceCapabilities:
  * @XFW_WORKSPACE_CAPABILITIES_NONE: workspace has no capabilities.
  * @XFW_WORKSPACE_CAPABILITIES_ACTIVATE: workspace can be activated.
+ * @XFW_WORKSPACE_CAPABILITIES_DEACTIVATE: workspace can be deactivated.
  * @XFW_WORKSPACE_CAPABILITIES_REMOVE: workspace can be removed.
+ * @XFW_WORKSPACE_CAPABILITIES_ASSIGN: workspace can be assigned to a group.
  *
  * Flags enum representing a bitfield of actions that can be performed on this
  * workspace.
@@ -53,7 +55,9 @@ typedef struct _XfwWorkspaceInterface XfwWorkspaceIface;
 typedef enum {
     XFW_WORKSPACE_CAPABILITIES_NONE = 0,
     XFW_WORKSPACE_CAPABILITIES_ACTIVATE = (1 << 0),
+    XFW_WORKSPACE_CAPABILITIES_DEACTIVATE = (1 << 1),
     XFW_WORKSPACE_CAPABILITIES_REMOVE = (1 << 2),
+    XFW_WORKSPACE_CAPABILITIES_ASSIGN = (1 << 3)
 } XfwWorkspaceCapabilities;
 
 /**
@@ -93,6 +97,8 @@ GdkRectangle *xfw_workspace_get_geometry(XfwWorkspace *workspace);
 
 gboolean xfw_workspace_activate(XfwWorkspace *workspace, GError **error);
 gboolean xfw_workspace_remove(XfwWorkspace *workspace, GError **error);
+
+gboolean xfw_workspace_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
 
 G_END_DECLS
 
