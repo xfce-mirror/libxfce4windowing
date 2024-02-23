@@ -46,6 +46,7 @@ static void xfw_application_x11_set_property(GObject *obj, guint prop_id, const 
 static void xfw_application_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_application_x11_finalize(GObject *obj);
 static guint64 xfw_application_x11_get_id(XfwApplication *app);
+static const gchar *xfw_application_x11_get_class_id(XfwApplication *app);
 static const gchar *xfw_application_x11_get_name(XfwApplication *app);
 static GIcon *xfw_application_x11_get_gicon(XfwApplication *app);
 static GList *xfw_application_x11_get_windows(XfwApplication *app);
@@ -71,6 +72,7 @@ xfw_application_x11_class_init(XfwApplicationX11Class *klass) {
     gklass->finalize = xfw_application_x11_finalize;
 
     app_class->get_id = xfw_application_x11_get_id;
+    app_class->get_class_id = xfw_application_x11_get_class_id;
     app_class->get_name = xfw_application_x11_get_name;
     app_class->get_gicon = xfw_application_x11_get_gicon;
     app_class->get_windows = xfw_application_x11_get_windows;
@@ -159,6 +161,11 @@ xfw_application_x11_finalize(GObject *obj) {
 static guint64
 xfw_application_x11_get_id(XfwApplication *app) {
     return xfw_window_get_id(XFW_APPLICATION_X11(app)->priv->windows->data);
+}
+
+static const gchar *
+xfw_application_x11_get_class_id(XfwApplication *app) {
+    return wnck_class_group_get_id(XFW_APPLICATION_X11(app)->priv->wnck_group);
 }
 
 static const gchar *
