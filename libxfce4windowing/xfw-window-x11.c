@@ -89,6 +89,8 @@ static void type_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 static void state_changed(WnckWindow *wnck_window, WnckWindowState changed_mask, WnckWindowState new_state, XfwWindowX11 *window);
 static void actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, WnckWindowActions wnck_new_actions, XfwWindowX11 *window);
 static void geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
+static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWindowX11 *window);
+static void monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWindowX11 *window);
 static void workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window);
 
 static XfwWindowType convert_type(WnckWindowType wnck_type);
@@ -155,12 +157,22 @@ xfw_window_x11_init(XfwWindowX11 *window) {
 static void xfw_window_x11_constructed(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
     XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
+    GdkDisplay *display = gdk_display_get_default();
+    guint n_monitors = gdk_display_get_n_monitors(display);
 
     window->priv->window_type = convert_type(wnck_window_get_window_type(window->priv->wnck_window));
     window->priv->state = convert_state(window->priv->wnck_window, wnck_window_get_state(window->priv->wnck_window));
     wnck_window_get_geometry(window->priv->wnck_window,
                              &window->priv->geometry.x, &window->priv->geometry.y,
                              &window->priv->geometry.width, &window->priv->geometry.height);
+    for (guint n = 0; n < n_monitors; n++) {
+        GdkMonitor *monitor = gdk_display_get_monitor(display, n);
+        GdkRectangle geom;
+        gdk_monitor_get_geometry(monitor, &geom);
+        if (gdk_rectangle_intersect(&window->priv->geometry, &geom, NULL)) {
+            window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
+        }
+    }
     window->priv->capabilities = convert_capabilities(window->priv->wnck_window, wnck_window_get_actions(window->priv->wnck_window));
     window->priv->workspace = _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(screen),
                                                                            wnck_window_get_workspace(window->priv->wnck_window));
@@ -173,6 +185,8 @@ static void xfw_window_x11_constructed(GObject *obj) {
     g_signal_connect(window->priv->wnck_window, "state-changed", G_CALLBACK(state_changed), window);
     g_signal_connect(window->priv->wnck_window, "actions-changed", G_CALLBACK(actions_changed), window);
     g_signal_connect(window->priv->wnck_window, "geometry-changed", G_CALLBACK(geometry_changed), window);
+    g_signal_connect(display, "monitor-added", G_CALLBACK(monitor_added), window);
+    g_signal_connect(display, "monitor-removed", G_CALLBACK(monitor_removed), window);
     g_signal_connect(window->priv->wnck_window, "workspace-changed", G_CALLBACK(workspace_changed), window);
 }
 
@@ -209,6 +223,7 @@ xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *value, GParamSp
 static void
 xfw_window_x11_finalize(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
+    GdkDisplay *display = gdk_display_get_default();
 
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, name_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, icon_changed, window);
@@ -217,6 +232,8 @@ xfw_window_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, state_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, actions_changed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, geometry_changed, window);
+    g_signal_handlers_disconnect_by_func(display, monitor_added, window);
+    g_signal_handlers_disconnect_by_func(display, monitor_removed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 
     g_list_free(window->priv->monitors);
@@ -608,23 +625,56 @@ actions_changed(WnckWindow *wnck_window, WnckWindowActions wnck_changed_mask, Wn
 
 static void
 geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
-    XfwWindowX11 *xwindow = XFW_WINDOW_X11(window);
-    GdkMonitor *monitor;
-    gint x, y;
+    GdkDisplay *display = gdk_display_get_default();
+    guint n_monitors = gdk_display_get_n_monitors(display);
+    gboolean notify = FALSE;
 
     wnck_window_get_geometry(wnck_window,
                              &window->priv->geometry.x, &window->priv->geometry.y,
                              &window->priv->geometry.width, &window->priv->geometry.height);
     g_signal_emit_by_name(window, "geometry-changed");
 
-    x = xwindow->priv->geometry.x + xwindow->priv->geometry.width / 2;
-    y = xwindow->priv->geometry.y + xwindow->priv->geometry.height / 2;
-    monitor = gdk_display_get_monitor_at_point(gdk_display_get_default(), x, y);
-    if (xwindow->priv->monitors == NULL || monitor != xwindow->priv->monitors->data) {
-        if (xwindow->priv->monitors != NULL) {
-            xwindow->priv->monitors = g_list_remove(xwindow->priv->monitors, xwindow->priv->monitors->data);
+    for (GList *lp = window->priv->monitors; lp != NULL;) {
+        GList *lnext = lp->next;
+        GdkRectangle geom;
+        gdk_monitor_get_geometry(lp->data, &geom);
+        if (!gdk_rectangle_intersect(&window->priv->geometry, &geom, NULL)) {
+            window->priv->monitors = g_list_delete_link(window->priv->monitors, lp);
+            notify = TRUE;
         }
-        xwindow->priv->monitors = g_list_prepend(xwindow->priv->monitors, monitor);
+        lp = lnext;
+    }
+
+    for (guint n = 0; n < n_monitors; n++) {
+        GdkMonitor *monitor = gdk_display_get_monitor(display, n);
+        GdkRectangle geom;
+        gdk_monitor_get_geometry(monitor, &geom);
+        if (gdk_rectangle_intersect(&window->priv->geometry, &geom, NULL) && !g_list_find(window->priv->monitors, monitor)) {
+            window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
+            notify = TRUE;
+        }
+    }
+
+    if (notify) {
+        g_object_notify(G_OBJECT(window), "monitors");
+    }
+}
+
+static void
+monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWindowX11 *window) {
+    GdkRectangle geom;
+    gdk_monitor_get_geometry(monitor, &geom);
+    if (gdk_rectangle_intersect(&window->priv->geometry, &geom, NULL)) {
+        window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
+        g_object_notify(G_OBJECT(window), "monitors");
+    }
+}
+
+static void
+monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWindowX11 *window) {
+    GList *lp = g_list_find(window->priv->monitors, monitor);
+    if (lp != NULL) {
+        window->priv->monitors = g_list_delete_link(window->priv->monitors, lp);
         g_object_notify(G_OBJECT(window), "monitors");
     }
 }
