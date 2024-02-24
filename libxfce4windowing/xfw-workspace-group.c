@@ -76,22 +76,6 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  XFW_TYPE_WORKSPACE_GROUP_CAPABILITIES);
 
     /**
-     * XfwWorkspaceGroup::workspace-created:
-     * @group: the object which received the signal.
-     * @workspace: (not nullable): the newly-created workspace.
-     *
-     * Emitted when a new workspace is created in @group.
-     **/
-    g_signal_new("workspace-created",
-                 XFW_TYPE_WORKSPACE_GROUP,
-                 G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, workspace_created),
-                 NULL, NULL,
-                 g_cclosure_marshal_VOID__OBJECT,
-                 G_TYPE_NONE, 1,
-                 XFW_TYPE_WORKSPACE);
-
-    /**
      * XfwWorkspaceGroup::active-workspace-changed:
      * @group: the object which received the signal.
      * @previously_active_workspace: (nullable): the previously active
@@ -103,22 +87,6 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  XFW_TYPE_WORKSPACE_GROUP,
                  G_SIGNAL_RUN_LAST,
                  G_STRUCT_OFFSET(XfwWorkspaceGroupIface, active_workspace_changed),
-                 NULL, NULL,
-                 g_cclosure_marshal_VOID__OBJECT,
-                 G_TYPE_NONE, 1,
-                 XFW_TYPE_WORKSPACE);
-
-    /**
-     * XfwWorkspaceGroup::workspace-destroyed:
-     * @group: the object which received the signal.
-     * @workspace: (not nullable): the workspace that was destroyed.
-     *
-     * Emitted when a workspace in @group is destroyed.
-     **/
-    g_signal_new("workspace-destroyed",
-                 XFW_TYPE_WORKSPACE_GROUP,
-                 G_SIGNAL_RUN_LAST,
-                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, workspace_destroyed),
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
@@ -169,6 +137,38 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
+
+    /**
+     * XfwWorkspaceGroup::workspace-added:
+     * @group: the object which received the signal.
+     * @workspace: the #XfwWorkspace added to the group.
+     *
+     * Emitted when @workspace joins @group.
+     */
+    g_signal_new("workspace-added",
+                 XFW_TYPE_WORKSPACE_GROUP,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, workspace_added),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_WORKSPACE);
+
+    /**
+     * XfwWorkspaceGroup::workspace-removed:
+     * @group: the object which received the signal.
+     * @workspace: the #XfwWorkspace removed from the group.
+     *
+     * Emitted when @workspace leaves @group.
+     */
+    g_signal_new("workspace-removed",
+                 XFW_TYPE_WORKSPACE_GROUP,
+                 G_SIGNAL_RUN_LAST,
+                 G_STRUCT_OFFSET(XfwWorkspaceGroupIface, workspace_removed),
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_WORKSPACE);
 
     /**
      * XfwWorkspaceGroup::viewports-changed:

@@ -48,6 +48,7 @@ XFW_TYPE_SCREEN
 XfwWorkspaceManager
 XfwWorkspaceManagerIface
 xfw_workspace_manager_list_workspace_groups
+xfw_workspace_manager_list_workspaces
 <SUBSECTION Standard>
 XfwWorkspaceManagerInterface
 XFW_TYPE_WORKSPACE_MANAGER
@@ -92,6 +93,7 @@ xfw_workspace_get_neighbor
 xfw_workspace_get_geometry
 xfw_workspace_activate
 xfw_workspace_remove
+xfw_workspace_assign_to_workspace_group
 <SUBSECTION Standard>
 XfwWorkspaceInterface
 XFW_TYPE_WORKSPACE

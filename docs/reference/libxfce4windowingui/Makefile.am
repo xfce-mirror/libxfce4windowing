@@ -46,7 +46,8 @@ GTKDOC_CFLAGS = \
 	$(GTK_CFLAGS)
 	
 GTKDOC_LIBS = \
-	$(top_builddir)/libxfce4windowingui/libxfce4windowingui-$(LIBXFCE4WINDOWINGUI_VERSION_API).la
+	$(top_builddir)/libxfce4windowingui/libxfce4windowingui-$(LIBXFCE4WINDOWINGUI_VERSION_API).la \
+	$(top_builddir)/libxfce4windowing/libxfce4windowing-$(LIBXFCE4WINDOWING_VERSION_API).la
 
 include $(top_srcdir)/gtk-doc.make
 
