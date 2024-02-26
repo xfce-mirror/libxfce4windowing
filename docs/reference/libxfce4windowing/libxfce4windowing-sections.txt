@@ -181,3 +181,8 @@ xfw_application_instance_get_windows
 XfwApplicationClass
 XFW_TYPE_APPLICATION
 </SECTION>
+
+<SECTION>
+<FILE>xfw-x11</FILE>
+xfw_window_x11_get_xid
+</SECTION>
