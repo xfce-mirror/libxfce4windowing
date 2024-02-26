@@ -40,7 +40,6 @@ struct _XfwApplicationClass {
     void (*icon_changed)(XfwApplication *app);
 
     /* Virtual Table */
-    guint64 (*get_id)(XfwApplication *app);
     const gchar *(*get_class_id)(XfwApplication *app);
     const gchar *(*get_name)(XfwApplication *app);
     GIcon *(*get_gicon)(XfwApplication *app);

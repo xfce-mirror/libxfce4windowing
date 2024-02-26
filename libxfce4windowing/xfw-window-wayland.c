@@ -40,7 +40,6 @@ struct _XfwWindowWaylandPrivate {
     struct zwlr_foreign_toplevel_handle_v1 *handle;
     gboolean created_emitted;
 
-    guint64 id;
     const gchar **class_ids;
     gchar *app_id;
     gchar *name;
@@ -56,7 +55,6 @@ static void xfw_window_wayland_set_property(GObject *obj, guint prop_id, const G
 static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_window_wayland_finalize(GObject *obj);
 
-static guint64 xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *const *xfw_window_wayland_get_class_ids(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GIcon *xfw_window_wayland_get_gicon(XfwWindow *window);
@@ -118,7 +116,6 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
     gklass->get_property = xfw_window_wayland_get_property;
     gklass->finalize = xfw_window_wayland_finalize;
 
-    window_class->get_id = xfw_window_wayland_get_id;
     window_class->get_class_ids = xfw_window_wayland_get_class_ids;
     window_class->get_name = xfw_window_wayland_get_name;
     window_class->get_gicon = xfw_window_wayland_get_gicon;
@@ -210,11 +207,6 @@ xfw_window_wayland_finalize(GObject *obj) {
     g_object_unref(window->priv->app);
 
     G_OBJECT_CLASS(xfw_window_wayland_parent_class)->finalize(obj);
-}
-
-static guint64
-xfw_window_wayland_get_id(XfwWindow *window) {
-    return XFW_WINDOW_WAYLAND(window)->priv->id;
 }
 
 static const gchar *const *
