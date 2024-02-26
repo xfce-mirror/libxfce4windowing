@@ -85,10 +85,28 @@ typedef enum {
     XFW_DIRECTION_RIGHT,
 } XfwDirection;
 
+/**
+ * XfwClientType:
+ * @XFW_CLIENT_TYPE_APPLICATION: a regular application
+ * @XFW_CLIENT_TYPE_PAGER: a pager or other user-controlled desktop component
+ *
+ * The type of the application.
+ *
+ * See #xfw_set_client_type() for details.
+ *
+ * Since: 4.19.3
+ **/
+typedef enum {
+    XFW_CLIENT_TYPE_APPLICATION = 1,
+    XFW_CLIENT_TYPE_PAGER = 2,
+} XfwClientType;
+
 GQuark xfw_error_quark(void) G_GNUC_CONST;
 GType xfw_direction_get_type(void) G_GNUC_CONST;
 
 XfwWindowing xfw_windowing_get(void);
+
+void xfw_set_client_type(XfwClientType client_type);
 
 /**
  * xfw_windowing_error_trap_push:
