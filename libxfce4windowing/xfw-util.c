@@ -33,6 +33,7 @@
 #endif
 #ifdef ENABLE_X11
 #include <gdk/gdkx.h>
+#include <libwnck/libwnck.h>
 #endif
 
 #include "libxfce4windowing-private.h"
@@ -77,6 +78,30 @@ xfw_windowing_get(void)
     }
 
     return windowing;
+}
+
+/**
+ * xfw_set_client_type:
+ * @client_type: A #XfwClientType
+ *
+ * Sets the type of the application.  This is used when sending various
+ * messages to control the behavior of other windows, to indicate the source of
+ * the control.  In general, #XFW_CLIENT_TYPE_APPLICATION will be interpreted
+ * as automated control from a regular application, and #XFW_CLIENT_TYPE_PAGER
+ * will be interpreted as user-initiated control from a desktop component
+ * application like a pager or dock.
+ *
+ * This does nothing on Wayland, but is safe to call under a Wayland session.
+ *
+ * Since: 4.19.3
+ **/
+void
+xfw_set_client_type(XfwClientType client_type) {
+#ifdef ENABLE_X11
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    wnck_set_client_type((WnckClientType)client_type);
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 }
 
 GQuark
