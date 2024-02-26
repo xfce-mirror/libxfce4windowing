@@ -123,6 +123,14 @@ if test x"$ENABLE_X11" != x"yes" -a x"$ENABLE_WAYLAND" != x"yes"; then
     AC_MSG_ERROR([At least one windowing backend must be enabled])
 fi
 
+AS_IF([test x"$ENABLE_X11" = x"yes"],
+      [
+          LIBXFCE4WINDOWING_HAS_X11="#define LIBXFCE4WINDOWING_HAS_X11 1"
+      ],
+      [
+          LIBXFCE4WINDOWING_HAS_X11="/* #undef LIBXFCE4WINDOWING_HAS_X11 */"
+      ])
+
 AS_IF([test x"$ENABLE_WAYLAND" = x"yes"],
       [
           XDT_CHECK_PACKAGE_BINARY([WAYLAND_SCANNER], [wayland-scanner], [wayland_scanner], [wayland-scanner])
@@ -137,7 +145,15 @@ AS_IF([test x"$ENABLE_WAYLAND" = x"yes"],
           AC_MSG_CHECKING([for wlr-protocols])
           AC_MSG_RESULT([$WLR_PROTOCOLS_PKGDATADIR])
           AC_SUBST([WLR_PROTOCOLS_PKGDATADIR])
+
+          LIBXFCE4WINDOWING_HAS_WAYLAND="#define LIBXFCE4WINDOWING_HAS_WAYLAND 1"
+      ],
+      [
+          LIBXFCE4WINDOWING_HAS_WAYLAND="/* #undef LIBXFCE4WINDOWING_HAS_WAYLAND */"
       ])
+
+AC_SUBST([LIBXFCE4WINDOWING_HAS_X11])
+AC_SUBST([LIBXFCE4WINDOWING_HAS_WAYLAND])
 
 GTK_DOC_CHECK([1.30])
 
