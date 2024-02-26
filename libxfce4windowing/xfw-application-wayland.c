@@ -45,7 +45,6 @@ static void xfw_application_wayland_constructed(GObject *obj);
 static void xfw_application_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void xfw_application_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GParamSpec *pspec);
 static void xfw_application_wayland_finalize(GObject *obj);
-static guint64 xfw_application_wayland_get_id(XfwApplication *app);
 static const gchar *xfw_application_wayland_get_class_id(XfwApplication *app);
 static const gchar *xfw_application_wayland_get_name(XfwApplication *app);
 static GIcon *xfw_application_wayland_get_gicon(XfwApplication *app);
@@ -69,7 +68,6 @@ xfw_application_wayland_class_init(XfwApplicationWaylandClass *klass) {
     gklass->get_property = xfw_application_wayland_get_property;
     gklass->finalize = xfw_application_wayland_finalize;
 
-    app_class->get_id = xfw_application_wayland_get_id;
     app_class->get_class_id = xfw_application_wayland_get_class_id;
     app_class->get_name = xfw_application_wayland_get_name;
     app_class->get_gicon = xfw_application_wayland_get_gicon;
@@ -164,11 +162,6 @@ xfw_application_wayland_finalize(GObject *obj) {
     g_list_free(priv->instances);
 
     G_OBJECT_CLASS(xfw_application_wayland_parent_class)->finalize(obj);
-}
-
-static guint64
-xfw_application_wayland_get_id(XfwApplication *app) {
-    return xfw_window_get_id(XFW_APPLICATION_WAYLAND(app)->priv->windows->data);
 }
 
 static const gchar *

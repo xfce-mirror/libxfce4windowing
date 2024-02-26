@@ -15,6 +15,11 @@ libxfce4windowing_0_headers = \
 	xfw-workspace-manager.h \
 	xfw-workspace.h
 
+if ENABLE_X11
+libxfce4windowing_0_headers += \
+	xfw-x11.h
+endif
+
 libxfce4windowing_0_include_HEADERS = \
 	$(libxfce4windowing_0_headers)
 
@@ -120,9 +125,15 @@ libxfce4windowing_0_la_LIBADD += \
 	$(top_builddir)/protocols/libwayland-protocols.la
 endif
 
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = \
+pkgconfig_files = \
 	libxfce4windowing-$(LIBXFCE4WINDOWING_VERSION_API).pc
+if ENABLE_X11
+pkgconfig_files += \
+	libxfce4windowing-x11-$(LIBXFCE4WINDOWING_VERSION_API).pc
+endif
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = $(pkgconfig_files)
 
 EXTRA_DIST = \
 	xfw-marshal.c \
