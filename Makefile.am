@@ -49,6 +49,6 @@ compile_flags.txt: $(shell find . -name Makefile)
 		echo "$$flag" >> $@ || exit 1; \
 	done
 
-DISTCHECK_CONFIGURE_FLAGS = \
+AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-gtk-doc \
 	--enable-introspection
