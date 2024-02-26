@@ -15,6 +15,11 @@ libxfce4windowing_0_headers = \
 	xfw-workspace-manager.h \
 	xfw-workspace.h
 
+if ENABLE_X11
+libxfce4windowing_0_headers += \
+	xfw-x11.h
+endif
+
 libxfce4windowing_0_include_HEADERS = \
 	$(libxfce4windowing_0_headers)
 
@@ -127,7 +132,8 @@ pkgconfig_DATA = \
 EXTRA_DIST = \
 	xfw-marshal.c \
 	xfw-marshal.h \
-	xfw-marshal.list
+	xfw-marshal.list \
+	xfw-x11.h
 
 CLEANFILES =
 
