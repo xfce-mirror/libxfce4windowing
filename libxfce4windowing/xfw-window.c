@@ -54,7 +54,6 @@
 enum {
     PROP0,
     PROP_SCREEN,
-    PROP_ID,
     PROP_CLASS_IDS,
     PROP_NAME,
     PROP_TYPE,
@@ -291,19 +290,6 @@ xfw_window_class_init(XfwWindowClass *klass) {
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
     /**
-     * XfwWindow:id:
-     *
-     * A windowing-platform dependent window ID.
-     **/
-    g_object_class_install_property(gobject_class,
-                                    PROP_ID,
-                                    g_param_spec_uint64("id",
-                                                        "id",
-                                                        "id",
-                                                        0, UINT64_MAX, 0,
-                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
-
-    /**
      * XfwWindow:class-ids:
      *
      * The window's class ids.
@@ -462,10 +448,6 @@ xfw_window_get_property(GObject *object,
             g_value_set_object(value, priv->screen);
             break;
 
-        case PROP_ID:
-            g_value_set_uint64(value, xfw_window_get_id(window));
-            break;
-
         case PROP_CLASS_IDS:
             g_value_set_boxed(value, xfw_window_get_class_ids(window));
             break;
@@ -516,22 +498,6 @@ xfw_window_finalize(GObject *object) {
     g_clear_object(&priv->icon);
 
     G_OBJECT_CLASS(xfw_window_parent_class)->finalize(object);
-}
-
-/**
- * xfw_window_get_id:
- * @window: an #XfwWindow.
- *
- * Fetches the windowing-platform dependent window ID.
- *
- * Return value: a 64-bit unsigned integer.
- **/
-guint64
-xfw_window_get_id(XfwWindow *window) {
-    XfwWindowClass *klass;
-    g_return_val_if_fail(XFW_IS_WINDOW(window), 0);
-    klass = XFW_WINDOW_GET_CLASS(window);
-    return (*klass->get_id)(window);
 }
 
 /**
