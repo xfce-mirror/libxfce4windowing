@@ -20,10 +20,6 @@
 #ifndef __LIBXFCE4WINDOWING_PRIVATE_H__
 #define __LIBXFCE4WINDOWING_PRIVATE_H__
 
-#if !defined(__LIBXFCE4WINDOWING_H_INSIDE__) && !defined(LIBXFCE4WINDOWING_COMPILATION)
-#error "Only libxfce4windowing.h can be included directly"
-#endif
-
 #ifdef ENABLE_X11
 #include <X11/Xlib.h>
 #endif
