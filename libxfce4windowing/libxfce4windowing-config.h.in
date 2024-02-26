@@ -29,6 +29,25 @@
 G_BEGIN_DECLS
 
 /**
+ * LIBXFCE4WINDOWING_HAS_X11:
+ *
+ * A macro that is defined if libxfce4windowing was compiled with X11 support.
+ *
+ * Since: 4.19.3
+ */
+@LIBXFCE4WINDOWING_HAS_X11@
+
+/**
+ * LIBXFCE4WINDOWING_HAS_WAYLAND:
+ *
+ * A macro that is defined if libxfce4windowing was compiled with Wayland
+ * support.
+ *
+ * Since: 4.19.3
+ */
+@LIBXFCE4WINDOWING_HAS_WAYLAND@
+
+/**
  * LIBXFCE4WINDOWING_MAJOR_VERSION:
  *
  * A macro that evaluates to the major version of libxfce4windowing, in a format
