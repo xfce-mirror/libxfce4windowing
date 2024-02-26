@@ -30,6 +30,7 @@
 #include "xfw-wnck-icon.h"
 #include "xfw-workspace-x11.h"
 #include "xfw-application-x11.h"
+#include "xfw-x11.h"
 
 enum {
     PROP0,
@@ -832,6 +833,26 @@ convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions)
         }
     }
     return capabilities;
+}
+
+/**
+ * xfw_window_x11_get_xid:
+ * @window: A #XfwWindow
+ *
+ * On X11, returns the platform-specific #Window handle to the underlying
+ * window.
+ *
+ * It is an error to call this function if the application is not currently
+ * running on X11.
+ *
+ * Return value: An X11 #Window handle.
+ *
+ * Since: 4.19.3
+ **/
+Window
+xfw_window_x11_get_xid(XfwWindow *window) {
+    g_return_val_if_fail(XFW_IS_WINDOW_X11(window), (Window)0);
+    return wnck_window_get_xid(XFW_WINDOW_X11(window)->priv->wnck_window);
 }
 
 WnckWindow *
