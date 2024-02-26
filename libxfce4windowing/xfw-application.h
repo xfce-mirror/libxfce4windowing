@@ -43,7 +43,6 @@ typedef struct _XfwApplicationInstance XfwApplicationInstance;
  **/
 typedef struct _XfwApplicationInstance XfwApplicationInstance;
 
-guint64 xfw_application_get_id(XfwApplication *app);
 const gchar *xfw_application_get_class_id(XfwApplication *app);
 const gchar *xfw_application_get_name(XfwApplication *app);
 GdkPixbuf *xfw_application_get_icon(XfwApplication *app, gint size, gint scale);

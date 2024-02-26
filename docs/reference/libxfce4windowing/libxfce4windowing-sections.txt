@@ -2,6 +2,8 @@
 
 <SECTION>
 <FILE>libxfce4windowing-config</FILE>
+LIBXFCE4WINDOWING_HAS_X11
+LIBXFCE4WINDOWING_HAS_WAYLAND
 LIBXFCE4WINDOWING_MAJOR_VERSION
 LIBXFCE4WINDOWING_MINOR_VERSION
 LIBXFCE4WINDOWING_MICRO_VERSION
@@ -109,7 +111,6 @@ XfwWindow
 XfwWindowCapabilities
 XfwWindowState
 XfwWindowType
-xfw_window_get_id
 xfw_window_get_class_ids
 xfw_window_get_name
 xfw_window_get_icon
@@ -167,7 +168,6 @@ xfw_window_type_get_type
 <FILE>xfw-application</FILE>
 XfwApplication
 XfwApplicationInstance
-xfw_application_get_id
 xfw_application_get_class_id
 xfw_application_get_name
 xfw_application_get_icon
@@ -182,4 +182,9 @@ xfw_application_instance_get_windows
 <SUBSECTION Standard>
 XfwApplicationClass
 XFW_TYPE_APPLICATION
+</SECTION>
+
+<SECTION>
+<FILE>xfw-x11</FILE>
+xfw_window_x11_get_xid
 </SECTION>

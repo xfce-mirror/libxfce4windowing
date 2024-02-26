@@ -48,7 +48,6 @@ struct _XfwWindowClass {
     void (*closed)(XfwWindow *window);
 
     /* Virtual Table */
-    guint64 (*get_id)(XfwWindow *window);
     const gchar *const *(*get_class_ids)(XfwWindow *window);
     const gchar *(*get_name)(XfwWindow *window);
     GIcon *(*get_gicon)(XfwWindow *window);

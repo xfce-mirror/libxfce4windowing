@@ -42,7 +42,6 @@
 
 enum {
     PROP0,
-    PROP_ID,
     PROP_CLASS_ID,
     PROP_NAME,
     PROP_WINDOWS,
@@ -94,19 +93,6 @@ xfw_application_class_init(XfwApplicationClass *klass) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__VOID,
                  G_TYPE_NONE, 0);
-
-    /**
-     * XfwApplication:id:
-     *
-     * The #XfwWindow:id of the first window in #XfwApplication:windows.
-     **/
-    g_object_class_install_property(gobject_class,
-                                    PROP_ID,
-                                    g_param_spec_uint64("id",
-                                                        "id",
-                                                        "id",
-                                                        0, G_MAXUINT64, 0,
-                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwApplication:class-id:
@@ -195,10 +181,6 @@ xfw_application_get_property(GObject *object,
     XfwApplication *app = XFW_APPLICATION(object);
 
     switch (prop_id) {
-        case PROP_ID:
-            g_value_set_uint64(value, xfw_application_get_id(app));
-            break;
-
         case PROP_CLASS_ID:
             g_value_set_string(value, xfw_application_get_class_id(app));
             break;
@@ -229,23 +211,6 @@ xfw_application_finalize(GObject *object) {
     g_clear_object(&priv->icon);
 
     G_OBJECT_CLASS(xfw_application_parent_class)->finalize(object);
-}
-
-/**
- * xfw_application_get_id:
- * @app: an #XfwApplication.
- *
- * Fetches this application's ID, which is the #XfwWindow:id of the first window
- * in #XfwApplication:windows.
- *
- * Return value: A unique integer identifying the application.
- **/
-guint64
-xfw_application_get_id(XfwApplication *app) {
-    XfwApplicationClass *klass;
-    g_return_val_if_fail(XFW_IS_APPLICATION(app), 0);
-    klass = XFW_APPLICATION_GET_CLASS(app);
-    return (*klass->get_id)(app);
 }
 
 /**
