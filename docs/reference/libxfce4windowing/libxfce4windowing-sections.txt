@@ -17,6 +17,7 @@ libxfce4windowing_check_version
 <SECTION>
 <FILE>xfw-util</FILE>
 XFW_ERROR
+XfwClientType
 XfwError
 XfwWindowing
 XfwDirection
