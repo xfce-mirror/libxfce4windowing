@@ -20,6 +20,7 @@ XFW_ERROR
 XfwError
 XfwWindowing
 XfwDirection
+xfw_set_client_type
 xfw_windowing_get
 xfw_windowing_error_trap_push
 xfw_windowing_error_trap_pop
