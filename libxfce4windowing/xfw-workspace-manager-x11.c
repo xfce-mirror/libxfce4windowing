@@ -112,7 +112,6 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     wnck_workspaces = wnck_screen_get_workspaces(priv->wnck_screen);
     for (GList *l = wnck_workspaces; l != NULL; l = l->next) {
         XfwWorkspace *workspace = g_object_new(XFW_TYPE_WORKSPACE_X11,
-                                               "group", group,
                                                "wnck-workspace", l->data,
                                                NULL);
         if (active_wnck_workspace == l->data) {
@@ -120,6 +119,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
         }
         priv->workspaces = g_list_append(priv->workspaces, workspace);
         g_hash_table_insert(priv->wnck_workspaces, l->data, workspace);
+        _xfw_workspace_x11_set_workspace_group(XFW_WORKSPACE_X11(workspace), XFW_WORKSPACE_GROUP(manager->priv->groups->data));
     }
     _xfw_workspace_group_dummy_set_workspaces(group, priv->workspaces);
 
