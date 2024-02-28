@@ -221,9 +221,11 @@ workspace_created(WnckScreen *screen, WnckWorkspace *wnck_workspace, XfwWorkspac
     g_hash_table_insert(manager->priv->wnck_workspaces, wnck_workspace, workspace);
     manager->priv->workspaces = g_list_insert(manager->priv->workspaces, workspace, workspace_num);
 
-    _xfw_workspace_x11_set_workspace_group(workspace, XFW_WORKSPACE_GROUP(manager->priv->groups->data));
+    g_object_freeze_notify(G_OBJECT(manager->priv->groups->data));
     _xfw_workspace_group_dummy_set_workspaces(XFW_WORKSPACE_GROUP_DUMMY(manager->priv->groups->data), manager->priv->workspaces);
+    _xfw_workspace_x11_set_workspace_group(workspace, XFW_WORKSPACE_GROUP(manager->priv->groups->data));
     g_signal_emit_by_name(manager, "workspace-created", workspace);
+    g_object_thaw_notify(G_OBJECT(manager->priv->groups->data));
     g_signal_emit_by_name(manager->priv->groups->data, "workspace-added", workspace);
 }
 

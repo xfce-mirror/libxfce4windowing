@@ -330,6 +330,7 @@ _xfw_workspace_group_dummy_set_workspaces(XfwWorkspaceGroupDummy *group, GList *
         g_list_free(group->priv->workspaces);
     }
     group->priv->workspaces = g_list_copy(workspaces);
+    g_object_notify(G_OBJECT(group), "workspaces");
 }
 
 void
