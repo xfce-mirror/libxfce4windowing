@@ -1,3 +1,44 @@
+4.19.3 (2024-02-29)
+======
+- Update copyright year
+- Ensure workspace/group state is correct on X11 before emitting signals
+- Set initial workspace's group properly on X11
+- Add XfwClientType to doc sections
+- Add xfw_set_client_type() to doc sections
+- Add xfw_set_client_type()
+- Add an X11-specific header and xfw_window_get_xid()
+- Remove xfw_(window|application)_get_id()
+- build: Use AM_DISTCHECK_CONFIGURE_FLAGS
+- Expose class ids in XfwWindow and XfwApplication
+- Update ext-workspace protocol spec to current version
+- XfwWindowX11: Improve monitor list management
+- XfwWindowX11: Fix monitor management
+- build: Search for bind_textdomain_codeset in libintl too
+- build: Test if wlr-protocols dir is empty at configure time
+- Use system wlr-protocols defs if avail, fall back to submodule if not
+- Reduce verbosity
+- Add missing G_END_DECLS
+- I18n: Update po/LINGUAS list
+- window-wayland: Set app_id only if it changes
+- application: Fix window memory management (V2)
+- I18n: Update po/LINGUAS list
+- I18n: Update po/LINGUAS list
+- I18n: Update po/LINGUAS list
+- window-wayland: Ensure app always exists (Fixes #14)
+- I18n: Update po/LINGUAS list
+- I18n: Update po/LINGUAS list
+- Add monitor-added and monitor-removed signals to XfwWorkspaceWayland
+- Minor cleanup to wayland group monitor code
+- Remove unused code from XfwWorkspaceGroupWayland
+- Fix missing monitors-changed signal emission on x11/dummy
+- x11: use workspace number as ID
+- Use G_N_ELEMENTS()
+- Fix previous commit
+- XfwApplication: Fix window memory management
+- Translation Updates:
+  Catalan, Chinese (Taiwan), Danish, Estonian, Irish, Italian, Occitan
+  (post 1500), Ukrainian
+
 4.19.2 (2023-04-17)
 ======
 - Update copyright year
