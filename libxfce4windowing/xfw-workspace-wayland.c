@@ -38,6 +38,8 @@ struct _XfwWorkspaceWaylandPrivate {
     XfwWorkspaceCapabilities capabilities;
     XfwWorkspaceState state;
     guint number;
+    gint row;
+    gint column;
     GdkRectangle geometry;
 };
 
@@ -120,6 +122,8 @@ xfw_workspace_wayland_class_init(XfwWorkspaceWaylandClass *klass) {
 static void
 xfw_workspace_wayland_init(XfwWorkspaceWayland *workspace) {
     workspace->priv = xfw_workspace_wayland_get_instance_private(workspace);
+    workspace->priv->row = -1;
+    workspace->priv->column = -1;
 }
 
 static void
@@ -245,12 +249,14 @@ xfw_workspace_wayland_get_workspace_group(XfwWorkspace *workspace) {
 
 static gint
 xfw_workspace_wayland_get_layout_row(XfwWorkspace *workspace) {
-    return 0;
+    XfwWorkspaceWayland *wworkspace = XFW_WORKSPACE_WAYLAND(workspace);
+    return wworkspace->priv->row >= 0 ? wworkspace->priv->row : 0;
 }
 
 static gint
 xfw_workspace_wayland_get_layout_column(XfwWorkspace *workspace) {
-    return xfw_workspace_wayland_get_number(workspace);
+    XfwWorkspaceWayland *wworkspace = XFW_WORKSPACE_WAYLAND(workspace);
+    return wworkspace->priv->column >= 0 ? wworkspace->priv->column : (gint)wworkspace->priv->number;
 }
 
 static XfwWorkspace *
@@ -341,8 +347,17 @@ workspace_name(void *data, struct ext_workspace_handle_v1 *wl_workspace, const c
 }
 
 static void
-workspace_coordinates(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *coordinates) {
+workspace_coordinates(void *data, struct ext_workspace_handle_v1 *wl_workspace, struct wl_array *coordinates) {
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
 
+    uint32_t *array_start = coordinates->data;
+
+    if (coordinates->size >= 1) {
+        workspace->priv->row = array_start[0];
+    }
+    if (coordinates->size >= 2) {
+        workspace->priv->column = array_start[1];
+    }
 }
 
 static const struct {
