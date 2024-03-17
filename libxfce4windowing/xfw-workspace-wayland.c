@@ -200,6 +200,14 @@ xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, G
             g_value_set_flags(value, workspace->priv->state);
             break;
 
+        case WORKSPACE_PROP_LAYOUT_ROW:
+            g_value_set_int(value, workspace->priv->row);
+            break;
+
+        case WORKSPACE_PROP_LAYOUT_COLUMN:
+            g_value_set_int(value, workspace->priv->column);
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
             break;
@@ -352,12 +360,18 @@ workspace_coordinates(void *data, struct ext_workspace_handle_v1 *wl_workspace, 
 
     uint32_t *array_start = coordinates->data;
 
-    if (coordinates->size >= 1) {
+    g_object_freeze_notify(G_OBJECT(workspace));
+
+    if (coordinates->size >= 1 && (int32_t)array_start[0] != workspace->priv->row) {
         workspace->priv->row = array_start[0];
+        g_object_notify(G_OBJECT(workspace), "layout-row");
     }
-    if (coordinates->size >= 2) {
+    if (coordinates->size >= 2 && (int32_t)array_start[1] != workspace->priv->column) {
         workspace->priv->column = array_start[1];
+        g_object_notify(G_OBJECT(workspace), "layout-column");
     }
+
+    g_object_thaw_notify(G_OBJECT(workspace));
 }
 
 static const struct {

@@ -202,6 +202,30 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                           "number",
                                                           0, UINT_MAX, 0,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    /**
+     * XfwWorkspace:layout-row:
+     *
+     * The x-coordinate of the workspace on a 2D grid.
+     */
+    g_object_interface_install_property(iface,
+                                        g_param_spec_int("layout-row",
+                                                         "layout-row",
+                                                         "layout-row",
+                                                         -1, G_MAXINT, -1,
+                                                         G_PARAM_READABLE));
+
+    /**
+     * XfwWorkspace:layout-column:
+     *
+     * The y-coordinate of the workspace on a 2D grid.
+     */
+    g_object_interface_install_property(iface,
+                                        g_param_spec_int("layout-column",
+                                                         "layout-column",
+                                                         "layout-column",
+                                                         -1, G_MAXINT, -1,
+                                                         G_PARAM_READABLE));
 }
 
 /**
@@ -466,4 +490,6 @@ _xfw_workspace_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_PROP_CAPABILITIES, "capabilities");
     g_object_class_override_property(gklass, WORKSPACE_PROP_STATE, "state");
     g_object_class_override_property(gklass, WORKSPACE_PROP_NUMBER, "number");
+    g_object_class_override_property(gklass, WORKSPACE_PROP_LAYOUT_ROW, "layout-row");
+    g_object_class_override_property(gklass, WORKSPACE_PROP_LAYOUT_COLUMN, "layout-column");
 }

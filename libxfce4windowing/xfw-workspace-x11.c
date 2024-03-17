@@ -150,6 +150,14 @@ xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GPara
             g_value_set_uint(value, xfw_workspace_x11_get_number(workspace));
             break;
 
+        case WORKSPACE_PROP_LAYOUT_ROW:
+            g_value_set_int(value, xfw_workspace_x11_get_layout_row(workspace));
+            break;
+
+        case WORKSPACE_PROP_LAYOUT_COLUMN:
+            g_value_set_int(value, xfw_workspace_x11_get_layout_column(workspace));
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
             break;
