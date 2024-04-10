@@ -25,7 +25,9 @@
  * @include: libxfce4windowing/libxfce4windowing.h
  **/
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include <gdk/gdk.h>
 #ifdef ENABLE_WAYLAND
