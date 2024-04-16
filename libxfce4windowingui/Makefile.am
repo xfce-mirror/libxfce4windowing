@@ -30,7 +30,7 @@ libxfce4windowingui_0_la_CFLAGS = \
 libxfce4windowingui_0_la_LDFLAGS = \
 	-version-info $(LIBXFCE4WINDOWINGUI_VERINFO) \
 	-export-symbols-regex "^[^_].*" \
-	-Wl,-no-undefined
+	-no-undefined
 
 libxfce4windowingui_0_la_LIBADD = \
 	$(top_builddir)/libxfce4windowing/libxfce4windowing-0.la \
