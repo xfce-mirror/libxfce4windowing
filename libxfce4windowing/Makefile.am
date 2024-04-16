@@ -109,7 +109,7 @@ libxfce4windowing_0_la_CFLAGS = \
 libxfce4windowing_0_la_LDFLAGS = \
 	-version-info $(LIBXFCE4WINDOWING_VERINFO) \
 	-export-symbols-regex "^[^_].*" \
-	-Wl,-no-undefined \
+	-no-undefined \
 	$(LIBX11_LDFLAGS)
 
 libxfce4windowing_0_la_LIBADD = \
