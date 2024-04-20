@@ -302,7 +302,11 @@ window_manager_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen) {
 
 static void
 showing_desktop_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen) {
-    xfw_screen_x11_set_show_desktop(XFW_SCREEN(screen), wnck_screen_get_showing_desktop(wnck_screen));
+    gboolean show_desktop = wnck_screen_get_showing_desktop(wnck_screen);
+    if (show_desktop != screen->priv->show_desktop) {
+        screen->priv->show_desktop = show_desktop;
+        g_object_notify(G_OBJECT(screen), "show-desktop");
+    }
 }
 
 XfwWorkspace *
