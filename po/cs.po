@@ -1,0 +1,99 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Xfce
+# This file is distributed under the same license as the libxfce4windowing.main package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# Martin Šiška <martin-siska@email.cz>, 2024
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: libxfce4windowing.main\n"
+"Report-Msgid-Bugs-To: https://gitlab.xfce.org/\n"
+"POT-Creation-Date: 2023-05-30 00:46+0200\n"
+"PO-Revision-Date: 2022-12-22 11:42+0000\n"
+"Last-Translator: Martin Šiška <martin-siska@email.cz>, 2024\n"
+"Language-Team: Czech (https://app.transifex.com/xfce/teams/16840/cs/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: cs\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+
+#: libxfce4windowing/xfw-wnck-icon.c:257
+msgid "The provided window does not have a _NET_WM_ICON or WMHints icon"
+msgstr "Zvolené okno nemá _NET_WM_ICON ani WMHints ikonu"
+
+#: libxfce4windowing/xfw-wnck-icon.c:630
+msgid "Failed to find or load an icon for the window"
+msgstr "Nepodařilo se najít ani načíst ikonu pro toto okno"
+
+#: libxfce4windowing/xfw-workspace-dummy.c:147
+msgid "Workspace 0"
+msgstr "Pracovní plocha 0"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:216
+msgid "_Move"
+msgstr "_Přesunout"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:221
+msgid "_Resize"
+msgstr "_Změnit velikost"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:229
+msgid "Always on _Top"
+msgstr "Vždy _nahoře"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:234
+msgid "_Always on Visible Workspace"
+msgstr "_Vždy na viditelné pracovní ploše"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:239
+msgid "_Only on This Workspace"
+msgstr "_Pouze na této pracovní ploše"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:244
+msgid "Move to Workspace _Left"
+msgstr "Umístit na pracovní plochu _nalevo"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:253
+msgid "Move to Workspace R_ight"
+msgstr "Umístit na pracovní plochu _napravo"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:262
+msgid "Move to Workspace _Up"
+msgstr "Umístit o pracovní plochu _výše"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:271
+msgid "Move to Workspace _Down"
+msgstr "Umístit o pracovní plochu _níže"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:280
+msgid "Move to Another _Workspace"
+msgstr "Přemístit na jinou _pracovní plochu"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:289
+msgid "_Close"
+msgstr "_Zavřít"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:462
+#, c-format
+msgid "Workspace %d"
+msgstr "Pracovní plocha %d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:490
+msgid "Mi_nimize"
+msgstr "Mi_nimalizovat"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:490
+msgid "Unmi_nimize"
+msgstr "Běžná velikost"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:495
+msgid "Ma_ximize"
+msgstr "Ma_ximalizovat"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:495
+msgid "Unma_ximize"
+msgstr "Běžná velikost"
