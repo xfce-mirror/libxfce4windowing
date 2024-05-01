@@ -24,6 +24,7 @@
 #include <libwnck/libwnck.h>
 
 #include "libxfce4windowing-private.h"
+#include "xfw-application-x11.h"
 #include "xfw-screen-x11.h"
 #include "xfw-screen.h"
 #include "xfw-util.h"
@@ -31,7 +32,6 @@
 #include "xfw-window-x11.h"
 #include "xfw-wnck-icon.h"
 #include "xfw-workspace-x11.h"
-#include "xfw-application-x11.h"
 #include "xfw-x11.h"
 
 enum {
@@ -59,7 +59,7 @@ static void xfw_window_x11_finalize(GObject *obj);
 
 static const gchar *const *xfw_window_x11_get_class_ids(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
-static GIcon * xfw_window_x11_get_gicon(XfwWindow *window);
+static GIcon *xfw_window_x11_get_gicon(XfwWindow *window);
 static XfwWindowType xfw_window_x11_get_window_type(XfwWindow *window);
 static XfwWindowState xfw_window_x11_get_state(XfwWindow *window);
 static XfwWindowCapabilities xfw_window_x11_get_capabilities(XfwWindow *window);
@@ -159,7 +159,8 @@ xfw_window_x11_init(XfwWindowX11 *window) {
     window->priv = xfw_window_x11_get_instance_private(window);
 }
 
-static void xfw_window_x11_constructed(GObject *obj) {
+static void
+xfw_window_x11_constructed(GObject *obj) {
     XfwWindowX11 *window = XFW_WINDOW_X11(obj);
     XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
     GdkDisplay *display = gdk_display_get_default();
@@ -252,7 +253,7 @@ xfw_window_x11_finalize(GObject *obj) {
     g_signal_handlers_disconnect_by_func(display, monitor_removed, window);
     g_signal_handlers_disconnect_by_func(window->priv->wnck_window, workspace_changed, window);
 
-    g_free (window->priv->class_ids);
+    g_free(window->priv->class_ids);
     g_list_free(window->priv->monitors);
     g_object_unref(window->priv->app);
 
@@ -814,22 +815,16 @@ static const struct {
     { WNCK_WINDOW_ACTION_CHANGE_WORKSPACE, 0, FALSE, XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE },
 };
 static XfwWindowCapabilities
-convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions)
-{
+convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions) {
     WnckWindowState wnck_state = wnck_window_get_state(wnck_window);
     XfwWindowCapabilities capabilities = XFW_WINDOW_CAPABILITIES_NONE;
     for (size_t i = 0; i < G_N_ELEMENTS(capabilities_converters); ++i) {
         if ((wnck_actions & capabilities_converters[i].wnck_actions_bits) != 0) {
-            if ((
-                    capabilities_converters[i].need_wnck_state_bits_present
-                    && (wnck_state & capabilities_converters[i].wnck_state_bits) != 0
-                )
-                ||
-                (
-                    !capabilities_converters[i].need_wnck_state_bits_present
-                    && (wnck_state & capabilities_converters[i].wnck_state_bits) == 0
-                )
-            ) {
+            if ((capabilities_converters[i].need_wnck_state_bits_present
+                 && (wnck_state & capabilities_converters[i].wnck_state_bits) != 0)
+                || (!capabilities_converters[i].need_wnck_state_bits_present
+                    && (wnck_state & capabilities_converters[i].wnck_state_bits) == 0))
+            {
                 capabilities |= capabilities_converters[i].capabilities_bit;
             }
         }

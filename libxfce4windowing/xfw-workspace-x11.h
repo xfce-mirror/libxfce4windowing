@@ -47,4 +47,4 @@ WnckWorkspace *_xfw_workspace_x11_get_wnck_workspace(XfwWorkspaceX11 *workspace)
 
 G_END_DECLS
 
-#endif  /* __XFW_WORKSPACE_X11_H__ */
+#endif /* __XFW_WORKSPACE_X11_H__ */
