@@ -1,0 +1,29 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+AlignEscapedNewlines: DontAlign
+AllowAllParametersOfDeclarationOnNextLine: false
+AlwaysBreakAfterDefinitionReturnType: All
+BraceWrapping:
+  # It doesn't force line break unfortunately, because of an incompatibility with
+  # ColumnLimit == 0 (and ColumnLimit != 0 is too restrictive in my opinion), but
+  # at least it preserves it.
+  # See https://github.com/llvm/llvm-project/issues/44857#issuecomment-2088310102
+  AfterControlStatement: MultiLine
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Custom
+ColumnLimit: 0
+Cpp11BracedListStyle: false
+IndentCaseLabels: true
+IndentWidth: 4
+InsertNewlineAtEOF: true
+MaxEmptyLinesToKeep: 2
+SpacesBeforeTrailingComments: 2
+WhitespaceSensitiveMacros:
+  # Avoid breaking formatting in the code parameter
+  - G_DEFINE_TYPE_WITH_CODE
+...
