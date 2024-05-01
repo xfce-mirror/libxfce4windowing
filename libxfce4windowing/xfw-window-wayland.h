@@ -24,10 +24,11 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <glib-object.h>
+#include "xfw-window-private.h"
 
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
-#include "xfw-window-private.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
@@ -46,4 +47,4 @@ struct zwlr_foreign_toplevel_handle_v1 *_xfw_window_wayland_get_handle(XfwWindow
 
 G_END_DECLS
 
-#endif  /* __XFW_WINDOW_WAYLAND_H__ */
+#endif /* __XFW_WINDOW_WAYLAND_H__ */

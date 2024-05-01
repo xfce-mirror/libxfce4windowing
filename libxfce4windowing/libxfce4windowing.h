@@ -32,4 +32,4 @@
 
 #undef __LIBXFCE4WINDOWING_H_INSIDE__
 
-#endif  /* !__LIBXFCE4WINDOWING_H__ */
+#endif /* !__LIBXFCE4WINDOWING_H__ */
