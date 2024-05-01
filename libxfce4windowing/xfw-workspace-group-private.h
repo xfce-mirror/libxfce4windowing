@@ -66,4 +66,4 @@ struct _XfwWorkspaceGroupInterface {
 
 G_END_DECLS
 
-#endif  /* !__XFW_WORKSPACE_GROUP_PRIVATE_H__ */
+#endif /* !__XFW_WORKSPACE_GROUP_PRIVATE_H__ */

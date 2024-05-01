@@ -48,4 +48,4 @@ const gchar *_xfw_application_x11_get_icon_name(XfwApplicationX11 *app);
 
 G_END_DECLS
 
-#endif  /* __XFW_APPLICATION_X11_H__ */
+#endif /* __XFW_APPLICATION_X11_H__ */

@@ -24,9 +24,9 @@
 #include <gtk/gtk.h>
 
 #include "libxfce4windowing-private.h"
-#include "xfw-screen-wayland.h"
 #include "xfw-application-private.h"
 #include "xfw-application-wayland.h"
+#include "xfw-screen-wayland.h"
 
 enum {
     PROP0,
@@ -91,7 +91,8 @@ xfw_application_wayland_init(XfwApplicationWayland *app) {
     app->priv = xfw_application_wayland_get_instance_private(app);
 }
 
-static void xfw_application_wayland_constructed(GObject *obj) {
+static void
+xfw_application_wayland_constructed(GObject *obj) {
     XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(obj)->priv;
     GDesktopAppInfo *app_info;
 
