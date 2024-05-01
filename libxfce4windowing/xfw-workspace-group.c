@@ -251,7 +251,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
  * @group: an #XfwWorkspaceGroup.
  *
  * Returns a bitfield describing operations allowed on this @group.
- * 
+ *
  * Return value: an #XfwWorkspaceGroupCapabilities bitfield.
  **/
 XfwWorkspaceGroupCapabilities

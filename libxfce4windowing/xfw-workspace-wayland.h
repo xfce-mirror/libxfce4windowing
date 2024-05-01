@@ -49,4 +49,4 @@ void _xfw_workspace_wayland_set_workspace_group(XfwWorkspaceWayland *workspace, 
 
 G_END_DECLS
 
-#endif  /* __XFW_WORKSPACE_WAYLAND_H__ */
+#endif /* __XFW_WORKSPACE_WAYLAND_H__ */

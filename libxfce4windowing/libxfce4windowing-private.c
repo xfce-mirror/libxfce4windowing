@@ -23,8 +23,8 @@
 
 #include <glib/gi18n-lib.h>
 #ifdef ENABLE_X11
-#include <libwnck/libwnck.h>
 #include <gdk/gdkx.h>
+#include <libwnck/libwnck.h>
 #endif
 #include <gtk/gtk.h>
 
@@ -43,7 +43,7 @@ _libxfce4windowing_init(void) {
         inited = TRUE;
         bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 #ifdef HAVE_BIND_TEXTDOMAIN_CODESET
-        bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+        bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 #endif
     }
 }
@@ -77,8 +77,7 @@ GIcon *
 _xfw_wnck_object_get_gicon(GObject *wnck_object,
                            const gchar *primary_icon_name,
                            const gchar *secondary_icon_name,
-                           const gchar *fallback_icon_name)
-{
+                           const gchar *fallback_icon_name) {
     GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
 
     g_return_val_if_fail(WNCK_IS_WINDOW(wnck_object) || WNCK_IS_CLASS_GROUP(wnck_object), NULL);

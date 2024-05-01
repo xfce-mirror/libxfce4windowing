@@ -56,7 +56,7 @@ enum {
     PROP_HANDLE,
 };
 
-static guint workspace_signals[N_SIGNALS] = { 0, };
+static guint workspace_signals[N_SIGNALS] = { 0 };
 
 static void xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface);
 static void xfw_workspace_wayland_constructed(GObject *obj);

@@ -148,8 +148,7 @@ xfw_window_action_menu_init(XfwWindowActionMenu *menu) {
 static void
 update_menu_item_image(GtkWidget *item,
                        GParamSpec *pspec,
-                       const gchar **icon_names)
-{
+                       const gchar **icon_names) {
     GtkIconTheme *itheme = gtk_icon_theme_get_default();
     gint scale_factor = gtk_widget_get_scale_factor(item);
     gint icon_width, icon_height, icon_size;
@@ -159,7 +158,7 @@ update_menu_item_image(GtkWidget *item,
     icon_size = MIN(icon_width, icon_height);
 
     icon_info = gtk_icon_theme_choose_icon_for_scale(itheme, icon_names, icon_size, scale_factor, GTK_ICON_LOOKUP_FORCE_SIZE);
-    if (G_LIKELY (icon_info != NULL)) {
+    if (G_LIKELY(icon_info != NULL)) {
         GdkPixbuf *icon = gtk_icon_info_load_icon(icon_info, NULL);
 
         if (G_LIKELY(icon != NULL)) {
@@ -167,9 +166,9 @@ update_menu_item_image(GtkWidget *item,
             GtkWidget *img = gtk_image_new_from_surface(surface);
 
             gtk_widget_show(img);
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+            G_GNUC_BEGIN_IGNORE_DEPRECATIONS
             gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), img);
-G_GNUC_END_IGNORE_DEPRECATIONS
+            G_GNUC_END_IGNORE_DEPRECATIONS
 
             g_object_unref(icon);
             cairo_surface_destroy(surface);
@@ -183,9 +182,9 @@ static GtkWidget *
 create_image_menu_item(const gchar *label_text, const gchar **icon_names) {
     GtkWidget *item;
 
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     item = gtk_image_menu_item_new_with_mnemonic(label_text);
-G_GNUC_END_IGNORE_DEPRECATIONS
+    G_GNUC_END_IGNORE_DEPRECATIONS
     update_menu_item_image(item, NULL, icon_names);
 
     return item;
@@ -443,8 +442,8 @@ update_move_submenu(XfwWindowActionMenu *menu) {
     }
     g_list_free(children);
 
-    if ((caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0 &&
-        g_list_length(xfw_workspace_manager_list_workspaces(manager)) > 1)
+    if ((caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0
+        && g_list_length(xfw_workspace_manager_list_workspaces(manager)) > 1)
     {
         for (GList *l = xfw_workspace_manager_list_workspaces(manager);
              l != NULL;
@@ -489,12 +488,12 @@ update_menu_items(XfwWindowActionMenu *menu) {
     set_item_mnemonic(menu->priv->min_item, (state & XFW_WINDOW_STATE_MINIMIZED) == 0 ? _("Mi_nimize") : _("Unmi_nimize"));
     gtk_widget_set_sensitive(menu->priv->min_item,
                              ((state & XFW_WINDOW_STATE_MINIMIZED) == 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE))
-                             || ((state & XFW_WINDOW_STATE_MINIMIZED) != 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE)));
+                                 || ((state & XFW_WINDOW_STATE_MINIMIZED) != 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE)));
 
     set_item_mnemonic(menu->priv->max_item, (state & XFW_WINDOW_STATE_MAXIMIZED) == 0 ? _("Ma_ximize") : _("Unma_ximize"));
     gtk_widget_set_sensitive(menu->priv->max_item,
                              ((state & XFW_WINDOW_STATE_MAXIMIZED) == 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE))
-                             || ((state & XFW_WINDOW_STATE_MAXIMIZED) != 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE)));
+                                 || ((state & XFW_WINDOW_STATE_MAXIMIZED) != 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE)));
 
     gtk_widget_set_sensitive(menu->priv->move_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_MOVE) != 0);
     gtk_widget_set_sensitive(menu->priv->resize_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_RESIZE) != 0);
@@ -503,7 +502,7 @@ update_menu_items(XfwWindowActionMenu *menu) {
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu->priv->above_item), (state & XFW_WINDOW_STATE_ABOVE) != 0);
     gtk_widget_set_sensitive(menu->priv->above_item,
                              ((state & XFW_WINDOW_STATE_ABOVE) == 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_PLACE_ABOVE))
-                             || ((state & XFW_WINDOW_STATE_ABOVE) != 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_ABOVE)));
+                                 || ((state & XFW_WINDOW_STATE_ABOVE) != 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_ABOVE)));
     g_signal_handlers_unblock_by_func(menu->priv->above_item, G_CALLBACK(toggle_above_state), menu->priv->window);
 
     g_signal_handlers_block_by_func(menu->priv->pin_item, G_CALLBACK(toggle_pinned_state), menu->priv->window);

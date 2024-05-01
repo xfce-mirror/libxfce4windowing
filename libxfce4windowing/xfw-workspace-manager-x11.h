@@ -47,4 +47,4 @@ XfwWorkspace *_xfw_workspace_manager_x11_workspace_for_wnck_workspace(XfwWorkspa
 
 G_END_DECLS
 
-#endif  /* __XFW_WORKSPACE_MANAGER_X11_H__ */
+#endif /* __XFW_WORKSPACE_MANAGER_X11_H__ */
