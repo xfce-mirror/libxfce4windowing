@@ -124,7 +124,7 @@ xfw_windowing_error_trap_push(GdkDisplay *display) {
     if (xfw_windowing_get() == XFW_WINDOWING_X11) {
         gdk_x11_display_error_trap_push(display);
     }
-#endif  /* GDK_WINDOWING_X11 */
+#endif /* GDK_WINDOWING_X11 */
 }
 
 /**
@@ -144,7 +144,7 @@ xfw_windowing_error_trap_pop(GdkDisplay *display) {
     if (xfw_windowing_get() == XFW_WINDOWING_X11) {
         return gdk_x11_display_error_trap_pop(display);
     } else
-#endif  /* GDK_WINDOWING_X11 */
+#endif /* GDK_WINDOWING_X11 */
     {
         return 0;
     }
@@ -164,9 +164,9 @@ xfw_windowing_error_trap_pop_ignored(GdkDisplay *display) {
     if (xfw_windowing_get() == XFW_WINDOWING_X11) {
         gdk_x11_display_error_trap_pop_ignored(display);
     }
-#endif  /* GDK_WINDOWING_X11 */
+#endif /* GDK_WINDOWING_X11 */
 }
 
 G_END_DECLS
 
-#endif  /* __XFW_UTIL_H__ */
+#endif /* __XFW_UTIL_H__ */
