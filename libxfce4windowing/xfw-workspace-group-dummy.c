@@ -21,8 +21,8 @@
 #include "config.h"
 #endif
 
-#include <glib/gi18n-lib.h>
 #include <gdk/gdk.h>
+#include <glib/gi18n-lib.h>
 
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"

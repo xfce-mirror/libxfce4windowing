@@ -22,13 +22,12 @@
 #endif
 
 #include <gdk/gdkx.h>
-
 #include <libwnck/libwnck.h>
 
 #include "libxfce4windowing-private.h"
-#include "xfw-util.h"
 #include "xfw-screen-private.h"
 #include "xfw-screen-x11.h"
+#include "xfw-util.h"
 #include "xfw-window-x11.h"
 #include "xfw-workspace-manager-x11.h"
 
@@ -89,9 +88,9 @@ static void
 xfw_screen_x11_constructed(GObject *obj) {
     XfwScreenX11 *screen = XFW_SCREEN_X11(obj);
 
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     screen->priv->wnck_screen = g_object_ref(wnck_screen_get(gdk_x11_screen_get_screen_number(screen->priv->gdk_screen)));
-G_GNUC_END_IGNORE_DEPRECATIONS
+    G_GNUC_END_IGNORE_DEPRECATIONS
     screen->priv->workspace_manager = _xfw_workspace_manager_x11_new(screen->priv->gdk_screen);
     screen->priv->wnck_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
 
@@ -200,17 +199,20 @@ xfw_screen_x11_get_workspace_manager(XfwScreen *screen) {
     return XFW_SCREEN_X11(screen)->priv->workspace_manager;
 }
 
-static GList *xfw_screen_x11_get_windows(XfwScreen *screen) {
+static GList *
+xfw_screen_x11_get_windows(XfwScreen *screen) {
     return XFW_SCREEN_X11(screen)->priv->windows;
 }
 
-static GList *xfw_screen_x11_get_windows_stacked(XfwScreen *screen) {
+static GList *
+xfw_screen_x11_get_windows_stacked(XfwScreen *screen) {
     return XFW_SCREEN_X11(screen)->priv->windows_stacked;
 }
 
-static XfwWindow *xfw_screen_x11_get_active_window(XfwScreen *screen) {
+static XfwWindow *
+xfw_screen_x11_get_active_window(XfwScreen *screen) {
     return XFW_SCREEN_X11(screen)->priv->active_window;
-} 
+}
 
 static gboolean
 xfw_screen_x11_get_show_desktop(XfwScreen *screen) {
@@ -277,7 +279,7 @@ active_window_changed(WnckScreen *wnck_screen, WnckWindow *previous_wnck_window,
             g_signal_emit_by_name(wnck_window, "state-changed", 0, wnck_window_get_state(wnck_window));
         }
         g_signal_emit_by_name(screen, "active-window-changed", g_hash_table_lookup(screen->priv->wnck_windows, previous_wnck_window));
-    }    
+    }
 }
 
 static void

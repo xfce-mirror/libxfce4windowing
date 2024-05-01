@@ -21,9 +21,8 @@
 #include "config.h"
 #endif
 
-#include <string.h>
-
 #include <gdk/gdkwayland.h>
+#include <string.h>
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 
@@ -270,12 +269,10 @@ manager_workspace(void *data, struct ext_workspace_manager_v1 *manager, struct e
 
 static void
 manager_done(void *data, struct ext_workspace_manager_v1 *manager) {
-
 }
 
 static void
 manager_finished(void *data, struct ext_workspace_manager_v1 *manager) {
-
 }
 
 XfwWorkspaceManager *

@@ -51,4 +51,4 @@ void _xfw_workspace_group_dummy_set_active_workspace(XfwWorkspaceGroupDummy *gro
 
 G_END_DECLS
 
-#endif  /* __XFW_WORKSPACE_GROUP_DUMMY_H__ */
+#endif /* __XFW_WORKSPACE_GROUP_DUMMY_H__ */
