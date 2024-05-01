@@ -26,7 +26,7 @@
 
 #include "xfw-window.h"
 
-#define XFW_WINDOW_FALLBACK_ICON_NAME  "window-maximize-symbolic"
+#define XFW_WINDOW_FALLBACK_ICON_NAME "window-maximize-symbolic"
 
 G_BEGIN_DECLS
 
@@ -87,4 +87,4 @@ void _xfw_window_invalidate_icon(XfwWindow *window);
 
 G_END_DECLS
 
-#endif  /* !__XFW_WINDOW_PRIVATE_H__ */
+#endif /* !__XFW_WINDOW_PRIVATE_H__ */
