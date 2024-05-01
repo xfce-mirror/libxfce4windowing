@@ -47,4 +47,4 @@ WnckWindow *_xfw_window_x11_get_wnck_window(XfwWindowX11 *window);
 
 G_END_DECLS
 
-#endif  /* __XFW_WINDOW_X11_H__ */
+#endif /* __XFW_WINDOW_X11_H__ */

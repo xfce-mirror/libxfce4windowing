@@ -46,4 +46,4 @@ XfwWorkspace *_xfw_screen_x11_workspace_for_wnck_workspace(XfwScreenX11 *screen,
 
 G_END_DECLS
 
-#endif  /* __XFW_SCREEN_X11_H__ */
+#endif /* __XFW_SCREEN_X11_H__ */
