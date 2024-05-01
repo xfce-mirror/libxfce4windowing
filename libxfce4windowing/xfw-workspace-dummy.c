@@ -21,12 +21,12 @@
 #include "config.h"
 #endif
 
-#include <glib/gi18n-lib.h>
-
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 #include "xfw-workspace-dummy.h"
 #include "xfw-workspace-private.h"
+
+#include <glib/gi18n-lib.h>
 
 struct _XfwWorkspaceDummyPrivate {
     XfwWorkspaceGroup *group;

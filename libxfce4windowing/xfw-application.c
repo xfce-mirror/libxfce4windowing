@@ -169,8 +169,7 @@ static void
 xfw_application_set_property(GObject *object,
                              guint prop_id,
                              const GValue *value,
-                             GParamSpec *pspec)
-{
+                             GParamSpec *pspec) {
     G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 }
 
@@ -178,8 +177,7 @@ static void
 xfw_application_get_property(GObject *object,
                              guint prop_id,
                              GValue *value,
-                             GParamSpec *pspec)
-{
+                             GParamSpec *pspec) {
     XfwApplication *app = XFW_APPLICATION(object);
 
     switch (prop_id) {

@@ -24,10 +24,10 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <glib-object.h>
-
 #include "xfw-application-private.h"
 #include "xfw-window-wayland.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
@@ -43,8 +43,8 @@ struct _XfwApplicationWayland {
 };
 
 XfwApplicationWayland *_xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id);
-GIcon * _xfw_application_wayland_get_gicon_no_fallback(XfwApplicationWayland *app);
+GIcon *_xfw_application_wayland_get_gicon_no_fallback(XfwApplicationWayland *app);
 
 G_END_DECLS
 
-#endif  /* __XFW_APPLICATION_WAYLAND_H__ */
+#endif /* __XFW_APPLICATION_WAYLAND_H__ */
