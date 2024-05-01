@@ -21,17 +21,17 @@
 #include "config.h"
 #endif
 
-#include <gdk/gdkwayland.h>
-
-#include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
-
 #include "libxfce4windowing-private.h"
+#include "xfw-application-wayland.h"
 #include "xfw-screen-wayland.h"
+#include "xfw-screen.h"
 #include "xfw-util.h"
 #include "xfw-window-private.h"
 #include "xfw-window-wayland.h"
-#include "xfw-application-wayland.h"
-#include "xfw-screen.h"
+
+#include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
+
+#include <gdk/gdkwayland.h>
 
 enum {
     PROP0,
@@ -577,7 +577,6 @@ toplevel_state(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, 
 
 static void
 toplevel_parent(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct zwlr_foreign_toplevel_handle_v1 *wl_parent) {
-
 }
 
 static void

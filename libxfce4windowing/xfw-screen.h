@@ -24,10 +24,10 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <gdk/gdk.h>
-
 #include "xfw-window.h"
 #include "xfw-workspace-manager.h"
+
+#include <gdk/gdk.h>
 
 G_BEGIN_DECLS
 
@@ -48,4 +48,4 @@ void xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show);
 
 G_END_DECLS
 
-#endif  /* !__XFW_SCREEN_H__ */
+#endif /* !__XFW_SCREEN_H__ */

@@ -26,7 +26,7 @@
 
 #include "xfw-application.h"
 
-#define XFW_APPLICATION_FALLBACK_ICON_NAME  "application-x-executable-symbolic"
+#define XFW_APPLICATION_FALLBACK_ICON_NAME "application-x-executable-symbolic"
 
 G_BEGIN_DECLS
 
@@ -59,4 +59,4 @@ void _xfw_application_invalidate_icon(XfwApplication *app);
 
 G_END_DECLS
 
-#endif  /* !__XFW_APPLICATION_PRIVATE_H__ */
+#endif /* !__XFW_APPLICATION_PRIVATE_H__ */

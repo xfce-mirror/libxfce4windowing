@@ -93,7 +93,8 @@ xfw_application_x11_init(XfwApplicationX11 *app) {
     app->priv = xfw_application_x11_get_instance_private(app);
 }
 
-static void xfw_application_x11_constructed(GObject *obj) {
+static void
+xfw_application_x11_constructed(GObject *obj) {
     XfwApplicationX11Private *priv = XFW_APPLICATION_X11(obj)->priv;
 
     g_hash_table_insert(wnck_groups, priv->wnck_group, obj);
@@ -219,7 +220,7 @@ name_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app) {
 }
 
 static gboolean
-find_instance (gpointer key, gpointer value, gpointer user_data) {
+find_instance(gpointer key, gpointer value, gpointer user_data) {
     return g_list_find(((XfwApplicationInstance *)value)->windows, user_data) != NULL;
 }
 

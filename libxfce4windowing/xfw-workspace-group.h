@@ -24,10 +24,10 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <glib-object.h>
-#include <gdk/gdk.h>
-
 #include "xfw-workspace.h"
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
 
 /* fwd decl */
 typedef struct _XfwWorkspaceManager XfwWorkspaceManager;
@@ -77,4 +77,4 @@ gboolean xfw_workspace_group_set_layout(XfwWorkspaceGroup *group, gint rows, gin
 
 G_END_DECLS
 
-#endif  /* !__XFW_WORKSPACE_GROUP_H__ */
+#endif /* !__XFW_WORKSPACE_GROUP_H__ */
