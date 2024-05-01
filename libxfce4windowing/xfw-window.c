@@ -43,15 +43,15 @@
 #include "config.h"
 #endif
 
-#include <limits.h>
-#include <stdint.h>
-
 #include "libxfce4windowing-private.h"
 #include "xfw-marshal.h"
 #include "xfw-screen.h"
 #include "xfw-window-private.h"
 
-#define XFW_WINDOW_GET_PRIVATE(window)  ((XfwWindowPrivate *)xfw_window_get_instance_private(window))
+#include <limits.h>
+#include <stdint.h>
+
+#define XFW_WINDOW_GET_PRIVATE(window) ((XfwWindowPrivate *)xfw_window_get_instance_private(window))
 
 enum {
     PROP0,
@@ -89,7 +89,8 @@ static void xfw_window_finalize(GObject *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE(XfwWindow, xfw_window, G_TYPE_OBJECT)
 
-G_DEFINE_FLAGS_TYPE(XfwWindowState, xfw_window_state,
+G_DEFINE_FLAGS_TYPE(
+    XfwWindowState, xfw_window_state,
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_STATE_NONE, "none"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_STATE_ACTIVE, "active"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_STATE_MINIMIZED, "minimized"),
@@ -103,7 +104,8 @@ G_DEFINE_FLAGS_TYPE(XfwWindowState, xfw_window_state,
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_STATE_BELOW, "below"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_STATE_URGENT, "urgent"))
 
-G_DEFINE_FLAGS_TYPE(XfwWindowCapabilities, xfw_window_capabilities,
+G_DEFINE_FLAGS_TYPE(
+    XfwWindowCapabilities, xfw_window_capabilities,
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_NONE, "none"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE, "can-minimize"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE, "can-unminimize"),
@@ -121,15 +123,16 @@ G_DEFINE_FLAGS_TYPE(XfwWindowCapabilities, xfw_window_capabilities,
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_BELOW, "can-unplace-below"),
     G_DEFINE_ENUM_VALUE(XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE, "can-change-workspace"))
 
-G_DEFINE_ENUM_TYPE(XfwWindowType, xfw_window_type,
-  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_NORMAL, "normal"),
-  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_DESKTOP, "desktop"),
-  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_DOCK, "dock"),
-  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_DIALOG, "dialog"),
-  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_TOOLBAR, "toolbar"),
-  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_MENU, "menu"),
-  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_UTILITY, "utility"),
-  G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_SPLASHSCREEN, "splashscreen"))
+G_DEFINE_ENUM_TYPE(
+    XfwWindowType, xfw_window_type,
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_NORMAL, "normal"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_DESKTOP, "desktop"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_DOCK, "dock"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_DIALOG, "dialog"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_TOOLBAR, "toolbar"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_MENU, "menu"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_UTILITY, "utility"),
+    G_DEFINE_ENUM_VALUE(XFW_WINDOW_TYPE_SPLASHSCREEN, "splashscreen"))
 
 
 static void
@@ -421,8 +424,7 @@ static void
 xfw_window_set_property(GObject *object,
                         guint prop_id,
                         const GValue *value,
-                        GParamSpec *pspec)
-{
+                        GParamSpec *pspec) {
     XfwWindowPrivate *priv = XFW_WINDOW_GET_PRIVATE(XFW_WINDOW(object));
 
     switch (prop_id) {
@@ -440,8 +442,7 @@ static void
 xfw_window_get_property(GObject *object,
                         guint prop_id,
                         GValue *value,
-                        GParamSpec *pspec)
-{
+                        GParamSpec *pspec) {
     XfwWindow *window = XFW_WINDOW(object);
     XfwWindowPrivate *priv = XFW_WINDOW_GET_PRIVATE(window);
 
@@ -782,7 +783,7 @@ xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error) {
 }
 
 gboolean
-xfw_window_start_move(XfwWindow *window, GError **error){
+xfw_window_start_move(XfwWindow *window, GError **error) {
     XfwWindowClass *klass;
     g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
     klass = XFW_WINDOW_GET_CLASS(window);
@@ -823,11 +824,11 @@ xfw_window_move_to_workspace(XfwWindow *window, XfwWorkspace *workspace, GError 
 
 #define STATE_SETTER(state) \
     gboolean \
-    xfw_window_set_ ## state(XfwWindow *window, gboolean is_ ## state, GError **error) { \
+        xfw_window_set_##state(XfwWindow *window, gboolean is_##state, GError **error) { \
         XfwWindowClass *klass; \
         g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE); \
         klass = XFW_WINDOW_GET_CLASS(window); \
-        return (*klass->set_ ## state)(window, is_ ## state, error); \
+        return (*klass->set_##state)(window, is_##state, error); \
     }
 
 STATE_SETTER(minimized)
@@ -844,11 +845,11 @@ STATE_SETTER(below)
 
 #define STATE_GETTER(state_lower, state_upper) \
     gboolean \
-    xfw_window_is_ ## state_lower(XfwWindow *window) { \
+        xfw_window_is_##state_lower(XfwWindow *window) { \
         XfwWindowState state; \
         g_return_val_if_fail(XFW_IS_WINDOW(window), XFW_WINDOW_STATE_NONE); \
         state = xfw_window_get_state(window); \
-        return (state & XFW_WINDOW_STATE_ ## state_upper) != 0; \
+        return (state & XFW_WINDOW_STATE_##state_upper) != 0; \
     }
 
 STATE_GETTER(active, ACTIVE)

@@ -24,10 +24,10 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
+#include "xfw-workspace-group.h"
+
 #include <glib-object.h>
 #include <libwnck/libwnck.h>
-
-#include "xfw-workspace-group.h"
 
 G_BEGIN_DECLS
 
@@ -47,4 +47,4 @@ WnckWorkspace *_xfw_workspace_x11_get_wnck_workspace(XfwWorkspaceX11 *workspace)
 
 G_END_DECLS
 
-#endif  /* __XFW_WORKSPACE_X11_H__ */
+#endif /* __XFW_WORKSPACE_X11_H__ */
