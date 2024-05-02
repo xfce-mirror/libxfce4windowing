@@ -50,4 +50,4 @@ XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen,
 
 G_END_DECLS
 
-#endif  /* __XFW_SCREEN_WAYLAND_H__ */
+#endif /* __XFW_SCREEN_WAYLAND_H__ */

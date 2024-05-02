@@ -48,4 +48,4 @@ void xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show);
 
 G_END_DECLS
 
-#endif  /* !__XFW_SCREEN_H__ */
+#endif /* !__XFW_SCREEN_H__ */

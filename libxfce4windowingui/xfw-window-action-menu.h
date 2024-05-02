@@ -41,4 +41,4 @@ GtkWidget *xfw_window_action_menu_new(XfwWindow *window);
 
 G_END_DECLS
 
-#endif  /* !__XFW_WINDOW_ACTION_MENU_H__ */
+#endif /* !__XFW_WINDOW_ACTION_MENU_H__ */
