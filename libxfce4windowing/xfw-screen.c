@@ -328,9 +328,10 @@ xfw_screen_get(GdkScreen *gdk_screen) {
                                   "screen", gdk_screen,
                                   NULL);
         } else
-#endif  /* ENABLE_X11 */
+#endif /* ENABLE_X11 */
 #ifdef ENABLE_WAYLAND
-        if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND) {
+            if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND)
+        {
             screen = g_object_new(XFW_TYPE_SCREEN_WAYLAND,
                                   "screen", gdk_screen,
                                   NULL);
