@@ -24,11 +24,11 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <glib-object.h>
-#include <libwnck/libwnck.h>
-
 #include "xfw-application-private.h"
 #include "xfw-window-x11.h"
+
+#include <glib-object.h>
+#include <libwnck/libwnck.h>
 
 G_BEGIN_DECLS
 
@@ -48,4 +48,4 @@ const gchar *_xfw_application_x11_get_icon_name(XfwApplicationX11 *app);
 
 G_END_DECLS
 
-#endif  /* __XFW_APPLICATION_X11_H__ */
+#endif /* __XFW_APPLICATION_X11_H__ */
