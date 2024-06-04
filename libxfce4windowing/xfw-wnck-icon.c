@@ -572,7 +572,7 @@ xfw_wnck_object_get_wmhints_icon(GObject *wnck_object)
                 window_icon = g_slice_new0(WindowIcon);
                 window_icon->width = cairo_image_surface_get_width(surface);
                 window_icon->height = cairo_image_surface_get_height(surface);
-                window_icon->bmp = xfw_wnck_icon_argb_to_bmp((gulong *)cairo_image_surface_get_data(surface),
+                window_icon->bmp = xfw_wnck_icon_argb_to_bmp((gulong *)(gpointer)cairo_image_surface_get_data(surface),
                                                              window_icon->width,
                                                              window_icon->height,
                                                              &window_icon->bmp_len);
