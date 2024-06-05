@@ -55,8 +55,7 @@ G_DEFINE_ENUM_TYPE(XfwDirection, xfw_direction,
  * Return value: A value from the #XfwWindowing enum.
  **/
 XfwWindowing
-xfw_windowing_get(void)
-{
+xfw_windowing_get(void) {
     static XfwWindowing windowing = XFW_WINDOWING_UNKNOWN;
 
     if (G_UNLIKELY(windowing == XFW_WINDOWING_UNKNOWN)) {
@@ -68,12 +67,13 @@ xfw_windowing_get(void)
         if (GDK_IS_X11_DISPLAY(gdpy)) {
             windowing = XFW_WINDOWING_X11;
         } else
-#endif  /* ENABLE_X11 */
+#endif /* ENABLE_X11 */
 #ifdef ENABLE_WAYLAND
-        if (GDK_IS_WAYLAND_DISPLAY(gdpy)) {
+            if (GDK_IS_WAYLAND_DISPLAY(gdpy))
+        {
             windowing = XFW_WINDOWING_WAYLAND;
         } else
-#endif  /* ENABLE_WAYLAND */
+#endif /* ENABLE_WAYLAND */
         {
             g_critical("Unknown/unsupported GDK windowing type");
         }
@@ -101,9 +101,9 @@ void
 xfw_set_client_type(XfwClientType client_type) {
 #ifdef ENABLE_X11
     if (xfw_windowing_get() == XFW_WINDOWING_X11) {
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+        G_GNUC_BEGIN_IGNORE_DEPRECATIONS
         wnck_set_client_type((WnckClientType)client_type);
-G_GNUC_END_IGNORE_DEPRECATIONS
+        G_GNUC_END_IGNORE_DEPRECATIONS
     }
 #endif
 }

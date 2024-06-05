@@ -21,20 +21,19 @@
 #include "config.h"
 #endif
 
-#include <limits.h>
-
-#include <glib/gi18n-lib.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkwayland.h>
-
-#include "protocols/ext-workspace-v1-20230427-client.h"
-
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 #include "xfw-workspace-group-private.h"
 #include "xfw-workspace-group-wayland.h"
 #include "xfw-workspace-wayland.h"
 #include "xfw-workspace.h"
+
+#include "protocols/ext-workspace-v1-20230427-client.h"
+
+#include <gdk/gdk.h>
+#include <gdk/gdkwayland.h>
+#include <glib/gi18n-lib.h>
+#include <limits.h>
 
 enum {
     SIGNAL_DESTROYED,
@@ -52,7 +51,7 @@ struct _XfwWorkspaceGroupWaylandPrivate {
     GList *monitors;
 };
 
-static guint group_signals[N_SIGNALS]  = { 0, };
+static guint group_signals[N_SIGNALS] = { 0 };
 
 static void xfw_workspace_group_wayland_workspace_group_init(XfwWorkspaceGroupIface *iface);
 static void xfw_workspace_group_wayland_constructed(GObject *obj);
@@ -64,7 +63,7 @@ static guint xfw_workspace_group_wayland_get_workspace_count(XfwWorkspaceGroup *
 static GList *xfw_workspace_group_wayland_list_workspaces(XfwWorkspaceGroup *group);
 static XfwWorkspace *xfw_workspace_group_wayland_get_active_workspace(XfwWorkspaceGroup *group);
 static GList *xfw_workspace_group_wayland_get_monitors(XfwWorkspaceGroup *group);
-static XfwWorkspaceManager * xfw_workspace_group_wayland_get_workspace_manager(XfwWorkspaceGroup *group);
+static XfwWorkspaceManager *xfw_workspace_group_wayland_get_workspace_manager(XfwWorkspaceGroup *group);
 static gboolean xfw_workspace_group_wayland_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 static gboolean xfw_workspace_group_wayland_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
 static gboolean xfw_workspace_group_wayland_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
@@ -286,8 +285,8 @@ group_output_enter(void *data, struct ext_workspace_group_handle_v1 *wl_group, s
 
     for (int i = 0; i < n_monitors; ++i) {
         GdkMonitor *monitor = gdk_display_get_monitor(display, i);
-        if (gdk_wayland_monitor_get_wl_output(monitor) == output &&
-            g_list_find(group->priv->monitors, monitor) == NULL)
+        if (gdk_wayland_monitor_get_wl_output(monitor) == output
+            && g_list_find(group->priv->monitors, monitor) == NULL)
         {
             group->priv->monitors = g_list_append(group->priv->monitors, monitor);
             g_signal_emit_by_name(group, "monitor-added", monitor);

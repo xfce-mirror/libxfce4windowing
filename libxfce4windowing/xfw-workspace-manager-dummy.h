@@ -24,9 +24,9 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <gdk/gdk.h>
-
 #include "xfw-workspace-manager.h"
+
+#include <gdk/gdk.h>
 
 G_BEGIN_DECLS
 
@@ -46,4 +46,4 @@ XfwWorkspaceManager *_xfw_workspace_manager_dummy_new(GdkScreen *screen);
 
 G_END_DECLS
 
-#endif  /* __XFW_WORKSPACE_MANAGER_DUMMY_H__ */
+#endif /* __XFW_WORKSPACE_MANAGER_DUMMY_H__ */

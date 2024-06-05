@@ -21,16 +21,16 @@
 #include "config.h"
 #endif
 
-#include <limits.h>
-
-#include "protocols/ext-workspace-v1-20230427-client.h"
-
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 #include "xfw-workspace-group-wayland.h"
 #include "xfw-workspace-group.h"
 #include "xfw-workspace-private.h"
 #include "xfw-workspace-wayland.h"
+
+#include "protocols/ext-workspace-v1-20230427-client.h"
+
+#include <limits.h>
 
 struct _XfwWorkspaceWaylandPrivate {
     XfwWorkspaceGroup *group;
@@ -56,7 +56,7 @@ enum {
     PROP_HANDLE,
 };
 
-static guint workspace_signals[N_SIGNALS] = { 0, };
+static guint workspace_signals[N_SIGNALS] = { 0 };
 
 static void xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface);
 static void xfw_workspace_wayland_constructed(GObject *obj);
