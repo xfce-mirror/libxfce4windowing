@@ -41,24 +41,26 @@
 #include "config.h"
 #endif
 
-#include <limits.h>
-
 #include "libxfce4windowing-private.h"
 #include "xfw-marshal.h"
 #include "xfw-window.h"
 #include "xfw-workspace-group.h"
 #include "xfw-workspace-private.h"
 
+#include <limits.h>
+
 G_DEFINE_INTERFACE(XfwWorkspace, xfw_workspace, G_TYPE_OBJECT)
 
-G_DEFINE_FLAGS_TYPE(XfwWorkspaceState, xfw_workspace_state,
+G_DEFINE_FLAGS_TYPE(
+    XfwWorkspaceState, xfw_workspace_state,
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_NONE, "none"),
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_ACTIVE, "active"),
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_URGENT, "urgent"),
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_HIDDEN, "hidden"),
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_STATE_VIRTUAL, "virtual"))
 
-G_DEFINE_FLAGS_TYPE(XfwWorkspaceCapabilities, xfw_workspace_capabilities,
+G_DEFINE_FLAGS_TYPE(
+    XfwWorkspaceCapabilities, xfw_workspace_capabilities,
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_CAPABILITIES_NONE, "none"),
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_CAPABILITIES_ACTIVATE, "activate"),
     G_DEFINE_ENUM_VALUE(XFW_WORKSPACE_CAPABILITIES_REMOVE, "remove"))

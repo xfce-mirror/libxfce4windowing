@@ -21,19 +21,18 @@
 #include "config.h"
 #endif
 
-#include <string.h>
-
-#include <gdk/gdkwayland.h>
-#include <wayland-client-core.h>
-#include <wayland-client-protocol.h>
-
-#include "protocols/ext-workspace-v1-20230427-client.h"
-
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-group-wayland.h"
 #include "xfw-workspace-manager-private.h"
 #include "xfw-workspace-manager-wayland.h"
 #include "xfw-workspace-wayland.h"
+
+#include "protocols/ext-workspace-v1-20230427-client.h"
+
+#include <gdk/gdkwayland.h>
+#include <string.h>
+#include <wayland-client-core.h>
+#include <wayland-client-protocol.h>
 
 enum {
     PROP0,
@@ -270,12 +269,10 @@ manager_workspace(void *data, struct ext_workspace_manager_v1 *manager, struct e
 
 static void
 manager_done(void *data, struct ext_workspace_manager_v1 *manager) {
-
 }
 
 static void
 manager_finished(void *data, struct ext_workspace_manager_v1 *manager) {
-
 }
 
 XfwWorkspaceManager *

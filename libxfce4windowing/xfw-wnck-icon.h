@@ -38,4 +38,4 @@ XfwWnckIcon *_xfw_wnck_icon_new(GObject *wnck_object);
 
 G_END_DECLS
 
-#endif  /* __XFW_WNCK_ICON_H__ */
+#endif /* __XFW_WNCK_ICON_H__ */

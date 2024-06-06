@@ -24,9 +24,9 @@
 #include <X11/Xlib.h>
 #endif
 
-#include <glib-object.h>
 #include <gdk/gdk.h>
 #include <gio/gdesktopappinfo.h>
+#include <glib-object.h>
 
 // Support glib < 2.74, avoid deprecation warnings when building with xfce4-dev-tools >= 4.17.1
 
@@ -34,61 +34,65 @@
 #undef G_DEFINE_ENUM_TYPE
 #endif
 #define G_DEFINE_ENUM_TYPE(TypeName, type_name, ...) \
-GType \
-type_name ## _get_type (void) { \
-  static gsize g_define_type__static = 0; \
-  if (g_once_init_enter (&g_define_type__static)) { \
-    static const GEnumValue enum_values[] = { \
-      __VA_ARGS__ , \
-      { 0, NULL, NULL }, \
-    }; \
-    GType g_define_type = g_enum_register_static (g_intern_static_string (#TypeName), enum_values); \
-    g_once_init_leave (&g_define_type__static, g_define_type); \
-  } \
-  return g_define_type__static; \
-}
+    GType \
+        type_name##_get_type(void) { \
+        static gsize g_define_type__static = 0; \
+        if (g_once_init_enter(&g_define_type__static)) { \
+            static const GEnumValue enum_values[] = { \
+                __VA_ARGS__, \
+                { 0, NULL, NULL }, \
+            }; \
+            GType g_define_type = g_enum_register_static(g_intern_static_string(#TypeName), enum_values); \
+            g_once_init_leave(&g_define_type__static, g_define_type); \
+        } \
+        return g_define_type__static; \
+    }
 
 #ifdef G_DEFINE_FLAGS_TYPE
 #undef G_DEFINE_FLAGS_TYPE
 #endif
 #define G_DEFINE_FLAGS_TYPE(TypeName, type_name, ...) \
-GType \
-type_name ## _get_type (void) { \
-  static gsize g_define_type__static = 0; \
-  if (g_once_init_enter (&g_define_type__static)) { \
-    static const GFlagsValue flags_values[] = { \
-      __VA_ARGS__ , \
-      { 0, NULL, NULL }, \
-    }; \
-    GType g_define_type = g_flags_register_static (g_intern_static_string (#TypeName), flags_values); \
-    g_once_init_leave (&g_define_type__static, g_define_type); \
-  } \
-  return g_define_type__static; \
-}
+    GType \
+        type_name##_get_type(void) { \
+        static gsize g_define_type__static = 0; \
+        if (g_once_init_enter(&g_define_type__static)) { \
+            static const GFlagsValue flags_values[] = { \
+                __VA_ARGS__, \
+                { 0, NULL, NULL }, \
+            }; \
+            GType g_define_type = g_flags_register_static(g_intern_static_string(#TypeName), flags_values); \
+            g_once_init_leave(&g_define_type__static, g_define_type); \
+        } \
+        return g_define_type__static; \
+    }
 
 #ifdef G_DEFINE_ENUM_VALUE
 #undef G_DEFINE_ENUM_VALUE
 #endif
 #define G_DEFINE_ENUM_VALUE(EnumValue, EnumNick) \
-  { EnumValue, #EnumValue, EnumNick }
+    { \
+        EnumValue, #EnumValue, EnumNick \
+    }
 
 /* copied and adapted from g_warning_once (GLib 2.78) */
 #if defined(G_HAVE_ISO_VARARGS) && !G_ANALYZER_ANALYZING
 #define _xfw_g_message_once(...) \
-  G_STMT_START { \
-    static int G_PASTE (__XfwGMessageOnceBoolean, __LINE__) = 0;  /* (atomic) */ \
-    if (g_atomic_int_compare_and_exchange (&G_PASTE (__XfwGMessageOnceBoolean, __LINE__), \
-                                           0, 1)) \
-      g_message (__VA_ARGS__); \
-  } G_STMT_END
-#elif defined(G_HAVE_GNUC_VARARGS)  && !G_ANALYZER_ANALYZING
+    G_STMT_START { \
+        static int G_PASTE(__XfwGMessageOnceBoolean, __LINE__) = 0; /* (atomic) */ \
+        if (g_atomic_int_compare_and_exchange(&G_PASTE(__XfwGMessageOnceBoolean, __LINE__), \
+                                              0, 1)) \
+            g_message(__VA_ARGS__); \
+    } \
+    G_STMT_END
+#elif defined(G_HAVE_GNUC_VARARGS) && !G_ANALYZER_ANALYZING
 #define _xfw_g_message_once(format...) \
-  G_STMT_START { \
-    static int G_PASTE (__XfwGMessageOnceBoolean, __LINE__) = 0;  /* (atomic) */ \
-    if (g_atomic_int_compare_and_exchange (&G_PASTE (__XfwGMessageOnceBoolean, __LINE__), \
-                                           0, 1)) \
-      g_message (format); \
-  } G_STMT_END
+    G_STMT_START { \
+        static int G_PASTE(__XfwGMessageOnceBoolean, __LINE__) = 0; /* (atomic) */ \
+        if (g_atomic_int_compare_and_exchange(&G_PASTE(__XfwGMessageOnceBoolean, __LINE__), \
+                                              0, 1)) \
+            g_message(format); \
+    } \
+    G_STMT_END
 #else
 #define _xfw_g_message_once g_message
 #endif
@@ -149,4 +153,4 @@ GIcon *_xfw_wnck_object_get_gicon(GObject *wnck_object,
 
 G_END_DECLS
 
-#endif  /* __LIBXFCE4WINDOWING_PRIVATE_H__ */
+#endif /* __LIBXFCE4WINDOWING_PRIVATE_H__ */

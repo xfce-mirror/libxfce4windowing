@@ -24,11 +24,11 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <glib-object.h>
+#include "xfw-workspace-group.h"
 
 #include "protocols/ext-workspace-v1-20230427-client.h"
 
-#include "xfw-workspace-group.h"
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
@@ -49,4 +49,4 @@ void _xfw_workspace_wayland_set_workspace_group(XfwWorkspaceWayland *workspace, 
 
 G_END_DECLS
 
-#endif  /* __XFW_WORKSPACE_WAYLAND_H__ */
+#endif /* __XFW_WORKSPACE_WAYLAND_H__ */

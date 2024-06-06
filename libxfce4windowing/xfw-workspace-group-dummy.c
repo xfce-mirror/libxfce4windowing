@@ -21,14 +21,14 @@
 #include "config.h"
 #endif
 
-#include <glib/gi18n-lib.h>
-#include <gdk/gdk.h>
-
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 #include "xfw-workspace-group-dummy.h"
 #include "xfw-workspace-group-private.h"
 #include "xfw-workspace.h"
+
+#include <gdk/gdk.h>
+#include <glib/gi18n-lib.h>
 
 enum {
     PROP0,
