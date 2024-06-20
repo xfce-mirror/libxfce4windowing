@@ -58,4 +58,4 @@ GList *xfw_application_instance_get_windows(XfwApplicationInstance *instance);
 
 G_END_DECLS
 
-#endif  /* !__XFW_APPLICATION_H__ */
+#endif /* !__XFW_APPLICATION_H__ */

@@ -42,12 +42,12 @@
 #include "config.h"
 #endif
 
-#include <gdk/gdk.h>
-
 #include "libxfce4windowing-private.h"
 #include "xfw-marshal.h"
 #include "xfw-workspace-group-private.h"
 #include "xfw-workspace-manager.h"
+
+#include <gdk/gdk.h>
 
 G_DEFINE_INTERFACE(XfwWorkspaceGroup, xfw_workspace_group, G_TYPE_OBJECT)
 
@@ -251,7 +251,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
  * @group: an #XfwWorkspaceGroup.
  *
  * Returns a bitfield describing operations allowed on this @group.
- * 
+ *
  * Return value: an #XfwWorkspaceGroupCapabilities bitfield.
  **/
 XfwWorkspaceGroupCapabilities

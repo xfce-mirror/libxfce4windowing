@@ -27,4 +27,4 @@
 
 #undef __LIBXFCE4WINDOWINGUI_H_INSIDE__
 
-#endif  /* !__LIBXFCE4WINDOWINGUI_H__ */
+#endif /* !__LIBXFCE4WINDOWINGUI_H__ */
