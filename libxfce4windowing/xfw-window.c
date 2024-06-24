@@ -57,6 +57,7 @@ enum {
     PROP0,
     PROP_SCREEN,
     PROP_CLASS_IDS,
+    PROP_ID,
     PROP_NAME,
     PROP_TYPE,
     PROP_STATE,
@@ -307,6 +308,19 @@ xfw_window_class_init(XfwWindowClass *klass) {
                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
+     * XfwWindow:id:
+     *
+     * The window's id
+     */
+    g_object_class_install_property(gobject_class,
+                                    PROP_ID,
+                                    g_param_spec_ulong("id",
+                                                        "id",
+                                                        "id",
+                                                        0, G_MAXULONG, 0,
+                                                        G_PARAM_READABLE));
+
+    /**
      * XfwWindow:name:
      *
      * The window's name or title.
@@ -454,6 +468,10 @@ xfw_window_get_property(GObject *object,
             g_value_set_boxed(value, xfw_window_get_class_ids(window));
             break;
 
+        case PROP_ID:
+            g_value_set_ulong(value, xfw_window_get_id(window));
+            break;
+
         case PROP_NAME:
             g_value_set_string(value, xfw_window_get_name(window));
             break;
@@ -522,6 +540,24 @@ xfw_window_get_class_ids(XfwWindow *window) {
     g_return_val_if_fail(XFW_IS_WINDOW(window), NULL);
     klass = XFW_WINDOW_GET_CLASS(window);
     return (*klass->get_class_ids)(window);
+}
+
+/**
+ * xfw_window_get_id:
+ * @window: an #XfwWindow.
+ *
+ * Fetches @window's id
+ *
+ * Return value: for X11, the xid; for Wayland, a generated id
+
+ * Since: 4.20.1
+ **/
+gulong
+xfw_window_get_id(XfwWindow *window) {
+    XfwWindowClass *klass;
+    g_return_val_if_fail(XFW_IS_WINDOW(window), 0UL);
+    klass = XFW_WINDOW_GET_CLASS(window);
+    return (*klass->get_id)(window);
 }
 
 /**

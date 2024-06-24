@@ -58,6 +58,7 @@ static void xfw_window_x11_get_property(GObject *obj, guint prop_id, GValue *val
 static void xfw_window_x11_finalize(GObject *obj);
 
 static const gchar *const *xfw_window_x11_get_class_ids(XfwWindow *window);
+static gulong xfw_window_x11_get_id(XfwWindow *window);
 static const gchar *xfw_window_x11_get_name(XfwWindow *window);
 static GIcon * xfw_window_x11_get_gicon(XfwWindow *window);
 static XfwWindowType xfw_window_x11_get_window_type(XfwWindow *window);
@@ -117,6 +118,7 @@ xfw_window_x11_class_init(XfwWindowX11Class *klass) {
     gklass->finalize = xfw_window_x11_finalize;
 
     window_class->get_class_ids = xfw_window_x11_get_class_ids;
+    window_class->get_id = xfw_window_x11_get_id;
     window_class->get_name = xfw_window_x11_get_name;
     window_class->get_gicon = xfw_window_x11_get_gicon;
     window_class->get_window_type = xfw_window_x11_get_window_type;
@@ -265,6 +267,11 @@ xfw_window_x11_finalize(GObject *obj) {
 static const gchar *const *
 xfw_window_x11_get_class_ids(XfwWindow *window) {
     return XFW_WINDOW_X11(window)->priv->class_ids;
+}
+
+static gulong
+xfw_window_x11_get_id(XfwWindow *window) {
+    return (gulong) xfw_window_x11_get_xid(window);
 }
 
 static const gchar *
