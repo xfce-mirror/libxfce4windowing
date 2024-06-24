@@ -32,8 +32,6 @@ G_BEGIN_DECLS
 #define XFW_TYPE_WNCK_ICON (xfw_wnck_icon_get_type())
 G_DECLARE_FINAL_TYPE(XfwWnckIcon, xfw_wnck_icon, XFW, WNCK_ICON, GObject)
 
-typedef struct _XfwWnckIcon XfwWnckIcon;
-
 XfwWnckIcon *_xfw_wnck_icon_new(GObject *wnck_object);
 
 G_END_DECLS

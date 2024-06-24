@@ -31,7 +31,7 @@
 G_BEGIN_DECLS
 
 /* fwd decl */
-typedef struct _XfwWorkspaceGroup XfwWorkspaceGroup;
+struct _XfwWorkspaceGroup;
 
 #define XFW_TYPE_WORKSPACE (xfw_workspace_get_type())
 G_DECLARE_INTERFACE(XfwWorkspace, xfw_workspace, XFW, WORKSPACE, GObject)
@@ -88,7 +88,7 @@ const gchar *xfw_workspace_get_name(XfwWorkspace *workspace);
 XfwWorkspaceCapabilities xfw_workspace_get_capabilities(XfwWorkspace *workspace);
 XfwWorkspaceState xfw_workspace_get_state(XfwWorkspace *workspace);
 guint xfw_workspace_get_number(XfwWorkspace *workspace);
-XfwWorkspaceGroup *xfw_workspace_get_workspace_group(XfwWorkspace *workspace);
+struct _XfwWorkspaceGroup *xfw_workspace_get_workspace_group(XfwWorkspace *workspace);
 
 gint xfw_workspace_get_layout_row(XfwWorkspace *workspace);
 gint xfw_workspace_get_layout_column(XfwWorkspace *workspace);
@@ -98,7 +98,7 @@ GdkRectangle *xfw_workspace_get_geometry(XfwWorkspace *workspace);
 gboolean xfw_workspace_activate(XfwWorkspace *workspace, GError **error);
 gboolean xfw_workspace_remove(XfwWorkspace *workspace, GError **error);
 
-gboolean xfw_workspace_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
+gboolean xfw_workspace_assign_to_workspace_group(XfwWorkspace *workspace, struct _XfwWorkspaceGroup *group, GError **error);
 
 G_END_DECLS
 

@@ -25,6 +25,7 @@
 #endif
 
 #include "xfw-application.h"
+#include "xfw-window.h"
 
 #define XFW_APPLICATION_FALLBACK_ICON_NAME  "application-x-executable-symbolic"
 

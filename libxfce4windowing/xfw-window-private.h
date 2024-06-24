@@ -25,6 +25,7 @@
 #endif
 
 #include "xfw-window.h"
+#include "xfw-screen.h"
 
 #define XFW_WINDOW_FALLBACK_ICON_NAME  "window-maximize-symbolic"
 

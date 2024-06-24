@@ -28,6 +28,7 @@
 #include "xfw-util.h"
 #include "xfw-workspace-group-dummy.h"
 #include "xfw-workspace-group-private.h"
+#include "xfw-workspace-manager.h"
 #include "xfw-workspace.h"
 
 enum {
