@@ -33,6 +33,7 @@
 #include "xfw-util.h"
 #include "xfw-workspace-group-private.h"
 #include "xfw-workspace-group-wayland.h"
+#include "xfw-workspace-manager.h"
 #include "xfw-workspace-wayland.h"
 #include "xfw-workspace.h"
 

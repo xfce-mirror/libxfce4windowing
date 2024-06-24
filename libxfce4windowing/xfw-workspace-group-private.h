@@ -25,6 +25,7 @@
 #endif
 
 #include "xfw-workspace-group.h"
+#include "xfw-workspace-manager.h"
 
 G_BEGIN_DECLS
 
