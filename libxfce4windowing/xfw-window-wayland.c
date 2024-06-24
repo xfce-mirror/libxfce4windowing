@@ -50,7 +50,11 @@ struct _XfwWindowWaylandPrivate {
     GdkRectangle geometry;  // unfortunately unsupported
     GList *monitors;
     XfwApplication *app;
+    gulong id;
 };
+
+// Assign each newly created window an id.
+static gulong next_window_id;
 
 static void xfw_window_wayland_constructed(GObject *obj);
 static void xfw_window_wayland_set_property(GObject *obj, guint prop_id, const GValue *value, GParamSpec *pspec);
@@ -58,6 +62,7 @@ static void xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue 
 static void xfw_window_wayland_finalize(GObject *obj);
 
 static const gchar *const *xfw_window_wayland_get_class_ids(XfwWindow *window);
+static gulong xfw_window_wayland_get_id(XfwWindow *window);
 static const gchar *xfw_window_wayland_get_name(XfwWindow *window);
 static GIcon *xfw_window_wayland_get_gicon(XfwWindow *window);
 static XfwWindowType xfw_window_wayland_get_window_type(XfwWindow *window);
@@ -119,6 +124,7 @@ xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {
     gklass->finalize = xfw_window_wayland_finalize;
 
     window_class->get_class_ids = xfw_window_wayland_get_class_ids;
+    window_class->get_id = xfw_window_wayland_get_id;
     window_class->get_name = xfw_window_wayland_get_name;
     window_class->get_gicon = xfw_window_wayland_get_gicon;
     window_class->get_window_type = xfw_window_wayland_get_window_type;
@@ -159,6 +165,7 @@ static void
 xfw_window_wayland_init(XfwWindowWayland *window) {
     window->priv = xfw_window_wayland_get_instance_private(window);
     window->priv->class_ids = g_new0(const gchar *, 2);
+    window->priv->id = ++next_window_id;
 }
 
 static void
@@ -214,6 +221,11 @@ xfw_window_wayland_finalize(GObject *obj) {
 static const gchar *const *
 xfw_window_wayland_get_class_ids(XfwWindow *window) {
     return XFW_WINDOW_WAYLAND(window)->priv->class_ids;
+}
+
+static gulong
+xfw_window_wayland_get_id(XfwWindow *window) {
+    return XFW_WINDOW_WAYLAND(window)->priv->id;
 }
 
 static const gchar *
