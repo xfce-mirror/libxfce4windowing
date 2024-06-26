@@ -53,4 +53,4 @@ struct _XfwScreenInterface {
 
 G_END_DECLS
 
-#endif  /* !__XFW_SCREEN_PRIVATE_H__ */
+#endif /* !__XFW_SCREEN_PRIVATE_H__ */

@@ -32,10 +32,8 @@
  * needs.
  **/
 
-#include <glib.h>
-
 #include <X11/X.h>
-
+#include <glib.h>
 #include <libxfce4windowing/libxfce4windowing.h>
 
 G_BEGIN_DECLS

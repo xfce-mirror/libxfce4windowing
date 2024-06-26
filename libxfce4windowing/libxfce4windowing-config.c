@@ -88,8 +88,7 @@ const guint libxfce4windowing_micro_version = LIBXFCE4WINDOWING_MICRO_VERSION;
 const gchar *
 libxfce4windowing_check_version(guint required_major,
                                 guint required_minor,
-                                guint required_micro)
-{
+                                guint required_micro) {
     if (required_major > LIBXFCE4WINDOWING_MAJOR_VERSION) {
         return "Libxfce4windowing version too old (major mismatch)";
     } else if (required_major < LIBXFCE4WINDOWING_MAJOR_VERSION) {
@@ -102,4 +101,3 @@ libxfce4windowing_check_version(guint required_major,
         return NULL;
     }
 }
-

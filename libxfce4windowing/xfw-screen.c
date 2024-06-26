@@ -42,12 +42,12 @@
 #include "config.h"
 #endif
 
-#include <limits.h>
-
 #include "libxfce4windowing-private.h"
 #include "xfw-screen-private.h"
 #include "xfw-util.h"
 #include "xfw-window.h"
+
+#include <limits.h>
 
 #ifdef ENABLE_X11
 #include "xfw-screen-x11.h"
@@ -328,9 +328,10 @@ xfw_screen_get(GdkScreen *gdk_screen) {
                                   "screen", gdk_screen,
                                   NULL);
         } else
-#endif  /* ENABLE_X11 */
+#endif /* ENABLE_X11 */
 #ifdef ENABLE_WAYLAND
-        if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND) {
+            if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND)
+        {
             screen = g_object_new(XFW_TYPE_SCREEN_WAYLAND,
                                   "screen", gdk_screen,
                                   NULL);

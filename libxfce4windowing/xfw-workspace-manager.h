@@ -24,10 +24,10 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <glib-object.h>
-#include <gdk/gdk.h>
-
 #include "xfw-workspace-group.h"
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
@@ -41,4 +41,4 @@ GList *xfw_workspace_manager_list_workspaces(XfwWorkspaceManager *manager);
 
 G_END_DECLS
 
-#endif  /* !__XFW_WORKSPACE_MANAGER_H__ */
+#endif /* !__XFW_WORKSPACE_MANAGER_H__ */

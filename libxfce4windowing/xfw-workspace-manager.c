@@ -36,10 +36,10 @@
 #include "config.h"
 #endif
 
-#include <gdk/gdk.h>
-
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-manager-private.h"
+
+#include <gdk/gdk.h>
 
 G_DEFINE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, G_TYPE_OBJECT)
 
