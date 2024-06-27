@@ -4,6 +4,7 @@ if enable_wayland
   protocols = {
     'ext-workspace-v1-20230427': 'ext-workspace-v1-20230427.xml',
     'wlr-foreign-toplevel-management-unstable-v1': wlr_protocols_pkgdatadir / 'unstable' / 'wlr-foreign-toplevel-management-unstable-v1.xml',
+    'xdg-output-unstable-v1': wl_protocols_pkgdatadir / 'unstable' / 'xdg-output' / 'xdg-output-unstable-v1.xml',
   }
 
   foreach name, file : protocols
