@@ -43,11 +43,14 @@ struct _XfwScreenInterface {
 
     /* Virtual Table */
     XfwWorkspaceManager *(*get_workspace_manager)(XfwScreen *screen);
+
     GList *(*get_windows)(XfwScreen *screen);
     GList *(*get_windows_stacked)(XfwScreen *screen);
     XfwWindow *(*get_active_window)(XfwScreen *screen);
-    gboolean (*get_show_desktop)(XfwScreen *screen);
 
+    GList *(*get_monitors)(XfwScreen *screen);
+
+    gboolean (*get_show_desktop)(XfwScreen *screen);
     void (*set_show_desktop)(XfwScreen *screen, gboolean show);
 };
 
