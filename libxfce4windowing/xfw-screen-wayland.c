@@ -28,6 +28,7 @@
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 
 #include "libxfce4windowing-private.h"
+#include "xfw-monitor-wayland.h"
 #include "xfw-util.h"
 #include "xfw-screen-private.h"
 #include "xfw-screen-wayland.h"
@@ -45,6 +46,7 @@ struct _XfwScreenWaylandPrivate {
     GList *windows_stacked;
     GHashTable *wl_windows;
     XfwWindow *active_window;
+    GList *monitors;
     guint show_desktop : 1;
     struct {
         GList *minimized;
@@ -61,9 +63,10 @@ static XfwWorkspaceManager *xfw_screen_wayland_get_workspace_manager(XfwScreen *
 static GList *xfw_screen_wayland_get_windows(XfwScreen *screen);
 static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen);
 static XfwWindow *xfw_screen_wayland_get_active_window(XfwScreen *screen);
+static GList *xfw_screen_wayland_get_monitors(XfwScreen *screen);
 static gboolean xfw_screen_wayland_get_show_desktop(XfwScreen *screen);
-
 static void xfw_screen_wayland_set_show_desktop(XfwScreen *screen, gboolean show);
+
 static void show_desktop_disconnect(gpointer object, gpointer data);
 
 static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
@@ -128,6 +131,8 @@ xfw_screen_wayland_constructed(GObject *obj) {
     if (screen->priv->workspace_manager == NULL) {
         screen->priv->workspace_manager = _xfw_workspace_manager_dummy_new(screen->priv->gdk_screen);
     }
+
+    _xfw_monitor_wayland_init(screen);
 }
 
 static void
@@ -198,6 +203,8 @@ xfw_screen_wayland_finalize(GObject *obj) {
     }
     g_list_free(screen->priv->show_desktop_data.minimized);
 
+    g_list_free_full(screen->priv->monitors, g_object_unref);
+
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->finalize(obj);
 }
 
@@ -207,8 +214,8 @@ xfw_screen_wayland_screen_init(XfwScreenIface *iface) {
     iface->get_windows = xfw_screen_wayland_get_windows;
     iface->get_windows_stacked = xfw_screen_wayland_get_windows_stacked;
     iface->get_active_window = xfw_screen_wayland_get_active_window;
+    iface->get_monitors = xfw_screen_wayland_get_monitors;
     iface->get_show_desktop = xfw_screen_wayland_get_show_desktop;
-
     iface->set_show_desktop = xfw_screen_wayland_set_show_desktop;
 }
 
@@ -228,6 +235,11 @@ static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen) {
 
 static XfwWindow *xfw_screen_wayland_get_active_window(XfwScreen *screen) {
     return XFW_SCREEN_WAYLAND(screen)->priv->active_window;
+}
+
+static GList *
+xfw_screen_wayland_get_monitors(XfwScreen *screen) {
+    return XFW_SCREEN_WAYLAND(screen)->priv->monitors;
 }
 
 static gboolean
@@ -409,4 +421,18 @@ _xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *wi
         _xfw_g_message_once("Window<->Workspace association is not available on Wayland");
         return NULL;
     }
+}
+
+GList *
+_xfw_screen_wayland_steal_monitors(XfwScreenWayland *screen) {
+    GList *monitors = screen->priv->monitors;
+    screen->priv->monitors = NULL;
+    return monitors;
+}
+
+void
+_xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors) {
+    g_list_free_full(screen->priv->monitors, g_object_unref);
+    screen->priv->monitors = monitors;
+    g_signal_emit_by_name(screen, "monitors-changed");
 }
