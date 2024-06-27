@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Brian Tarricone <brian@tarricone.org>
+ * Copyright (c) 2024 Brian Tarricone <brian@tarricone.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,20 +17,19 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __LIBXFCE4WINDOWING_H__
-#define __LIBXFCE4WINDOWING_H__
+#ifndef __XFW_MONITOR_WAYLAND_H__
+#define __XFW_MONITOR_WAYLAND_H__
 
-#define __LIBXFCE4WINDOWING_H_INSIDE__
+#include "xfw-monitor-private.h"
+#include "xfw-screen-wayland.h"
 
-#include <libxfce4windowing/libxfce4windowing-config.h>
-#include <libxfce4windowing/xfw-monitor.h>
-#include <libxfce4windowing/xfw-screen.h>
-#include <libxfce4windowing/xfw-util.h>
-#include <libxfce4windowing/xfw-window.h>
-#include <libxfce4windowing/xfw-workspace-group.h>
-#include <libxfce4windowing/xfw-workspace-manager.h>
-#include <libxfce4windowing/xfw-workspace.h>
+G_BEGIN_DECLS
 
-#undef __LIBXFCE4WINDOWING_H_INSIDE__
+#define XFW_TYPE_MONITOR_WAYLAND (xfw_monitor_wayland_get_type())
+G_DECLARE_FINAL_TYPE(XfwMonitorWayland, xfw_monitor_wayland, XFW, MONITOR_WAYLAND, XfwMonitor)
 
-#endif  /* !__LIBXFCE4WINDOWING_H__ */
+void _xfw_monitor_wayland_init(XfwScreenWayland *screen);
+
+G_END_DECLS
+
+#endif /* __XFW_MONITOR_WAYLAND_H__ */

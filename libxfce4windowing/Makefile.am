@@ -8,6 +8,7 @@ libxfce4windowing_0_headers = \
 	libxfce4windowing.h \
 	libxfce4windowing-config.h \
 	xfw-application.h \
+	xfw-monitor.h \
 	xfw-screen.h \
 	xfw-util.h \
 	xfw-window.h \
@@ -30,6 +31,8 @@ libxfce4windowing_0_built_sources = \
 libxfce4windowing_0_x11_sources = \
 	xfw-application-x11.c \
 	xfw-application-x11.h \
+	xfw-monitor-x11.c \
+	xfw-monitor-x11.h \
 	xfw-screen-x11.c \
 	xfw-screen-x11.h \
 	xfw-window-x11.c \
@@ -44,6 +47,8 @@ libxfce4windowing_0_x11_sources = \
 libxfce4windowing_0_wayland_sources = \
 	xfw-application-wayland.c \
 	xfw-application-wayland.h \
+	xfw-monitor-wayland.c \
+	xfw-monitor-wayland.h \
 	xfw-screen-wayland.c \
 	xfw-screen-wayland.h \
 	xfw-window-wayland.c \
@@ -63,6 +68,8 @@ libxfce4windowing_0_la_SOURCES = \
 	libxfce4windowing-private.h \
 	xfw-application.c \
 	xfw-application-private.h \
+	xfw-monitor.c \
+	xfw-monitor-private.h \
 	xfw-screen.c \
 	xfw-screen-private.h \
 	xfw-util.c \
@@ -104,7 +111,10 @@ libxfce4windowing_0_la_CFLAGS = \
 	$(GTK_CFLAGS) \
 	$(LIBWNCK_CFLAGS) \
 	$(LIBX11_CFLAGS) \
-	$(WAYLAND_CLIENT_CFLAGS)
+	$(DISPLAY_INFO_CFLAGS) \
+	$(XRANDR_CFLAGS) \
+	$(WAYLAND_CLIENT_CFLAGS) \
+	$(LIBXFCE4UTIL_CFLAGS)
 
 libxfce4windowing_0_la_LDFLAGS = \
 	-version-info $(LIBXFCE4WINDOWING_VERINFO) \
@@ -118,7 +128,10 @@ libxfce4windowing_0_la_LIBADD = \
 	$(GTK_LIBS) \
 	$(LIBWNCK_LIBS) \
 	$(LIBX11_LIBS) \
-	$(WAYLAND_CLIENT_LIBS)
+	$(DISPLAY_INFO_LIBS) \
+	$(XRANDR_LIBS) \
+	$(WAYLAND_CLIENT_LIBS) \
+	$(LIBXFCE4UTIL_LIBS)
 
 if ENABLE_WAYLAND
 libxfce4windowing_0_la_LIBADD += \
