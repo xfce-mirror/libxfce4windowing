@@ -21,13 +21,16 @@ gnome = import('gnome')
 i18n = import('i18n')
 
 dependency_versions = {
+  'display-info': '>= 0.1.1',
   'glib': '>= 2.68.0',
   'gdk-pixbuf': '>= 2.40.0',
   'gtk': '>= 3.24.0',
   'libx11': '>= 1.6.7',
   'wayland': '>= 1.15',
+  'wayland-protocols': '>= 1.18',
   'wlr-protocols': '>= 0',
   'wnck': '>= 3.14',
+  'xrandr': '>= 1.5.0',
 }
 
 glib = dependency('glib-2.0', version: dependency_versions['glib'])
@@ -38,14 +41,17 @@ gdk_pixbuf = dependency('gdk-pixbuf-2.0', version: dependency_versions['gdk-pixb
 gtk = dependency('gtk+-3.0', version: dependency_versions['gtk'])
 
 # Feature: 'x11'
+display_info = dependency('libdisplay-info', version: dependency_versions['display-info'], required: get_option('x11'))
 libx11 = dependency('x11', version: dependency_versions['libx11'], required: get_option('x11'))
 gdk_x11 = dependency('gdk-x11-3.0', version: dependency_versions['gtk'], required: get_option('x11'))
 wnck = dependency('libwnck-3.0', version: dependency_versions['wnck'], required: get_option('x11'))
+xrandr = dependency('xrandr', version: dependency_versions['xrandr'], required: get_option('x11'))
 
 # Feature: 'wayland'
 gdk_wayland = dependency('gdk-wayland-3.0', version: dependency_versions['gtk'], required: get_option('wayland'))
 wayland_client = dependency('wayland-client', version: dependency_versions['wayland'], required: get_option('wayland'))
 wayland_scanner = dependency('wayland-scanner', version: dependency_versions['wayland'], required: get_option('wayland'))
+wayland_protocols = dependency('wayland-protocols', version: dependency_versions['wayland-protocols'], required: get_option('wayland'))
 wlr_protocols = dependency('wlr-protocols', version: dependency_versions['wlr-protocols'], required: false)
 
 feature_cflags = []
@@ -58,9 +64,11 @@ x11_deps = []
 if enable_x11
   feature_cflags += '-DENABLE_X11=1'
   x11_deps += [
+    display_info,
     libx11,
     gdk_x11,
     wnck,
+    xrandr,
   ]
 endif
 
@@ -74,6 +82,8 @@ if enable_wayland
 
   wayland_scanner_path = wayland_scanner.get_variable(pkgconfig: 'wayland_scanner')
   wayland_scanner_bin = find_program(wayland_scanner_path, required: true)
+
+  wl_protocols_pkgdatadir = wayland_protocols.get_variable(pkgconfig: 'pkgdatadir')
 
   if wlr_protocols.found()
     wlr_protocols_pkgdatadir = wlr_protocols.get_variable(pkgconfig: 'pkgdatadir')
