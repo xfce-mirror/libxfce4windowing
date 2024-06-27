@@ -39,11 +39,14 @@ typedef struct _XfwScreenInterface XfwScreenIface;
 XfwScreen *xfw_screen_get_default(void);
 
 XfwWorkspaceManager *xfw_screen_get_workspace_manager(XfwScreen *screen);
+
 GList *xfw_screen_get_windows(XfwScreen *screen);
 GList *xfw_screen_get_windows_stacked(XfwScreen *screen);
 XfwWindow *xfw_screen_get_active_window(XfwScreen *screen);
-gboolean xfw_screen_get_show_desktop(XfwScreen *screen);
 
+GList *xfw_screen_get_monitors(XfwScreen *screen);
+
+gboolean xfw_screen_get_show_desktop(XfwScreen *screen);
 void xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show);
 
 G_END_DECLS
