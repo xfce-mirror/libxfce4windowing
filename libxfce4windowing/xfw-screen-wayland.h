@@ -48,6 +48,9 @@ struct wl_seat *_xfw_screen_wayland_get_wl_seat(XfwScreenWayland *screen);
 void _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *window);
 XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window);
 
+GList *_xfw_screen_wayland_steal_monitors(XfwScreenWayland *screen);
+void _xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors);
+
 G_END_DECLS
 
 #endif /* __XFW_SCREEN_WAYLAND_H__ */
