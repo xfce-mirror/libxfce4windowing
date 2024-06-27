@@ -45,4 +45,4 @@ XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(GdkScreen *screen);
 
 G_END_DECLS
 
-#endif  /* __XFW_WORKSPACE_MANAGER_WAYLAND_H__ */
+#endif /* __XFW_WORKSPACE_MANAGER_WAYLAND_H__ */

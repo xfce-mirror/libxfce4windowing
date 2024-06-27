@@ -21,17 +21,16 @@
 #include "config.h"
 #endif
 
-#include <X11/Xlib.h>
 #include <X11/Xatom.h>
-
-#include <glib/gi18n-lib.h>
+#include <X11/Xlib.h>
 #include <cairo-xlib.h>
+#include <glib/gi18n-lib.h>
 
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 #include "xfw-wnck-icon.h"
 
-#define IMGDATA_TYPE  "bmp"
+#define IMGDATA_TYPE "bmp"
 
 typedef struct
 {
@@ -43,8 +42,7 @@ typedef struct
 
 static gint
 window_icon_compare(gconstpointer a,
-                    gconstpointer b)
-{
+                    gconstpointer b) {
     const WindowIcon *wa = a;
     const WindowIcon *wb = b;
 
@@ -60,21 +58,18 @@ window_icon_compare(gconstpointer a,
 }
 
 static void
-window_icon_free(WindowIcon *window_icon)
-{
+window_icon_free(WindowIcon *window_icon) {
     g_free(window_icon->bmp);
     g_slice_free(WindowIcon, window_icon);
 }
 
 
-enum
-{
+enum {
     PROP0,
     PROP_WNCK_OBJECT,
 };
 
-struct _XfwWnckIcon
-{
+struct _XfwWnckIcon {
     GObject parent;
 
     GObject *wnck_object;
@@ -82,8 +77,7 @@ struct _XfwWnckIcon
     GList *window_icons;
 };
 
-struct _XfwWnckIconClass
-{
+struct _XfwWnckIconClass {
     GObjectClass parent_class;
 };
 
@@ -157,8 +151,7 @@ static void
 xfw_wnck_icon_set_property(GObject *object,
                            guint prop_id,
                            const GValue *value,
-                           GParamSpec *pspec)
-{
+                           GParamSpec *pspec) {
     XfwWnckIcon *icon = XFW_WNCK_ICON(object);
 
     switch (prop_id) {
@@ -176,8 +169,7 @@ static void
 xfw_wnck_icon_get_property(GObject *object,
                            guint prop_id,
                            GValue *value,
-                           GParamSpec *pspec)
-{
+                           GParamSpec *pspec) {
     XfwWnckIcon *icon = XFW_WNCK_ICON(object);
 
     switch (prop_id) {
@@ -233,8 +225,7 @@ xfw_wnck_icon_init(XfwWnckIcon *icon) {}
 static gboolean
 xfw_wnck_icon_initable_real_init(GInitable *initable,
                                  GCancellable *cancellable,
-                                 GError **error)
-{
+                                 GError **error) {
     XfwWnckIcon *icon = XFW_WNCK_ICON(initable);
     GObject *wnck_object = icon->wnck_object;
     GList *window_icons = NULL;
@@ -262,8 +253,7 @@ xfw_wnck_icon_initable_real_init(GInitable *initable,
 
 static gboolean
 xfw_wnck_icon_equal(GIcon *icon1,
-                    GIcon *icon2)
-{
+                    GIcon *icon2) {
     GObject *wnck_object1, *wnck_object2;
 
     if (!XFW_IS_WNCK_ICON(icon1) || !XFW_IS_WNCK_ICON(icon2)) {
@@ -302,8 +292,7 @@ static guchar *
 xfw_wnck_icon_argb_to_bmp(const gulong *image_data,
                           gint width,
                           gint height,
-                          gsize *bmp_len)
-{
+                          gsize *bmp_len) {
     guint image_data_len;
     guchar *data;
     const guint32 header_bytes = 108;
@@ -319,16 +308,20 @@ xfw_wnck_icon_argb_to_bmp(const gulong *image_data,
     image_data_len = width * 4 * height;
     data_size = pixel_data_start + image_data_len;
 
-#define PACK_U16(off, val) G_STMT_START{ \
-    data[(off)] = (val) & 0xff; \
-    data[(off)+1] = ((val) >> 8) & 0xff; \
-}G_STMT_END
-#define PACK_U32(off, val) G_STMT_START{ \
-    data[(off)] = (val) & 0xff; \
-    data[(off)+1] = ((val) >> 8) & 0xff; \
-    data[(off)+2] = ((val) >> 16) & 0xff; \
-    data[(off)+3] = ((val) >> 24) & 0xff; \
-}G_STMT_END
+#define PACK_U16(off, val) \
+    G_STMT_START { \
+        data[(off)] = (val) & 0xff; \
+        data[(off) + 1] = ((val) >> 8) & 0xff; \
+    } \
+    G_STMT_END
+#define PACK_U32(off, val) \
+    G_STMT_START { \
+        data[(off)] = (val) & 0xff; \
+        data[(off) + 1] = ((val) >> 8) & 0xff; \
+        data[(off) + 2] = ((val) >> 16) & 0xff; \
+        data[(off) + 3] = ((val) >> 24) & 0xff; \
+    } \
+    G_STMT_END
 
     data = g_malloc(data_size);
     memset(data, 0, pixel_data_start);
@@ -368,8 +361,7 @@ xfw_wnck_icon_argb_to_bmp(const gulong *image_data,
 }
 
 static GList *
-xfw_wnck_object_get_net_wm_icon(GObject *wnck_object)
-{
+xfw_wnck_object_get_net_wm_icon(GObject *wnck_object) {
     GdkDisplay *display;
     Display *dpy;
     Window xid;
@@ -440,8 +432,7 @@ xfw_wnck_object_get_net_wm_icon(GObject *wnck_object)
 static cairo_surface_t *
 xfw_cairo_surface_from_drawable(Drawable drawable,
                                 guint *width_out,
-                                guint *height_out)
-{
+                                guint *height_out) {
     cairo_surface_t *surface = NULL;
     GdkDisplay *display;
     Display *dpy;
@@ -480,8 +471,7 @@ xfw_cairo_surface_from_drawable(Drawable drawable,
 
 static cairo_surface_t *
 xfw_cairo_surface_from_pixmap_and_mask(Pixmap pixmap,
-                                       Pixmap mask)
-{
+                                       Pixmap mask) {
     cairo_surface_t *surface = NULL;
     cairo_surface_t *pix_surface, *mask_surface = NULL;
     GdkDisplay *display;
@@ -540,8 +530,7 @@ xfw_cairo_surface_from_pixmap_and_mask(Pixmap pixmap,
 }
 
 static WindowIcon *
-xfw_wnck_object_get_wmhints_icon(GObject *wnck_object)
-{
+xfw_wnck_object_get_wmhints_icon(GObject *wnck_object) {
     WindowIcon *window_icon = NULL;
     GdkDisplay *display;
     Display *dpy;
@@ -599,8 +588,7 @@ xfw_wnck_icon_load(GLoadableIcon *icon,
                    int size,
                    char **type,
                    GCancellable *cancellable,
-                   GError **error)
-{
+                   GError **error) {
     XfwWnckIcon *wnck_icon = XFW_WNCK_ICON(icon);
     WindowIcon *window_icon = NULL;
 
@@ -638,8 +626,7 @@ xfw_wnck_icon_load_async(GLoadableIcon *icon,
                          int size,
                          GCancellable *cancellable,
                          GAsyncReadyCallback callback,
-                         gpointer user_data)
-{
+                         gpointer user_data) {
     GInputStream *stream;
     GTask *task = g_task_new(icon, cancellable, callback, user_data);
     gchar *type = NULL;
@@ -658,8 +645,7 @@ static GInputStream *
 xfw_wnck_icon_load_finish(GLoadableIcon *icon,
                           GAsyncResult *res,
                           char **type,
-                          GError **error)
-{
+                          GError **error) {
     GTask *task;
 
     g_return_val_if_fail(G_IS_TASK(res), NULL);
@@ -674,13 +660,12 @@ xfw_wnck_icon_load_finish(GLoadableIcon *icon,
 }
 
 XfwWnckIcon *
-_xfw_wnck_icon_new(GObject *wnck_object)
-{
+_xfw_wnck_icon_new(GObject *wnck_object) {
     g_return_val_if_fail(WNCK_IS_WINDOW(wnck_object) || WNCK_IS_CLASS_GROUP(wnck_object), NULL);
 
     return g_initable_new(XFW_TYPE_WNCK_ICON,
                           NULL,
                           NULL,
-                         "wnck-object", wnck_object,
-                         NULL);
+                          "wnck-object", wnck_object,
+                          NULL);
 }

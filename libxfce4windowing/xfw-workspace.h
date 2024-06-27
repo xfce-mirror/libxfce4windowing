@@ -37,7 +37,7 @@ struct _XfwWorkspaceGroup;
 G_DECLARE_INTERFACE(XfwWorkspace, xfw_workspace, XFW, WORKSPACE, GObject)
 
 #define XFW_TYPE_WORKSPACE_CAPABILITIES (xfw_workspace_capabilities_get_type())
-#define XFW_TYPE_WORKSPACE_STATE        (xfw_workspace_state_get_type())
+#define XFW_TYPE_WORKSPACE_STATE (xfw_workspace_state_get_type())
 
 typedef struct _XfwWorkspaceInterface XfwWorkspaceIface;
 
@@ -102,4 +102,4 @@ gboolean xfw_workspace_assign_to_workspace_group(XfwWorkspace *workspace, struct
 
 G_END_DECLS
 
-#endif  /* !__XFW_WORKSPACE_H__ */
+#endif /* !__XFW_WORKSPACE_H__ */

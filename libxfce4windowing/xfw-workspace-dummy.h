@@ -45,4 +45,4 @@ void _xfw_workspace_dummy_set_workspace_group(XfwWorkspaceDummy *workspace, XfwW
 
 G_END_DECLS
 
-#endif  /* __XFW_WORKSPACE_DUMMY_H__ */
+#endif /* __XFW_WORKSPACE_DUMMY_H__ */
