@@ -25,6 +25,7 @@
 #include <libwnck/libwnck.h>
 
 #include "libxfce4windowing-private.h"
+#include "xfw-monitor-x11.h"
 #include "xfw-screen-private.h"
 #include "xfw-screen-x11.h"
 #include "xfw-util.h"
@@ -39,6 +40,7 @@ struct _XfwScreenX11Private {
     GList *windows_stacked;
     GHashTable *wnck_windows;
     XfwWindow *active_window;
+    GList *monitors;
     guint show_desktop : 1;
 };
 
@@ -50,6 +52,7 @@ static void xfw_screen_x11_finalize(GObject *obj);
 static XfwWorkspaceManager *xfw_screen_x11_get_workspace_manager(XfwScreen *screen);
 static GList *xfw_screen_x11_get_windows(XfwScreen *screen);
 static GList *xfw_screen_x11_get_windows_stacked(XfwScreen *screen);
+static GList *xfw_screen_x11_get_monitors(XfwScreen *screen);
 static XfwWindow *xfw_screen_x11_get_active_window(XfwScreen *screen);
 static gboolean xfw_screen_x11_get_show_desktop(XfwScreen *screen);
 
@@ -113,6 +116,8 @@ xfw_screen_x11_constructed(GObject *obj) {
     g_signal_connect(screen->priv->wnck_screen, "window-stacking-changed", G_CALLBACK(window_stacking_changed), screen);
     g_signal_connect(screen->priv->wnck_screen, "window-manager-changed", G_CALLBACK(window_manager_changed), screen);
     g_signal_connect(screen->priv->wnck_screen, "showing-desktop-changed", G_CALLBACK(showing_desktop_changed), screen);
+
+    _xfw_monitor_x11_init(screen);
 }
 
 static void
@@ -177,6 +182,8 @@ xfw_screen_x11_finalize(GObject *obj) {
     g_list_free(screen->priv->windows_stacked);
     g_hash_table_destroy(screen->priv->wnck_windows);
 
+    g_list_free_full(screen->priv->monitors, g_object_unref);
+
     // to be released last
     g_object_unref(screen->priv->wnck_screen);
 
@@ -189,8 +196,8 @@ xfw_screen_x11_screen_init(XfwScreenIface *iface) {
     iface->get_windows = xfw_screen_x11_get_windows;
     iface->get_windows_stacked = xfw_screen_x11_get_windows_stacked;
     iface->get_active_window = xfw_screen_x11_get_active_window;
+    iface->get_monitors = xfw_screen_x11_get_monitors;
     iface->get_show_desktop = xfw_screen_x11_get_show_desktop;
-
     iface->set_show_desktop = xfw_screen_x11_set_show_desktop;
 }
 
@@ -212,6 +219,11 @@ xfw_screen_x11_get_windows_stacked(XfwScreen *screen) {
 static XfwWindow *
 xfw_screen_x11_get_active_window(XfwScreen *screen) {
     return XFW_SCREEN_X11(screen)->priv->active_window;
+}
+
+static GList *
+xfw_screen_x11_get_monitors(XfwScreen *screen) {
+    return XFW_SCREEN_X11(screen)->priv->monitors;
 }
 
 static gboolean
@@ -314,4 +326,18 @@ showing_desktop_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen) {
 XfwWorkspace *
 _xfw_screen_x11_workspace_for_wnck_workspace(XfwScreenX11 *screen, WnckWorkspace *wnck_workspace) {
     return _xfw_workspace_manager_x11_workspace_for_wnck_workspace(XFW_WORKSPACE_MANAGER_X11(screen->priv->workspace_manager), wnck_workspace);
+}
+
+GList *
+_xfw_screen_x11_steal_monitors(XfwScreenX11 *screen) {
+    GList *monitors = screen->priv->monitors;
+    screen->priv->monitors = NULL;
+    return monitors;
+}
+
+void
+_xfw_screen_x11_set_monitors(XfwScreenX11 *screen, GList *monitors) {
+    g_list_free_full(screen->priv->monitors, g_object_unref);
+    screen->priv->monitors = monitors;
+    g_signal_emit_by_name(screen, "monitors-changed");
 }
