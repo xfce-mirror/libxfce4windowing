@@ -19,6 +19,9 @@ m4_define([gtk_minimum_version], [3.24.0])
 m4_define([gdk_pixbuf_minimum_version], [2.40.0])
 m4_define([wnck_minimum_version], [3.14])
 m4_define([wayland_minimum_version], [1.15])
+m4_define([wayland_protocols_minimum_version], [1.18])
+m4_define([display_info_minimum_version], [0.1.1])
+m4_define([xrandr_minimum_version], [1.5.0])
 
 dnl init autoconf
 AC_COPYRIGHT([Copyright (c) 2022-2024 The Xfce development team. All rights reserved.])
@@ -109,6 +112,8 @@ XDT_CHECK_OPTIONAL_FEATURE([X11],
                                XDT_FEATURE_DEPENDENCY([LIBX11], [x11], [libx11_minimum_version])
                                XDT_FEATURE_DEPENDENCY([GDK_X11], [gdk-x11-3.0], [gtk_minimum_version])
                                XDT_FEATURE_DEPENDENCY([LIBWNCK], [libwnck-3.0], [wnck_minimum_version])
+                               XDT_FEATURE_DEPENDENCY([DISPLAY_INFO], [libdisplay-info], [display_info_minimum_version])
+                               XDT_FEATURE_DEPENDENCY([XRANDR], [xrandr], [xrandr_minimum_version])
                            ],
                            [the X11 windowing system])
 XDT_CHECK_OPTIONAL_FEATURE([WAYLAND],
@@ -117,6 +122,7 @@ XDT_CHECK_OPTIONAL_FEATURE([WAYLAND],
                                XDT_FEATURE_DEPENDENCY([GDK_WAYLAND], [gdk-wayland-3.0], [gtk_minimum_version])
                                XDT_FEATURE_DEPENDENCY([WAYLAND_SCANNER], [wayland-scanner], [wayland_minimum_version])
                                XDT_FEATURE_DEPENDENCY([WAYLAND_CLIENT], [wayland-client], [wayland_minimum_version])
+                               XDT_FEATURE_DEPENDENCY([WAYLAND_PROTOCOLS], [wayland-protocols], [wayland_protocols_minimum_version])
                            ],
                            [the Wayland windowing system])
 
@@ -135,6 +141,9 @@ AS_IF([test x"$ENABLE_X11" = x"yes"],
 AS_IF([test x"$ENABLE_WAYLAND" = x"yes"],
       [
           XDT_CHECK_PACKAGE_BINARY([WAYLAND_SCANNER], [wayland-scanner], [wayland_scanner], [wayland-scanner])
+
+          WL_PROTOCOLS_PKGDATADIR=`$PKG_CONFIG --variable=pkgdatadir wayland-protocols`
+          AC_SUBST([WL_PROTOCOLS_PKGDATADIR])
 
           WLR_PROTOCOLS_PKGDATADIR=`$PKG_CONFIG --variable=pkgdatadir wlr-protocols 2>/dev/null || true`
           if test x"$WLR_PROTOCOLS_PKGDATADIR" = x""; then
