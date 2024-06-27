@@ -21,19 +21,19 @@
 #include "config.h"
 #endif
 
-#include <gdk/gdkwayland.h>
-#include <string.h>
-#include <wayland-client.h>
-
-#include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
-
 #include "libxfce4windowing-private.h"
-#include "xfw-util.h"
 #include "xfw-screen-private.h"
 #include "xfw-screen-wayland.h"
+#include "xfw-util.h"
 #include "xfw-window-wayland.h"
 #include "xfw-workspace-manager-dummy.h"
 #include "xfw-workspace-manager-wayland.h"
+
+#include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
+
+#include <gdk/gdkwayland.h>
+#include <string.h>
+#include <wayland-client.h>
 
 struct _XfwScreenWaylandPrivate {
     GdkScreen *gdk_screen;
@@ -217,16 +217,19 @@ xfw_screen_wayland_get_workspace_manager(XfwScreen *screen) {
     return XFW_SCREEN_WAYLAND(screen)->priv->workspace_manager;
 }
 
-static GList *xfw_screen_wayland_get_windows(XfwScreen *screen) {
+static GList *
+xfw_screen_wayland_get_windows(XfwScreen *screen) {
     return XFW_SCREEN_WAYLAND(screen)->priv->windows;
 }
 
-static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen) {
+static GList *
+xfw_screen_wayland_get_windows_stacked(XfwScreen *screen) {
     _xfw_g_message_once("Wayland does not support discovering window stacking; windows returned are unordered");
     return XFW_SCREEN_WAYLAND(screen)->priv->windows_stacked;
 }
 
-static XfwWindow *xfw_screen_wayland_get_active_window(XfwScreen *screen) {
+static XfwWindow *
+xfw_screen_wayland_get_active_window(XfwScreen *screen) {
     return XFW_SCREEN_WAYLAND(screen)->priv->active_window;
 }
 
@@ -236,12 +239,12 @@ xfw_screen_wayland_get_show_desktop(XfwScreen *screen) {
 }
 
 static void
-show_desktop_state_changed(XfwWindow *window, XfwWindowState changed, XfwWindowState new, XfwScreenWayland *screen) {
-    if (!(changed & XFW_WINDOW_STATE_MINIMIZED)) {
+show_desktop_state_changed(XfwWindow *window, XfwWindowState changed_mask, XfwWindowState new_state, XfwScreenWayland *screen) {
+    if (!(changed_mask & XFW_WINDOW_STATE_MINIMIZED)) {
         return;
     }
 
-    if (new & XFW_WINDOW_STATE_MINIMIZED) {
+    if (new_state & XFW_WINDOW_STATE_MINIMIZED) {
         screen->priv->show_desktop_data.minimized = g_list_prepend(screen->priv->show_desktop_data.minimized, window);
     } else {
         show_desktop_disconnect(window, screen);
