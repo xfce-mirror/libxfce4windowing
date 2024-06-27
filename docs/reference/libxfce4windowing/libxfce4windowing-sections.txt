@@ -40,6 +40,7 @@ xfw_screen_get_workspace_manager
 xfw_screen_get_windows
 xfw_screen_get_windows_stacked
 xfw_screen_get_active_window
+xfw_screen_get_monitors
 xfw_screen_get_show_desktop
 xfw_screen_set_show_desktop
 <SUBSECTION Standard>
@@ -184,6 +185,34 @@ xfw_application_instance_get_windows
 <SUBSECTION Standard>
 XfwApplicationClass
 XFW_TYPE_APPLICATION
+</SECTION>
+
+<SECTION>
+<FILE>xfw-monitor</FILE>
+XfwMonitor
+XfwMonitorSubpixel
+XfwMonitorTransform
+xfw_monitor_get_identifier
+xfw_monitor_get_description
+xfw_monitor_get_connector
+xfw_monitor_get_make
+xfw_monitor_get_model
+xfw_monitor_get_serial
+xfw_monitor_get_refresh
+xfw_monitor_get_scale
+xfw_monitor_get_physical_geometry
+xfw_monitor_get_logical_geometry
+xfw_monitor_get_physical_size
+xfw_monitor_get_subpixel
+xfw_monitor_get_transform
+<SUBSECTION Standard>
+XfwMonitorClass
+XFW_TYPE_MONITOR
+XFW_TYPE_MONITOR_SUBPIXEL
+XFW_TYPE_MONITOR_TRANSFORM
+xfw_monitor_get_type
+xfw_monitor_subpixel_get_type
+xfw_monitor_transform_get_type
 </SECTION>
 
 <SECTION>

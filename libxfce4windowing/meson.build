@@ -4,6 +4,7 @@ libxfce4windowing_pkgname = 'lib@0@'.format(libxfce4windowing_apiname)
 windowing_headers = [
   'libxfce4windowing.h',
   'xfw-application.h',
+  'xfw-monitor.h',
   'xfw-screen.h',
   'xfw-util.h',
   'xfw-window.h',
@@ -20,6 +21,7 @@ windowing_sources = [
   'libxfce4windowing-config.c',
   'libxfce4windowing-private.c',
   'xfw-application.c',
+  'xfw-monitor.c',
   'xfw-screen.c',
   'xfw-util.c',
   'xfw-window.c',
@@ -49,6 +51,7 @@ if enable_x11
   windowing_config_data.set('LIBXFCE4WINDOWING_HAS_X11', '#define LIBXFCE4WINDOWING_HAS_X11')
   windowing_sources += [
     'xfw-application-x11.c',
+    'xfw-monitor-x11.c',
     'xfw-screen-x11.c',
     'xfw-window-x11.c',
     'xfw-wnck-icon.c',
@@ -64,6 +67,7 @@ if enable_wayland
   windowing_sources += wayland_protocols_generated_sources
   windowing_sources += [
     'xfw-application-wayland.c',
+    'xfw-monitor-wayland.c',
     'xfw-screen-wayland.c',
     'xfw-window-wayland.c',
     'xfw-workspace-group-wayland.c',
@@ -85,6 +89,7 @@ windowing_sources += configure_file(
 windowing_deps = [
   gio_unix,
   gtk,
+  libxfce4util,
   x11_deps,
   wayland_deps,
 ]
