@@ -150,6 +150,22 @@ xfw_screen_default_init(XfwScreenIface *iface) {
                  G_TYPE_NONE, 0);
 
     /**
+     * XfwScreen::monitors-changed:
+     * @screen: the object which received the signal.
+     *
+     * Emitted when the monitor count or layout has changed.
+     *
+     * Since: 4.19.4
+     **/
+    g_signal_new("monitors-changed",
+                 XFW_TYPE_SCREEN,
+                 G_SIGNAL_RUN_LAST,
+                 0,
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__VOID,
+                 G_TYPE_NONE, 0);
+
+    /**
      * XfwScreen:screen:
      *
      * The #GdkScreen instance used to construct this #XfwScreen.
@@ -271,6 +287,25 @@ xfw_screen_get_active_window(XfwScreen *screen) {
     g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
     iface = XFW_SCREEN_GET_IFACE(screen);
     return (*iface->get_active_window)(screen);
+}
+
+/**
+ * xfw_screen_get_monitors:
+ * @screen: an #XfwScreen.
+ *
+ * Retrieves the list of monitors currently attached and enabled on @screen.
+ *
+ * Return value: (nullable) (element-type XfwMonitor) (transfer none): the list
+ * of #XfwMonitor on @screen, or %NULL if there are no connected/enabled
+ * monitors.  The list and its contents are owned by @screen.
+ *
+ * Since: 4.19.4
+ **/
+GList *
+xfw_screen_get_monitors(XfwScreen *screen) {
+    g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
+    XfwScreenIface *iface = XFW_SCREEN_GET_IFACE(screen);
+    return (*iface->get_monitors)(screen);
 }
 
 /**
