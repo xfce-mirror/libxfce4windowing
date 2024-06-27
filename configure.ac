@@ -25,6 +25,7 @@ AC_COPYRIGHT([Copyright (c) 2022-2024 The Xfce development team. All rights rese
 AC_INIT([libxfce4windowing], [xdt_version], [https://gitlab.xfce.org/xfce/libxfce4windowing])
 AC_PREREQ([2.69])
 AC_CONFIG_MACRO_DIRS([m4])
+AC_REVISION([xdt_version_build])
 
 dnl init automake
 AM_INIT_AUTOMAKE([1.11 dist-bzip2 tar-ustar no-dist-gzip foreign])
@@ -160,7 +161,7 @@ GTK_DOC_CHECK([1.30])
 GOBJECT_INTROSPECTION_CHECK([1.66.0])
 
 dnl check for debugging support
-XDT_FEATURE_DEBUG()
+XDT_FEATURE_DEBUG([xdt_debug_default])
 XDT_FEATURE_LINKER_OPTS()
 
 dnl ****************************************
