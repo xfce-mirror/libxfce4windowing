@@ -51,4 +51,4 @@ struct _XfwWorkspaceManagerInterface {
 
 G_END_DECLS
 
-#endif  /* !__XFW_WORKSPACE_MANAGER_PRIVATE_H__ */
+#endif /* !__XFW_WORKSPACE_MANAGER_PRIVATE_H__ */
