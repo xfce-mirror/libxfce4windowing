@@ -42,6 +42,7 @@
     <xi:include href="xml/xfw-workspace.xml"/>
     <xi:include href="xml/xfw-window.xml"/>
     <xi:include href="xml/xfw-application.xml"/>
+    <xi:include href="xml/xfw-monitor.xml"/>
   </part>
 
   <part id="libxfce4windowing-backend">
@@ -60,6 +61,10 @@
   <index id="api-index-4-19-3">
     <title>Index of new symbols in 4.19.3</title>
     <xi:include href="xml/api-index-4.19.3.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-4-19-4">
+    <title>Index of new symbols in 4.19.4</title>
+    <xi:include href="xml/api-index-4.19.4.xml"><xi:fallback /></xi:include>
   </index>
   <!--
   <index id="api-index-deprecated">
