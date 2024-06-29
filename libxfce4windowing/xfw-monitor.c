@@ -57,8 +57,30 @@ typedef struct _XfwMonitorPrivate {
     guint height_mm;
     XfwMonitorSubpixel subpixel;
     XfwMonitorTransform transform;
+
+    MonitorPendingChanges pending_changes;
 } XfwMonitorPrivate;
 
+enum {
+    PROP0,
+    PROP_IDENTIFIER,
+    PROP_DESCRIPTION,
+    PROP_CONNECTOR,
+    PROP_MAKE,
+    PROP_MODEL,
+    PROP_SERIAL,
+    PROP_REFRESH,
+    PROP_SCALE,
+    PROP_PHYSICAL_GEOMETRY,
+    PROP_LOGICAL_GEOMETRY,
+    PROP_PHYSICAL_WIDTH,
+    PROP_PHYSICAL_HEIGHT,
+    PROP_SUBPIXEL,
+    PROP_TRANSFORM,
+};
+
+static void xfw_monitor_set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
+static void xfw_monitor_get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void xfw_monitor_finalize(GObject *object);
 
 
@@ -90,13 +112,301 @@ G_DEFINE_ENUM_TYPE(
 static void
 xfw_monitor_class_init(XfwMonitorClass *klass) {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+    gobject_class->set_property = xfw_monitor_set_property;
+    gobject_class->get_property = xfw_monitor_get_property;
     gobject_class->finalize = xfw_monitor_finalize;
+
+    /**
+     * XfwMonitor:identifier:
+     *
+     * Opaque, hopefully-unique monitor identifier.
+     *
+     * Since: 4.19.4
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_IDENTIFIER,
+                                    g_param_spec_string("identifier",
+                                                        "identifier",
+                                                        "Opaque, hopefully-unique monitor identifier",
+                                                        NULL,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+    /**
+     * XfwMonitor:description:
+     *
+     * Human-readable description.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_DESCRIPTION,
+                                    g_param_spec_string("description",
+                                                        "description",
+                                                        "Human-readable description",
+                                                        NULL,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:connector:
+     *
+     * Physical/virtual connector name.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_CONNECTOR,
+                                    g_param_spec_string("connector",
+                                                        "connector",
+                                                        "Physical/virtual connector name",
+                                                        NULL,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:make:
+     *
+     * Manufacturer name.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_MAKE,
+                                    g_param_spec_string("make",
+                                                        "make",
+                                                        "Manufacturer name",
+                                                        NULL,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:model:
+     *
+     * Product model name.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_MODEL,
+                                    g_param_spec_string("model",
+                                                        "model",
+                                                        "Product model name",
+                                                        NULL,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:serial:
+     *
+     * Product serial number.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_SERIAL,
+                                    g_param_spec_string("serial",
+                                                        "serial",
+                                                        "Product serial number",
+                                                        NULL,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:refresh:
+     *
+     * Current refresh rate, in millihertz.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_REFRESH,
+                                    g_param_spec_uint("refresh",
+                                                      "refresh",
+                                                      "Current refresh rate, in millihertz",
+                                                      0, G_MAXUINT, 60000,
+                                                      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:scale:
+     *
+     * UI scaling factor.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_SCALE,
+                                    g_param_spec_uint("scale",
+                                                      "scale",
+                                                      "UI scaling factor",
+                                                      1, G_MAXUINT, 1,
+                                                      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:physical-geometry:
+     *
+     * Coordinates and size of the monitor in physical device pixels.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_PHYSICAL_GEOMETRY,
+                                    g_param_spec_boxed("physical-geometry",
+                                                       "physical-geometry",
+                                                       "Coordinates and size of the monitor in physical device pixels",
+                                                       GDK_TYPE_RECTANGLE,
+                                                       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:logical-geometry:
+     *
+     * Coordinates and size of the monitor in scaled logical pixels.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_LOGICAL_GEOMETRY,
+                                    g_param_spec_boxed("logical-geometry",
+                                                       "logical-geometry",
+                                                       "Coordinates and size of the monitor in scaled logical pixels",
+                                                       GDK_TYPE_RECTANGLE,
+                                                       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:width-mm:
+     *
+     * Physical width of the monitor in millimeters.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_PHYSICAL_WIDTH,
+                                    g_param_spec_uint("width-mm",
+                                                      "width-mm",
+                                                      "Physical width of the monitor in millimeters",
+                                                      0, G_MAXUINT, 0,
+                                                      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:height-mm:
+     *
+     * Physical height of the monitor in millimeters.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_PHYSICAL_HEIGHT,
+                                    g_param_spec_uint("height-mm",
+                                                      "height-mm",
+                                                      "Physical height of the monitor in millimeters",
+                                                      0, G_MAXUINT, 0,
+                                                      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:subpixel:
+     *
+     * Hardware subpixel layout.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_SUBPIXEL,
+                                    g_param_spec_enum("subpixel",
+                                                      "subpixel",
+                                                      "Hardware subpixel layout",
+                                                      XFW_TYPE_MONITOR_SUBPIXEL,
+                                                      XFW_MONITOR_SUBPIXEL_UNKNOWN,
+                                                      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:transorm
+     *
+     * Rotation and reflextion of the monitor's contents.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_TRANSFORM,
+                                    g_param_spec_enum("transform",
+                                                      "transform",
+                                                      "Rotation and reflection of the monitor's contents",
+                                                      XFW_TYPE_MONITOR_TRANSFORM,
+                                                      XFW_MONITOR_TRANSFORM_NORMAL,
+                                                      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 }
 
 static void
 xfw_monitor_init(XfwMonitor *monitor) {
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
+    priv->refresh = 60000;
     priv->scale = 1;
+}
+
+static void
+xfw_monitor_set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec) {
+    G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
+}
+
+static void
+xfw_monitor_get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec) {
+    XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(object);
+
+    switch (property_id) {
+        case PROP_IDENTIFIER:
+            g_value_set_string(value, priv->identifier);
+            break;
+
+        case PROP_DESCRIPTION:
+            g_value_set_string(value, priv->description);
+            break;
+
+        case PROP_CONNECTOR:
+            g_value_set_string(value, priv->connector);
+            break;
+
+        case PROP_MAKE:
+            g_value_set_string(value, priv->make);
+            break;
+
+        case PROP_MODEL:
+            g_value_set_string(value, priv->model);
+            break;
+
+        case PROP_SERIAL:
+            g_value_set_string(value, priv->serial);
+            break;
+
+        case PROP_REFRESH:
+            g_value_set_uint(value, priv->refresh);
+            break;
+
+        case PROP_SCALE:
+            g_value_set_uint(value, priv->scale);
+            break;
+
+        case PROP_PHYSICAL_GEOMETRY:
+            g_value_set_boxed(value, &priv->physical_geometry);
+            break;
+
+        case PROP_LOGICAL_GEOMETRY:
+            g_value_set_boxed(value, &priv->logical_geometry);
+            break;
+
+        case PROP_PHYSICAL_WIDTH:
+            g_value_set_uint(value, priv->width_mm);
+            break;
+
+        case PROP_PHYSICAL_HEIGHT:
+            g_value_set_uint(value, priv->height_mm);
+            break;
+
+        case PROP_SUBPIXEL:
+            g_value_set_enum(value, priv->subpixel);
+            break;
+
+        case PROP_TRANSFORM:
+            g_value_set_enum(value, priv->transform);
+            break;
+
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
+            break;
+    }
 }
 
 static void
@@ -358,6 +668,7 @@ _xfw_monitor_set_identifier(XfwMonitor *monitor, const char *identifier) {
     if (g_strcmp0(identifier, priv->identifier) != 0) {
         g_free(priv->identifier);
         priv->identifier = g_strdup(identifier);
+        priv->pending_changes |= MONITOR_PENDING_IDENTIFIER;
     }
 }
 
@@ -371,6 +682,7 @@ _xfw_monitor_set_description(XfwMonitor *monitor, const char *description) {
     if (g_strcmp0(description, priv->description) != 0) {
         g_free(priv->description);
         priv->description = g_strdup(description);
+        priv->pending_changes |= MONITOR_PENDING_DESCRIPTION;
     }
 }
 
@@ -384,6 +696,7 @@ _xfw_monitor_set_connector(XfwMonitor *monitor, const char *connector) {
     if (g_strcmp0(connector, priv->connector) != 0) {
         g_free(priv->connector);
         priv->connector = g_strdup(connector);
+        priv->pending_changes |= MONITOR_PENDING_CONNECTOR;
     }
 }
 
@@ -397,6 +710,7 @@ _xfw_monitor_set_make(XfwMonitor *monitor, const char *make) {
     if (g_strcmp0(make, priv->make) != 0) {
         g_free(priv->make);
         priv->make = g_strdup(make);
+        priv->pending_changes |= MONITOR_PENDING_MAKE;
     }
 }
 
@@ -410,6 +724,7 @@ _xfw_monitor_set_model(XfwMonitor *monitor, const char *model) {
     if (g_strcmp0(model, priv->model) != 0) {
         g_free(priv->model);
         priv->model = g_strdup(model);
+        priv->pending_changes |= MONITOR_PENDING_MODEL;
     }
 }
 
@@ -423,6 +738,7 @@ _xfw_monitor_set_serial(XfwMonitor *monitor, const char *serial) {
     if (g_strcmp0(serial, priv->serial) != 0) {
         g_free(priv->serial);
         priv->serial = g_strdup(serial);
+        priv->pending_changes |= MONITOR_PENDING_SERIAL;
     }
 }
 
@@ -431,7 +747,10 @@ _xfw_monitor_set_refresh(XfwMonitor *monitor, guint refresh_millihertz) {
     g_return_if_fail(XFW_IS_MONITOR(monitor));
 
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
-    priv->refresh = refresh_millihertz;
+    if (priv->refresh != refresh_millihertz) {
+        priv->refresh = refresh_millihertz;
+        priv->pending_changes |= MONITOR_PENDING_REFRESH;
+    }
 }
 
 void
@@ -439,7 +758,10 @@ _xfw_monitor_set_scale(XfwMonitor *monitor, guint scale) {
     g_return_if_fail(XFW_IS_MONITOR(monitor));
 
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
-    priv->scale = scale;
+    if (priv->scale != scale) {
+        priv->scale = scale;
+        priv->pending_changes |= MONITOR_PENDING_SCALE;
+    }
 }
 
 void
@@ -448,7 +770,10 @@ _xfw_monitor_set_physical_geometry(XfwMonitor *monitor, GdkRectangle *physical_g
     g_return_if_fail(physical_geometry != NULL);
 
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
-    priv->physical_geometry = *physical_geometry;
+    if (!gdk_rectangle_equal(&priv->physical_geometry, physical_geometry)) {
+        priv->physical_geometry = *physical_geometry;
+        priv->pending_changes |= MONITOR_PENDING_PHYSICAL_GEOMETRY;
+    }
 }
 
 void
@@ -457,7 +782,10 @@ _xfw_monitor_set_logical_geometry(XfwMonitor *monitor, GdkRectangle *logical_geo
     g_return_if_fail(logical_geometry != NULL);
 
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
-    priv->logical_geometry = *logical_geometry;
+    if (!gdk_rectangle_equal(&priv->logical_geometry, logical_geometry)) {
+        priv->logical_geometry = *logical_geometry;
+        priv->pending_changes |= MONITOR_PENDING_LOGICAL_GEOMETRY;
+    }
 }
 
 void
@@ -465,8 +793,14 @@ _xfw_monitor_set_physical_size(XfwMonitor *monitor, guint width_mm, guint height
     g_return_if_fail(XFW_IS_MONITOR(monitor));
 
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
-    priv->width_mm = width_mm;
-    priv->height_mm = height_mm;
+    if (priv->width_mm != width_mm) {
+        priv->width_mm = width_mm;
+        priv->pending_changes |= MONITOR_PENDING_PHYSICAL_WIDTH;
+    }
+    if (priv->width_mm != width_mm) {
+        priv->height_mm = height_mm;
+        priv->pending_changes |= MONITOR_PENDING_PHYSICAL_HEIGHT;
+    }
 }
 
 void
@@ -475,7 +809,10 @@ _xfw_monitor_set_subpixel(XfwMonitor *monitor, XfwMonitorSubpixel subpixel) {
     g_return_if_fail(subpixel >= XFW_MONITOR_SUBPIXEL_UNKNOWN && subpixel <= XFW_MONITOR_SUBPIXEL_VBGR);
 
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
-    priv->subpixel = subpixel;
+    if (priv->subpixel != subpixel) {
+        priv->subpixel = subpixel;
+        priv->pending_changes |= MONITOR_PENDING_SUBPIXEL;
+    }
 }
 
 void
@@ -484,5 +821,47 @@ _xfw_monitor_set_transform(XfwMonitor *monitor, XfwMonitorTransform transform) {
     g_return_if_fail(transform >= XFW_MONITOR_TRANSFORM_NORMAL && transform <= XFW_MONITOR_TRANSFORM_FLIPPED_270);
 
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
-    priv->transform = transform;
+    if (priv->transform != transform) {
+        priv->transform = transform;
+        priv->pending_changes |= MONITOR_PENDING_TRANSFORM;
+    }
+}
+
+MonitorPendingChanges
+_xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
+    static const struct {
+        MonitorPendingChanges bit;
+        const gchar *property;
+    } change_map[] = {
+        { MONITOR_PENDING_IDENTIFIER, "identifier" },
+        { MONITOR_PENDING_CONNECTOR, "connector" },
+        { MONITOR_PENDING_DESCRIPTION, "description" },
+        { MONITOR_PENDING_MAKE, "make" },
+        { MONITOR_PENDING_MODEL, "model" },
+        { MONITOR_PENDING_SERIAL, "serial" },
+        { MONITOR_PENDING_REFRESH, "refresh" },
+        { MONITOR_PENDING_SCALE, "scale" },
+        { MONITOR_PENDING_PHYSICAL_GEOMETRY, "physical-geometry" },
+        { MONITOR_PENDING_LOGICAL_GEOMETRY, "logical-geometry" },
+        { MONITOR_PENDING_PHYSICAL_WIDTH, "width-mm" },
+        { MONITOR_PENDING_PHYSICAL_HEIGHT, "height-mm" },
+        { MONITOR_PENDING_SUBPIXEL, "subpixel" },
+        { MONITOR_PENDING_TRANSFORM, "transform" },
+    };
+    XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
+
+    g_object_freeze_notify(G_OBJECT(monitor));
+
+    for (gsize i = 0; i < G_N_ELEMENTS(change_map); ++i) {
+        if ((priv->pending_changes & change_map[i].bit) != 0) {
+            g_object_notify(G_OBJECT(monitor), change_map[i].property);
+        }
+    }
+
+    MonitorPendingChanges old_pending_changes = priv->pending_changes;
+    priv->pending_changes = 0;
+
+    g_object_thaw_notify(G_OBJECT(monitor));
+
+    return old_pending_changes;
 }
