@@ -28,6 +28,7 @@
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 
 #include "libxfce4windowing-private.h"
+#include "xfw-monitor-private.h"
 #include "xfw-monitor-wayland.h"
 #include "xfw-screen-private.h"
 #include "xfw-screen-wayland.h"
@@ -434,8 +435,18 @@ _xfw_screen_wayland_steal_monitors(XfwScreenWayland *screen) {
 }
 
 void
-_xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors) {
+_xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors, guint n_added, guint n_removed) {
     g_list_free_full(screen->priv->monitors, g_object_unref);
     screen->priv->monitors = monitors;
-    g_signal_emit_by_name(screen, "monitors-changed");
+
+    MonitorPendingChanges changed = 0;
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        changed |= _xfw_monitor_notify_pending_changes(XFW_MONITOR(l->data));
+    }
+
+    if ((changed & MONITORS_CHANGED_MASK) != 0 || n_added > 0 || n_removed > 0) {
+        // Only notify if what has changed is relevant to positioning or size, or if
+        // a monitor was added or removed.
+        g_signal_emit_by_name(screen, "monitors-changed");
+    }
 }
