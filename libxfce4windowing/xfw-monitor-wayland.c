@@ -377,7 +377,7 @@ finalize_output(MonitorsData *msdata, XfwMonitorWayland *monitor_wl) {
     gboolean added = FALSE;
     GList *monitors = _xfw_screen_wayland_steal_monitors(msdata->screen);
     if (!g_list_find(monitors, monitor)) {
-        monitors = g_list_append(monitors, monitor);
+        monitors = g_list_append(monitors, g_object_ref(monitor));
         added = TRUE;
     }
 
@@ -587,7 +587,7 @@ registry_global(void *data, struct wl_registry *registry, uint32_t name, const c
         struct wl_output *output = wl_registry_bind(registry, name, &wl_output_interface, MIN(version, 4));
         g_debug("got output ID %d", wl_proxy_get_id((struct wl_proxy *)output));
         wl_output_add_listener(output, &output_listener, msdata);
-        g_hash_table_insert(msdata->outputs_to_monitors, output, g_object_ref(monitor));
+        g_hash_table_insert(msdata->outputs_to_monitors, output, monitor);
 
         if (msdata->xdg_output_manager != NULL) {
             init_xdg_output(msdata, output, monitor);
@@ -630,10 +630,11 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t name) 
                 g_hash_table_remove(msdata->xdg_outputs_to_monitors, monitor->xdg_output);
             }
             g_hash_table_remove(msdata->outputs_to_monitors, output);
-            g_object_unref(monitor);
 
             GList *monitors = _xfw_screen_wayland_steal_monitors(msdata->screen);
             monitors = g_list_remove(monitors, monitor);
+            g_object_unref(monitor);
+
             _xfw_screen_wayland_set_monitors(msdata->screen, monitors, 0, 1);
 
             break;
