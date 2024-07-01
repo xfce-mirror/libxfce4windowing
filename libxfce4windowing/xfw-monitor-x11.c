@@ -140,14 +140,8 @@ steal_monitor_by_connector(GList **monitors, const char *connector) {
 }
 
 static GList *
-enumerate_monitors(XfwScreenX11 *screen, GList **previous_monitors) {
-    g_return_val_if_fail(XFW_IS_SCREEN_X11(screen), NULL);
-
-    GdkScreen *gscreen = NULL;
-    g_object_get(screen,
-                 "screen", &gscreen,
-                 NULL);
-
+enumerate_monitors(XfwScreen *screen, GList **previous_monitors) {
+    GdkScreen *gscreen = _xfw_screen_get_gdk_screen(screen);
     GdkDisplay *display = gdk_screen_get_display(gscreen);
     gint scale = gdk_monitor_get_scale_factor(gdk_display_get_monitor(display, 0));
     Display *dpy = gdk_x11_display_get_xdisplay(display);
@@ -327,16 +321,15 @@ enumerate_monitors(XfwScreenX11 *screen, GList **previous_monitors) {
 }
 
 static void
-refresh_monitors(XfwScreenX11 *screen) {
-    GList *previous_monitors = _xfw_screen_x11_steal_monitors(screen);
+refresh_monitors(XfwScreen *screen) {
+    GList *previous_monitors = _xfw_screen_steal_monitors(screen);
     guint n_previous = g_list_length(previous_monitors);
     GList *monitors = enumerate_monitors(screen, &previous_monitors);
 
     guint n_removed = g_list_length(previous_monitors);
     guint n_kept = n_previous - n_removed;
     guint n_added = g_list_length(monitors) - n_kept;
-    _xfw_screen_x11_set_monitors(screen, monitors, n_added, n_removed);
-
+    _xfw_screen_set_monitors(screen, monitors, n_added, n_removed);
     g_list_free_full(previous_monitors, g_object_unref);
 }
 
@@ -347,7 +340,7 @@ rootwin_event_filter(GdkXEvent *gxevent, GdkEvent *event, gpointer data) {
     if (xevent->type - xrandr_event_base == RRScreenChangeNotify
         || xevent->type - xrandr_event_base == RRNotify)
     {
-        XfwScreenX11 *screen = XFW_SCREEN_X11(data);
+        XfwScreen *screen = XFW_SCREEN(data);
         refresh_monitors(screen);
     }
 
@@ -360,12 +353,9 @@ screen_destroyed(gpointer data, GObject *where_the_object_was) {
 }
 
 void
-_xfw_monitor_x11_init(XfwScreenX11 *screen) {
-    GdkScreen *gscreen = NULL;
-    g_object_get(screen,
-                 "screen", &gscreen,
-                 NULL);
-
+_xfw_monitor_x11_init(XfwScreenX11 *xscreen) {
+    XfwScreen *screen = XFW_SCREEN(xscreen);
+    GdkScreen *gscreen = _xfw_screen_get_gdk_screen(screen);
     const gchar *error = g_once(&xrandr_init_once, xrandr_init, gscreen);
     if (error != NULL) {
         g_message("XRandR initialization error: %s", error);
@@ -378,12 +368,12 @@ _xfw_monitor_x11_init(XfwScreenX11 *screen) {
         _xfw_monitor_set_description(monitor, "X11 Monitor (X11-1)");
         _xfw_monitor_set_refresh(monitor, 60000);
 
-        Screen *xscreen = gdk_x11_screen_get_xscreen(gscreen);
+        Screen *x11screen = gdk_x11_screen_get_xscreen(gscreen);
         GdkRectangle geom = {
             .x = 0,
             .y = 0,
-            .width = WidthOfScreen(xscreen),
-            .height = HeightOfScreen(xscreen),
+            .width = WidthOfScreen(x11screen),
+            .height = HeightOfScreen(x11screen),
         };
         _xfw_monitor_set_physical_geometry(monitor, &geom);
 
@@ -399,7 +389,7 @@ _xfw_monitor_x11_init(XfwScreenX11 *screen) {
         g_checksum_free(identifier_cksum);
 
         GList *monitors = g_list_append(NULL, monitor);
-        _xfw_screen_x11_set_monitors(screen, monitors, 1, 0);
+        _xfw_screen_set_monitors(screen, monitors, 1, 0);
     } else {
         Display *dpy = gdk_x11_display_get_xdisplay(gdk_screen_get_display(gscreen));
         GdkWindow *rootwin = gdk_screen_get_root_window(gscreen);
