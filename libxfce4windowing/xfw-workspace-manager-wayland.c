@@ -30,6 +30,7 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-workspace-group-wayland.h"
+#include "xfw-workspace-manager-dummy.h"
 #include "xfw-workspace-manager-private.h"
 #include "xfw-workspace-manager-wayland.h"
 #include "xfw-workspace-wayland.h"
@@ -297,6 +298,6 @@ _xfw_workspace_manager_wayland_new(GdkScreen *screen) {
     } else {
         g_message("Your compositor does not support the ext_workspace_manager_v1 protocol");
         wl_registry_destroy(wl_registry);
-        return NULL;
+        return _xfw_workspace_manager_dummy_new(screen);
     }
 }
