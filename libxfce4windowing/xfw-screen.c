@@ -45,6 +45,7 @@
 #include <limits.h>
 
 #include "libxfce4windowing-private.h"
+#include "xfw-monitor-private.h"
 #include "xfw-screen-private.h"
 #include "xfw-util.h"
 #include "xfw-window.h"
@@ -65,6 +66,7 @@
 typedef struct _XfwXcreenPrivate {
     GdkScreen *gdk_screen;
     XfwWorkspaceManager *workspace_manager;
+    GList *monitors;
     XfwWindow *active_window;
     guint32 show_desktop : 1;
 } XfwScreenPrivate;
@@ -322,6 +324,8 @@ static void
 xfw_screen_finalize(GObject *object) {
     XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(object);
 
+    g_list_free_full(priv->monitors, g_object_unref);
+
     g_object_unref(priv->workspace_manager);
 
     G_OBJECT_CLASS(xfw_screen_parent_class)->finalize(object);
@@ -410,8 +414,7 @@ xfw_screen_get_active_window(XfwScreen *screen) {
 GList *
 xfw_screen_get_monitors(XfwScreen *screen) {
     g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
-    XfwScreenClass *klass = XFW_SCREEN_GET_CLASS(screen);
-    return klass->get_monitors(screen);
+    return XFW_SCREEN_GET_PRIVATE(screen)->monitors;
 }
 
 /**
@@ -513,6 +516,33 @@ GdkScreen *
 _xfw_screen_get_gdk_screen(XfwScreen *screen) {
     g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
     return XFW_SCREEN_GET_PRIVATE(screen)->gdk_screen;
+}
+
+
+GList *
+_xfw_screen_steal_monitors(XfwScreen *screen) {
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
+    GList *monitors = priv->monitors;
+    priv->monitors = NULL;
+    return monitors;
+}
+
+void
+_xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, guint n_added, guint n_removed) {
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
+    g_list_free_full(priv->monitors, g_object_unref);
+    priv->monitors = monitors;
+
+    MonitorPendingChanges changed = 0;
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        changed |= _xfw_monitor_notify_pending_changes(XFW_MONITOR(l->data));
+    }
+
+    if ((changed & MONITORS_CHANGED_MASK) != 0 || n_added > 0 || n_removed > 0) {
+        // Only notify if what has changed is relevant to positioning or size, or if
+        // a monitor was added or removed.
+        g_signal_emit_by_name(screen, "monitors-changed");
+    }
 }
 
 void

@@ -46,7 +46,6 @@ struct _XfwScreenWayland {
     GList *windows;
     GList *windows_stacked;
     GHashTable *wl_windows;
-    GList *monitors;
     struct {
         GList *minimized;
         XfwWindow *was_active;
@@ -57,7 +56,6 @@ static void xfw_screen_wayland_constructed(GObject *obj);
 static void xfw_screen_wayland_finalize(GObject *obj);
 static GList *xfw_screen_wayland_get_windows(XfwScreen *screen);
 static GList *xfw_screen_wayland_get_windows_stacked(XfwScreen *screen);
-static GList *xfw_screen_wayland_get_monitors(XfwScreen *screen);
 static void xfw_screen_wayland_set_show_desktop(XfwScreen *screen, gboolean show);
 
 static void show_desktop_disconnect(gpointer object, gpointer data);
@@ -90,7 +88,6 @@ xfw_screen_wayland_class_init(XfwScreenWaylandClass *klass) {
     XfwScreenClass *screen_class = XFW_SCREEN_CLASS(klass);
     screen_class->get_windows = xfw_screen_wayland_get_windows;
     screen_class->get_windows_stacked = xfw_screen_wayland_get_windows_stacked;
-    screen_class->get_monitors = xfw_screen_wayland_get_monitors;
     screen_class->set_show_desktop = xfw_screen_wayland_set_show_desktop;
 }
 
@@ -143,8 +140,6 @@ xfw_screen_wayland_finalize(GObject *obj) {
     }
     g_list_free(screen->show_desktop_data.minimized);
 
-    g_list_free_full(screen->monitors, g_object_unref);
-
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->finalize(obj);
 }
 
@@ -157,11 +152,6 @@ static GList *
 xfw_screen_wayland_get_windows_stacked(XfwScreen *screen) {
     _xfw_g_message_once("Wayland does not support discovering window stacking; windows returned are unordered");
     return XFW_SCREEN_WAYLAND(screen)->windows_stacked;
-}
-
-static GList *
-xfw_screen_wayland_get_monitors(XfwScreen *screen) {
-    return XFW_SCREEN_WAYLAND(screen)->monitors;
 }
 
 static void
@@ -320,29 +310,5 @@ _xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *wi
     } else {
         _xfw_g_message_once("Window<->Workspace association is not available on Wayland");
         return NULL;
-    }
-}
-
-GList *
-_xfw_screen_wayland_steal_monitors(XfwScreenWayland *screen) {
-    GList *monitors = screen->monitors;
-    screen->monitors = NULL;
-    return monitors;
-}
-
-void
-_xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors, guint n_added, guint n_removed) {
-    g_list_free_full(screen->monitors, g_object_unref);
-    screen->monitors = monitors;
-
-    MonitorPendingChanges changed = 0;
-    for (GList *l = monitors; l != NULL; l = l->next) {
-        changed |= _xfw_monitor_notify_pending_changes(XFW_MONITOR(l->data));
-    }
-
-    if ((changed & MONITORS_CHANGED_MASK) != 0 || n_added > 0 || n_removed > 0) {
-        // Only notify if what has changed is relevant to positioning or size, or if
-        // a monitor was added or removed.
-        g_signal_emit_by_name(screen, "monitors-changed");
     }
 }

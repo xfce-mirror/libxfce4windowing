@@ -37,7 +37,7 @@
 #include "xfw-screen.h"
 
 typedef struct {
-    XfwScreenWayland *screen;
+    XfwScreen *screen;
     GdkDisplay *display;
 
     GHashTable *outputs_to_monitors;
@@ -375,7 +375,7 @@ finalize_output(MonitorsData *msdata, XfwMonitorWayland *monitor_wl) {
     _xfw_monitor_set_logical_geometry(monitor, &monitor_wl->logical_geometry);
 
     gboolean added = FALSE;
-    GList *monitors = _xfw_screen_wayland_steal_monitors(msdata->screen);
+    GList *monitors = _xfw_screen_steal_monitors(msdata->screen);
     if (!g_list_find(monitors, monitor)) {
         monitors = g_list_append(monitors, g_object_ref(monitor));
         added = TRUE;
@@ -421,7 +421,7 @@ finalize_output(MonitorsData *msdata, XfwMonitorWayland *monitor_wl) {
         }
     }
 
-    _xfw_screen_wayland_set_monitors(msdata->screen, monitors, added ? 1 : 0, 0);
+    _xfw_screen_set_monitors(msdata->screen, monitors, added ? 1 : 0, 0);
 }
 
 static void
@@ -631,11 +631,11 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t name) 
             }
             g_hash_table_remove(msdata->outputs_to_monitors, output);
 
-            GList *monitors = _xfw_screen_wayland_steal_monitors(msdata->screen);
+            GList *monitors = _xfw_screen_steal_monitors(msdata->screen);
             monitors = g_list_remove(monitors, monitor);
             g_object_unref(monitor);
 
-            _xfw_screen_wayland_set_monitors(msdata->screen, monitors, 0, 1);
+            _xfw_screen_set_monitors(msdata->screen, monitors, 0, 1);
 
             break;
         }
@@ -668,12 +668,9 @@ screen_destroyed(gpointer data, GObject *where_the_object_was) {
 }
 
 void
-_xfw_monitor_wayland_init(XfwScreenWayland *screen) {
-    GdkScreen *gscreen = NULL;
-    g_object_get(screen,
-                 "screen", &gscreen,
-                 NULL);
-
+_xfw_monitor_wayland_init(XfwScreenWayland *wscreen) {
+    XfwScreen *screen = XFW_SCREEN(wscreen);
+    GdkScreen *gscreen = _xfw_screen_get_gdk_screen(screen);
     GdkDisplay *display = gdk_screen_get_display(gscreen);
     struct wl_display *wldpy = gdk_wayland_display_get_wl_display(display);
     struct wl_registry *registry = wl_display_get_registry(wldpy);

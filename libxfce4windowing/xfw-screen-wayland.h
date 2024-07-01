@@ -42,9 +42,6 @@ GdkScreen *_xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen);
 struct wl_seat *_xfw_screen_wayland_get_wl_seat(XfwScreenWayland *screen);
 XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window);
 
-GList *_xfw_screen_wayland_steal_monitors(XfwScreenWayland *screen);
-void _xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors, guint n_added, guint n_removed);
-
 G_END_DECLS
 
 #endif /* __XFW_SCREEN_WAYLAND_H__ */
