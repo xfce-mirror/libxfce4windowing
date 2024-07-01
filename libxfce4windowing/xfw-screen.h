@@ -32,9 +32,7 @@
 G_BEGIN_DECLS
 
 #define XFW_TYPE_SCREEN (xfw_screen_get_type())
-G_DECLARE_INTERFACE(XfwScreen, xfw_screen, XFW, SCREEN, GObject)
-
-typedef struct _XfwScreenInterface XfwScreenIface;
+G_DECLARE_DERIVABLE_TYPE(XfwScreen, xfw_screen, XFW, SCREEN, GObject)
 
 XfwScreen *xfw_screen_get_default(void);
 
