@@ -24,13 +24,16 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
+#include <gdk/gdk.h>
+
 #include "xfw-screen.h"
+#include "xfw-window.h"
 
 G_BEGIN_DECLS
 
-struct _XfwScreenInterface {
+struct _XfwScreenClass {
     /*< private >*/
-    GTypeInterface g_iface;
+    GObjectClass parent_class;
 
     /*< public >*/
 
@@ -42,17 +45,17 @@ struct _XfwScreenInterface {
     void (*window_manager_changed)(XfwScreen *screen);
 
     /* Virtual Table */
-    XfwWorkspaceManager *(*get_workspace_manager)(XfwScreen *screen);
-
     GList *(*get_windows)(XfwScreen *screen);
     GList *(*get_windows_stacked)(XfwScreen *screen);
-    XfwWindow *(*get_active_window)(XfwScreen *screen);
 
-    GList *(*get_monitors)(XfwScreen *screen);
-
-    gboolean (*get_show_desktop)(XfwScreen *screen);
     void (*set_show_desktop)(XfwScreen *screen, gboolean show);
 };
+
+GdkScreen *_xfw_screen_get_gdk_screen(XfwScreen *screen);
+void _xfw_screen_set_active_window(XfwScreen *screen, XfwWindow *window);
+GList *_xfw_screen_steal_monitors(XfwScreen *screen);
+void _xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, guint n_added, guint n_removed);
+void _xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show_desktop);
 
 G_END_DECLS
 
