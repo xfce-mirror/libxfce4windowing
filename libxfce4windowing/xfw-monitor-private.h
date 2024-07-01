@@ -22,11 +22,34 @@
 
 #include "xfw-monitor.h"
 
+#define MONITORS_CHANGED_MASK ( \
+    MONITOR_PENDING_SCALE \
+    | MONITOR_PENDING_PHYSICAL_GEOMETRY \
+    | MONITOR_PENDING_LOGICAL_GEOMETRY \
+    | MONITOR_PENDING_TRANSFORM)
+
 G_BEGIN_DECLS
 
 struct _XfwMonitorClass {
     GObjectClass parent_class;
 };
+
+typedef enum {
+    MONITOR_PENDING_IDENTIFIER = (1 << 0),
+    MONITOR_PENDING_DESCRIPTION = (1 << 1),
+    MONITOR_PENDING_CONNECTOR = (1 << 2),
+    MONITOR_PENDING_MAKE = (1 << 3),
+    MONITOR_PENDING_MODEL = (1 << 4),
+    MONITOR_PENDING_SERIAL = (1 << 5),
+    MONITOR_PENDING_REFRESH = (1 << 6),
+    MONITOR_PENDING_SCALE = (1 << 7),
+    MONITOR_PENDING_PHYSICAL_GEOMETRY = (1 << 8),
+    MONITOR_PENDING_LOGICAL_GEOMETRY = (1 << 9),
+    MONITOR_PENDING_PHYSICAL_WIDTH = (1 << 10),
+    MONITOR_PENDING_PHYSICAL_HEIGHT = (1 << 11),
+    MONITOR_PENDING_SUBPIXEL = (1 << 12),
+    MONITOR_PENDING_TRANSFORM = (1 << 13),
+} MonitorPendingChanges;
 
 void _xfw_monitor_set_identifier(XfwMonitor *monitor,
                                  const char *identifier);
@@ -55,6 +78,8 @@ void _xfw_monitor_set_subpixel(XfwMonitor *monitor,
                                XfwMonitorSubpixel subpixel);
 void _xfw_monitor_set_transform(XfwMonitor *monitor,
                                 XfwMonitorTransform transform);
+
+MonitorPendingChanges _xfw_monitor_notify_pending_changes(XfwMonitor *monitor);
 
 G_END_DECLS
 

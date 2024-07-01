@@ -49,7 +49,7 @@ void _xfw_screen_wayland_set_active_window(XfwScreenWayland *screen, XfwWindow *
 XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window);
 
 GList *_xfw_screen_wayland_steal_monitors(XfwScreenWayland *screen);
-void _xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors);
+void _xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors, guint n_added, guint n_removed);
 
 G_END_DECLS
 

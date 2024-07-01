@@ -17,6 +17,7 @@
  * MA 02110-1301 USA
  */
 
+#include "xfw-monitor-private.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -434,8 +435,18 @@ _xfw_screen_wayland_steal_monitors(XfwScreenWayland *screen) {
 }
 
 void
-_xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors) {
+_xfw_screen_wayland_set_monitors(XfwScreenWayland *screen, GList *monitors, guint n_added, guint n_removed) {
     g_list_free_full(screen->priv->monitors, g_object_unref);
     screen->priv->monitors = monitors;
-    g_signal_emit_by_name(screen, "monitors-changed");
+
+    MonitorPendingChanges changed = 0;
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        changed |= _xfw_monitor_notify_pending_changes(XFW_MONITOR(l->data));
+    }
+
+    if ((changed & MONITORS_CHANGED_MASK) != 0 || n_added > 0 || n_removed > 0) {
+        // Only notify if what has changed is relevant to positioning or size, or if
+        // a monitor was added or removed.
+        g_signal_emit_by_name(screen, "monitors-changed");
+    }
 }
