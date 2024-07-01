@@ -48,13 +48,13 @@ struct _XfwScreenClass {
     GList *(*get_windows)(XfwScreen *screen);
     GList *(*get_windows_stacked)(XfwScreen *screen);
 
-    GList *(*get_monitors)(XfwScreen *screen);
-
     void (*set_show_desktop)(XfwScreen *screen, gboolean show);
 };
 
 GdkScreen *_xfw_screen_get_gdk_screen(XfwScreen *screen);
 void _xfw_screen_set_active_window(XfwScreen *screen, XfwWindow *window);
+GList *_xfw_screen_steal_monitors(XfwScreen *screen);
+void _xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, guint n_added, guint n_removed);
 void _xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show_desktop);
 
 G_END_DECLS
