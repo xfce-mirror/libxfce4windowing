@@ -153,7 +153,18 @@ xfw_screen_default_init(XfwScreenIface *iface) {
      * XfwScreen::monitors-changed:
      * @screen: the object which received the signal.
      *
-     * Emitted when the monitor count or layout has changed.
+     * Emitted when one of the following has changed about the monitors
+     * attached to @screen:
+     *
+     *   * A monitor was added.
+     *   * A monitor was removed.
+     *   * A monitor's resolution changed (including if the scale factor changed).
+     *   * A monitor was re-positioned in the global screen space.
+     *
+     * Note that changes such as the subpixel layout or model name will not
+     * result in the emission of this signal.  Connect to the propert notify
+     * signals on #XfwMonitor to be notified of changes in other aspects of the
+     * monitor.
      *
      * Since: 4.19.4
      **/

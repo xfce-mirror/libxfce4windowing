@@ -45,7 +45,7 @@ struct _XfwScreenX11 {
 XfwWorkspace *_xfw_screen_x11_workspace_for_wnck_workspace(XfwScreenX11 *screen, WnckWorkspace *wnck_workspace);
 
 GList *_xfw_screen_x11_steal_monitors(XfwScreenX11 *screen);
-void _xfw_screen_x11_set_monitors(XfwScreenX11 *screen, GList *monitors);
+void _xfw_screen_x11_set_monitors(XfwScreenX11 *screen, GList *monitors, guint n_added, guint n_removed);
 
 G_END_DECLS
 
