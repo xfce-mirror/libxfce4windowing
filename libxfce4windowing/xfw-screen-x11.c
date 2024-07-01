@@ -39,14 +39,12 @@ struct _XfwScreenX11 {
     GList *windows;
     GList *windows_stacked;
     GHashTable *wnck_windows;
-    GList *monitors;
 };
 
 static void xfw_screen_x11_constructed(GObject *obj);
 static void xfw_screen_x11_finalize(GObject *obj);
 static GList *xfw_screen_x11_get_windows(XfwScreen *screen);
 static GList *xfw_screen_x11_get_windows_stacked(XfwScreen *screen);
-static GList *xfw_screen_x11_get_monitors(XfwScreen *screen);
 static void xfw_screen_x11_set_show_desktop(XfwScreen *screen, gboolean show);
 
 static void window_opened(WnckScreen *wnck_screen, WnckWindow *window, XfwScreenX11 *screen);
@@ -69,7 +67,6 @@ xfw_screen_x11_class_init(XfwScreenX11Class *klass) {
     XfwScreenClass *screen_class = XFW_SCREEN_CLASS(klass);
     screen_class->get_windows = xfw_screen_x11_get_windows;
     screen_class->get_windows_stacked = xfw_screen_x11_get_windows_stacked;
-    screen_class->get_monitors = xfw_screen_x11_get_monitors;
     screen_class->set_show_desktop = xfw_screen_x11_set_show_desktop;
 }
 
@@ -122,8 +119,6 @@ xfw_screen_x11_finalize(GObject *obj) {
     g_list_free(screen->windows_stacked);
     g_hash_table_destroy(screen->wnck_windows);
 
-    g_list_free_full(screen->monitors, g_object_unref);
-
     // to be released last
     g_object_unref(screen->wnck_screen);
 
@@ -138,11 +133,6 @@ xfw_screen_x11_get_windows(XfwScreen *screen) {
 static GList *
 xfw_screen_x11_get_windows_stacked(XfwScreen *screen) {
     return XFW_SCREEN_X11(screen)->windows_stacked;
-}
-
-static GList *
-xfw_screen_x11_get_monitors(XfwScreen *screen) {
-    return XFW_SCREEN_X11(screen)->monitors;
 }
 
 static void
@@ -236,28 +226,4 @@ _xfw_screen_x11_workspace_for_wnck_workspace(XfwScreenX11 *screen, WnckWorkspace
     XfwWorkspaceManager *workspace_manager = xfw_screen_get_workspace_manager(XFW_SCREEN(screen));
     return _xfw_workspace_manager_x11_workspace_for_wnck_workspace(XFW_WORKSPACE_MANAGER_X11(workspace_manager),
                                                                    wnck_workspace);
-}
-
-GList *
-_xfw_screen_x11_steal_monitors(XfwScreenX11 *screen) {
-    GList *monitors = screen->monitors;
-    screen->monitors = NULL;
-    return monitors;
-}
-
-void
-_xfw_screen_x11_set_monitors(XfwScreenX11 *screen, GList *monitors, guint n_added, guint n_removed) {
-    g_list_free_full(screen->monitors, g_object_unref);
-    screen->monitors = monitors;
-
-    MonitorPendingChanges changed = 0;
-    for (GList *l = monitors; l != NULL; l = l->next) {
-        changed |= _xfw_monitor_notify_pending_changes(XFW_MONITOR(l->data));
-    }
-
-    if ((changed & MONITORS_CHANGED_MASK) != 0 || n_added > 0 || n_removed > 0) {
-        // Only notify if what has changed is relevant to positioning or size, or if
-        // a monitor was added or removed.
-        g_signal_emit_by_name(screen, "monitors-changed");
-    }
 }
