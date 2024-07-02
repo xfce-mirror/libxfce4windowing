@@ -87,7 +87,7 @@ xfw_screen_x11_constructed(GObject *obj) {
 
     for (GList *l = wnck_screen_get_windows(xscreen->wnck_screen); l != NULL; l = l->next) {
         XfwWindowX11 *window = g_object_new(XFW_TYPE_WINDOW_X11,
-                                            "xscreen", xscreen,
+                                            "screen", screen,
                                             "wnck-window", l->data,
                                             NULL);
         xscreen->windows = g_list_prepend(xscreen->windows, window);
