@@ -57,6 +57,7 @@ typedef struct _XfwMonitorPrivate {
     guint height_mm;
     XfwMonitorSubpixel subpixel;
     XfwMonitorTransform transform;
+    gboolean is_primary;
 
     MonitorPendingChanges pending_changes;
 } XfwMonitorPrivate;
@@ -77,6 +78,7 @@ enum {
     PROP_PHYSICAL_HEIGHT,
     PROP_SUBPIXEL,
     PROP_TRANSFORM,
+    PROP_IS_PRIMARY,
 };
 
 static void xfw_monitor_set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
@@ -328,6 +330,21 @@ xfw_monitor_class_init(XfwMonitorClass *klass) {
                                                       XFW_TYPE_MONITOR_TRANSFORM,
                                                       XFW_MONITOR_TRANSFORM_NORMAL,
                                                       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:is-primary
+     *
+     * Whether or not this monitor is the primary monitor.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_IS_PRIMARY,
+                                    g_param_spec_boolean("is-primary",
+                                                         "is-primary",
+                                                         "If this is the primary monitor",
+                                                         FALSE,
+                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 }
 
 static void
@@ -401,6 +418,10 @@ xfw_monitor_get_property(GObject *object, guint property_id, GValue *value, GPar
 
         case PROP_TRANSFORM:
             g_value_set_enum(value, priv->transform);
+            break;
+
+        case PROP_IS_PRIMARY:
+            g_value_set_boolean(value, priv->is_primary);
             break;
 
         default:
@@ -657,6 +678,23 @@ xfw_monitor_get_transform(XfwMonitor *monitor) {
     return XFW_MONITOR_GET_PRIVATE(monitor)->transform;
 }
 
+/**
+ * xfw_monitor_is_primary:
+ * @monitor: a #XfwMonitor.
+ *
+ * Returns whether or not @monitor has been designated as the primary
+ * monitor.
+ *
+ * Return value: %TRUE or %FALSE.
+ *
+ * Since: 4.19.4
+ **/
+gboolean
+xfw_monitor_is_primary(XfwMonitor *monitor) {
+    g_return_val_if_fail(XFW_IS_MONITOR(monitor), FALSE);
+    return XFW_MONITOR_GET_PRIVATE(monitor)->is_primary;
+}
+
 
 void
 _xfw_monitor_set_identifier(XfwMonitor *monitor, const char *identifier) {
@@ -827,6 +865,17 @@ _xfw_monitor_set_transform(XfwMonitor *monitor, XfwMonitorTransform transform) {
     }
 }
 
+void
+_xfw_monitor_set_is_primary(XfwMonitor *monitor, gboolean is_primary) {
+    g_return_if_fail(XFW_IS_MONITOR(monitor));
+
+    XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
+    if (priv->is_primary != is_primary) {
+        priv->is_primary = is_primary;
+        priv->pending_changes |= MONITOR_PENDING_IS_PRIMARY;
+    }
+}
+
 MonitorPendingChanges
 _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
     static const struct {
@@ -847,6 +896,7 @@ _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
         { MONITOR_PENDING_PHYSICAL_HEIGHT, "height-mm" },
         { MONITOR_PENDING_SUBPIXEL, "subpixel" },
         { MONITOR_PENDING_TRANSFORM, "transform" },
+        { MONITOR_PENDING_IS_PRIMARY, "is-primary" },
     };
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
 

@@ -308,6 +308,8 @@ enumerate_monitors(XfwScreen *screen, GList **previous_monitors) {
         _xfw_monitor_set_description(monitor, description);
         g_free(description);
 
+        _xfw_monitor_set_is_primary(monitor, !!rrmonitors[i].primary);
+
         monitors = g_list_prepend(monitors, monitor);
 
         g_free(connector);
@@ -387,6 +389,8 @@ _xfw_monitor_x11_init(XfwScreenX11 *xscreen) {
         g_checksum_update(identifier_cksum, (guchar *)connector, strlen(connector));
         _xfw_monitor_set_identifier(monitor, g_checksum_get_string(identifier_cksum));
         g_checksum_free(identifier_cksum);
+
+        _xfw_monitor_set_is_primary(monitor, TRUE);
 
         GList *monitors = g_list_append(NULL, monitor);
         _xfw_screen_set_monitors(screen, monitors, 1, 0);
