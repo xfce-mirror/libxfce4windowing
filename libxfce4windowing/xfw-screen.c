@@ -188,6 +188,41 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                  G_TYPE_NONE, 0);
 
     /**
+     * XfwScreen::monitor-added:
+     * @screen: the object which received the signal.
+     * @monitor: the monitor that was added.
+     *
+     * Emitted when a monitor is added to @screen.
+     *
+     * Since: 4.19.4
+     **/
+    g_signal_new("monitor-added",
+                 XFW_TYPE_SCREEN,
+                 G_SIGNAL_RUN_LAST,
+                 0,
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_MONITOR);
+
+    /**
+     * XfwScreen::monitor-added:
+     * @screen: the object which received the signal.
+     * @monitor: the monitor that was removed.
+     *
+     * Emitted when a monitor is removed from @screen.
+     *
+     * Since: 4.19.4
+     **/
+    g_signal_new("monitor-removed",
+                 XFW_TYPE_SCREEN,
+                 G_SIGNAL_RUN_LAST,
+                 0,
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_MONITOR);
+    /**
      * XfwScreen::monitors-changed:
      * @screen: the object which received the signal.
      *
@@ -554,7 +589,7 @@ _xfw_screen_steal_monitors(XfwScreen *screen) {
 }
 
 void
-_xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, guint n_added, guint n_removed) {
+_xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, GList *added, GList *removed) {
     XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
     g_list_free_full(priv->monitors, g_object_unref);
     priv->monitors = monitors;
@@ -572,7 +607,15 @@ _xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, guint n_added, guin
         changed |= _xfw_monitor_notify_pending_changes(XFW_MONITOR(l->data));
     }
 
-    if ((changed & MONITORS_CHANGED_MASK) != 0 || n_added > 0 || n_removed > 0) {
+    for (GList *l = added; l != NULL; l = l->next) {
+        g_signal_emit_by_name(screen, "monitor-added", XFW_MONITOR(l->data));
+    }
+
+    for (GList *l = removed; l != NULL; l = l->next) {
+        g_signal_emit_by_name(screen, "monitor-removed", XFW_MONITOR(l->data));
+    }
+
+    if ((changed & MONITORS_CHANGED_MASK) != 0 || added != NULL || removed != NULL) {
         // Only notify if what has changed is relevant to positioning or size, or if
         // a monitor was added or removed, or the primary monitor has changed.
         g_signal_emit_by_name(screen, "monitors-changed");
