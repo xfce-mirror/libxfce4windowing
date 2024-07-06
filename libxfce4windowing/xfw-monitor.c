@@ -332,7 +332,7 @@ xfw_monitor_class_init(XfwMonitorClass *klass) {
                                                       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
-     * XfwMonitor:is-primary
+     * XfwMonitor:is-primary:
      *
      * Whether or not this monitor is the primary monitor.
      *
