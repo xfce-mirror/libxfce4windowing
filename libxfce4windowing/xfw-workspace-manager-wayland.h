@@ -26,6 +26,7 @@
 
 #include <gdk/gdk.h>
 
+#include "xfw-screen.h"
 #include "xfw-workspace-manager.h"
 
 G_BEGIN_DECLS
@@ -41,7 +42,7 @@ struct _XfwWorkspaceManagerWayland {
     XfwWorkspaceManagerWaylandPrivate *priv;
 };
 
-XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(GdkScreen *screen);
+XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(XfwScreen *screen);
 
 G_END_DECLS
 

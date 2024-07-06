@@ -681,7 +681,6 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t name) 
             if (lm != NULL) {
                 monitors = g_list_delete_link(monitors, lm);
                 removed.data = monitor;
-                g_object_unref(monitor);
 
                 XfwMonitor *primary_monitor = guess_primary_monitor(monitors);
                 for (GList *l = monitors; l != NULL; l = l->next) {
@@ -691,6 +690,10 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t name) 
             }
 
             _xfw_screen_set_monitors(msdata->screen, monitors, NULL, &removed);
+
+            if (removed.data != NULL) {
+                g_object_unref(XFW_MONITOR(removed.data));
+            }
 
             break;
         }
@@ -745,4 +748,9 @@ _xfw_monitor_wayland_init(XfwScreenWayland *wscreen) {
     while (msdata->async_roundtrips != NULL) {
         wl_display_dispatch(wldpy);
     }
+}
+
+struct wl_output *
+_xfw_monitor_wayland_get_wl_output(XfwMonitorWayland *monitor) {
+    return monitor->output;
 }

@@ -49,15 +49,14 @@
 #include "xfw-screen-private.h"
 #include "xfw-util.h"
 #include "xfw-window.h"
+#include "xfw-workspace-manager.h"
 
 #ifdef ENABLE_X11
 #include "xfw-screen-x11.h"
-#include "xfw-workspace-manager-x11.h"
 #endif
 
 #ifdef ENABLE_WAYLAND
 #include "xfw-screen-wayland.h"
-#include "xfw-workspace-manager-wayland.h"
 #endif
 
 #define XFW_SCREEN_GET_PRIVATE(screen) ((XfwScreenPrivate *)xfw_screen_get_instance_private((XfwScreen *)screen))
@@ -251,15 +250,15 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                  G_TYPE_NONE, 0);
 
     /**
-     * XfwScreen:screen:
+     * XfwScreen:gdk-screen:
      *
      * The #GdkScreen instance used to construct this #XfwScreen.
      **/
     g_object_class_install_property(gobject_class,
                                     PROP_SCREEN,
-                                    g_param_spec_object("screen",
-                                                        "screen",
-                                                        "screen",
+                                    g_param_spec_object("gdk-screen",
+                                                        "gdk-screen",
+                                                        "GdkScreen",
                                                         GDK_TYPE_SCREEN,
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 
@@ -275,7 +274,7 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                                                         "workspace-manager",
                                                         "workspace-manager",
                                                         XFW_TYPE_WORKSPACE_MANAGER,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                        G_PARAM_READABLE));
 
     /**
      * XfwScreen:active-window:
@@ -528,20 +527,16 @@ xfw_screen_get(GdkScreen *gdk_screen) {
 
 #ifdef ENABLE_X11
         if (xfw_windowing_get() == XFW_WINDOWING_X11) {
-            XfwWorkspaceManager *workspace_manager = _xfw_workspace_manager_x11_new(gdk_screen);
             screen = g_object_new(XFW_TYPE_SCREEN_X11,
-                                  "screen", gdk_screen,
-                                  "workspace-manager", workspace_manager,
+                                  "gdk-screen", gdk_screen,
                                   NULL);
         } else
 #endif /* ENABLE_X11 */
 #ifdef ENABLE_WAYLAND
             if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND)
         {
-            XfwWorkspaceManager *workspace_manager = _xfw_workspace_manager_wayland_new(gdk_screen);
             screen = g_object_new(XFW_TYPE_SCREEN_WAYLAND,
-                                  "screen", gdk_screen,
-                                  "workspace-manager", workspace_manager,
+                                  "gdk-screen", gdk_screen,
                                   NULL);
         } else
 #endif
@@ -579,6 +574,10 @@ _xfw_screen_get_gdk_screen(XfwScreen *screen) {
     return XFW_SCREEN_GET_PRIVATE(screen)->gdk_screen;
 }
 
+void
+_xfw_screen_set_workspace_manager(XfwScreen *screen, XfwWorkspaceManager *workspace_manager) {
+    XFW_SCREEN_GET_PRIVATE(screen)->workspace_manager = workspace_manager;
+}
 
 GList *
 _xfw_screen_steal_monitors(XfwScreen *screen) {
