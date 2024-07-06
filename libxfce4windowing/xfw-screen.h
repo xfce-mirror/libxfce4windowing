@@ -26,6 +26,7 @@
 
 #include <gdk/gdk.h>
 
+#include "xfw-monitor.h"
 #include "xfw-window.h"
 #include "xfw-workspace-manager.h"
 
@@ -43,6 +44,7 @@ GList *xfw_screen_get_windows_stacked(XfwScreen *screen);
 XfwWindow *xfw_screen_get_active_window(XfwScreen *screen);
 
 GList *xfw_screen_get_monitors(XfwScreen *screen);
+XfwMonitor *xfw_screen_get_primary_monitor(XfwScreen *screen);
 
 gboolean xfw_screen_get_show_desktop(XfwScreen *screen);
 void xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show);

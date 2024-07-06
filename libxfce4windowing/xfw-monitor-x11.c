@@ -140,7 +140,7 @@ steal_monitor_by_connector(GList **monitors, const char *connector) {
 }
 
 static GList *
-enumerate_monitors(XfwScreen *screen, GList **previous_monitors) {
+enumerate_monitors(XfwScreen *screen, GList **previous_monitors, XfwMonitor **primary_monitor) {
     GdkScreen *gscreen = _xfw_screen_get_gdk_screen(screen);
     GdkDisplay *display = gdk_screen_get_display(gscreen);
     gint scale = gdk_monitor_get_scale_factor(gdk_display_get_monitor(display, 0));
@@ -162,6 +162,7 @@ enumerate_monitors(XfwScreen *screen, GList **previous_monitors) {
     }
 
     GList *monitors = NULL;
+    *primary_monitor = NULL;
 
     for (int i = 0; i < nmonitors; ++i) {
         RROutput output = rrmonitors[i].outputs[0];
@@ -308,6 +309,11 @@ enumerate_monitors(XfwScreen *screen, GList **previous_monitors) {
         _xfw_monitor_set_description(monitor, description);
         g_free(description);
 
+        _xfw_monitor_set_is_primary(monitor, !!rrmonitors[i].primary);
+        if (rrmonitors[i].primary) {
+            *primary_monitor = monitor;
+        }
+
         monitors = g_list_prepend(monitors, monitor);
 
         g_free(connector);
@@ -324,12 +330,13 @@ static void
 refresh_monitors(XfwScreen *screen) {
     GList *previous_monitors = _xfw_screen_steal_monitors(screen);
     guint n_previous = g_list_length(previous_monitors);
-    GList *monitors = enumerate_monitors(screen, &previous_monitors);
+    XfwMonitor *primary_monitor = NULL;
+    GList *monitors = enumerate_monitors(screen, &previous_monitors, &primary_monitor);
 
     guint n_removed = g_list_length(previous_monitors);
     guint n_kept = n_previous - n_removed;
     guint n_added = g_list_length(monitors) - n_kept;
-    _xfw_screen_set_monitors(screen, monitors, n_added, n_removed);
+    _xfw_screen_set_monitors(screen, monitors, primary_monitor, n_added, n_removed);
     g_list_free_full(previous_monitors, g_object_unref);
 }
 
@@ -389,7 +396,7 @@ _xfw_monitor_x11_init(XfwScreenX11 *xscreen) {
         g_checksum_free(identifier_cksum);
 
         GList *monitors = g_list_append(NULL, monitor);
-        _xfw_screen_set_monitors(screen, monitors, 1, 0);
+        _xfw_screen_set_monitors(screen, monitors, monitor, 1, 0);
     } else {
         Display *dpy = gdk_x11_display_get_xdisplay(gdk_screen_get_display(gscreen));
         GdkWindow *rootwin = gdk_screen_get_root_window(gscreen);
