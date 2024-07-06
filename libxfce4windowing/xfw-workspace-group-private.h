@@ -24,6 +24,7 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
+#include "xfw-monitor.h"
 #include "xfw-workspace-group.h"
 #include "xfw-workspace-manager.h"
 
@@ -42,9 +43,9 @@ struct _XfwWorkspaceGroupInterface {
     void (*active_workspace_changed)(XfwWorkspaceGroup *group,
                                      XfwWorkspace *previously_active_workspace);
     void (*monitor_added)(XfwWorkspaceGroup *group,
-                          GdkMonitor *monitor);
+                          XfwMonitor *monitor);
     void (*monitor_removed)(XfwWorkspaceGroup *group,
-                            GdkMonitor *monitor);
+                            XfwMonitor *monitor);
     void (*monitors_changed)(XfwWorkspaceGroup *group);
     void (*viewports_changed)(XfwWorkspaceGroup *group);
     void (*workspace_added)(XfwWorkspaceGroup *group,

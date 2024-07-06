@@ -27,6 +27,7 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-application-wayland.h"
+#include "xfw-monitor-wayland.h"
 #include "xfw-screen-wayland.h"
 #include "xfw-screen.h"
 #include "xfw-util.h"
@@ -582,37 +583,38 @@ toplevel_parent(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
 static void
 toplevel_output_enter(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_output *output) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
-    GdkDisplay *display = gdk_display_get_default();
-    GdkMonitor *monitor;
-    gint n_monitors = gdk_display_get_n_monitors(display);
+    XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
+    GList *monitors = xfw_screen_get_monitors(screen);
 
-    for (gint n = 0; n < n_monitors; n++) {
-        monitor = gdk_display_get_monitor(display, n);
-        if (output == gdk_wayland_monitor_get_wl_output(monitor)) {
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        XfwMonitorWayland *monitor = XFW_MONITOR_WAYLAND(l->data);
+        if (output == _xfw_monitor_wayland_get_wl_output(monitor)
+            && g_list_find(window->priv->monitors, monitor) == NULL)
+        {
             window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
+            g_object_notify(G_OBJECT(window), "monitors");
             break;
         }
     }
-
-    g_object_notify(G_OBJECT(window), "monitors");
 }
 
 static void
 toplevel_output_leave(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_output *output) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
-    GdkDisplay *display = gdk_display_get_default();
-    GdkMonitor *monitor;
-    gint n_monitors = gdk_display_get_n_monitors(display);
+    XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
+    GList *monitors = xfw_screen_get_monitors(screen);
 
-    for (gint n = 0; n < n_monitors; n++) {
-        monitor = gdk_display_get_monitor(display, n);
-        if (output == gdk_wayland_monitor_get_wl_output(monitor)) {
-            window->priv->monitors = g_list_remove(window->priv->monitors, monitor);
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        XfwMonitorWayland *monitor = XFW_MONITOR_WAYLAND(l->data);
+        if (output == _xfw_monitor_wayland_get_wl_output(monitor)) {
+            GList *lm = g_list_find(window->priv->monitors, monitor);
+            if (lm != NULL) {
+                window->priv->monitors = g_list_delete_link(window->priv->monitors, lm);
+                g_object_notify(G_OBJECT(window), "monitors");
+            }
             break;
         }
     }
-
-    g_object_notify(G_OBJECT(window), "monitors");
 }
 
 static void
