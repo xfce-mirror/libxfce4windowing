@@ -38,6 +38,7 @@
 #endif
 
 #include "libxfce4windowing-private.h"
+#include "xfw-gdk-private.h"
 #include "xfw-monitor-private.h"
 
 #define XFW_MONITOR_GET_PRIVATE(monitor) ((XfwMonitorPrivate *)xfw_monitor_get_instance_private(XFW_MONITOR(monitor)))
@@ -59,6 +60,8 @@ typedef struct _XfwMonitorPrivate {
     XfwMonitorTransform transform;
     gboolean is_primary;
 
+    GdkMonitor *gdkmonitor;
+
     MonitorPendingChanges pending_changes;
 } XfwMonitorPrivate;
 
@@ -79,6 +82,7 @@ enum {
     PROP_SUBPIXEL,
     PROP_TRANSFORM,
     PROP_IS_PRIMARY,
+    PROP_GDK_MONITOR,
 };
 
 static void xfw_monitor_set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
@@ -345,6 +349,21 @@ xfw_monitor_class_init(XfwMonitorClass *klass) {
                                                          "If this is the primary monitor",
                                                          FALSE,
                                                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:gdk-monitor:
+     *
+     * The #GdkMonitor corresponding to this monitor.
+     *
+     * Since 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_GDK_MONITOR,
+                                    g_param_spec_object("gdk-monitor",
+                                                        "gdk-monitor",
+                                                        "Monitor's GdkMonitor",
+                                                        GDK_TYPE_MONITOR,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 }
 
 static void
@@ -424,6 +443,10 @@ xfw_monitor_get_property(GObject *object, guint property_id, GValue *value, GPar
             g_value_set_boolean(value, priv->is_primary);
             break;
 
+        case PROP_GDK_MONITOR:
+            g_value_set_object(value, xfw_monitor_get_gdk_monitor(XFW_MONITOR(object)));
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
             break;
@@ -433,6 +456,10 @@ xfw_monitor_get_property(GObject *object, guint property_id, GValue *value, GPar
 static void
 xfw_monitor_finalize(GObject *object) {
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(object);
+
+    if (priv->gdkmonitor != NULL) {
+        g_object_remove_weak_pointer(G_OBJECT(priv->gdkmonitor), (gpointer)&priv->gdkmonitor);
+    }
 
     g_free(priv->identifier);
     g_free(priv->description);
@@ -693,6 +720,47 @@ gboolean
 xfw_monitor_is_primary(XfwMonitor *monitor) {
     g_return_val_if_fail(XFW_IS_MONITOR(monitor), FALSE);
     return XFW_MONITOR_GET_PRIVATE(monitor)->is_primary;
+}
+
+/**
+ * xfw_monitor_get_gdk_monitor:
+ * @monitor: a #XfwMonitor.
+ *
+ * Returns the #GdkMonitor that corresponds to @monitor.
+ *
+ * Return value: (not nullable) (transfer none): A #GdkMonitor.
+ *
+ * Since: 4.19.4
+ **/
+GdkMonitor *
+xfw_monitor_get_gdk_monitor(XfwMonitor *monitor) {
+    g_return_val_if_fail(XFW_IS_MONITOR(monitor), NULL);
+
+    XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
+    if (priv->gdkmonitor == NULL) {
+        GdkDisplay *display = gdk_display_get_default();
+        gint nmonitors = gdk_display_get_n_monitors(display);
+        for (gint i = 0; i < nmonitors; ++i) {
+            GdkMonitor *gdkmonitor = gdk_display_get_monitor(display, i);
+            const gchar *connector = xfw_gdk_monitor_get_connector(gdkmonitor);
+            if (g_strcmp0(priv->connector, connector) == 0) {
+                priv->gdkmonitor = gdkmonitor;
+                g_object_add_weak_pointer(G_OBJECT(priv->gdkmonitor), (gpointer)&priv->gdkmonitor);
+                break;
+            }
+        }
+    }
+
+    if (priv->gdkmonitor == NULL) {
+        GdkDisplay *display = gdk_display_get_default();
+        if (gdk_display_get_n_monitors(display) == 1) {
+            priv->gdkmonitor = gdk_display_get_monitor(display, 0);
+            g_object_add_weak_pointer(G_OBJECT(priv->gdkmonitor), (gpointer)&priv->gdkmonitor);
+        }
+    }
+
+    g_return_val_if_fail(GDK_IS_MONITOR(priv->gdkmonitor), NULL);
+    return priv->gdkmonitor;
 }
 
 

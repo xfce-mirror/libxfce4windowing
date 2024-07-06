@@ -207,6 +207,7 @@ xfw_monitor_get_physical_size
 xfw_monitor_get_subpixel
 xfw_monitor_get_transform
 xfw_monitor_is_primary
+xfw_monitor_get_gdk_monitor
 <SUBSECTION Standard>
 XfwMonitorClass
 XFW_TYPE_MONITOR
