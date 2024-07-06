@@ -25,9 +25,8 @@
 #endif
 
 #include <gdk/gdk.h>
-
-#include "xfw-application.h"
-#include "xfw-workspace.h"
+#include <libxfce4windowing/xfw-application.h>
+#include <libxfce4windowing/xfw-workspace.h>
 
 G_BEGIN_DECLS
 

@@ -24,7 +24,8 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <gdk/gdk.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gio/gio.h>
 
 G_BEGIN_DECLS
 

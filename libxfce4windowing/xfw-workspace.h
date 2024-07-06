@@ -25,8 +25,7 @@
 #endif
 
 #include <glib-object.h>
-
-#include "xfw-util.h"
+#include <libxfce4windowing/xfw-util.h>
 
 G_BEGIN_DECLS
 

@@ -24,10 +24,8 @@
 #error "Only libxfce4windowing.h can be included directly"
 #endif
 
-#include <gdk/gdk.h>
-
-#include "xfw-window.h"
-#include "xfw-workspace-manager.h"
+#include <libxfce4windowing/xfw-window.h>
+#include <libxfce4windowing/xfw-workspace-manager.h>
 
 G_BEGIN_DECLS
 
