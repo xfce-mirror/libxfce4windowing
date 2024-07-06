@@ -319,6 +319,44 @@ unscale_monitor_coordinates(GList *monitors, XfwMonitor *monitor) {
     g_array_free(found_y_segments, TRUE);
 }
 
+static XfwMonitor *
+guess_primary_monitor(GList *monitors) {
+    XfwMonitor *maybe_primary = NULL;
+
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        XfwMonitor *monitor = XFW_MONITOR(l->data);
+        const char *connector = xfw_monitor_get_connector(monitor);
+        if (G_UNLIKELY(connector == NULL)) {
+            continue;
+        }
+
+        if (g_str_has_prefix(connector, "LVDS")
+            || g_str_has_prefix(connector, "eDP")
+            || strcmp(connector, "PANEL") == 0)
+        {
+            // It's probably a laptop and this is the laptop's main
+            // screen, so let's call that the primary monitor.
+            return monitor;
+        }
+
+        GdkRectangle geom;
+        xfw_monitor_get_logical_geometry(monitor, &geom);
+        if (geom.x == 0 && geom.y == 0) {
+            // The topmost, leftmost monitor could be considered primary.
+            maybe_primary = monitor;
+        }
+    }
+
+    if (maybe_primary == NULL) {
+        // We give up; first monitor in the list is primary.
+        if (monitors != NULL) {
+            maybe_primary = XFW_MONITOR(monitors->data);
+        }
+    }
+
+    return maybe_primary;
+}
+
 static void
 finalize_output(MonitorsData *msdata, XfwMonitorWayland *monitor_wl) {
     XfwMonitor *monitor = XFW_MONITOR(monitor_wl);
@@ -419,6 +457,12 @@ finalize_output(MonitorsData *msdata, XfwMonitorWayland *monitor_wl) {
                 unscale_monitor_coordinates(monitors, a_monitor);
             }
         }
+    }
+
+    XfwMonitor *primary_monitor = guess_primary_monitor(monitors);
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        XfwMonitor *a_monitor = XFW_MONITOR(l->data);
+        _xfw_monitor_set_is_primary(a_monitor, a_monitor == primary_monitor);
     }
 
     _xfw_screen_set_monitors(msdata->screen, monitors, added ? 1 : 0, 0);
@@ -634,6 +678,12 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t name) 
             GList *monitors = _xfw_screen_steal_monitors(msdata->screen);
             monitors = g_list_remove(monitors, monitor);
             g_object_unref(monitor);
+
+            XfwMonitor *primary_monitor = guess_primary_monitor(monitors);
+            for (GList *l = monitors; l != NULL; l = l->next) {
+                XfwMonitor *a_monitor = XFW_MONITOR(l->data);
+                _xfw_monitor_set_is_primary(a_monitor, a_monitor == primary_monitor);
+            }
 
             _xfw_screen_set_monitors(msdata->screen, monitors, 0, 1);
 

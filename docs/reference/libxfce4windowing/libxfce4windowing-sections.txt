@@ -41,6 +41,7 @@ xfw_screen_get_windows
 xfw_screen_get_windows_stacked
 xfw_screen_get_active_window
 xfw_screen_get_monitors
+xfw_screen_get_primary_monitor
 xfw_screen_get_show_desktop
 xfw_screen_set_show_desktop
 <SUBSECTION Standard>
@@ -205,6 +206,7 @@ xfw_monitor_get_logical_geometry
 xfw_monitor_get_physical_size
 xfw_monitor_get_subpixel
 xfw_monitor_get_transform
+xfw_monitor_is_primary
 <SUBSECTION Standard>
 XfwMonitorClass
 XFW_TYPE_MONITOR
