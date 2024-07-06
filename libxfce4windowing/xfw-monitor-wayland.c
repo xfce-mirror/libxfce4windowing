@@ -746,3 +746,8 @@ _xfw_monitor_wayland_init(XfwScreenWayland *wscreen) {
         wl_display_dispatch(wldpy);
     }
 }
+
+struct wl_output *
+_xfw_monitor_wayland_get_wl_output(XfwMonitorWayland *monitor) {
+    return monitor->output;
+}

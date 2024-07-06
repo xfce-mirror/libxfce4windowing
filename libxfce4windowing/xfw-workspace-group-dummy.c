@@ -21,10 +21,10 @@
 #include "config.h"
 #endif
 
-#include <gdk/gdk.h>
 #include <glib/gi18n-lib.h>
 
 #include "libxfce4windowing-private.h"
+#include "xfw-screen.h"
 #include "xfw-util.h"
 #include "xfw-workspace-group-dummy.h"
 #include "xfw-workspace-group-private.h"
@@ -42,10 +42,9 @@ struct _XfwWorkspaceGroupDummyPrivate {
     XfwCreateWorkspaceFunc create_workspace_func;
     XfwMoveViewportFunc move_viewport_func;
     XfwSetLayoutFunc set_layout_func;
-    GdkScreen *screen;
+    XfwScreen *screen;
     XfwWorkspaceManager *workspace_manager;
     GList *workspaces;
-    GList *monitors;
     XfwWorkspace *active_workspace;
 };
 
@@ -64,8 +63,8 @@ static gboolean xfw_workspace_group_dummy_create_workspace(XfwWorkspaceGroup *gr
 static gboolean xfw_workspace_group_dummy_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
 static gboolean xfw_workspace_group_dummy_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
 
-static void monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
-static void monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group);
+static void monitor_added(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupDummy *group);
+static void monitor_removed(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupDummy *group);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceGroupDummy, xfw_workspace_group_dummy, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceGroupDummy)
@@ -110,14 +109,8 @@ xfw_workspace_group_dummy_init(XfwWorkspaceGroupDummy *group) {
 static void
 xfw_workspace_group_dummy_constructed(GObject *obj) {
     XfwWorkspaceGroupDummy *group = XFW_WORKSPACE_GROUP_DUMMY(obj);
-    GdkDisplay *display = gdk_screen_get_display(group->priv->screen);
-    int n_monitors = gdk_display_get_n_monitors(display);
-    for (int i = 0; i < n_monitors; ++i) {
-        group->priv->monitors = g_list_prepend(group->priv->monitors, gdk_display_get_monitor(display, i));
-    }
-    group->priv->monitors = g_list_reverse(group->priv->monitors);
-    g_signal_connect(display, "monitor-added", G_CALLBACK(monitor_added), group);
-    g_signal_connect(display, "monitor-removed", G_CALLBACK(monitor_removed), group);
+    g_signal_connect(group->priv->screen, "monitor-added", G_CALLBACK(monitor_added), group);
+    g_signal_connect(group->priv->screen, "monitor-removed", G_CALLBACK(monitor_removed), group);
 }
 
 static void
@@ -190,7 +183,7 @@ xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *valu
             break;
 
         case WORKSPACE_GROUP_PROP_MONITORS:
-            g_value_set_pointer(value, group->priv->monitors);
+            g_value_set_pointer(value, xfw_screen_get_monitors(group->priv->screen));
             break;
 
         default:
@@ -202,14 +195,9 @@ xfw_workspace_group_dummy_get_property(GObject *obj, guint prop_id, GValue *valu
 static void
 xfw_workspace_group_dummy_finalize(GObject *obj) {
     XfwWorkspaceGroupDummy *group = XFW_WORKSPACE_GROUP_DUMMY(obj);
-    GdkDisplay *display;
 
+    g_signal_handlers_disconnect_by_data(group->priv->screen, group);
     g_list_free(group->priv->workspaces);
-
-    display = gdk_screen_get_display(group->priv->screen);
-    g_signal_handlers_disconnect_by_func(display, monitor_added, group);
-    g_signal_handlers_disconnect_by_func(display, monitor_removed, group);
-    g_list_free(group->priv->monitors);
 
     G_OBJECT_CLASS(xfw_workspace_group_dummy_parent_class)->finalize(obj);
 }
@@ -260,7 +248,7 @@ xfw_workspace_group_dummy_get_active_workspace(XfwWorkspaceGroup *group) {
 
 static GList *
 xfw_workspace_group_dummy_get_monitors(XfwWorkspaceGroup *group) {
-    return XFW_WORKSPACE_GROUP_DUMMY(group)->priv->monitors;
+    return xfw_screen_get_monitors(XFW_WORKSPACE_GROUP_DUMMY(group)->priv->screen);
 }
 
 static XfwWorkspaceManager *
@@ -308,21 +296,13 @@ xfw_workspace_group_dummy_set_layout(XfwWorkspaceGroup *group, gint rows, gint c
 }
 
 static void
-monitor_added(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group) {
-    int n_monitors = gdk_display_get_n_monitors(display);
-    for (int i = 0; i < n_monitors; ++i) {
-        if (gdk_display_get_monitor(display, i) == monitor) {
-            group->priv->monitors = g_list_insert(group->priv->monitors, monitor, i);
-            g_signal_emit_by_name(group, "monitor-added", monitor);
-            g_signal_emit_by_name(group, "monitors-changed");
-            break;
-        }
-    }
+monitor_added(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupDummy *group) {
+    g_signal_emit_by_name(group, "monitor-added", monitor);
+    g_signal_emit_by_name(group, "monitors-changed");
 }
 
 static void
-monitor_removed(GdkDisplay *display, GdkMonitor *monitor, XfwWorkspaceGroupDummy *group) {
-    group->priv->monitors = g_list_remove(group->priv->monitors, monitor);
+monitor_removed(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupDummy *group) {
     g_signal_emit_by_name(group, "monitor-removed", monitor);
     g_signal_emit_by_name(group, "monitors-changed");
 }
