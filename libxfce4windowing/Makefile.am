@@ -68,6 +68,8 @@ libxfce4windowing_0_la_SOURCES = \
 	libxfce4windowing-private.h \
 	xfw-application.c \
 	xfw-application-private.h \
+	xfw-gdk-private.c \
+	xfw-gdk-private.h \
 	xfw-monitor.c \
 	xfw-monitor-private.h \
 	xfw-screen.c \
