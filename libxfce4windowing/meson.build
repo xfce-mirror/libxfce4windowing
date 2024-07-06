@@ -21,6 +21,7 @@ windowing_sources = [
   'libxfce4windowing-config.c',
   'libxfce4windowing-private.c',
   'xfw-application.c',
+  'xfw-gdk-private.c',
   'xfw-monitor.c',
   'xfw-screen.c',
   'xfw-util.c',

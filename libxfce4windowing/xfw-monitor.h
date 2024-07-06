@@ -108,6 +108,8 @@ XfwMonitorTransform xfw_monitor_get_transform(XfwMonitor *monitor);
 
 gboolean xfw_monitor_is_primary(XfwMonitor *monitor);
 
+GdkMonitor *xfw_monitor_get_gdk_monitor(XfwMonitor *monitor);
+
 G_END_DECLS
 
 #endif /* __XFW_MONITOR_H__ */

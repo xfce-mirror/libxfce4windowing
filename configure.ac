@@ -15,7 +15,7 @@ XDT_VERSION_INIT([4.19.3], [git])
 dnl minimum required versions
 m4_define([libx11_minimum_version], [1.6.7])
 m4_define([glib_minimum_version], [2.68.0])
-m4_define([gtk_minimum_version], [3.24.0])
+m4_define([gtk_minimum_version], [3.24.10])
 m4_define([gdk_pixbuf_minimum_version], [2.40.0])
 m4_define([wnck_minimum_version], [3.14])
 m4_define([wayland_minimum_version], [1.15])
