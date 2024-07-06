@@ -106,6 +106,8 @@ void xfw_monitor_get_physical_size(XfwMonitor *monitor,
 XfwMonitorSubpixel xfw_monitor_get_subpixel(XfwMonitor *monitor);
 XfwMonitorTransform xfw_monitor_get_transform(XfwMonitor *monitor);
 
+gboolean xfw_monitor_is_primary(XfwMonitor *monitor);
+
 G_END_DECLS
 
 #endif /* __XFW_MONITOR_H__ */
