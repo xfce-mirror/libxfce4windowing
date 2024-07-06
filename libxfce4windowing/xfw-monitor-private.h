@@ -26,7 +26,8 @@
     MONITOR_PENDING_SCALE \
     | MONITOR_PENDING_PHYSICAL_GEOMETRY \
     | MONITOR_PENDING_LOGICAL_GEOMETRY \
-    | MONITOR_PENDING_TRANSFORM)
+    | MONITOR_PENDING_TRANSFORM \
+    | MONITOR_PENDING_IS_PRIMARY)
 
 G_BEGIN_DECLS
 
@@ -49,6 +50,7 @@ typedef enum {
     MONITOR_PENDING_PHYSICAL_HEIGHT = (1 << 11),
     MONITOR_PENDING_SUBPIXEL = (1 << 12),
     MONITOR_PENDING_TRANSFORM = (1 << 13),
+    MONITOR_PENDING_IS_PRIMARY = (1 << 14),
 } MonitorPendingChanges;
 
 void _xfw_monitor_set_identifier(XfwMonitor *monitor,
@@ -78,6 +80,9 @@ void _xfw_monitor_set_subpixel(XfwMonitor *monitor,
                                XfwMonitorSubpixel subpixel);
 void _xfw_monitor_set_transform(XfwMonitor *monitor,
                                 XfwMonitorTransform transform);
+
+void _xfw_monitor_set_is_primary(XfwMonitor *monitor,
+                                 gboolean is_primary);
 
 MonitorPendingChanges _xfw_monitor_notify_pending_changes(XfwMonitor *monitor);
 
