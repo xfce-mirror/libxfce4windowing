@@ -67,6 +67,7 @@ typedef struct _XfwXcreenPrivate {
     GdkScreen *gdk_screen;
     XfwWorkspaceManager *workspace_manager;
     GList *monitors;
+    XfwMonitor *primary_monitor;
     XfwWindow *active_window;
     guint32 show_desktop : 1;
 } XfwScreenPrivate;
@@ -197,6 +198,7 @@ xfw_screen_class_init(XfwScreenClass *klass) {
      *   * A monitor was removed.
      *   * A monitor's resolution changed (including if the scale factor changed).
      *   * A monitor was re-positioned in the global screen space.
+     *   * Which monitor is primary has changed.
      *
      * Note that changes such as the subpixel layout or model name will not
      * result in the emission of this signal.  Connect to the propert notify
@@ -418,6 +420,30 @@ xfw_screen_get_monitors(XfwScreen *screen) {
 }
 
 /**
+ * xfw_screen_get_primary_monitor:
+ * @screen: an #XfwScreen.
+ *
+ * Returns the monitor designated as "primary".
+ *
+ * This function will do its best to return something other than %NULL.  If the
+ * windowing system has no concept of a primary monitor, or if the primary
+ * monitor is unset, a likely candidate will be chosen from the list of
+ * available monitors.
+ *
+ * However, if no monitors are connected, %NULL can still be returned.
+ *
+ * Return value: (nullable) (transfer none): @screen's primary #XfwMonitor, or
+ * %NULL.
+ *
+ * Since: 41.9.4
+ **/
+XfwMonitor *
+xfw_screen_get_primary_monitor(XfwScreen *screen) {
+    g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
+    return XFW_SCREEN_GET_PRIVATE(screen)->primary_monitor;
+}
+
+/**
  * xfw_screen_get_show_desktop:
  * @screen: an #XfwScreen.
  *
@@ -528,17 +554,20 @@ _xfw_screen_steal_monitors(XfwScreen *screen) {
 }
 
 void
-_xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, guint n_added, guint n_removed) {
+_xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, XfwMonitor *primary_monitor, guint n_added, guint n_removed) {
     XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
     g_list_free_full(priv->monitors, g_object_unref);
     priv->monitors = monitors;
+
+    gboolean primary_changed = priv->primary_monitor != primary_monitor;
+    priv->primary_monitor = primary_monitor;
 
     MonitorPendingChanges changed = 0;
     for (GList *l = monitors; l != NULL; l = l->next) {
         changed |= _xfw_monitor_notify_pending_changes(XFW_MONITOR(l->data));
     }
 
-    if ((changed & MONITORS_CHANGED_MASK) != 0 || n_added > 0 || n_removed > 0) {
+    if ((changed & MONITORS_CHANGED_MASK) != 0 || n_added > 0 || n_removed > 0 || primary_changed) {
         // Only notify if what has changed is relevant to positioning or size, or if
         // a monitor was added or removed.
         g_signal_emit_by_name(screen, "monitors-changed");

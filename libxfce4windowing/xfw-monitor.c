@@ -58,6 +58,8 @@ typedef struct _XfwMonitorPrivate {
     XfwMonitorSubpixel subpixel;
     XfwMonitorTransform transform;
 
+    gboolean is_primary;
+
     MonitorPendingChanges pending_changes;
 } XfwMonitorPrivate;
 
@@ -657,6 +659,23 @@ xfw_monitor_get_transform(XfwMonitor *monitor) {
     return XFW_MONITOR_GET_PRIVATE(monitor)->transform;
 }
 
+/**
+ * xfw_monitor_is_primary:
+ * @monitor: a #XfwMonitor.
+ *
+ * Returns whether or not @monitor has been designated as the primary
+ * monitor.
+ *
+ * Return value: %TRUE or %FALSE.
+ *
+ * Since: 4.19.4
+ **/
+gboolean
+xfw_monitor_is_primary(XfwMonitor *monitor) {
+    g_return_val_if_fail(XFW_IS_MONITOR(monitor), FALSE);
+    return XFW_MONITOR_GET_PRIVATE(monitor)->is_primary;
+}
+
 
 void
 _xfw_monitor_set_identifier(XfwMonitor *monitor, const char *identifier) {
@@ -825,6 +844,13 @@ _xfw_monitor_set_transform(XfwMonitor *monitor, XfwMonitorTransform transform) {
         priv->transform = transform;
         priv->pending_changes |= MONITOR_PENDING_TRANSFORM;
     }
+}
+
+void
+_xfw_monitor_set_is_primary(XfwMonitor *monitor, gboolean is_primary) {
+    g_return_if_fail(XFW_IS_MONITOR(monitor));
+    XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
+    priv->is_primary = is_primary;
 }
 
 MonitorPendingChanges

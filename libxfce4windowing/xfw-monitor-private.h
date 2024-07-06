@@ -79,6 +79,9 @@ void _xfw_monitor_set_subpixel(XfwMonitor *monitor,
 void _xfw_monitor_set_transform(XfwMonitor *monitor,
                                 XfwMonitorTransform transform);
 
+void _xfw_monitor_set_is_primary(XfwMonitor *monitor,
+                                 gboolean is_primary);
+
 MonitorPendingChanges _xfw_monitor_notify_pending_changes(XfwMonitor *monitor);
 
 G_END_DECLS
