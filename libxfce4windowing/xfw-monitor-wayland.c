@@ -412,11 +412,11 @@ finalize_output(MonitorsData *msdata, XfwMonitorWayland *monitor_wl) {
 
     _xfw_monitor_set_logical_geometry(monitor, &monitor_wl->logical_geometry);
 
-    gboolean added = FALSE;
+    GList added = { NULL, NULL, NULL };
     GList *monitors = _xfw_screen_steal_monitors(msdata->screen);
     if (!g_list_find(monitors, monitor)) {
         monitors = g_list_append(monitors, g_object_ref(monitor));
-        added = TRUE;
+        added.data = monitor;
     }
 
     // The compositor doesn't appear to tell us the monitor layout coordinates
@@ -465,7 +465,7 @@ finalize_output(MonitorsData *msdata, XfwMonitorWayland *monitor_wl) {
         _xfw_monitor_set_is_primary(a_monitor, a_monitor == primary_monitor);
     }
 
-    _xfw_screen_set_monitors(msdata->screen, monitors, added ? 1 : 0, 0);
+    _xfw_screen_set_monitors(msdata->screen, monitors, &added, NULL);
 }
 
 static void
@@ -675,17 +675,22 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t name) 
             }
             g_hash_table_remove(msdata->outputs_to_monitors, output);
 
+            GList removed = { NULL, NULL, NULL };
             GList *monitors = _xfw_screen_steal_monitors(msdata->screen);
-            monitors = g_list_remove(monitors, monitor);
-            g_object_unref(monitor);
+            GList *lm = g_list_find(monitors, monitor);
+            if (lm != NULL) {
+                monitors = g_list_delete_link(monitors, lm);
+                removed.data = monitor;
+                g_object_unref(monitor);
 
-            XfwMonitor *primary_monitor = guess_primary_monitor(monitors);
-            for (GList *l = monitors; l != NULL; l = l->next) {
-                XfwMonitor *a_monitor = XFW_MONITOR(l->data);
-                _xfw_monitor_set_is_primary(a_monitor, a_monitor == primary_monitor);
+                XfwMonitor *primary_monitor = guess_primary_monitor(monitors);
+                for (GList *l = monitors; l != NULL; l = l->next) {
+                    XfwMonitor *a_monitor = XFW_MONITOR(l->data);
+                    _xfw_monitor_set_is_primary(a_monitor, a_monitor == primary_monitor);
+                }
             }
 
-            _xfw_screen_set_monitors(msdata->screen, monitors, 0, 1);
+            _xfw_screen_set_monitors(msdata->screen, monitors, NULL, &removed);
 
             break;
         }
