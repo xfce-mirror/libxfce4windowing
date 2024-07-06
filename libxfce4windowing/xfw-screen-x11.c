@@ -80,6 +80,8 @@ xfw_screen_x11_constructed(GObject *obj) {
 
     G_OBJECT_CLASS(xfw_screen_x11_parent_class)->constructed(obj);
 
+    _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_x11_new(screen));
+
     G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     xscreen->wnck_screen = g_object_ref(wnck_screen_get(gdk_x11_screen_get_screen_number(_xfw_screen_get_gdk_screen(screen))));
     G_GNUC_END_IGNORE_DEPRECATIONS
