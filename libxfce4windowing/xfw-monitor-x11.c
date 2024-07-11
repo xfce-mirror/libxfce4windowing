@@ -149,14 +149,14 @@ enumerate_monitors(XfwScreen *screen, GList **previous_monitors) {
 
     XRRScreenResources *resources = XRRGetScreenResourcesCurrent(dpy, root);
     if (resources == NULL) {
-        g_warning("XRRGetScreenResourcesCurrent() failed");
+        g_message("XRRGetScreenResourcesCurrent() failed");
         return NULL;
     }
 
     int nmonitors = 0;
     XRRMonitorInfo *rrmonitors = XRRGetMonitors(dpy, root, True, &nmonitors);
-    if (rrmonitors == NULL || nmonitors == 0) {
-        g_warning("XRRMonitorInfo returned nothing");
+    if (rrmonitors == NULL) {
+        g_message("XRRGetMonitors() failed");
         XRRFreeScreenResources(resources);
         return NULL;
     }
