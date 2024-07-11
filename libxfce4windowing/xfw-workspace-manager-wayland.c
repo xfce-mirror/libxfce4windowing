@@ -29,6 +29,7 @@
 #include "protocols/ext-workspace-v1-20230427-client.h"
 
 #include "libxfce4windowing-private.h"
+#include "xfw-screen.h"
 #include "xfw-workspace-group-wayland.h"
 #include "xfw-workspace-manager-dummy.h"
 #include "xfw-workspace-manager-private.h"
@@ -44,7 +45,7 @@ enum {
 struct _XfwWorkspaceManagerWaylandPrivate {
     struct wl_registry *wl_registry;
     struct ext_workspace_manager_v1 *handle;
-    GdkScreen *screen;
+    XfwScreen *screen;
     GList *groups;
     GList *workspaces;
 };
@@ -137,7 +138,7 @@ xfw_workspace_manager_wayland_set_property(GObject *obj, guint prop_id, const GV
             break;
 
         case WORKSPACE_MANAGER_PROP_SCREEN:
-            manager->priv->screen = GDK_SCREEN(g_value_get_object(value));
+            manager->priv->screen = XFW_SCREEN(g_value_get_object(value));
             break;
 
         default:
