@@ -435,7 +435,7 @@ xfw_screen_get_monitors(XfwScreen *screen) {
  * Return value: (nullable) (transfer none): @screen's primary #XfwMonitor, or
  * %NULL.
  *
- * Since: 41.9.4
+ * Since: 4.19.4
  **/
 XfwMonitor *
 xfw_screen_get_primary_monitor(XfwScreen *screen) {
