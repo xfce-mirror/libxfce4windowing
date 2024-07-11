@@ -46,6 +46,8 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-marshal.h"
+#include "xfw-monitor.h"
+#include "xfw-screen.h"
 #include "xfw-workspace-group-private.h"
 #include "xfw-workspace-manager.h"
 
@@ -97,7 +99,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
     /**
      * XfwWorkspaceGroup::monitor-added:
      * @group: the object which received the signal.
-     * @monitor: a #GdkMonitor.
+     * @monitor: a #XfwMonitor.
      *
      * Emitted when @group is added to a new monitor.
      **/
@@ -108,12 +110,12 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
-                 GDK_TYPE_MONITOR);
+                 XFW_TYPE_MONITOR);
 
     /**
      * XfwWorkspaceGroup::monitor-removed:
      * @group: the object which received the signal.
-     * @monitor: a #GdkMonitor.
+     * @monitor: a #XfwMonitor.
      *
      * Emitted when @group is removed from a monitor.
      **/
@@ -124,7 +126,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                  NULL, NULL,
                  g_cclosure_marshal_VOID__OBJECT,
                  G_TYPE_NONE, 1,
-                 GDK_TYPE_MONITOR);
+                 XFW_TYPE_MONITOR);
 
     /**
      * XfwWorkspaceGroup::monitors-changed:
@@ -189,14 +191,13 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
     /**
      * XfwWorkspaceGroup:screen:
      *
-     * The #GdkScreen used when creating the #XfwScreen that owns this
-     * #XfwWorkspaceGroup.
+     * The #XfwScreen that owns this #XfwWorkspaceGroup.
      **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("screen",
                                                             "screen",
                                                             "screen",
-                                                            GDK_TYPE_SCREEN,
+                                                            XFW_TYPE_SCREEN,
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 
     /**
@@ -237,7 +238,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
     /**
      * XfwWorkspaceGroup:monitors:
      *
-     * The list of #GdkMonitor this #XfwWorkspaceGroup is displayed on.
+     * The list of #XfwMonitor this #XfwWorkspaceGroup is displayed on.
      **/
     g_object_interface_install_property(iface,
                                         g_param_spec_pointer("monitors",
@@ -319,8 +320,8 @@ xfw_workspace_group_get_active_workspace(XfwWorkspaceGroup *group) {
  *
  * Lists the physical monitors that this workspace group displays on.
  *
- * Return value: (nullable) (element-type GdkMonitor) (transfer none):
- * A list of #GdkMonitor, or %NULL if @group is not displayed on any
+ * Return value: (nullable) (element-type XfwMonitor) (transfer none):
+ * A list of #XfwMonitor, or %NULL if @group is not displayed on any
  * monitors.  The list and its contents are owned by @group.
  **/
 GList *

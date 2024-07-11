@@ -20,6 +20,8 @@
 #ifndef __XFW_MONITOR_WAYLAND_H__
 #define __XFW_MONITOR_WAYLAND_H__
 
+#include <wayland-client-protocol.h>
+
 #include "xfw-monitor-private.h"
 #include "xfw-screen-wayland.h"
 
@@ -29,6 +31,8 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE(XfwMonitorWayland, xfw_monitor_wayland, XFW, MONITOR_WAYLAND, XfwMonitor)
 
 void _xfw_monitor_wayland_init(XfwScreenWayland *screen);
+
+struct wl_output *_xfw_monitor_wayland_get_wl_output(XfwMonitorWayland *monitor);
 
 G_END_DECLS
 
