@@ -54,6 +54,7 @@ typedef struct _XfwMonitorPrivate {
     guint scale;
     GdkRectangle physical_geometry;
     GdkRectangle logical_geometry;
+    GdkRectangle workarea;
     guint width_mm;
     guint height_mm;
     XfwMonitorSubpixel subpixel;
@@ -77,6 +78,7 @@ enum {
     PROP_SCALE,
     PROP_PHYSICAL_GEOMETRY,
     PROP_LOGICAL_GEOMETRY,
+    PROP_WORKAREA,
     PROP_PHYSICAL_WIDTH,
     PROP_PHYSICAL_HEIGHT,
     PROP_SUBPIXEL,
@@ -272,6 +274,21 @@ xfw_monitor_class_init(XfwMonitorClass *klass) {
                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
+     * XfwMonitor:workearea:
+     *
+     * Monitor workarea in scaled logical pixels.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_WORKAREA,
+                                    g_param_spec_boxed("workarea",
+                                                       "workarea",
+                                                       "Monitor workarea in scaled logical pixels",
+                                                       GDK_TYPE_RECTANGLE,
+                                                       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
      * XfwMonitor:width-mm:
      *
      * Physical width of the monitor in millimeters.
@@ -419,6 +436,10 @@ xfw_monitor_get_property(GObject *object, guint property_id, GValue *value, GPar
 
         case PROP_LOGICAL_GEOMETRY:
             g_value_set_boxed(value, &priv->logical_geometry);
+            break;
+
+        case PROP_WORKAREA:
+            g_value_set_boxed(value, &priv->workarea);
             break;
 
         case PROP_PHYSICAL_WIDTH:
@@ -647,6 +668,27 @@ xfw_monitor_get_logical_geometry(XfwMonitor *monitor, GdkRectangle *logical_geom
     g_return_if_fail(XFW_IS_MONITOR(monitor));
     g_return_if_fail(logical_geometry != NULL);
     *logical_geometry = XFW_MONITOR_GET_PRIVATE(monitor)->logical_geometry;
+}
+
+/**
+ * xfw_monitor_get_workarea:
+ * @monitor: a #XfwMonitor.
+ * @workarea: (not nullable) (out caller-allocates): a #GdkRectangle.
+ *
+ * Retrieves the workarea for @monitor, which may exclude regions of the screen
+ * for windows such as panels or docks.
+ *
+ * The returned geometry is in logical application pixels, which are affected
+ * by the monitor's scale factor.  The origin is set to the top-left corner of
+ * the monitor.
+ *
+ * Since: 4.19.4
+ **/
+void
+xfw_monitor_get_workarea(XfwMonitor *monitor, GdkRectangle *workarea) {
+    g_return_if_fail(XFW_IS_MONITOR(monitor));
+    g_return_if_fail(workarea != NULL);
+    *workarea = XFW_MONITOR_GET_PRIVATE(monitor)->workarea;
 }
 
 /**
@@ -893,6 +935,18 @@ _xfw_monitor_set_logical_geometry(XfwMonitor *monitor, GdkRectangle *logical_geo
 }
 
 void
+_xfw_monitor_set_workarea(XfwMonitor *monitor, GdkRectangle *workarea) {
+    g_return_if_fail(XFW_IS_MONITOR(monitor));
+    g_return_if_fail(workarea != NULL);
+
+    XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
+    if (!gdk_rectangle_equal(&priv->workarea, workarea)) {
+        priv->workarea = *workarea;
+        priv->pending_changes |= MONITOR_PENDING_WORKAREA;
+    }
+}
+
+void
 _xfw_monitor_set_physical_size(XfwMonitor *monitor, guint width_mm, guint height_mm) {
     g_return_if_fail(XFW_IS_MONITOR(monitor));
 
@@ -958,6 +1012,7 @@ _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
         { MONITOR_PENDING_SCALE, "scale" },
         { MONITOR_PENDING_PHYSICAL_GEOMETRY, "physical-geometry" },
         { MONITOR_PENDING_LOGICAL_GEOMETRY, "logical-geometry" },
+        { MONITOR_PENDING_WORKAREA, "workarea" },
         { MONITOR_PENDING_PHYSICAL_WIDTH, "width-mm" },
         { MONITOR_PENDING_PHYSICAL_HEIGHT, "height-mm" },
         { MONITOR_PENDING_SUBPIXEL, "subpixel" },
