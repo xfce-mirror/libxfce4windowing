@@ -130,8 +130,6 @@ xfw_monitor_class_init(XfwMonitorClass *klass) {
      * Opaque, hopefully-unique monitor identifier.
      *
      * Since: 4.19.4
-     *
-     * Since: 4.19.4
      **/
     g_object_class_install_property(gobject_class,
                                     PROP_IDENTIFIER,
