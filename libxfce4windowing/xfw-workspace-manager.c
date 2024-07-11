@@ -36,9 +36,8 @@
 #include "config.h"
 #endif
 
-#include <gdk/gdk.h>
-
 #include "libxfce4windowing-private.h"
+#include "xfw-screen.h"
 #include "xfw-workspace-manager-private.h"
 
 G_DEFINE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, G_TYPE_OBJECT)
@@ -113,14 +112,13 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
     /**
      * XfwWorkspaceManager:screen:
      *
-     * The #GdkScreen instance used to construct the #XfwScreen that owns this
-     * workspace manager.
+     * The #XfwScreen instance that owns this workspace manager.
      **/
     g_object_interface_install_property(iface,
                                         g_param_spec_object("screen",
                                                             "screen",
                                                             "screen",
-                                                            GDK_TYPE_SCREEN,
+                                                            XFW_TYPE_SCREEN,
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 }
 

@@ -21,14 +21,14 @@
 #include "config.h"
 #endif
 
-#include <gdk/gdk.h>
-#include <gdk/gdkwayland.h>
 #include <glib/gi18n-lib.h>
 #include <limits.h>
 
 #include "protocols/ext-workspace-v1-20230427-client.h"
 
 #include "libxfce4windowing-private.h"
+#include "xfw-monitor-wayland.h"
+#include "xfw-screen.h"
 #include "xfw-util.h"
 #include "xfw-workspace-group-private.h"
 #include "xfw-workspace-group-wayland.h"
@@ -43,7 +43,7 @@ enum {
 };
 
 struct _XfwWorkspaceGroupWaylandPrivate {
-    GdkScreen *screen;
+    XfwScreen *screen;
     XfwWorkspaceManager *workspace_manager;
     struct ext_workspace_group_handle_v1 *handle;
     XfwWorkspaceGroupCapabilities capabilities;
@@ -281,12 +281,10 @@ group_capabilities(void *data, struct ext_workspace_group_handle_v1 *wl_group, u
 static void
 group_output_enter(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct wl_output *output) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
-    GdkDisplay *display = gdk_screen_get_display(group->priv->screen);
-    int n_monitors = gdk_display_get_n_monitors(display);
 
-    for (int i = 0; i < n_monitors; ++i) {
-        GdkMonitor *monitor = gdk_display_get_monitor(display, i);
-        if (gdk_wayland_monitor_get_wl_output(monitor) == output
+    for (GList *l = xfw_screen_get_monitors(group->priv->screen); l != NULL; l = l->next) {
+        XfwMonitorWayland *monitor = XFW_MONITOR_WAYLAND(l->data);
+        if (_xfw_monitor_wayland_get_wl_output(monitor) == output
             && g_list_find(group->priv->monitors, monitor) == NULL)
         {
             group->priv->monitors = g_list_append(group->priv->monitors, monitor);
@@ -301,9 +299,9 @@ static void
 group_output_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct wl_output *output) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
 
-    for (GList *l = group->priv->monitors; l != NULL; l = l->next) {
-        GdkMonitor *monitor = GDK_MONITOR(l->data);
-        if (gdk_wayland_monitor_get_wl_output(monitor) == output) {
+    for (GList *l = xfw_screen_get_monitors(group->priv->screen); l != NULL; l = l->next) {
+        XfwMonitorWayland *monitor = XFW_MONITOR_WAYLAND(l->data);
+        if (_xfw_monitor_wayland_get_wl_output(monitor) == output) {
             group->priv->monitors = g_list_delete_link(group->priv->monitors, l);
             g_signal_emit_by_name(group, "monitor-removed", monitor);
             g_signal_emit_by_name(group, "monitors-changed");
