@@ -102,6 +102,11 @@ xfw_screen_wayland_constructed(GObject *obj) {
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->constructed(obj);
 
+    _xfw_screen_set_workspace_manager(XFW_SCREEN(screen),
+                                      g_object_new(XFW_TYPE_WORKSPACE_MANAGER_WAYLAND,
+                                                   "screen", screen,
+                                                   NULL));
+
     gdk_display = gdk_screen_get_display(_xfw_screen_get_gdk_screen(XFW_SCREEN(screen)));
     wl_display = gdk_wayland_display_get_wl_display(GDK_WAYLAND_DISPLAY(gdk_display));
     screen->wl_registry = wl_display_get_registry(wl_display);
