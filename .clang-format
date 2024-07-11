@@ -3,6 +3,7 @@ Language: Cpp
 BasedOnStyle: LLVM
 
 AlignEscapedNewlines: DontAlign
+AlignOperands: DontAlign
 AlignTrailingComments: Never
 AllowAllParametersOfDeclarationOnNextLine: false
 AlwaysBreakAfterDefinitionReturnType: All
@@ -17,6 +18,7 @@ BraceWrapping:
   SplitEmptyNamespace: false
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
+BreakBeforeTernaryOperators: true
 ColumnLimit: 0
 Cpp11BracedListStyle: false
 IncludeBlocks: Regroup
