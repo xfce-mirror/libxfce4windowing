@@ -21,6 +21,7 @@
 #include "config.h"
 #endif
 
+#include <X11/X.h>
 #include <gdk/gdkx.h>
 #include <libwnck/libwnck.h>
 
@@ -39,6 +40,9 @@ struct _XfwScreenX11 {
     GList *windows;
     GList *windows_stacked;
     GHashTable *wnck_windows;
+
+    // _NET_WORKAREA is defined for each workspace
+    GArray *workareas;  // GdkRectangle
 };
 
 static void xfw_screen_x11_constructed(GObject *obj);
@@ -53,6 +57,7 @@ static void active_window_changed(WnckScreen *wnck_screen, WnckWindow *previous_
 static void window_stacking_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen);
 static void showing_desktop_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen);
 static void window_manager_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen);
+static void active_workspace_changed(WnckScreen *wnck_screen, WnckWorkspace *previous_workspace, XfwScreenX11 *screen);
 
 
 G_DEFINE_TYPE(XfwScreenX11, xfw_screen_x11, XFW_TYPE_SCREEN)
@@ -80,6 +85,11 @@ xfw_screen_x11_constructed(GObject *obj) {
 
     G_OBJECT_CLASS(xfw_screen_x11_parent_class)->constructed(obj);
 
+    _xfw_screen_set_workspace_manager(screen,
+                                      g_object_new(XFW_TYPE_WORKSPACE_MANAGER_X11,
+                                                   "screen", screen,
+                                                   NULL));
+
     G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     xscreen->wnck_screen = g_object_ref(wnck_screen_get(gdk_x11_screen_get_screen_number(_xfw_screen_get_gdk_screen(screen))));
     G_GNUC_END_IGNORE_DEPRECATIONS
@@ -106,6 +116,7 @@ xfw_screen_x11_constructed(GObject *obj) {
     g_signal_connect(xscreen->wnck_screen, "window-stacking-changed", G_CALLBACK(window_stacking_changed), xscreen);
     g_signal_connect(xscreen->wnck_screen, "window-manager-changed", G_CALLBACK(window_manager_changed), xscreen);
     g_signal_connect(xscreen->wnck_screen, "showing-desktop-changed", G_CALLBACK(showing_desktop_changed), xscreen);
+    g_signal_connect(xscreen->wnck_screen, "active-workspace-changed", G_CALLBACK(active_workspace_changed), xscreen);
 
     _xfw_monitor_x11_init(xscreen);
 }
@@ -118,6 +129,10 @@ xfw_screen_x11_finalize(GObject *obj) {
     g_list_free(screen->windows);
     g_list_free(screen->windows_stacked);
     g_hash_table_destroy(screen->wnck_windows);
+
+    if (screen->workareas != NULL) {
+        g_array_free(screen->workareas, TRUE);
+    }
 
     // to be released last
     g_object_unref(screen->wnck_screen);
@@ -221,9 +236,31 @@ showing_desktop_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen) {
     _xfw_screen_set_show_desktop(XFW_SCREEN(screen), show_desktop);
 }
 
+static void
+active_workspace_changed(WnckScreen *wnck_screen, WnckWorkspace *previous_workspace, XfwScreenX11 *screen) {
+    WnckWorkspace *cur_workspace = wnck_screen_get_active_workspace(screen->wnck_screen);
+    gint cur_workspace_num = cur_workspace != NULL
+        ? wnck_workspace_get_number(cur_workspace)
+        : 0;
+    _xfw_monitor_x11_workspace_changed(screen, cur_workspace_num);
+}
+
 XfwWorkspace *
 _xfw_screen_x11_workspace_for_wnck_workspace(XfwScreenX11 *screen, WnckWorkspace *wnck_workspace) {
     XfwWorkspaceManager *workspace_manager = xfw_screen_get_workspace_manager(XFW_SCREEN(screen));
     return _xfw_workspace_manager_x11_workspace_for_wnck_workspace(XFW_WORKSPACE_MANAGER_X11(workspace_manager),
                                                                    wnck_workspace);
+}
+
+GArray *
+_xfw_screen_x11_get_workareas(XfwScreenX11 *screen) {
+    return screen->workareas;
+}
+
+void
+_xfw_screen_x11_set_workareas(XfwScreenX11 *screen, GArray *workareas) {
+    if (screen->workareas != NULL && screen->workareas != workareas) {
+        g_array_free(screen->workareas, TRUE);
+    }
+    screen->workareas = workareas;
 }
