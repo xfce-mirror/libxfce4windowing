@@ -411,6 +411,13 @@ finalize_output(MonitorsData *msdata, XfwMonitorWayland *monitor_wl) {
     g_checksum_free(identifier_cksum);
 
     _xfw_monitor_set_logical_geometry(monitor, &monitor_wl->logical_geometry);
+    GdkRectangle workarea = {
+        .x = 0,
+        .y = 0,
+        .width = monitor_wl->logical_geometry.width,
+        .height = monitor_wl->logical_geometry.height,
+    };
+    _xfw_monitor_set_workarea(monitor, &workarea);
 
     GList added = { NULL, NULL, NULL };
     GList *monitors = _xfw_screen_steal_monitors(msdata->screen);
