@@ -203,6 +203,7 @@ xfw_monitor_get_refresh
 xfw_monitor_get_scale
 xfw_monitor_get_physical_geometry
 xfw_monitor_get_logical_geometry
+xfw_monitor_get_workarea
 xfw_monitor_get_physical_size
 xfw_monitor_get_subpixel
 xfw_monitor_get_transform
