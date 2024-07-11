@@ -100,6 +100,8 @@ void xfw_monitor_get_physical_geometry(XfwMonitor *monitor,
                                        GdkRectangle *physical_geometry);
 void xfw_monitor_get_logical_geometry(XfwMonitor *monitor,
                                       GdkRectangle *logical_geometry);
+void xfw_monitor_get_workarea(XfwMonitor *monitor,
+                              GdkRectangle *workarea);
 void xfw_monitor_get_physical_size(XfwMonitor *monitor,
                                    guint *width_mm,
                                    guint *height_mm);
