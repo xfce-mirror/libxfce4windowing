@@ -623,6 +623,7 @@ static void
 init_xdg_output(MonitorsData *msdata, struct wl_output *output, XfwMonitorWayland *monitor) {
     struct zxdg_output_v1 *xdg_output = zxdg_output_manager_v1_get_xdg_output(msdata->xdg_output_manager, output);
     g_debug("got xdg_output ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
+    monitor->xdg_output = xdg_output;
     zxdg_output_v1_add_listener(xdg_output, &xdg_output_listener, msdata);
     g_hash_table_insert(msdata->xdg_outputs_to_monitors, xdg_output, g_object_ref(monitor));
 }
@@ -637,6 +638,7 @@ registry_global(void *data, struct wl_registry *registry, uint32_t name, const c
 
         struct wl_output *output = wl_registry_bind(registry, name, &wl_output_interface, MIN(version, 4));
         g_debug("got output ID %d", wl_proxy_get_id((struct wl_proxy *)output));
+        monitor->output = output;
         wl_output_add_listener(output, &output_listener, msdata);
         g_hash_table_insert(msdata->outputs_to_monitors, output, monitor);
 
