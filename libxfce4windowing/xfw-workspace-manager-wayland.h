@@ -26,7 +26,9 @@
 
 #include <gdk/gdk.h>
 
-#include "xfw-screen.h"
+#include "protocols/ext-workspace-v1-20230427-client.h"
+
+#include "xfw-screen-wayland.h"
 #include "xfw-workspace-manager.h"
 
 G_BEGIN_DECLS
@@ -42,7 +44,7 @@ struct _XfwWorkspaceManagerWayland {
     XfwWorkspaceManagerWaylandPrivate *priv;
 };
 
-XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(XfwScreen *screen);
+XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(XfwScreenWayland *screen, struct ext_workspace_manager_v1 *manager);
 
 G_END_DECLS
 

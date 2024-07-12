@@ -25,6 +25,7 @@
 #include <string.h>
 #include <wayland-client.h>
 
+#include "protocols/ext-workspace-v1-20230427-client.h"
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 
 #include "libxfce4windowing-private.h"
@@ -41,8 +42,9 @@ struct _XfwScreenWayland {
     XfwScreen parent;
 
     struct wl_registry *wl_registry;
-    struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
     struct wl_seat *wl_seat;
+
+    struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
     GList *windows;
     GList *windows_stacked;
     GHashTable *wl_windows;
@@ -92,7 +94,9 @@ xfw_screen_wayland_class_init(XfwScreenWaylandClass *klass) {
 }
 
 static void
-xfw_screen_wayland_init(XfwScreenWayland *screen) {}
+xfw_screen_wayland_init(XfwScreenWayland *screen) {
+    screen->wl_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
+}
 
 static void
 xfw_screen_wayland_constructed(GObject *obj) {
@@ -101,21 +105,19 @@ xfw_screen_wayland_constructed(GObject *obj) {
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->constructed(obj);
 
-    _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_wayland_new(screen));
-
     GdkDisplay *gdk_display = gdk_screen_get_display(_xfw_screen_get_gdk_screen(screen));
     struct wl_display *wl_display = gdk_wayland_display_get_wl_display(gdk_display);
     wscreen->wl_registry = wl_display_get_registry(wl_display);
     wl_registry_add_listener(wscreen->wl_registry, &registry_listener, wscreen);
     wl_display_roundtrip(wl_display);
 
-    if (wscreen->toplevel_manager != NULL) {
-        wscreen->wl_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
-        zwlr_foreign_toplevel_manager_v1_add_listener(wscreen->toplevel_manager, &toplevel_manager_listener, wscreen);
-    } else {
+    if (wscreen->toplevel_manager == NULL) {
         g_message("Your compositor does not support wlr_foreign_toplevel_manager_v1 protocol");
-        wl_registry_destroy(wscreen->wl_registry);
-        wscreen->wl_registry = NULL;
+    }
+
+    if (xfw_screen_get_workspace_manager(XFW_SCREEN(screen)) == NULL) {
+        g_message("Your compositor does not support the ext_workspace_manager_v1 protocol");
+        _xfw_screen_set_workspace_manager(XFW_SCREEN(screen), _xfw_workspace_manager_dummy_new(screen));
     }
 
     _xfw_monitor_wayland_init(wscreen);
@@ -136,9 +138,7 @@ xfw_screen_wayland_finalize(GObject *obj) {
     }
     g_list_free(screen->windows);
     g_list_free(screen->windows_stacked);
-    if (screen->wl_windows != NULL) {
-        g_hash_table_destroy(screen->wl_windows);
-    }
+    g_hash_table_destroy(screen->wl_windows);
     g_list_free(screen->show_desktop_data.minimized);
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->finalize(obj);
@@ -237,22 +237,34 @@ show_desktop_disconnect(gpointer object, gpointer data) {
 
 static void
 registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version) {
-    XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(data);
+    XfwScreenWayland *wscreen = XFW_SCREEN_WAYLAND(data);
 
     if (strcmp(zwlr_foreign_toplevel_manager_v1_interface.name, interface) == 0) {
-        screen->toplevel_manager = wl_registry_bind(screen->wl_registry,
-                                                    id,
-                                                    &zwlr_foreign_toplevel_manager_v1_interface,
-                                                    MIN((uint32_t)zwlr_foreign_toplevel_manager_v1_interface.version, version));
+        wscreen->toplevel_manager = wl_registry_bind(wscreen->wl_registry,
+                                                     id,
+                                                     &zwlr_foreign_toplevel_manager_v1_interface,
+                                                     MIN((uint32_t)zwlr_foreign_toplevel_manager_v1_interface.version, version));
+        zwlr_foreign_toplevel_manager_v1_add_listener(wscreen->toplevel_manager, &toplevel_manager_listener, wscreen);
     } else if (strcmp(wl_seat_interface.name, interface) == 0) {
-        if (screen->wl_seat != NULL) {
+        if (wscreen->wl_seat != NULL) {
             g_debug("We already had a wl_seat, but now we're getting a new one");
-            wl_seat_release(screen->wl_seat);
+            wl_seat_release(wscreen->wl_seat);
         }
-        screen->wl_seat = wl_registry_bind(screen->wl_registry,
-                                           id,
-                                           &wl_seat_interface,
-                                           MIN((uint32_t)wl_seat_interface.version, version));
+        wscreen->wl_seat = wl_registry_bind(wscreen->wl_registry,
+                                            id,
+                                            &wl_seat_interface,
+                                            MIN((uint32_t)wl_seat_interface.version, version));
+    } else if (strcmp(ext_workspace_manager_v1_interface.name, interface) == 0) {
+        XfwScreen *screen = XFW_SCREEN(wscreen);
+        if (xfw_screen_get_workspace_manager(screen) != NULL) {
+            g_message("Already have a workspace manager, but got a new ext_workspace_manager_v1 global");
+        } else {
+            struct ext_workspace_manager_v1 *wl_workspace_manager = wl_registry_bind(registry,
+                                                                                     id,
+                                                                                     &ext_workspace_manager_v1_interface,
+                                                                                     MIN((uint32_t)ext_workspace_manager_v1_interface.version, version));
+            _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_wayland_new(wscreen, wl_workspace_manager));
+        }
     }
 }
 
