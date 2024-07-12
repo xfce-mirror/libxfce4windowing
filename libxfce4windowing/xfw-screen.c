@@ -49,15 +49,14 @@
 #include "xfw-screen-private.h"
 #include "xfw-util.h"
 #include "xfw-window.h"
+#include "xfw-workspace-manager.h"
 
 #ifdef ENABLE_X11
 #include "xfw-screen-x11.h"
-#include "xfw-workspace-manager-x11.h"
 #endif
 
 #ifdef ENABLE_WAYLAND
 #include "xfw-screen-wayland.h"
-#include "xfw-workspace-manager-wayland.h"
 #endif
 
 #define XFW_SCREEN_GET_PRIVATE(screen) ((XfwScreenPrivate *)xfw_screen_get_instance_private((XfwScreen *)screen))
@@ -188,6 +187,41 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                  G_TYPE_NONE, 0);
 
     /**
+     * XfwScreen::monitor-added:
+     * @screen: the object which received the signal.
+     * @monitor: the monitor that was added.
+     *
+     * Emitted when a monitor is added to @screen.
+     *
+     * Since: 4.19.4
+     **/
+    g_signal_new("monitor-added",
+                 XFW_TYPE_SCREEN,
+                 G_SIGNAL_RUN_LAST,
+                 0,
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_MONITOR);
+
+    /**
+     * XfwScreen::monitor-removed:
+     * @screen: the object which received the signal.
+     * @monitor: the monitor that was removed.
+     *
+     * Emitted when a monitor is removed from @screen.
+     *
+     * Since: 4.19.4
+     **/
+    g_signal_new("monitor-removed",
+                 XFW_TYPE_SCREEN,
+                 G_SIGNAL_RUN_LAST,
+                 0,
+                 NULL, NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE, 1,
+                 XFW_TYPE_MONITOR);
+    /**
      * XfwScreen::monitors-changed:
      * @screen: the object which received the signal.
      *
@@ -216,15 +250,15 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                  G_TYPE_NONE, 0);
 
     /**
-     * XfwScreen:screen:
+     * XfwScreen:gdk-screen:
      *
      * The #GdkScreen instance used to construct this #XfwScreen.
      **/
     g_object_class_install_property(gobject_class,
                                     PROP_SCREEN,
-                                    g_param_spec_object("screen",
-                                                        "screen",
-                                                        "screen",
+                                    g_param_spec_object("gdk-screen",
+                                                        "gdk-screen",
+                                                        "GdkScreen",
                                                         GDK_TYPE_SCREEN,
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 
@@ -240,7 +274,7 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                                                         "workspace-manager",
                                                         "workspace-manager",
                                                         XFW_TYPE_WORKSPACE_MANAGER,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                        G_PARAM_READABLE));
 
     /**
      * XfwScreen:active-window:
@@ -493,20 +527,16 @@ xfw_screen_get(GdkScreen *gdk_screen) {
 
 #ifdef ENABLE_X11
         if (xfw_windowing_get() == XFW_WINDOWING_X11) {
-            XfwWorkspaceManager *workspace_manager = _xfw_workspace_manager_x11_new(gdk_screen);
             screen = g_object_new(XFW_TYPE_SCREEN_X11,
-                                  "screen", gdk_screen,
-                                  "workspace-manager", workspace_manager,
+                                  "gdk-screen", gdk_screen,
                                   NULL);
         } else
 #endif /* ENABLE_X11 */
 #ifdef ENABLE_WAYLAND
             if (xfw_windowing_get() == XFW_WINDOWING_WAYLAND)
         {
-            XfwWorkspaceManager *workspace_manager = _xfw_workspace_manager_wayland_new(gdk_screen);
             screen = g_object_new(XFW_TYPE_SCREEN_WAYLAND,
-                                  "screen", gdk_screen,
-                                  "workspace-manager", workspace_manager,
+                                  "gdk-screen", gdk_screen,
                                   NULL);
         } else
 #endif
@@ -544,6 +574,10 @@ _xfw_screen_get_gdk_screen(XfwScreen *screen) {
     return XFW_SCREEN_GET_PRIVATE(screen)->gdk_screen;
 }
 
+void
+_xfw_screen_set_workspace_manager(XfwScreen *screen, XfwWorkspaceManager *workspace_manager) {
+    XFW_SCREEN_GET_PRIVATE(screen)->workspace_manager = workspace_manager;
+}
 
 GList *
 _xfw_screen_steal_monitors(XfwScreen *screen) {
@@ -554,7 +588,7 @@ _xfw_screen_steal_monitors(XfwScreen *screen) {
 }
 
 void
-_xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, guint n_added, guint n_removed) {
+_xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, GList *added, GList *removed) {
     XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
     g_list_free_full(priv->monitors, g_object_unref);
     priv->monitors = monitors;
@@ -572,7 +606,15 @@ _xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, guint n_added, guin
         changed |= _xfw_monitor_notify_pending_changes(XFW_MONITOR(l->data));
     }
 
-    if ((changed & MONITORS_CHANGED_MASK) != 0 || n_added > 0 || n_removed > 0) {
+    for (GList *l = added; l != NULL; l = l->next) {
+        g_signal_emit_by_name(screen, "monitor-added", XFW_MONITOR(l->data));
+    }
+
+    for (GList *l = removed; l != NULL; l = l->next) {
+        g_signal_emit_by_name(screen, "monitor-removed", XFW_MONITOR(l->data));
+    }
+
+    if ((changed & MONITORS_CHANGED_MASK) != 0 || added != NULL || removed != NULL) {
         // Only notify if what has changed is relevant to positioning or size, or if
         // a monitor was added or removed, or the primary monitor has changed.
         g_signal_emit_by_name(screen, "monitors-changed");
