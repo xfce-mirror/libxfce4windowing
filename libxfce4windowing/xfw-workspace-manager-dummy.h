@@ -26,6 +26,7 @@
 
 #include <gdk/gdk.h>
 
+#include "xfw-screen.h"
 #include "xfw-workspace-manager.h"
 
 G_BEGIN_DECLS
@@ -42,7 +43,7 @@ struct _XfwWorkspaceManagerDummy {
     XfwWorkspaceManagerDummyPrivate *priv;
 };
 
-XfwWorkspaceManager *_xfw_workspace_manager_dummy_new(GdkScreen *screen);
+XfwWorkspaceManager *_xfw_workspace_manager_dummy_new(XfwScreen *screen);
 
 G_END_DECLS
 

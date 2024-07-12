@@ -25,13 +25,14 @@
 #include <libwnck/libwnck.h>
 
 #include "libxfce4windowing-private.h"
+#include "xfw-screen-private.h"
 #include "xfw-workspace-group-dummy.h"
 #include "xfw-workspace-manager-private.h"
 #include "xfw-workspace-manager-x11.h"
 #include "xfw-workspace-x11.h"
 
 struct _XfwWorkspaceManagerX11Private {
-    GdkScreen *screen;
+    XfwScreen *screen;
     WnckScreen *wnck_screen;
     GList *groups;
     GList *workspaces;
@@ -92,8 +93,10 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
     GList *wnck_workspaces;
     WnckWorkspace *active_wnck_workspace;
 
+    GdkScreen *gdkscreen = _xfw_screen_get_gdk_screen(priv->screen);
     G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-    priv->wnck_screen = g_object_ref(wnck_screen_get(gdk_x11_screen_get_screen_number(GDK_X11_SCREEN(priv->screen))));
+    gint screen_number = gdk_x11_screen_get_screen_number(gdkscreen);
+    priv->wnck_screen = g_object_ref(wnck_screen_get(screen_number));
     G_GNUC_END_IGNORE_DEPRECATIONS
     g_signal_connect(priv->wnck_screen, "active-workspace-changed", G_CALLBACK(active_workspace_changed), manager);
     g_signal_connect(priv->wnck_screen, "workspace-created", G_CALLBACK(workspace_created), manager);
@@ -134,7 +137,7 @@ xfw_workspace_manager_x11_set_property(GObject *obj, guint prop_id, const GValue
 
     switch (prop_id) {
         case WORKSPACE_MANAGER_PROP_SCREEN:
-            manager->priv->screen = GDK_SCREEN(g_value_get_object(value));
+            manager->priv->screen = XFW_SCREEN(g_value_get_object(value));
             break;
 
         default:
@@ -163,10 +166,7 @@ xfw_workspace_manager_x11_finalize(GObject *obj) {
     XfwWorkspaceManagerX11 *manager = XFW_WORKSPACE_MANAGER_X11(obj);
     XfwWorkspaceManagerX11Private *priv = manager->priv;
 
-    g_signal_handlers_disconnect_by_func(priv->wnck_screen, active_workspace_changed, manager);
-    g_signal_handlers_disconnect_by_func(priv->wnck_screen, workspace_created, manager);
-    g_signal_handlers_disconnect_by_func(priv->wnck_screen, workspace_destroyed, manager);
-    g_signal_handlers_disconnect_by_func(priv->wnck_screen, viewports_changed, manager);
+    g_signal_handlers_disconnect_by_data(priv->wnck_screen, manager);
     g_list_free(priv->workspaces);
     g_hash_table_destroy(priv->wnck_workspaces);
     g_hash_table_destroy(priv->pending_workspace_names);
@@ -292,7 +292,7 @@ group_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **err
 }
 
 XfwWorkspaceManager *
-_xfw_workspace_manager_x11_new(GdkScreen *screen) {
+_xfw_workspace_manager_x11_new(XfwScreen *screen) {
     return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_X11,
                         "screen", screen,
                         NULL);

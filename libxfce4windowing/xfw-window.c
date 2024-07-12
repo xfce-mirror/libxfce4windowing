@@ -381,7 +381,7 @@ xfw_window_class_init(XfwWindowClass *klass) {
     /**
      * XfwWindow:monitors:
      *
-     * The list of monitors (if any) that the window is displayed on.
+     * The list of #XfwMonitor<!-- -->s (if any) that the window is displayed on.
      **/
     g_object_class_install_property(gobject_class,
                                     PROP_MONITORS,
@@ -737,8 +737,8 @@ xfw_window_get_workspace(XfwWindow *window) {
  *
  * Fetches the list of monitors @window is displayed on, if any.
  *
- * Return value: (nullable) (element-type GdkMonitor) (transfer none): A list
- * of #GdkMonitor instances, or %NULL.  The list and its contents are owned by
+ * Return value: (nullable) (element-type XfwMonitor) (transfer none): A list
+ * of #XfwMonitor instances, or %NULL.  The list and its contents are owned by
  * @window and should not be modified or freed.
  **/
 GList *
