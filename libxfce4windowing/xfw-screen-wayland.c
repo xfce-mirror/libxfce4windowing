@@ -27,6 +27,7 @@
 
 #include "protocols/ext-workspace-v1-20230427-client.h"
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
+#include "protocols/xdg-output-unstable-v1-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-monitor-private.h"
@@ -41,7 +42,10 @@
 struct _XfwScreenWayland {
     XfwScreen parent;
 
+    struct wl_display *wl_display;
     struct wl_registry *wl_registry;
+    GList *async_roundtrips;
+
     struct wl_seat *wl_seat;
 
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
@@ -52,6 +56,8 @@ struct _XfwScreenWayland {
         GList *minimized;
         XfwWindow *was_active;
     } show_desktop_data;
+
+    XfwMonitorManagerWayland *monitor_manager;
 };
 
 static void xfw_screen_wayland_constructed(GObject *obj);
@@ -62,17 +68,22 @@ static void xfw_screen_wayland_set_show_desktop(XfwScreen *screen, gboolean show
 
 static void show_desktop_disconnect(gpointer object, gpointer data);
 
+static void async_roundtrip_done(void *data, struct wl_callback *callback, uint32_t callback_id);
+
 static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
 static void registry_global_remove(void *data, struct wl_registry *registry, uint32_t id);
 
 static void toplevel_manager_toplevel(void *data, struct zwlr_foreign_toplevel_manager_v1 *wl_manager, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel);
 static void toplevel_manager_finished(void *data, struct zwlr_foreign_toplevel_manager_v1 *wl_manager);
 
-const struct wl_registry_listener registry_listener = {
+static const struct wl_callback_listener callback_listener = {
+    .done = async_roundtrip_done,
+};
+static const struct wl_registry_listener registry_listener = {
     .global = registry_global,
     .global_remove = registry_global_remove,
 };
-const struct zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_listener = {
+static const struct zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_listener = {
     .toplevel = toplevel_manager_toplevel,
     .finished = toplevel_manager_finished,
 };
@@ -105,27 +116,35 @@ xfw_screen_wayland_constructed(GObject *obj) {
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->constructed(obj);
 
+    wscreen->monitor_manager = _xfw_monitor_manager_wayland_new(wscreen);
+
     GdkDisplay *gdk_display = gdk_screen_get_display(_xfw_screen_get_gdk_screen(screen));
-    struct wl_display *wl_display = gdk_wayland_display_get_wl_display(gdk_display);
-    wscreen->wl_registry = wl_display_get_registry(wl_display);
+    wscreen->wl_display = gdk_wayland_display_get_wl_display(gdk_display);
+    wscreen->wl_registry = wl_display_get_registry(wscreen->wl_display);
     wl_registry_add_listener(wscreen->wl_registry, &registry_listener, wscreen);
-    wl_display_roundtrip(wl_display);
+
+    wl_display_roundtrip(wscreen->wl_display);
+    while (wscreen->async_roundtrips != NULL) {
+        wl_display_dispatch(wscreen->wl_display);
+    }
 
     if (wscreen->toplevel_manager == NULL) {
-        g_message("Your compositor does not support wlr_foreign_toplevel_manager_v1 protocol");
+        g_message("Your compositor does not support the wlr_foreign_toplevel_manager_v1 protocol");
     }
 
     if (xfw_screen_get_workspace_manager(XFW_SCREEN(screen)) == NULL) {
         g_message("Your compositor does not support the ext_workspace_manager_v1 protocol");
         _xfw_screen_set_workspace_manager(XFW_SCREEN(screen), _xfw_workspace_manager_dummy_new(screen));
     }
-
-    _xfw_monitor_wayland_init(wscreen);
 }
 
 static void
 xfw_screen_wayland_finalize(GObject *obj) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(obj);
+
+    g_list_free_full(screen->async_roundtrips, (GDestroyNotify)wl_callback_destroy);
+
+    _xfw_monitor_manager_wayland_destroy(screen->monitor_manager);
 
     if (screen->toplevel_manager != NULL) {
         zwlr_foreign_toplevel_manager_v1_destroy(screen->toplevel_manager);
@@ -236,6 +255,20 @@ show_desktop_disconnect(gpointer object, gpointer data) {
 }
 
 static void
+add_async_roundtrip(XfwScreenWayland *screen) {
+    struct wl_callback *callback = wl_display_sync(screen->wl_display);
+    wl_callback_add_listener(callback, &callback_listener, screen);
+    screen->async_roundtrips = g_list_prepend(screen->async_roundtrips, callback);
+}
+
+static void
+async_roundtrip_done(void *data, struct wl_callback *callback, uint32_t callback_id) {
+    XfwScreenWayland *screen = data;
+    screen->async_roundtrips = g_list_remove(screen->async_roundtrips, callback);
+    wl_callback_destroy(callback);
+}
+
+static void
 registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version) {
     XfwScreenWayland *wscreen = XFW_SCREEN_WAYLAND(data);
 
@@ -265,12 +298,24 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
                                                                                      MIN((uint32_t)ext_workspace_manager_v1_interface.version, version));
             _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_wayland_new(wscreen, wl_workspace_manager));
         }
+    } else if (strcmp(wl_output_interface.name, interface) == 0) {
+        struct wl_output *output = wl_registry_bind(registry, id, &wl_output_interface, MIN(version, 4));
+        _xfw_monitor_manager_wayland_new_output(wscreen->monitor_manager, output);
+        add_async_roundtrip(wscreen);
+    } else if (strcmp(zxdg_output_manager_v1_interface.name, interface) == 0) {
+        struct zxdg_output_manager_v1 *xdg_output_manager = wl_registry_bind(registry,
+                                                                             id,
+                                                                             &zxdg_output_manager_v1_interface,
+                                                                             MIN(version, 3));
+        _xfw_monitor_manager_wayland_new_xdg_output_manager(wscreen->monitor_manager, xdg_output_manager);
+        add_async_roundtrip(wscreen);
     }
 }
 
 static void
 registry_global_remove(void *data, struct wl_registry *registry, uint32_t id) {
-    // XXX: do we need to do something here?
+    XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(data);
+    _xfw_monitor_manager_wayland_global_removed(screen->monitor_manager, id);
 }
 
 static void

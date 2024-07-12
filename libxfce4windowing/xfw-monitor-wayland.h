@@ -22,6 +22,8 @@
 
 #include <wayland-client-protocol.h>
 
+#include "protocols/xdg-output-unstable-v1-client.h"
+
 #include "xfw-monitor-private.h"
 #include "xfw-screen-wayland.h"
 
@@ -30,7 +32,13 @@ G_BEGIN_DECLS
 #define XFW_TYPE_MONITOR_WAYLAND (xfw_monitor_wayland_get_type())
 G_DECLARE_FINAL_TYPE(XfwMonitorWayland, xfw_monitor_wayland, XFW, MONITOR_WAYLAND, XfwMonitor)
 
-void _xfw_monitor_wayland_init(XfwScreenWayland *screen);
+typedef struct _XfwMonitorManagerWayland XfwMonitorManagerWayland;
+
+XfwMonitorManagerWayland *_xfw_monitor_manager_wayland_new(XfwScreenWayland *screen);
+void _xfw_monitor_manager_wayland_new_output(XfwMonitorManagerWayland *monitor_manager, struct wl_output *output);
+void _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_manager, uint32_t id);
+void _xfw_monitor_manager_wayland_new_xdg_output_manager(XfwMonitorManagerWayland *monitor_manager, struct zxdg_output_manager_v1 *xdg_output_manager);
+void _xfw_monitor_manager_wayland_destroy(XfwMonitorManagerWayland *monitor_manager);
 
 struct wl_output *_xfw_monitor_wayland_get_wl_output(XfwMonitorWayland *monitor);
 
