@@ -96,28 +96,29 @@ xfw_screen_wayland_init(XfwScreenWayland *screen) {}
 
 static void
 xfw_screen_wayland_constructed(GObject *obj) {
-    XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(obj);
-    GdkDisplay *gdk_display;
-    struct wl_display *wl_display;
+    XfwScreen *screen = XFW_SCREEN(obj);
+    XfwScreenWayland *wscreen = XFW_SCREEN_WAYLAND(obj);
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->constructed(obj);
 
-    gdk_display = gdk_screen_get_display(_xfw_screen_get_gdk_screen(XFW_SCREEN(screen)));
-    wl_display = gdk_wayland_display_get_wl_display(GDK_WAYLAND_DISPLAY(gdk_display));
-    screen->wl_registry = wl_display_get_registry(wl_display);
-    wl_registry_add_listener(screen->wl_registry, &registry_listener, screen);
+    _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_wayland_new(screen));
+
+    GdkDisplay *gdk_display = gdk_screen_get_display(_xfw_screen_get_gdk_screen(screen));
+    struct wl_display *wl_display = gdk_wayland_display_get_wl_display(gdk_display);
+    wscreen->wl_registry = wl_display_get_registry(wl_display);
+    wl_registry_add_listener(wscreen->wl_registry, &registry_listener, wscreen);
     wl_display_roundtrip(wl_display);
 
-    if (screen->toplevel_manager != NULL) {
-        screen->wl_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
-        zwlr_foreign_toplevel_manager_v1_add_listener(screen->toplevel_manager, &toplevel_manager_listener, screen);
+    if (wscreen->toplevel_manager != NULL) {
+        wscreen->wl_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
+        zwlr_foreign_toplevel_manager_v1_add_listener(wscreen->toplevel_manager, &toplevel_manager_listener, wscreen);
     } else {
         g_message("Your compositor does not support wlr_foreign_toplevel_manager_v1 protocol");
-        wl_registry_destroy(screen->wl_registry);
-        screen->wl_registry = NULL;
+        wl_registry_destroy(wscreen->wl_registry);
+        wscreen->wl_registry = NULL;
     }
 
-    _xfw_monitor_wayland_init(screen);
+    _xfw_monitor_wayland_init(wscreen);
 }
 
 static void
