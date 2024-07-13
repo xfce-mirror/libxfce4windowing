@@ -24,6 +24,7 @@
 
 #define MONITORS_CHANGED_MASK ( \
     MONITOR_PENDING_SCALE \
+    | MONITOR_PENDING_FRACTIONAL_SCALE \
     | MONITOR_PENDING_PHYSICAL_GEOMETRY \
     | MONITOR_PENDING_LOGICAL_GEOMETRY \
     | MONITOR_PENDING_TRANSFORM \
@@ -52,6 +53,7 @@ typedef enum {
     MONITOR_PENDING_TRANSFORM = (1 << 13),
     MONITOR_PENDING_IS_PRIMARY = (1 << 14),
     MONITOR_PENDING_WORKAREA = (1 << 15),
+    MONITOR_PENDING_FRACTIONAL_SCALE = (1 << 16),
 } MonitorPendingChanges;
 
 void _xfw_monitor_set_identifier(XfwMonitor *monitor,
@@ -70,6 +72,8 @@ void _xfw_monitor_set_refresh(XfwMonitor *monitor,
                               guint refresh_millihertz);
 void _xfw_monitor_set_scale(XfwMonitor *monitor,
                             guint scale);
+void _xfw_monitor_set_fractional_scale(XfwMonitor *monitor,
+                                       gdouble fractional_scale);
 void _xfw_monitor_set_physical_geometry(XfwMonitor *monitor,
                                         GdkRectangle *physical_geometry);
 void _xfw_monitor_set_logical_geometry(XfwMonitor *monitor,

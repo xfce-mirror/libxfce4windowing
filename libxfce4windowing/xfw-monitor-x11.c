@@ -196,6 +196,7 @@ enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_mon
         }
 
         _xfw_monitor_set_scale(monitor, scale);
+        _xfw_monitor_set_fractional_scale(monitor, scale);
         _xfw_monitor_set_physical_size(monitor, oinfo->mm_width, oinfo->mm_height);
         _xfw_monitor_set_subpixel(monitor, xfw_subpixel_from_x11(oinfo->subpixel_order));
         _xfw_monitor_set_transform(monitor, xfw_transform_from_x11(crtc->rotation));
@@ -559,6 +560,7 @@ _xfw_monitor_x11_init(XfwScreenX11 *xscreen) {
 
         gint scale = gdk_monitor_get_scale_factor(gdk_display_get_monitor(gdk_screen_get_display(gscreen), 0));
         _xfw_monitor_set_scale(monitor, scale);
+        _xfw_monitor_set_fractional_scale(monitor, scale);
         geom.width /= scale;
         geom.height /= scale;
         _xfw_monitor_set_logical_geometry(monitor, &geom);

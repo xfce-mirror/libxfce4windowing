@@ -414,6 +414,15 @@ finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *mo
         }
     }
 
+    gdouble xscale = monitor_wl->logical_geometry.width != 0
+                         ? (gdouble)monitor_wl->physical_geometry.width / monitor_wl->logical_geometry.width
+                         : 0;
+    gdouble yscale = monitor_wl->logical_geometry.height != 0
+                         ? (gdouble)monitor_wl->physical_geometry.height / monitor_wl->logical_geometry.height
+                         : 0;
+    gdouble fractional_scale = xscale != 0 ? xscale : (yscale != 0 ? yscale : xfw_monitor_get_scale(monitor));
+    _xfw_monitor_set_fractional_scale(monitor, fractional_scale);
+
     XfwMonitor *primary_monitor = _xfw_monitor_guess_primary_monitor(monitors);
     for (GList *l = monitors; l != NULL; l = l->next) {
         XfwMonitor *a_monitor = XFW_MONITOR(l->data);

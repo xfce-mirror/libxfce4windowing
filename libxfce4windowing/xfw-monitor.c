@@ -52,6 +52,7 @@ typedef struct _XfwMonitorPrivate {
     char *serial;
     guint refresh;
     guint scale;
+    gdouble fractional_scale;
     GdkRectangle physical_geometry;
     GdkRectangle logical_geometry;
     GdkRectangle workarea;
@@ -76,6 +77,7 @@ enum {
     PROP_SERIAL,
     PROP_REFRESH,
     PROP_SCALE,
+    PROP_FRACTIONAL_SCALE,
     PROP_PHYSICAL_GEOMETRY,
     PROP_LOGICAL_GEOMETRY,
     PROP_WORKAREA,
@@ -242,6 +244,21 @@ xfw_monitor_class_init(XfwMonitorClass *klass) {
                                                       "UI scaling factor",
                                                       1, G_MAXUINT, 1,
                                                       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:fractional-scale:
+     *
+     * UI fractional scaling factor.
+     *
+     * Since: 4.19.4
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_SCALE,
+                                    g_param_spec_double("fractional-scale",
+                                                        "fractional-scale",
+                                                        "UI fractional scaling factor",
+                                                        1.0, G_MAXDOUBLE, 1.0,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwMonitor:physical-geometry:
@@ -428,6 +445,10 @@ xfw_monitor_get_property(GObject *object, guint property_id, GValue *value, GPar
 
         case PROP_SCALE:
             g_value_set_uint(value, priv->scale);
+            break;
+
+        case PROP_FRACTIONAL_SCALE:
+            g_value_set_double(value, priv->scale);
             break;
 
         case PROP_PHYSICAL_GEOMETRY:
@@ -625,7 +646,7 @@ xfw_monitor_get_refresh(XfwMonitor *monitor) {
  * xfw_monitor_get_scale:
  * @monitor: a #XfwMonitor.
  *
- * Returns the monitor's scaling factor.
+ * Returns the monitor's scaling factor, as an integer.
  *
  * Return value: A positive integer scale.
  *
@@ -635,6 +656,22 @@ guint
 xfw_monitor_get_scale(XfwMonitor *monitor) {
     g_return_val_if_fail(XFW_IS_MONITOR(monitor), 1);
     return XFW_MONITOR_GET_PRIVATE(monitor)->scale;
+}
+
+/**
+ * xfw_monitor_get_fractional_scale:
+ * @monitor: a #XfwMonitor.
+ *
+ * Returns the monitor's scaling factor.
+ *
+ * Return value: A positive fractional scale.
+ *
+ * Since: 4.19.4
+ **/
+gdouble
+xfw_monitor_get_fractional_scale(XfwMonitor *monitor) {
+    g_return_val_if_fail(XFW_IS_MONITOR(monitor), 1);
+    return XFW_MONITOR_GET_PRIVATE(monitor)->fractional_scale;
 }
 
 /**
@@ -659,7 +696,7 @@ xfw_monitor_get_physical_geometry(XfwMonitor *monitor, GdkRectangle *physical_ge
  * @logical_geometry: (not nullable) (out caller-allocates): a #GdkRectangle.
  *
  * Retrieves the position and size of the monitor in logical application
- * pixels, which are affected by the monitor's scale factor.
+ * pixels, which are affected by the monitor's fractional scale factor.
  *
  * Since: 4.19.4
  **/
@@ -679,8 +716,8 @@ xfw_monitor_get_logical_geometry(XfwMonitor *monitor, GdkRectangle *logical_geom
  * for windows such as panels or docks.
  *
  * The returned geometry is in logical application pixels, which are affected
- * by the monitor's scale factor.  The origin is set to the top-left corner of
- * the monitor.
+ * by the monitor's integer scale factor.  The origin is set to the top-left
+ * corner of the monitor.
  *
  * Since: 4.19.4
  **/
@@ -911,6 +948,17 @@ _xfw_monitor_set_scale(XfwMonitor *monitor, guint scale) {
 }
 
 void
+_xfw_monitor_set_fractional_scale(XfwMonitor *monitor, gdouble fractional_scale) {
+    g_return_if_fail(XFW_IS_MONITOR(monitor));
+
+    XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
+    if (priv->fractional_scale != fractional_scale) {
+        priv->fractional_scale = fractional_scale;
+        priv->pending_changes |= MONITOR_PENDING_FRACTIONAL_SCALE;
+    }
+}
+
+void
 _xfw_monitor_set_physical_geometry(XfwMonitor *monitor, GdkRectangle *physical_geometry) {
     g_return_if_fail(XFW_IS_MONITOR(monitor));
     g_return_if_fail(physical_geometry != NULL);
@@ -1049,6 +1097,7 @@ _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
         { MONITOR_PENDING_SERIAL, "serial" },
         { MONITOR_PENDING_REFRESH, "refresh" },
         { MONITOR_PENDING_SCALE, "scale" },
+        { MONITOR_PENDING_FRACTIONAL_SCALE, "fractional-scale" },
         { MONITOR_PENDING_PHYSICAL_GEOMETRY, "physical-geometry" },
         { MONITOR_PENDING_LOGICAL_GEOMETRY, "logical-geometry" },
         { MONITOR_PENDING_WORKAREA, "workarea" },

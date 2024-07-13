@@ -96,6 +96,7 @@ const char *xfw_monitor_get_model(XfwMonitor *monitor);
 const char *xfw_monitor_get_serial(XfwMonitor *monitor);
 guint xfw_monitor_get_refresh(XfwMonitor *monitor);
 guint xfw_monitor_get_scale(XfwMonitor *monitor);
+gdouble xfw_monitor_get_fractional_scale(XfwMonitor *monitor);
 void xfw_monitor_get_physical_geometry(XfwMonitor *monitor,
                                        GdkRectangle *physical_geometry);
 void xfw_monitor_get_logical_geometry(XfwMonitor *monitor,
