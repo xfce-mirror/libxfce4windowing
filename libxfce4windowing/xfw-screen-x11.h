@@ -37,6 +37,9 @@ G_DECLARE_FINAL_TYPE(XfwScreenX11, xfw_screen_x11, XFW, SCREEN_X11, XfwScreen)
 
 XfwWorkspace *_xfw_screen_x11_workspace_for_wnck_workspace(XfwScreenX11 *screen, WnckWorkspace *wnck_workspace);
 
+GArray *_xfw_screen_x11_get_workareas(XfwScreenX11 *screen);
+void _xfw_screen_x11_set_workareas(XfwScreenX11 *screen, GArray *workareas);
+
 G_END_DECLS
 
 #endif /* __XFW_SCREEN_X11_H__ */

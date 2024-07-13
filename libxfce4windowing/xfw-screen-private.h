@@ -28,6 +28,7 @@
 
 #include "xfw-screen.h"
 #include "xfw-window.h"
+#include "xfw-workspace-manager.h"
 
 G_BEGIN_DECLS
 
@@ -52,9 +53,10 @@ struct _XfwScreenClass {
 };
 
 GdkScreen *_xfw_screen_get_gdk_screen(XfwScreen *screen);
+void _xfw_screen_set_workspace_manager(XfwScreen *screen, XfwWorkspaceManager *workspace_manager);
 void _xfw_screen_set_active_window(XfwScreen *screen, XfwWindow *window);
 GList *_xfw_screen_steal_monitors(XfwScreen *screen);
-void _xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, guint n_added, guint n_removed);
+void _xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, GList *added, GList *removed);
 void _xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show_desktop);
 
 G_END_DECLS
