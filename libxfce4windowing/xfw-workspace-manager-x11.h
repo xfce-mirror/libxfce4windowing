@@ -27,6 +27,7 @@
 #include <gdk/gdk.h>
 #include <libwnck/libwnck.h>
 
+#include "xfw-screen.h"
 #include "xfw-workspace-manager.h"
 
 G_BEGIN_DECLS
@@ -42,7 +43,7 @@ struct _XfwWorkspaceManagerX11 {
     XfwWorkspaceManagerX11Private *priv;
 };
 
-XfwWorkspaceManager *_xfw_workspace_manager_x11_new(GdkScreen *screen);
+XfwWorkspaceManager *_xfw_workspace_manager_x11_new(XfwScreen *screen);
 XfwWorkspace *_xfw_workspace_manager_x11_workspace_for_wnck_workspace(XfwWorkspaceManagerX11 *manager, WnckWorkspace *wnck_workspace);
 
 G_END_DECLS

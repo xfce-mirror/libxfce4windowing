@@ -51,6 +51,7 @@ typedef enum {
     MONITOR_PENDING_SUBPIXEL = (1 << 12),
     MONITOR_PENDING_TRANSFORM = (1 << 13),
     MONITOR_PENDING_IS_PRIMARY = (1 << 14),
+    MONITOR_PENDING_WORKAREA = (1 << 15),
 } MonitorPendingChanges;
 
 void _xfw_monitor_set_identifier(XfwMonitor *monitor,
@@ -73,6 +74,8 @@ void _xfw_monitor_set_physical_geometry(XfwMonitor *monitor,
                                         GdkRectangle *physical_geometry);
 void _xfw_monitor_set_logical_geometry(XfwMonitor *monitor,
                                        GdkRectangle *logical_geometry);
+void _xfw_monitor_set_workarea(XfwMonitor *monitor,
+                               GdkRectangle *workarea);
 void _xfw_monitor_set_physical_size(XfwMonitor *monitor,
                                     guint width_mm,
                                     guint height_mm);
@@ -83,6 +86,8 @@ void _xfw_monitor_set_transform(XfwMonitor *monitor,
 
 void _xfw_monitor_set_is_primary(XfwMonitor *monitor,
                                  gboolean is_primary);
+
+XfwMonitor *_xfw_monitor_guess_primary_monitor(GList *monitors);
 
 MonitorPendingChanges _xfw_monitor_notify_pending_changes(XfwMonitor *monitor);
 
