@@ -87,6 +87,8 @@ void _xfw_monitor_set_transform(XfwMonitor *monitor,
 void _xfw_monitor_set_is_primary(XfwMonitor *monitor,
                                  gboolean is_primary);
 
+XfwMonitor *_xfw_monitor_guess_primary_monitor(GList *monitors);
+
 MonitorPendingChanges _xfw_monitor_notify_pending_changes(XfwMonitor *monitor);
 
 G_END_DECLS

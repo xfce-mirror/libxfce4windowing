@@ -162,6 +162,7 @@ enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_mon
     }
 
     GList *monitors = NULL;
+    XfwMonitor *primary_monitor = NULL;
 
     for (int i = 0; i < nmonitors; ++i) {
         RROutput output = rrmonitors[i].outputs[0];
@@ -310,17 +311,28 @@ enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_mon
         g_free(description);
 
         _xfw_monitor_set_is_primary(monitor, !!rrmonitors[i].primary);
+        if (rrmonitors[i].primary) {
+            primary_monitor = monitor;
+        }
 
         monitors = g_list_prepend(monitors, monitor);
 
         g_free(connector);
         XRRFreeOutputInfo(oinfo);
     }
+    monitors = g_list_reverse(monitors);
 
     XRRFreeScreenResources(resources);
     XRRFreeMonitors(rrmonitors);
 
-    return g_list_reverse(monitors);
+    if (primary_monitor == NULL) {
+        primary_monitor = _xfw_monitor_guess_primary_monitor(monitors);
+        if (primary_monitor != NULL) {
+            _xfw_monitor_set_is_primary(primary_monitor, TRUE);
+        }
+    }
+
+    return monitors;
 }
 
 static void
