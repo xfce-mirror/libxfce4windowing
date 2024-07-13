@@ -278,6 +278,7 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
                                                      &zwlr_foreign_toplevel_manager_v1_interface,
                                                      MIN((uint32_t)zwlr_foreign_toplevel_manager_v1_interface.version, version));
         zwlr_foreign_toplevel_manager_v1_add_listener(wscreen->toplevel_manager, &toplevel_manager_listener, wscreen);
+        add_async_roundtrip(wscreen);
     } else if (strcmp(wl_seat_interface.name, interface) == 0) {
         if (wscreen->wl_seat != NULL) {
             g_debug("We already had a wl_seat, but now we're getting a new one");
@@ -287,6 +288,7 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
                                             id,
                                             &wl_seat_interface,
                                             MIN((uint32_t)wl_seat_interface.version, version));
+        add_async_roundtrip(wscreen);
     } else if (strcmp(ext_workspace_manager_v1_interface.name, interface) == 0) {
         XfwScreen *screen = XFW_SCREEN(wscreen);
         if (xfw_screen_get_workspace_manager(screen) != NULL) {
@@ -297,6 +299,7 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
                                                                                      &ext_workspace_manager_v1_interface,
                                                                                      MIN((uint32_t)ext_workspace_manager_v1_interface.version, version));
             _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_wayland_new(wscreen, wl_workspace_manager));
+            add_async_roundtrip(wscreen);
         }
     } else if (strcmp(wl_output_interface.name, interface) == 0) {
         struct wl_output *output = wl_registry_bind(registry, id, &wl_output_interface, MIN(version, 4));
