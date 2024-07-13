@@ -309,6 +309,9 @@ static void
 finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *monitor_wl) {
     XfwMonitor *monitor = XFW_MONITOR(monitor_wl);
 
+    monitor_wl->output_dones = 0;
+    monitor_wl->xdg_output_done = FALSE;
+
     const char *make = xfw_monitor_get_make(monitor);
     const char *model = xfw_monitor_get_model(monitor);
     const char *serial = xfw_monitor_get_serial(monitor);
