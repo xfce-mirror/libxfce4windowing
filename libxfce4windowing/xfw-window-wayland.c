@@ -582,6 +582,8 @@ toplevel_parent(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
 
 static void
 toplevel_output_enter(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_output *output) {
+    g_debug("toplevel %u output_enter", wl_proxy_get_id((struct wl_proxy *)wl_toplevel));
+
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
     XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
     GList *monitors = xfw_screen_get_monitors(screen);
@@ -600,6 +602,8 @@ toplevel_output_enter(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_top
 
 static void
 toplevel_output_leave(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_output *output) {
+    g_debug("toplevel %u output_leave", wl_proxy_get_id((struct wl_proxy *)wl_toplevel));
+
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
     XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
     GList *monitors = xfw_screen_get_monitors(screen);
