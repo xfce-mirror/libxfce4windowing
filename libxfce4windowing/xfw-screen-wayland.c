@@ -48,7 +48,11 @@ struct _XfwScreenWayland {
 
     struct wl_seat *wl_seat;
 
+    gboolean defer_toplevel_manager;
+    uint32_t toplevel_manager_id;
+    uint32_t toplevel_manager_version;
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
+
     GList *windows;
     GList *windows_stacked;
     GHashTable *wl_windows;
@@ -69,6 +73,8 @@ static void xfw_screen_wayland_set_show_desktop(XfwScreen *screen, gboolean show
 static void show_desktop_disconnect(gpointer object, gpointer data);
 
 static void async_roundtrip_done(void *data, struct wl_callback *callback, uint32_t callback_id);
+
+static void init_toplevel_manager(XfwScreenWayland *screen);
 
 static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
 static void registry_global_remove(void *data, struct wl_registry *registry, uint32_t id);
@@ -106,6 +112,7 @@ xfw_screen_wayland_class_init(XfwScreenWaylandClass *klass) {
 
 static void
 xfw_screen_wayland_init(XfwScreenWayland *screen) {
+    screen->defer_toplevel_manager = TRUE;
     screen->wl_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
 }
 
@@ -128,7 +135,19 @@ xfw_screen_wayland_constructed(GObject *obj) {
         wl_display_dispatch(wscreen->wl_display);
     }
 
-    if (wscreen->toplevel_manager == NULL) {
+    // We defer binding to the toplevel manager until after we have all
+    // XfwMonitor instances initialized.  Otherwise, we would get output_enter
+    // events for toplevels, but have no XfwMonitor to match them to.
+    wscreen->defer_toplevel_manager = FALSE;
+    if (wscreen->toplevel_manager_id != 0 && wscreen->toplevel_manager_version != 0) {
+        init_toplevel_manager(wscreen);
+    }
+
+    if (wscreen->toplevel_manager != NULL) {
+        while (wscreen->async_roundtrips != NULL) {
+            wl_display_dispatch(wscreen->wl_display);
+        }
+    } else {
         g_message("Your compositor does not support the wlr_foreign_toplevel_manager_v1 protocol");
     }
 
@@ -269,16 +288,31 @@ async_roundtrip_done(void *data, struct wl_callback *callback, uint32_t callback
 }
 
 static void
+init_toplevel_manager(XfwScreenWayland *screen) {
+    g_return_if_fail(!screen->defer_toplevel_manager);
+    g_return_if_fail(screen->toplevel_manager_id != 0);
+    g_return_if_fail(screen->toplevel_manager_version != 0);
+    g_return_if_fail(screen->toplevel_manager == NULL);
+
+    screen->toplevel_manager = wl_registry_bind(screen->wl_registry,
+                                                screen->toplevel_manager_id,
+                                                &zwlr_foreign_toplevel_manager_v1_interface,
+                                                MIN(screen->toplevel_manager_version, 3));
+    zwlr_foreign_toplevel_manager_v1_add_listener(screen->toplevel_manager, &toplevel_manager_listener, screen);
+    add_async_roundtrip(screen);
+}
+
+
+static void
 registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version) {
     XfwScreenWayland *wscreen = XFW_SCREEN_WAYLAND(data);
 
     if (strcmp(zwlr_foreign_toplevel_manager_v1_interface.name, interface) == 0) {
-        wscreen->toplevel_manager = wl_registry_bind(wscreen->wl_registry,
-                                                     id,
-                                                     &zwlr_foreign_toplevel_manager_v1_interface,
-                                                     MIN((uint32_t)zwlr_foreign_toplevel_manager_v1_interface.version, version));
-        zwlr_foreign_toplevel_manager_v1_add_listener(wscreen->toplevel_manager, &toplevel_manager_listener, wscreen);
-        add_async_roundtrip(wscreen);
+        wscreen->toplevel_manager_id = id;
+        wscreen->toplevel_manager_version = version;
+        if (!wscreen->defer_toplevel_manager) {
+            init_toplevel_manager(wscreen);
+        }
     } else if (strcmp(wl_seat_interface.name, interface) == 0) {
         if (wscreen->wl_seat != NULL) {
             g_debug("We already had a wl_seat, but now we're getting a new one");
