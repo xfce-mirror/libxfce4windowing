@@ -307,6 +307,8 @@ unscale_monitor_coordinates(GList *monitors, XfwMonitor *monitor) {
 
 static void
 finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *monitor_wl) {
+    g_debug("finalizing for output ID %d", wl_proxy_get_id((struct wl_proxy *)monitor_wl->output));
+
     XfwMonitor *monitor = XFW_MONITOR(monitor_wl);
 
     monitor_wl->output_dones = 0;
