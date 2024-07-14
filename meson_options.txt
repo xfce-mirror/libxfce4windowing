@@ -25,3 +25,10 @@ option(
   value: true,
   description: 'Build gobject-introspection files',
 )
+
+option(
+  'tests',
+  type: 'boolean',
+  value: false,
+  description: 'Build some small test programs',
+)
