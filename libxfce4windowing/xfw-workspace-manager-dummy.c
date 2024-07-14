@@ -22,13 +22,14 @@
 #endif
 
 #include "libxfce4windowing-private.h"
+#include "xfw-screen.h"
 #include "xfw-workspace-dummy.h"
 #include "xfw-workspace-group-dummy.h"
 #include "xfw-workspace-manager-dummy.h"
 #include "xfw-workspace-manager-private.h"
 
 struct _XfwWorkspaceManagerDummyPrivate {
-    GdkScreen *screen;
+    XfwScreen *screen;
     GList *groups;
     GList *workspaces;
 };
@@ -139,7 +140,7 @@ xfw_workspace_manager_dummy_list_workspaces(XfwWorkspaceManager *manager) {
 }
 
 XfwWorkspaceManager *
-_xfw_workspace_manager_dummy_new(GdkScreen *screen) {
+_xfw_workspace_manager_dummy_new(XfwScreen *screen) {
     return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_DUMMY,
                         "screen", screen,
                         NULL);
