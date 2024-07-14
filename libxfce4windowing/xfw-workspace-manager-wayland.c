@@ -29,6 +29,7 @@
 #include "protocols/ext-workspace-v1-20230427-client.h"
 
 #include "libxfce4windowing-private.h"
+#include "xfw-screen-private.h"
 #include "xfw-workspace-group-wayland.h"
 #include "xfw-workspace-manager-dummy.h"
 #include "xfw-workspace-manager-private.h"
@@ -37,14 +38,12 @@
 
 enum {
     PROP0,
-    PROP_WL_REGISTRY,
     PROP_WL_MANAGER,
 };
 
 struct _XfwWorkspaceManagerWaylandPrivate {
-    struct wl_registry *wl_registry;
     struct ext_workspace_manager_v1 *handle;
-    GdkScreen *screen;
+    XfwScreen *screen;
     GList *groups;
     GList *workspaces;
 };
@@ -57,19 +56,12 @@ static void xfw_workspace_manager_wayland_finalize(GObject *obj);
 static GList *xfw_workspace_manager_wayland_list_workspace_groups(XfwWorkspaceManager *manager);
 static GList *xfw_workspace_manager_wayland_list_workspaces(XfwWorkspaceManager *manager);
 
-static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
-static void registry_global_remove(void *data, struct wl_registry *registry, uint32_t id);
-
 static void manager_workspace_group(void *data, struct ext_workspace_manager_v1 *manager, struct ext_workspace_group_handle_v1 *group);
 static void manager_workspace(void *data, struct ext_workspace_manager_v1 *manager, struct ext_workspace_handle_v1 *workspace);
 static void manager_done(void *data, struct ext_workspace_manager_v1 *manager);
 static void manager_finished(void *data, struct ext_workspace_manager_v1 *manager);
 
 
-static const struct wl_registry_listener registry_listener = {
-    .global = registry_global,
-    .global_remove = registry_global_remove,
-};
 static const struct ext_workspace_manager_v1_listener manager_listener = {
     .workspace_group = manager_workspace_group,
     .workspace = manager_workspace,
@@ -91,12 +83,6 @@ xfw_workspace_manager_wayland_class_init(XfwWorkspaceManagerWaylandClass *klass)
     gklass->get_property = xfw_workspace_manager_wayland_get_property;
     gklass->finalize = xfw_workspace_manager_wayland_finalize;
 
-    g_object_class_install_property(gklass,
-                                    PROP_WL_REGISTRY,
-                                    g_param_spec_pointer("wl-registry",
-                                                         "wl-registry",
-                                                         "wl-registry",
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     g_object_class_install_property(gklass,
                                     PROP_WL_MANAGER,
                                     g_param_spec_pointer("wl-manager",
@@ -128,16 +114,12 @@ xfw_workspace_manager_wayland_set_property(GObject *obj, guint prop_id, const GV
     XfwWorkspaceManagerWayland *manager = XFW_WORKSPACE_MANAGER_WAYLAND(obj);
 
     switch (prop_id) {
-        case PROP_WL_REGISTRY:
-            manager->priv->wl_registry = g_value_get_pointer(value);
-            break;
-
         case PROP_WL_MANAGER:
             manager->priv->handle = g_value_get_pointer(value);
             break;
 
         case WORKSPACE_MANAGER_PROP_SCREEN:
-            manager->priv->screen = GDK_SCREEN(g_value_get_object(value));
+            manager->priv->screen = XFW_SCREEN(g_value_get_object(value));
             break;
 
         default:
@@ -151,10 +133,6 @@ xfw_workspace_manager_wayland_get_property(GObject *obj, guint prop_id, GValue *
     XfwWorkspaceManagerWayland *manager = XFW_WORKSPACE_MANAGER_WAYLAND(obj);
 
     switch (prop_id) {
-        case PROP_WL_REGISTRY:
-            g_value_set_pointer(value, manager->priv->wl_registry);
-            break;
-
         case PROP_WL_MANAGER:
             g_value_set_pointer(value, manager->priv->handle);
             break;
@@ -178,7 +156,6 @@ xfw_workspace_manager_wayland_finalize(GObject *obj) {
     g_list_free_full(priv->groups, g_object_unref);
 
     ext_workspace_manager_v1_destroy(priv->handle);
-    wl_registry_destroy(priv->wl_registry);
 
     G_OBJECT_CLASS(xfw_workspace_manager_wayland_parent_class)->finalize(obj);
 }
@@ -193,23 +170,6 @@ static GList *
 xfw_workspace_manager_wayland_list_workspaces(XfwWorkspaceManager *manager) {
     XfwWorkspaceManagerWayland *wmanager = XFW_WORKSPACE_MANAGER_WAYLAND(manager);
     return wmanager->priv->workspaces;
-}
-
-static void
-registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version) {
-    struct ext_workspace_manager_v1 **handle = data;
-
-    if (strcmp(interface, ext_workspace_manager_v1_interface.name) == 0) {
-        *handle = wl_registry_bind(registry,
-                                   id,
-                                   &ext_workspace_manager_v1_interface,
-                                   MIN((uint32_t)ext_workspace_manager_v1_interface.version, version));
-    }
-}
-
-static void
-registry_global_remove(void *data, struct wl_registry *registry, uint32_t id) {
-    // FIXME: do we need to do anything here?
 }
 
 static void
@@ -277,27 +237,9 @@ manager_finished(void *data, struct ext_workspace_manager_v1 *manager) {
 }
 
 XfwWorkspaceManager *
-_xfw_workspace_manager_wayland_new(GdkScreen *screen) {
-    GdkDisplay *gdk_display;
-    struct wl_display *wl_display;
-    struct wl_registry *wl_registry;
-    struct ext_workspace_manager_v1 *handle = NULL;
-
-    gdk_display = gdk_screen_get_display(screen);
-    wl_display = gdk_wayland_display_get_wl_display(GDK_WAYLAND_DISPLAY(gdk_display));
-    wl_registry = wl_display_get_registry(wl_display);
-    wl_registry_add_listener(wl_registry, &registry_listener, &handle);
-    wl_display_roundtrip(wl_display);
-
-    if (handle != NULL) {
-        return XFW_WORKSPACE_MANAGER(g_object_new(XFW_TYPE_WORKSPACE_MANAGER_WAYLAND,
-                                                  "wl-registry", wl_registry,
-                                                  "wl-manager", handle,
-                                                  "screen", screen,
-                                                  NULL));
-    } else {
-        g_message("Your compositor does not support the ext_workspace_manager_v1 protocol");
-        wl_registry_destroy(wl_registry);
-        return _xfw_workspace_manager_dummy_new(screen);
-    }
+_xfw_workspace_manager_wayland_new(XfwScreenWayland *screen, struct ext_workspace_manager_v1 *manager) {
+    return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_WAYLAND,
+                        "screen", screen,
+                        "wl-manager", manager,
+                        NULL);
 }
