@@ -28,7 +28,11 @@ G_BEGIN_DECLS
 #define XFW_TYPE_MONITOR_X11 (xfw_monitor_x11_get_type())
 G_DECLARE_FINAL_TYPE(XfwMonitorX11, xfw_monitor_x11, XFW, MONITOR_X11, XfwMonitor)
 
-void _xfw_monitor_x11_init(XfwScreenX11 *screen);
+typedef struct _XfwMonitorManagerX11 XfwMonitorManagerX11;
+
+XfwMonitorManagerX11 *_xfw_monitor_manager_x11_new(XfwScreenX11 *screen);
+void _xfw_monitor_manager_x11_destroy(XfwMonitorManagerX11 *manager);
+
 void _xfw_monitor_x11_workspace_changed(XfwScreenX11 *screen, gint new_workspace_num);
 
 G_END_DECLS

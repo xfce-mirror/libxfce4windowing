@@ -38,6 +38,11 @@
 #include "xfw-screen-x11.h"
 #include "xfw-screen.h"
 
+struct _XfwMonitorManagerX11 {
+    XfwScreenX11 *screen;
+    guint refresh_idle_id;
+};
+
 struct _XfwMonitorX11 {
     XfwMonitor parent;
 };
@@ -155,11 +160,6 @@ enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_mon
 
     int nmonitors = 0;
     XRRMonitorInfo *rrmonitors = XRRGetMonitors(dpy, root, True, &nmonitors);
-    if (rrmonitors == NULL) {
-        g_message("XRRGetMonitors() failed");
-        XRRFreeScreenResources(resources);
-        return NULL;
-    }
 
     GList *monitors = NULL;
     XfwMonitor *primary_monitor = NULL;
@@ -324,7 +324,9 @@ enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_mon
     monitors = g_list_reverse(monitors);
 
     XRRFreeScreenResources(resources);
-    XRRFreeMonitors(rrmonitors);
+    if (rrmonitors != NULL) {
+        XRRFreeMonitors(rrmonitors);
+    }
 
     if (primary_monitor == NULL) {
         primary_monitor = _xfw_monitor_guess_primary_monitor(monitors);
@@ -506,6 +508,14 @@ update_workareas(XfwScreenX11 *screen) {
     update_monitor_workareas(screen, cur_workspace_num);
 }
 
+static gboolean
+refresh_monitors_idled(gpointer data) {
+    XfwMonitorManagerX11 *manager = data;
+    manager->refresh_idle_id = 0;
+    refresh_monitors(XFW_SCREEN(manager->screen));
+    return FALSE;
+}
+
 static GdkFilterReturn
 rootwin_event_filter(GdkXEvent *gxevent, GdkEvent *event, gpointer data) {
     XEvent *xevent = (XEvent *)gxevent;
@@ -513,23 +523,26 @@ rootwin_event_filter(GdkXEvent *gxevent, GdkEvent *event, gpointer data) {
     if (xevent->type - xrandr_event_base == RRScreenChangeNotify
         || xevent->type - xrandr_event_base == RRNotify)
     {
-        XfwScreen *screen = XFW_SCREEN(data);
-        refresh_monitors(screen);
-    } else if (xevent->type == PropertyNotify) {
-        XfwScreenX11 *screen = XFW_SCREEN_X11(data);
-        update_workareas(screen);
+        XfwMonitorManagerX11 *manager = data;
+        if (manager->refresh_idle_id != 0) {
+            g_source_remove(manager->refresh_idle_id);
+        }
+        manager->refresh_idle_id = g_idle_add(refresh_monitors_idled, manager);
+    } else if (xevent->type == PropertyNotify
+               && xevent->xproperty.atom == XInternAtom(xevent->xproperty.display, "_NET_WORKAREA", False))
+    {
+        XfwMonitorManagerX11 *manager = data;
+        update_workareas(manager->screen);
     }
 
     return GDK_FILTER_CONTINUE;
 }
 
-static void
-screen_destroyed(gpointer data, GObject *where_the_object_was) {
-    gdk_window_remove_filter(GDK_WINDOW(data), rootwin_event_filter, where_the_object_was);
-}
+XfwMonitorManagerX11 *
+_xfw_monitor_manager_x11_new(XfwScreenX11 *xscreen) {
+    XfwMonitorManagerX11 *manager = g_new0(XfwMonitorManagerX11, 1);
+    manager->screen = xscreen;
 
-void
-_xfw_monitor_x11_init(XfwScreenX11 *xscreen) {
     XfwScreen *screen = XFW_SCREEN(xscreen);
     GdkScreen *gscreen = _xfw_screen_get_gdk_screen(screen);
 
@@ -579,8 +592,7 @@ _xfw_monitor_x11_init(XfwScreenX11 *xscreen) {
                        xrootwin,
                        RRScreenChangeNotifyMask | RRCrtcChangeNotifyMask | RROutputPropertyNotifyMask);
 
-        gdk_window_add_filter(rootwin, rootwin_event_filter, screen);
-        g_object_weak_ref(G_OBJECT(screen), screen_destroyed, rootwin);
+        gdk_window_add_filter(rootwin, rootwin_event_filter, manager);
 
         refresh_monitors(screen);
     }
@@ -590,6 +602,21 @@ _xfw_monitor_x11_init(XfwScreenX11 *xscreen) {
     XSelectInput(dpy, xrootwin, winattrs.your_event_mask | PropertyChangeMask);
 
     update_workareas(xscreen);
+
+    return manager;
+}
+
+void
+_xfw_monitor_manager_x11_destroy(XfwMonitorManagerX11 *manager) {
+    if (manager->refresh_idle_id != 0) {
+        g_source_remove(manager->refresh_idle_id);
+    }
+
+    GdkScreen *gscreen = _xfw_screen_get_gdk_screen(XFW_SCREEN(manager->screen));
+    GdkWindow *rootwin = gdk_screen_get_root_window(gscreen);
+    gdk_window_remove_filter(rootwin, rootwin_event_filter, manager);
+
+    g_free(manager);
 }
 
 void

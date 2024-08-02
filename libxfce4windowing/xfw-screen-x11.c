@@ -43,6 +43,8 @@ struct _XfwScreenX11 {
 
     // _NET_WORKAREA is defined for each workspace
     GArray *workareas;  // GdkRectangle
+
+    XfwMonitorManagerX11 *monitor_manager;
 };
 
 static void xfw_screen_x11_constructed(GObject *obj);
@@ -115,12 +117,14 @@ xfw_screen_x11_constructed(GObject *obj) {
     g_signal_connect(xscreen->wnck_screen, "showing-desktop-changed", G_CALLBACK(showing_desktop_changed), xscreen);
     g_signal_connect(xscreen->wnck_screen, "active-workspace-changed", G_CALLBACK(active_workspace_changed), xscreen);
 
-    _xfw_monitor_x11_init(xscreen);
+    xscreen->monitor_manager = _xfw_monitor_manager_x11_new(xscreen);
 }
 
 static void
 xfw_screen_x11_finalize(GObject *obj) {
     XfwScreenX11 *screen = XFW_SCREEN_X11(obj);
+
+    _xfw_monitor_manager_x11_destroy(screen->monitor_manager);
 
     g_signal_handlers_disconnect_by_data(screen->wnck_screen, screen);
     g_list_free(screen->windows);
