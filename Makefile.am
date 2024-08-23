@@ -7,7 +7,8 @@ SUBDIRS = \
 	libxfce4windowing \
 	libxfce4windowingui \
 	docs \
-	po
+	po \
+	tests
 
 EXTRA_DIST = \
 	README.md \
