@@ -227,6 +227,7 @@ libxfce4windowingui/libxfce4windowingui-0.pc
 libxfce4windowingui/libxfce4windowingui-config.h
 po/Makefile.in
 protocols/Makefile
+tests/Makefile
 ])
 AC_OUTPUT
 

@@ -76,3 +76,6 @@ protocols/*.c
 protocols/*.h
 
 compile_flags.txt
+
+tests/xfw-enum-monitors
+tests/xfw-enum-windows
