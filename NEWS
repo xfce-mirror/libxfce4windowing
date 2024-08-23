@@ -1,3 +1,53 @@
+4.19.4 (2024-08-23)
+======
+- Add tests/Makefile.am
+- x11: refresh monitors in an idle function
+- I18n: Update po/LINGUAS list
+- Add a couple small test programs
+- Defer binding to the toplevel manager until after we have the outputs
+- Add debug logging to toplevel output_enter/leave
+- Add debugging when finalizing output properties
+- Add a few more display synchronization points in the wayland code
+- Reset XfwMonitorWayland output_done/xdg_output_done count on finalize
+- Add XfwMonitor:fractional-scale
+- Add primary monitor fallback guessing to X11 too
+- Remove extra wl_registry for the wayland monitor management
+- Remove extra wl_registry for the wayland workspace manager
+- Fix missing wl_output & xdg_output assignment in XfwMonitorWayland
+- Add workarea info and tracking to XfwMonitor
+- Use XfwMonitor instead of GdkMonitor throughout
+- Add XfwScreen::monitor-added and XfwScreen::monitor-removed
+- Fix 'Since' doc tag typos
+- Don't g_warning() if xrandr returns no monitors
+- Add xfw_monitor_get_gdk_monitor()
+- Fix bad doc comment for XfwMonitor:is-primary
+- Add primary monitor concept to XfwMonitor
+- Use system-relative include paths in public headers
+- Fix bad property name (from a stray search-and-replace)
+- Move monitors list into XfwScreen
+- Make XfwScreen an abstract class instead of an interface
+- wayland: Fix monitor ownership
+- XfwMonitor: add object properties
+- Add XfwMonitor
+- Apply .clang-format file
+- clang-format: Add file
+- build: Complete use of XDT_VERSION_INIT
+- Fix warnings about typedef redeclaration
+- use -no-undefined so that libtool consumes it
+- scan-build: Add false positive file
+- build: clang: Fix -Wcast-align
+- I18n: Update po/LINGUAS list
+- Revert "Add new CI builds to build without X11 and Wayland"
+- I18n: Update po/LINGUAS list
+- Don't toggle show-desktop whenever wnck tells us it changed
+- make sure bash is found non non-linux
+- Add meson build files
+- Add layout-row and layout-column properties to XfwWorkspace
+- Implement workspace layout row/column for Wayland
+- I18n: Update po/LINGUAS list
+- Translation Updates:
+  Asturian, Czech, Greek, Kazakh
+
 4.19.3 (2024-02-29)
 ======
 - Update copyright year
