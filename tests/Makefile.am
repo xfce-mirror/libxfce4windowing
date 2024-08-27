@@ -1,6 +1,7 @@
 noinst_PROGRAMS = \
 	xfw-enum-monitors \
-	xfw-enum-windows
+	xfw-enum-windows \
+	xfw-monitor-offon
 
 tests_cflags = \
 	-I$(top_srcdir) \
@@ -17,3 +18,7 @@ xfw_enum_monitors_LDADD = $(tests_ldadd)
 xfw_enum_windows_SOURCES = xfw-enum-windows.c
 xfw_enum_windows_CFLAGS = $(tests_cflags)
 xfw_enum_windows_LDADD = $(tests_ldadd)
+
+xfw_monitor_offon_SOURCES = xfw-monitor-offon.c
+xfw_monitor_offon_CFLAGS = $(tests_cflags)
+xfw_monitor_offon_LDADD = $(tests_ldadd)
