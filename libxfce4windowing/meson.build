@@ -58,6 +58,7 @@ if enable_x11
     'xfw-wnck-icon.c',
     'xfw-workspace-manager-x11.c',
     'xfw-workspace-x11.c',
+    'xsettings-x11.c',
   ]
 else
   windowing_config_data.set('LIBXFCE4WINDOWING_HAS_X11', '/* #undef LIBXFCE4WINDOWING_HAS_X11 */')
