@@ -31,24 +31,24 @@
 #include <libdisplay-info/info.h>
 #include <stdlib.h>
 
-#include "libxfce4windowing-private.h"
 #include "xfw-monitor-private.h"
 #include "xfw-monitor-x11.h"
 #include "xfw-monitor.h"
 #include "xfw-screen-x11.h"
 #include "xfw-screen.h"
+#include "xsettings-x11.h"
 
 struct _XfwMonitorManagerX11 {
     XfwScreenX11 *screen;
+    int xrandr_event_base;
+    XSettingsX11 *xsettings;
+    gint scale;
     guint refresh_idle_id;
 };
 
 struct _XfwMonitorX11 {
     XfwMonitor parent;
 };
-
-static GOnce xrandr_init_once = G_ONCE_INIT;
-static int xrandr_event_base = 0;
 
 
 G_DEFINE_TYPE(XfwMonitorX11, xfw_monitor_x11, XFW_TYPE_MONITOR)
@@ -60,28 +60,25 @@ xfw_monitor_x11_class_init(XfwMonitorX11Class *klass) {}
 static void
 xfw_monitor_x11_init(XfwMonitorX11 *monitor) {}
 
-static gpointer
-xrandr_init(gpointer data) {
-    GdkScreen *gscreen = GDK_SCREEN(data);
-    GdkDisplay *display = gdk_screen_get_display(gscreen);
-
-    Display *dpy = gdk_x11_display_get_xdisplay(display);
-    int errbase;
-    if (!XRRQueryExtension(dpy, &xrandr_event_base, &errbase)) {
-        return "extension not found";
+static int
+xrandr_init(Display *dpy, const gchar **error) {
+    int evbase, errbase;
+    if (!XRRQueryExtension(dpy, &evbase, &errbase)) {
+        *error = "extension not found";
+        return -1;
     }
 
     int major, minor;
     if (!XRRQueryVersion(dpy, &major, &minor)) {
-        return "version query failed";
+        *error = "version query failed";
+        return -1;
     }
     if (major != 1 || minor < 5) {
-        return "version 1.5 or better required";
+        *error = "version 1.5 or better required";
+        return -1;
     }
 
-    gdk_x11_register_standard_event_type(display, xrandr_event_base, RRNumberEvents);
-
-    return NULL;
+    return evbase;
 }
 
 static inline XfwMonitorSubpixel
@@ -132,6 +129,179 @@ xfw_transform_from_x11(Rotation x11_rotation) {
     }
 }
 
+static gboolean
+get_cardinal_prop(GdkDisplay *display, Window xroot, const char *prop_name, gint *value) {
+    Display *dpy = gdk_x11_display_get_xdisplay(display);
+    Atom actual_type;
+    int actual_format;
+    gulong nitems = 0;
+    gulong bytes_after = 0;
+    guchar *prop = NULL;
+
+    gdk_x11_display_error_trap_push(display);
+    int ret = XGetWindowProperty(dpy,
+                                 xroot,
+                                 XInternAtom(dpy, prop_name, False),
+                                 0,
+                                 sizeof(gint),
+                                 False,
+                                 XA_CARDINAL,
+                                 &actual_type,
+                                 &actual_format,
+                                 &nitems,
+                                 &bytes_after,
+                                 &prop);
+    if (gdk_x11_display_error_trap_pop(display) != 0
+        || ret != Success
+        || actual_type != XA_CARDINAL
+        || actual_format != 32
+        || nitems != 1
+        || bytes_after != 0)
+    {
+        g_clear_pointer(&prop, XFree);
+        return FALSE;
+    } else {
+        *value = ((gulong *)(gpointer)prop)[0];
+        XFree(prop);
+        return TRUE;
+    }
+}
+
+static void
+update_monitor_workarea(XfwScreenX11 *screen, XfwMonitor *monitor, gint cur_workspace_num) {
+    GArray *workareas = _xfw_screen_x11_get_workareas(screen);
+    g_return_if_fail(workareas != NULL);
+    g_return_if_fail(workareas->len > 0);
+
+    guint workarea_num = CLAMP(cur_workspace_num, 0, (gint64)workareas->len);
+    if (cur_workspace_num != (gint64)workarea_num) {
+        g_message("Bad current workspace (%d), should be between 0 and %u",
+                  cur_workspace_num,
+                  workareas->len - 1);
+    }
+
+    GdkRectangle geom;
+    xfw_monitor_get_logical_geometry(monitor, &geom);
+    GdkRectangle *workarea = &g_array_index(workareas, GdkRectangle, workarea_num);
+    if (gdk_rectangle_intersect(&geom, workarea, &geom)) {
+        _xfw_monitor_set_workarea(monitor, &geom);
+    }
+}
+
+static void
+update_monitor_workareas_for_workspace(XfwScreenX11 *screen, gint cur_workspace_num) {
+    for (GList *l = xfw_screen_get_monitors(XFW_SCREEN(screen)); l != NULL; l = l->next) {
+        XfwMonitor *monitor = XFW_MONITOR(l->data);
+        update_monitor_workarea(screen, monitor, cur_workspace_num);
+    }
+    for (GList *l = xfw_screen_get_monitors(XFW_SCREEN(screen)); l != NULL; l = l->next) {
+        XfwMonitor *monitor = XFW_MONITOR(l->data);
+        _xfw_monitor_notify_pending_changes(monitor);
+    }
+}
+
+static void
+update_monitor_workareas(XfwMonitorManagerX11 *manager) {
+    GdkScreen *gscreen = _xfw_screen_get_gdk_screen(XFW_SCREEN(manager->screen));
+    GdkDisplay *display = gdk_screen_get_display(gscreen);
+    Window root = gdk_x11_window_get_xid(gdk_screen_get_root_window(gscreen));
+
+    gint cur_workspace_num = 0;
+    if (!get_cardinal_prop(display, root, "_NET_CURRENT_DESKTOP", &cur_workspace_num)) {
+        g_message("Failed to fetch _NET_CURRENT_DESKTOP; assuming 0");
+    }
+
+    update_monitor_workareas_for_workspace(manager->screen, cur_workspace_num);
+}
+
+static void
+update_workareas(XfwMonitorManagerX11 *manager) {
+    GdkScreen *gdkscreen = _xfw_screen_get_gdk_screen(XFW_SCREEN(manager->screen));
+    GdkWindow *root = gdk_screen_get_root_window(gdkscreen);
+    Window xroot = gdk_x11_window_get_xid(root);
+
+    GdkDisplay *display = gdk_screen_get_display(gdkscreen);
+    Display *dpy = gdk_x11_display_get_xdisplay(display);
+
+    gint workspace_count = 1;
+    if (!get_cardinal_prop(display, xroot, "_NET_NUMBER_OF_DESKTOPS", &workspace_count)) {
+        g_message("Failed to fetch _NET_NUMBER_OF_DESKTOPS; assuming 1");
+    }
+
+    Atom actual_type;
+    int actual_format;
+    gulong nitems = 0;
+    gulong bytes_after = 0;
+    guchar *prop = NULL;
+
+    GArray *workareas;
+
+    gdk_x11_display_error_trap_push(display);
+    int ret = XGetWindowProperty(dpy,
+                                 xroot,
+                                 XInternAtom(dpy, "_NET_WORKAREA", False),
+                                 0,
+                                 sizeof(unsigned int) * 4 * workspace_count,
+                                 False,
+                                 XA_CARDINAL,
+                                 &actual_type,
+                                 &actual_format,
+                                 &nitems,
+                                 &bytes_after,
+                                 &prop);
+    if (gdk_x11_display_error_trap_pop(display) != 0
+        || ret != Success
+        || actual_type != XA_CARDINAL
+        || actual_format != 32
+        || nitems < 4
+        || nitems % 4 != 0)
+    {
+        g_message("Failed to get _NET_WORKAREA; using full screen dimensions");
+        Screen *xscreen = gdk_x11_screen_get_xscreen(gdkscreen);
+        GdkRectangle screen_geom = {
+            .x = 0,
+            .y = 0,
+            .width = WidthOfScreen(xscreen),
+            .height = HeightOfScreen(xscreen),
+        };
+        workareas = g_array_sized_new(FALSE, TRUE, sizeof(GdkRectangle), workspace_count);
+        for (gint i = 0; i < workspace_count; ++i) {
+            g_array_append_val(workareas, screen_geom);
+        }
+    } else {
+        gint nworkareas = nitems / 4;
+        long *workareas_raw = (long *)(gpointer)prop;
+
+        if (nworkareas < workspace_count) {
+            g_message("We got %d as the workspace count, but there are only %d workareas returned",
+                      workspace_count,
+                      nworkareas);
+        }
+
+        workareas = g_array_sized_new(FALSE, TRUE, sizeof(GdkRectangle), nworkareas);
+        for (gint i = 0; i < nworkareas; ++i) {
+            GdkRectangle workarea = {
+                .x = workareas_raw[i * 4] / manager->scale,
+                .y = workareas_raw[i * 4 + 1] / manager->scale,
+                .width = workareas_raw[i * 4 + 2] / manager->scale,
+                .height = workareas_raw[i * 4 + 3] / manager->scale,
+            };
+            g_array_append_val(workareas, workarea);
+        }
+    }
+    g_clear_pointer(&prop, XFree);
+
+    _xfw_screen_x11_set_workareas(manager->screen, workareas);
+}
+
+static void
+ensure_workareas(XfwMonitorManagerX11 *manager) {
+    if (_xfw_screen_x11_get_workareas(manager->screen) == NULL) {
+        update_workareas(manager);
+        update_monitor_workareas(manager);
+    }
+}
+
 static XfwMonitor *
 steal_monitor_by_connector(GList **monitors, const char *connector) {
     for (GList *l = *monitors; l != NULL; l = l->next) {
@@ -145,10 +315,9 @@ steal_monitor_by_connector(GList **monitors, const char *connector) {
 }
 
 static GList *
-enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_monitors) {
-    GdkScreen *gscreen = _xfw_screen_get_gdk_screen(screen);
+enumerate_monitors(XfwMonitorManagerX11 *manager, GList **new_monitors, GList **previous_monitors) {
+    GdkScreen *gscreen = _xfw_screen_get_gdk_screen(XFW_SCREEN(manager->screen));
     GdkDisplay *display = gdk_screen_get_display(gscreen);
-    gint scale = gdk_monitor_get_scale_factor(gdk_display_get_monitor(display, 0));
     Display *dpy = gdk_x11_display_get_xdisplay(display);
     Window root = XDefaultRootWindow(dpy);
 
@@ -156,6 +325,12 @@ enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_mon
     if (resources == NULL) {
         g_message("XRRGetScreenResourcesCurrent() failed");
         return NULL;
+    }
+
+    ensure_workareas(manager);
+    gint cur_workspace_num = 0;
+    if (!get_cardinal_prop(display, root, "_NET_CURRENT_DESKTOP", &cur_workspace_num)) {
+        g_message("Failed to fetch _NET_CURRENT_DESKTOP; assuming 0");
     }
 
     int nmonitors = 0;
@@ -195,8 +370,8 @@ enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_mon
             _xfw_monitor_set_connector(monitor, connector);
         }
 
-        _xfw_monitor_set_scale(monitor, scale);
-        _xfw_monitor_set_fractional_scale(monitor, scale);
+        _xfw_monitor_set_scale(monitor, manager->scale);
+        _xfw_monitor_set_fractional_scale(monitor, manager->scale);
         _xfw_monitor_set_physical_size(monitor, oinfo->mm_width, oinfo->mm_height);
         _xfw_monitor_set_subpixel(monitor, xfw_subpixel_from_x11(oinfo->subpixel_order));
         _xfw_monitor_set_transform(monitor, xfw_transform_from_x11(crtc->rotation));
@@ -219,11 +394,13 @@ enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_mon
         };
         _xfw_monitor_set_physical_geometry(monitor, &geometry);
 
-        geometry.x /= scale;
-        geometry.y /= scale;
-        geometry.width /= scale;
-        geometry.height /= scale;
+        geometry.x /= manager->scale;
+        geometry.y /= manager->scale;
+        geometry.width /= manager->scale;
+        geometry.height /= manager->scale;
         _xfw_monitor_set_logical_geometry(monitor, &geometry);
+
+        update_monitor_workarea(manager->screen, monitor, cur_workspace_num);
 
         XRRFreeCrtcInfo(crtc);
 
@@ -339,191 +516,34 @@ enumerate_monitors(XfwScreen *screen, GList **new_monitors, GList **previous_mon
 }
 
 static void
-refresh_monitors(XfwScreen *screen) {
+refresh_monitors(XfwMonitorManagerX11 *manager) {
     GList *new_monitors = NULL;
-    GList *previous_monitors = _xfw_screen_steal_monitors(screen);
-    GList *monitors = enumerate_monitors(screen, &new_monitors, &previous_monitors);
+    GList *previous_monitors = _xfw_screen_steal_monitors(XFW_SCREEN(manager->screen));
+    GList *monitors = enumerate_monitors(manager, &new_monitors, &previous_monitors);
 
-    _xfw_screen_set_monitors(screen, monitors, new_monitors, previous_monitors);
+    _xfw_screen_set_monitors(XFW_SCREEN(manager->screen), monitors, new_monitors, previous_monitors);
 
     g_list_free(new_monitors);
     g_list_free_full(previous_monitors, g_object_unref);
-}
-
-static void
-update_monitor_workareas(XfwScreenX11 *screen, gint cur_workspace_num) {
-    GArray *workareas = _xfw_screen_x11_get_workareas(screen);
-    g_return_if_fail(workareas != NULL);
-
-    guint workarea_num = CLAMP(cur_workspace_num, 0, (gint64)workareas->len);
-    if (cur_workspace_num != (gint64)workarea_num) {
-        g_message("Bad current workspace (%d), should be between 0 and %u",
-                  cur_workspace_num,
-                  workareas->len - 1);
-    }
-
-    for (GList *l = xfw_screen_get_monitors(XFW_SCREEN(screen)); l != NULL; l = l->next) {
-        XfwMonitor *monitor = XFW_MONITOR(l->data);
-        GdkRectangle geom;
-        xfw_monitor_get_logical_geometry(monitor, &geom);
-        if (gdk_rectangle_intersect(&geom, &g_array_index(workareas, GdkRectangle, workarea_num), &geom)) {
-            _xfw_monitor_set_workarea(monitor, &geom);
-        }
-    }
-
-    for (GList *l = xfw_screen_get_monitors(XFW_SCREEN(screen)); l != NULL; l = l->next) {
-        XfwMonitor *monitor = XFW_MONITOR(l->data);
-        _xfw_monitor_notify_pending_changes(monitor);
-    }
-}
-
-static gboolean
-get_cardinal_prop(GdkDisplay *display, Window xroot, const char *prop_name, gint *value) {
-    Display *dpy = gdk_x11_display_get_xdisplay(display);
-    Atom actual_type;
-    int actual_format;
-    gulong nitems = 0;
-    gulong bytes_after = 0;
-    guchar *prop = NULL;
-
-    gdk_x11_display_error_trap_push(display);
-    int ret = XGetWindowProperty(dpy,
-                                 xroot,
-                                 XInternAtom(dpy, prop_name, False),
-                                 0,
-                                 sizeof(gint),
-                                 False,
-                                 XA_CARDINAL,
-                                 &actual_type,
-                                 &actual_format,
-                                 &nitems,
-                                 &bytes_after,
-                                 &prop);
-    if (gdk_x11_display_error_trap_pop(display) != 0
-        || ret != Success
-        || actual_type != XA_CARDINAL
-        || actual_format != 32
-        || nitems != 1
-        || bytes_after != 0)
-    {
-        g_clear_pointer(&prop, XFree);
-        return FALSE;
-    } else {
-        *value = ((gulong *)(gpointer)prop)[0];
-        XFree(prop);
-        return TRUE;
-    }
-}
-
-static void
-update_workareas(XfwScreenX11 *screen) {
-    GdkScreen *gdkscreen = _xfw_screen_get_gdk_screen(XFW_SCREEN(screen));
-    GdkWindow *root = gdk_screen_get_root_window(gdkscreen);
-    Window xroot = gdk_x11_window_get_xid(root);
-
-    GdkDisplay *display = gdk_screen_get_display(gdkscreen);
-    Display *dpy = gdk_x11_display_get_xdisplay(display);
-
-    gint workspace_count = 1;
-    if (!get_cardinal_prop(display, xroot, "_NET_NUMBER_OF_DESKTOPS", &workspace_count)) {
-        g_message("Failed to fetch _NET_NUMBER_OF_DESKTOPS; assuming 1");
-    }
-    gint cur_workspace_num = 0;
-    if (!get_cardinal_prop(display, xroot, "_NET_CURRENT_DESKTOP", &cur_workspace_num)) {
-        g_message("Failed to fetch _NET_CURRENT_DESKTOP; assuming 0");
-    }
-
-    Atom actual_type;
-    int actual_format;
-    gulong nitems = 0;
-    gulong bytes_after = 0;
-    guchar *prop = NULL;
-
-    GArray *workareas;
-
-    gdk_x11_display_error_trap_push(display);
-    int ret = XGetWindowProperty(dpy,
-                                 xroot,
-                                 XInternAtom(dpy, "_NET_WORKAREA", False),
-                                 0,
-                                 sizeof(unsigned int) * 4 * workspace_count,
-                                 False,
-                                 XA_CARDINAL,
-                                 &actual_type,
-                                 &actual_format,
-                                 &nitems,
-                                 &bytes_after,
-                                 &prop);
-    if (gdk_x11_display_error_trap_pop(display) != 0
-        || ret != Success
-        || actual_type != XA_CARDINAL
-        || actual_format != 32
-        || nitems < 4
-        || nitems % 4 != 0)
-    {
-        g_message("Failed to get _NET_WORKAREA; using full screen dimensions");
-        Screen *xscreen = gdk_x11_screen_get_xscreen(gdkscreen);
-        GdkRectangle screen_geom = {
-            .x = 0,
-            .y = 0,
-            .width = WidthOfScreen(xscreen),
-            .height = HeightOfScreen(xscreen),
-        };
-        workareas = g_array_sized_new(FALSE, TRUE, sizeof(GdkRectangle), 1);
-        g_array_append_val(workareas, screen_geom);
-        cur_workspace_num = 0;
-    } else {
-        gint nworkareas = nitems / 4;
-        long *workareas_raw = (long *)(gpointer)prop;
-
-        if (nworkareas < workspace_count) {
-            g_message("We got %d as the workspace count, but there are only %d workareas returned",
-                      workspace_count,
-                      nworkareas);
-        }
-
-        if (cur_workspace_num >= nworkareas) {
-            g_message("Current workspace number %d is out of range for the %d workareas returned; assuming workspace 0",
-                      cur_workspace_num,
-                      nworkareas);
-            cur_workspace_num = 0;
-        }
-
-        gint scale = gdk_monitor_get_scale_factor(gdk_display_get_monitor(display, 0));
-
-        workareas = g_array_sized_new(FALSE, TRUE, sizeof(GdkRectangle), nworkareas);
-        for (gint i = 0; i < nworkareas; ++i) {
-            GdkRectangle workarea = {
-                .x = workareas_raw[i * 4] / scale,
-                .y = workareas_raw[i * 4 + 1] / scale,
-                .width = workareas_raw[i * 4 + 2] / scale,
-                .height = workareas_raw[i * 4 + 3] / scale,
-            };
-            g_array_append_val(workareas, workarea);
-        }
-    }
-    g_clear_pointer(&prop, XFree);
-
-    _xfw_screen_x11_set_workareas(screen, workareas);
-    update_monitor_workareas(screen, cur_workspace_num);
 }
 
 static gboolean
 refresh_monitors_idled(gpointer data) {
     XfwMonitorManagerX11 *manager = data;
     manager->refresh_idle_id = 0;
-    refresh_monitors(XFW_SCREEN(manager->screen));
+    refresh_monitors(manager);
     return FALSE;
 }
 
 static GdkFilterReturn
 rootwin_event_filter(GdkXEvent *gxevent, GdkEvent *event, gpointer data) {
+        XfwMonitorManagerX11 *manager = data;
     XEvent *xevent = (XEvent *)gxevent;
 
-    if (xevent->type - xrandr_event_base == RRScreenChangeNotify
-        || xevent->type - xrandr_event_base == RRNotify)
+    if (manager->xrandr_event_base != -1
+        && (xevent->type - manager->xrandr_event_base == RRScreenChangeNotify
+            || xevent->type - manager->xrandr_event_base == RRNotify))
     {
-        XfwMonitorManagerX11 *manager = data;
         if (manager->refresh_idle_id != 0) {
             g_source_remove(manager->refresh_idle_id);
         }
@@ -531,27 +551,83 @@ rootwin_event_filter(GdkXEvent *gxevent, GdkEvent *event, gpointer data) {
     } else if (xevent->type == PropertyNotify
                && xevent->xproperty.atom == XInternAtom(xevent->xproperty.display, "_NET_WORKAREA", False))
     {
-        XfwMonitorManagerX11 *manager = data;
-        update_workareas(manager->screen);
+        update_workareas(manager);
+        update_monitor_workareas(manager);
     }
 
     return GDK_FILTER_CONTINUE;
+}
+
+static void
+scale_factor_changed(gint scale, gpointer data) {
+    XfwMonitorManagerX11 *manager = data;
+    if (scale != manager->scale) {
+        manager->scale = scale;
+        update_workareas(manager);
+
+        if (manager->xrandr_event_base != -1) {
+            if (manager->refresh_idle_id != 0) {
+                g_source_remove(manager->refresh_idle_id);
+            }
+            manager->refresh_idle_id = g_idle_add(refresh_monitors_idled, manager);
+        } else {
+            GList *monitors = _xfw_screen_steal_monitors(XFW_SCREEN(manager->screen));
+
+            for (GList *l = monitors; l != NULL; l = l->next) {
+                XfwMonitor *monitor = XFW_MONITOR(l->data);
+                _xfw_monitor_set_scale(monitor, manager->scale);
+                _xfw_monitor_set_fractional_scale(monitor, manager->scale);
+
+                GdkRectangle geom;
+                xfw_monitor_get_physical_geometry(monitor, &geom);
+                geom.x /= manager->scale;
+                geom.y /= manager->scale;
+                geom.width /= manager->scale;
+                geom.height /= manager->scale;
+                _xfw_monitor_set_logical_geometry(monitor, &geom);
+            }
+
+            _xfw_screen_set_monitors(XFW_SCREEN(manager->screen), monitors, NULL, NULL);
+        }
+    }
+}
+
+static gboolean
+parse_gdk_scale_env(gint *scale) {
+    const gchar *gdk_scale_str = g_getenv("GDK_SCALE");
+    char *endptr = NULL;
+    errno = 0;
+    gint gdk_scale = gdk_scale_str != NULL ? strtol(gdk_scale_str, &endptr, 10) : 0;
+    if (gdk_scale > 0 && endptr != NULL && *endptr == '\0' && errno == 0) {
+        *scale = gdk_scale;
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 XfwMonitorManagerX11 *
 _xfw_monitor_manager_x11_new(XfwScreenX11 *xscreen) {
     XfwMonitorManagerX11 *manager = g_new0(XfwMonitorManagerX11, 1);
     manager->screen = xscreen;
+    manager->scale = 1;
 
     XfwScreen *screen = XFW_SCREEN(xscreen);
     GdkScreen *gscreen = _xfw_screen_get_gdk_screen(screen);
 
+    if (!parse_gdk_scale_env(&manager->scale)) {
+        manager->xsettings = _xsettings_x11_new(gscreen, scale_factor_changed, manager);
+        manager->scale = _xsettings_x11_get_scale(manager->xsettings);
+    }
+
+    GdkDisplay *display = gdk_screen_get_display(gscreen);
     Display *dpy = gdk_x11_display_get_xdisplay(gdk_screen_get_display(gscreen));
     GdkWindow *rootwin = gdk_screen_get_root_window(gscreen);
     Window xrootwin = gdk_x11_window_get_xid(rootwin);
 
-    const gchar *error = g_once(&xrandr_init_once, xrandr_init, gscreen);
-    if (error != NULL) {
+    const gchar *error = NULL;
+    manager->xrandr_event_base = xrandr_init(dpy, &error);
+    if (manager->xrandr_event_base == -1) {
         g_message("XRandR initialization error: %s", error);
         g_message("Will advertise only a single monitor");
 
@@ -571,11 +647,10 @@ _xfw_monitor_manager_x11_new(XfwScreenX11 *xscreen) {
         };
         _xfw_monitor_set_physical_geometry(monitor, &geom);
 
-        gint scale = gdk_monitor_get_scale_factor(gdk_display_get_monitor(gdk_screen_get_display(gscreen), 0));
-        _xfw_monitor_set_scale(monitor, scale);
-        _xfw_monitor_set_fractional_scale(monitor, scale);
-        geom.width /= scale;
-        geom.height /= scale;
+        _xfw_monitor_set_scale(monitor, manager->scale);
+        _xfw_monitor_set_fractional_scale(monitor, manager->scale);
+        geom.width /= manager->scale;
+        geom.height /= manager->scale;
         _xfw_monitor_set_logical_geometry(monitor, &geom);
 
         GChecksum *identifier_cksum = g_checksum_new(G_CHECKSUM_SHA1);
@@ -585,23 +660,29 @@ _xfw_monitor_manager_x11_new(XfwScreenX11 *xscreen) {
 
         _xfw_monitor_set_is_primary(monitor, TRUE);
 
+        ensure_workareas(manager);
+        update_monitor_workarea(xscreen, monitor, 0);
+
         GList *monitors = g_list_append(NULL, monitor);
         _xfw_screen_set_monitors(screen, monitors, monitors, NULL);
     } else {
+        gdk_x11_register_standard_event_type(display, manager->xrandr_event_base, RRNumberEvents);
+
+        gdk_x11_display_error_trap_push(display);
         XRRSelectInput(dpy,
                        xrootwin,
                        RRScreenChangeNotifyMask | RRCrtcChangeNotifyMask | RROutputPropertyNotifyMask);
+        gdk_x11_display_error_trap_pop_ignored(display);
 
-        gdk_window_add_filter(rootwin, rootwin_event_filter, manager);
-
-        refresh_monitors(screen);
+        refresh_monitors(manager);
     }
 
+    gdk_x11_display_error_trap_push(display);
     XWindowAttributes winattrs;
     XGetWindowAttributes(dpy, xrootwin, &winattrs);
     XSelectInput(dpy, xrootwin, winattrs.your_event_mask | PropertyChangeMask);
-
-    update_workareas(xscreen);
+    gdk_x11_display_error_trap_pop_ignored(display);
+    gdk_window_add_filter(rootwin, rootwin_event_filter, manager);
 
     return manager;
 }
@@ -610,6 +691,10 @@ void
 _xfw_monitor_manager_x11_destroy(XfwMonitorManagerX11 *manager) {
     if (manager->refresh_idle_id != 0) {
         g_source_remove(manager->refresh_idle_id);
+    }
+
+    if (manager->xsettings != NULL) {
+        _xsettings_x11_destroy(manager->xsettings);
     }
 
     GdkScreen *gscreen = _xfw_screen_get_gdk_screen(XFW_SCREEN(manager->screen));
@@ -621,5 +706,5 @@ _xfw_monitor_manager_x11_destroy(XfwMonitorManagerX11 *manager) {
 
 void
 _xfw_monitor_x11_workspace_changed(XfwScreenX11 *screen, gint new_workspace_num) {
-    update_monitor_workareas(screen, new_workspace_num);
+    update_monitor_workareas_for_workspace(screen, new_workspace_num);
 }
