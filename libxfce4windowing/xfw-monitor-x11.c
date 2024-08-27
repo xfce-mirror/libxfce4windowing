@@ -40,6 +40,7 @@
 
 struct _XfwMonitorManagerX11 {
     XfwScreenX11 *screen;
+    int xrandr_event_base;
     XSettingsX11 *xsettings;
     gint scale;
     guint refresh_idle_id;
@@ -48,9 +49,6 @@ struct _XfwMonitorManagerX11 {
 struct _XfwMonitorX11 {
     XfwMonitor parent;
 };
-
-static GOnce xrandr_init_once = G_ONCE_INIT;
-static int xrandr_event_base = -1;
 
 
 G_DEFINE_TYPE(XfwMonitorX11, xfw_monitor_x11, XFW_TYPE_MONITOR)
@@ -62,30 +60,25 @@ xfw_monitor_x11_class_init(XfwMonitorX11Class *klass) {}
 static void
 xfw_monitor_x11_init(XfwMonitorX11 *monitor) {}
 
-static gpointer
-xrandr_init(gpointer data) {
-    GdkScreen *gscreen = GDK_SCREEN(data);
-    GdkDisplay *display = gdk_screen_get_display(gscreen);
-
-    Display *dpy = gdk_x11_display_get_xdisplay(display);
-    int errbase;
-    if (!XRRQueryExtension(dpy, &xrandr_event_base, &errbase)) {
-        return "extension not found";
+static int
+xrandr_init(Display *dpy, const gchar **error) {
+    int evbase, errbase;
+    if (!XRRQueryExtension(dpy, &evbase, &errbase)) {
+        *error = "extension not found";
+        return -1;
     }
 
     int major, minor;
     if (!XRRQueryVersion(dpy, &major, &minor)) {
-        xrandr_event_base = -1;
-        return "version query failed";
+        *error = "version query failed";
+        return -1;
     }
     if (major != 1 || minor < 5) {
-        xrandr_event_base = -1;
-        return "version 1.5 or better required";
+        *error = "version 1.5 or better required";
+        return -1;
     }
 
-    gdk_x11_register_standard_event_type(display, xrandr_event_base, RRNumberEvents);
-
-    return NULL;
+    return evbase;
 }
 
 static inline XfwMonitorSubpixel
@@ -544,12 +537,13 @@ refresh_monitors_idled(gpointer data) {
 
 static GdkFilterReturn
 rootwin_event_filter(GdkXEvent *gxevent, GdkEvent *event, gpointer data) {
+        XfwMonitorManagerX11 *manager = data;
     XEvent *xevent = (XEvent *)gxevent;
 
-    if (xrandr_event_base != -1
-        && (xevent->type - xrandr_event_base == RRScreenChangeNotify || xevent->type - xrandr_event_base == RRNotify))
+    if (manager->xrandr_event_base != -1
+        && (xevent->type - manager->xrandr_event_base == RRScreenChangeNotify
+            || xevent->type - manager->xrandr_event_base == RRNotify))
     {
-        XfwMonitorManagerX11 *manager = data;
         if (manager->refresh_idle_id != 0) {
             g_source_remove(manager->refresh_idle_id);
         }
@@ -557,7 +551,6 @@ rootwin_event_filter(GdkXEvent *gxevent, GdkEvent *event, gpointer data) {
     } else if (xevent->type == PropertyNotify
                && xevent->xproperty.atom == XInternAtom(xevent->xproperty.display, "_NET_WORKAREA", False))
     {
-        XfwMonitorManagerX11 *manager = data;
         update_workareas(manager);
         update_monitor_workareas(manager);
     }
@@ -572,7 +565,7 @@ scale_factor_changed(gint scale, gpointer data) {
         manager->scale = scale;
         update_workareas(manager);
 
-        if (xrandr_event_base != -1) {
+        if (manager->xrandr_event_base != -1) {
             if (manager->refresh_idle_id != 0) {
                 g_source_remove(manager->refresh_idle_id);
             }
@@ -632,8 +625,9 @@ _xfw_monitor_manager_x11_new(XfwScreenX11 *xscreen) {
     GdkWindow *rootwin = gdk_screen_get_root_window(gscreen);
     Window xrootwin = gdk_x11_window_get_xid(rootwin);
 
-    const gchar *error = g_once(&xrandr_init_once, xrandr_init, gscreen);
-    if (error != NULL) {
+    const gchar *error = NULL;
+    manager->xrandr_event_base = xrandr_init(dpy, &error);
+    if (manager->xrandr_event_base == -1) {
         g_message("XRandR initialization error: %s", error);
         g_message("Will advertise only a single monitor");
 
@@ -672,6 +666,8 @@ _xfw_monitor_manager_x11_new(XfwScreenX11 *xscreen) {
         GList *monitors = g_list_append(NULL, monitor);
         _xfw_screen_set_monitors(screen, monitors, monitors, NULL);
     } else {
+        gdk_x11_register_standard_event_type(display, manager->xrandr_event_base, RRNumberEvents);
+
         gdk_x11_display_error_trap_push(display);
         XRRSelectInput(dpy,
                        xrootwin,
