@@ -2,6 +2,7 @@ if get_option('tests')
   test_bins = [
     'xfw-enum-monitors',
     'xfw-enum-windows',
+    'xfw-monitor-offon',
   ]
 
   foreach bin : test_bins
