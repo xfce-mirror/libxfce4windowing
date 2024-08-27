@@ -1,6 +1,7 @@
 noinst_PROGRAMS = \
 	xfw-enum-monitors \
-	xfw-enum-windows
+	xfw-enum-windows \
+	xfw-monitor-offon
 
 tests_cflags = \
 	-I$(top_srcdir) \

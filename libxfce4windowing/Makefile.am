@@ -42,7 +42,9 @@ libxfce4windowing_0_x11_sources = \
 	xfw-workspace-manager-x11.c \
 	xfw-workspace-manager-x11.h \
 	xfw-workspace-x11.c \
-	xfw-workspace-x11.h
+	xfw-workspace-x11.h \
+	xsettings-x11.c \
+	xsettings-x11.h
 
 libxfce4windowing_0_wayland_sources = \
 	xfw-application-wayland.c \
