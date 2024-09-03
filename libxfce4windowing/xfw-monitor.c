@@ -1082,6 +1082,48 @@ _xfw_monitor_guess_primary_monitor(GList *monitors) {
     return maybe_primary;
 }
 
+/* The idea here is to base the identifier off make+model+serial: this should
+ * ensure the ID is specific to a particular piece of monitor hardware, and it
+ * should be stable between X11 and Wayland.  If we don't have a serial number,
+ * then we'll include the connector.  That will at least identify it as a
+ * particular specific monitor model plugged into a particular port on the
+ * machine, which for many people will end up being the same all the time.  If
+ * we're lacking the make and model and serial number, we're in trouble, and
+ * the best we can do is the connector.
+ *
+ * If we had access to the EDID everywhere, I'd prefer to just hash the raw
+ * value and have that be it.  But we don't get EDID on Wayland, so we can't
+ * use it.
+ */
+gchar *
+_xfw_monitor_build_identifier(const gchar *make, const gchar *model, const gchar *serial, const gchar *connector) {
+    GChecksum *cksum = g_checksum_new(G_CHECKSUM_SHA1);
+
+    const guchar *sep = (const guchar *)"|";
+
+    if (make != NULL) {
+        g_checksum_update(cksum, (const guchar *)make, -1);
+        g_checksum_update(cksum, sep, -1);
+    }
+    if (model != NULL) {
+        g_checksum_update(cksum, (const guchar *)model, -1);
+        g_checksum_update(cksum, sep, -1);
+    }
+    if (serial != NULL) {
+        g_checksum_update(cksum, (const guchar *)serial, -1);
+    }
+
+    if ((make == NULL && model == NULL) || serial == NULL) {
+        if (make == NULL && model == NULL) {
+            g_checksum_update(cksum, sep, -1);
+        }
+        g_checksum_update(cksum, (const guchar *)connector, -1);
+    }
+
+    gchar *identifier = g_strdup(g_checksum_get_string(cksum));
+    g_checksum_free(cksum);
+    return identifier;
+}
 
 MonitorPendingChanges
 _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {

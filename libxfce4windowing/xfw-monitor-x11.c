@@ -452,21 +452,6 @@ enumerate_monitors(XfwMonitorManagerX11 *manager, GList **new_monitors, GList **
                 di_info_destroy(edid_info);
             }
         }
-
-        unsigned char *identifier_data;
-        guint idenfifier_data_len;
-        if (edid_data != NULL && nbytes > 0) {
-            identifier_data = edid_data;
-            idenfifier_data_len = nbytes;
-        } else {
-            identifier_data = (unsigned char *)connector;
-            idenfifier_data_len = strlen(connector);
-        }
-        GChecksum *identifier_cksum = g_checksum_new(G_CHECKSUM_SHA1);
-        g_checksum_update(identifier_cksum, identifier_data, idenfifier_data_len);
-        _xfw_monitor_set_identifier(monitor, g_checksum_get_string(identifier_cksum));
-        g_checksum_free(identifier_cksum);
-
         if (edid_data != NULL) {
             XFree(edid_data);
         }
@@ -474,6 +459,10 @@ enumerate_monitors(XfwMonitorManagerX11 *manager, GList **new_monitors, GList **
         const char *make = xfw_monitor_get_make(monitor);
         const char *model = xfw_monitor_get_model(monitor);
         const char *serial = xfw_monitor_get_serial(monitor);
+
+        gchar *identifier = _xfw_monitor_build_identifier(make, model, serial, connector);
+        _xfw_monitor_set_identifier(monitor, identifier);
+        g_free(identifier);
 
         char *description;
         if (make != NULL && model != NULL && serial != NULL) {
