@@ -16,8 +16,9 @@ main(int argc, char **argv) {
         guint wmm, hmm;
         xfw_monitor_get_physical_size(monitor, &wmm, &hmm);
 
-        g_print("Monitor: %s, serial=%s, scale=%d, size=%dx%dmm phys=%dx%d+%d+%d, log=%dx%d+%d+%d, gdkmonitor=%p\n",
+        g_print("Monitor: %s, ID=%s, serial=%s, scale=%d, size=%dx%dmm phys=%dx%d+%d+%d, log=%dx%d+%d+%d, gdkmonitor=%p\n",
                 xfw_monitor_get_description(monitor),
+                xfw_monitor_get_identifier(monitor),
                 xfw_monitor_get_serial(monitor),
                 xfw_monitor_get_scale(monitor),
                 wmm, hmm,
