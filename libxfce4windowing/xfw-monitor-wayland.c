@@ -318,13 +318,13 @@ finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *mo
     const char *model = xfw_monitor_get_model(monitor);
     const char *serial = xfw_monitor_get_serial(monitor);
     const char *description = xfw_monitor_get_description(monitor);
+    const char *connector = xfw_monitor_get_connector(monitor);
 
     if (serial == NULL && make != NULL && model != NULL && description != NULL) {
         // On the DRM backend, wlroots formats the description like so:
         //     $MAKE $MODEL $SERIAL ($CONNECTOR via $SUBCONNECTOR)
         // ... so we can try to extract the serial number if it's present.
 
-        const char *connector = xfw_monitor_get_connector(monitor);
         size_t make_len = strlen(make);
         size_t model_len = strlen(model);
         size_t description_len = strlen(description);
@@ -345,23 +345,9 @@ finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *mo
         }
     }
 
-    GChecksum *identifier_cksum = g_checksum_new(G_CHECKSUM_SHA1);
-    if ((make != NULL && model != NULL) || serial != NULL) {
-        if (make != NULL) {
-            g_checksum_update(identifier_cksum, (guchar *)make, strlen(make));
-        }
-        if (model != NULL) {
-            g_checksum_update(identifier_cksum, (guchar *)model, strlen(model));
-        }
-        if (serial != NULL) {
-            g_checksum_update(identifier_cksum, (guchar *)serial, strlen(serial));
-        }
-    } else {
-        const char *connector = xfw_monitor_get_connector(monitor);
-        g_checksum_update(identifier_cksum, (guchar *)connector, strlen(connector));
-    }
-    _xfw_monitor_set_identifier(monitor, g_checksum_get_string(identifier_cksum));
-    g_checksum_free(identifier_cksum);
+    gchar *identifier = _xfw_monitor_build_identifier(make, model, serial, connector);
+    _xfw_monitor_set_identifier(monitor, identifier);
+    g_free(identifier);
 
     _xfw_monitor_set_logical_geometry(monitor, &monitor_wl->logical_geometry);
     GdkRectangle workarea = {

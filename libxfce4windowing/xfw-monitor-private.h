@@ -93,6 +93,11 @@ void _xfw_monitor_set_is_primary(XfwMonitor *monitor,
 
 XfwMonitor *_xfw_monitor_guess_primary_monitor(GList *monitors);
 
+gchar *_xfw_monitor_build_identifier(const gchar *make,
+                                     const gchar *model,
+                                     const gchar *serial,
+                                     const gchar *connector);
+
 MonitorPendingChanges _xfw_monitor_notify_pending_changes(XfwMonitor *monitor);
 
 G_END_DECLS
