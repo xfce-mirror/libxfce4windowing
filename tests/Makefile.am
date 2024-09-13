@@ -1,3 +1,5 @@
+if ENABLE_TESTS
+
 noinst_PROGRAMS = \
 	xfw-enum-monitors \
 	xfw-enum-windows \
@@ -22,3 +24,5 @@ xfw_enum_windows_LDADD = $(tests_ldadd)
 xfw_monitor_offon_SOURCES = xfw-monitor-offon.c
 xfw_monitor_offon_CFLAGS = $(tests_cflags)
 xfw_monitor_offon_LDADD = $(tests_ldadd)
+
+endif

@@ -165,6 +165,12 @@ AS_IF([test x"$ENABLE_WAYLAND" = x"yes"],
 AC_SUBST([LIBXFCE4WINDOWING_HAS_X11])
 AC_SUBST([LIBXFCE4WINDOWING_HAS_WAYLAND])
 
+AC_ARG_ENABLE([tests],
+              AS_HELP_STRING([--enable-tests],
+                             [Build some small test programs (default=disabled)]),
+              [enable_tests=$enableval], [enable_tests=no])
+AM_CONDITIONAL([ENABLE_TESTS], [test x"$enable_tests" = x"yes"])
+
 GTK_DOC_CHECK([1.30])
 
 GOBJECT_INTROSPECTION_CHECK([1.66.0])
@@ -238,4 +244,5 @@ echo "* Wayland support:               $ENABLE_WAYLAND"
 echo "* Debug support:                 $enable_debug"
 echo "* GObject Introspection support: $enable_introspection"
 echo "* Documentation support:         $enable_gtk_doc"
+echo "* Test programs:                 $enable_tests"
 echo
