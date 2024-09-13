@@ -17,7 +17,7 @@ if enable_x11
   windowing_headers += 'xfw-x11.h'
 endif
 
-windowing_sources = [
+windowing_public_sources = [
   'libxfce4windowing-config.c',
   'libxfce4windowing-private.c',
   'xfw-application.c',
@@ -33,6 +33,9 @@ windowing_sources = [
   'xfw-workspace-manager.c',
   'xfw-workspace.c',
 ]
+
+windowing_sources = []
+windowing_sources += windowing_public_sources
 
 windowing_sources += gnome.genmarshal(
   'xfw-marshal',
@@ -60,6 +63,7 @@ if enable_x11
     'xfw-workspace-x11.c',
     'xsettings-x11.c',
   ]
+  windowing_public_sources += 'xfw-window-x11.c'
 else
   windowing_config_data.set('LIBXFCE4WINDOWING_HAS_X11', '/* #undef LIBXFCE4WINDOWING_HAS_X11 */')
 endif
@@ -80,13 +84,15 @@ else
   windowing_config_data.set('LIBXFCE4WINDOWING_HAS_WAYLAND', '/* #undef LIBXFCE4WINDOWING_HAS_WAYLAND */')
 endif
 
-windowing_sources += configure_file(
+windowing_config_h = configure_file(
   configuration: windowing_config_data,
   input: 'libxfce4windowing-config.h.in',
   output: 'libxfce4windowing-config.h',
   install: true,
   install_dir: get_option('prefix') / get_option('includedir') / 'xfce4' / libxfce4windowing_pkgname / 'libxfce4windowing',
 )
+windowing_public_sources += windowing_config_h
+windowing_sources += windowing_config_h
 
 windowing_deps = [
   gio_unix,
@@ -143,7 +149,7 @@ if enable_x11
 endif
 
 if get_option('introspection')
-  windowing_gir_sources = windowing_sources + windowing_headers
+  windowing_gir_sources = windowing_public_sources + windowing_headers
 
   libxfce4windowing_gir = gnome.generate_gir(
     libxfce4windowing,

@@ -21,6 +21,18 @@ libxfce4windowing_0_headers += \
 	xfw-x11.h
 endif
 
+libxfce4windowing_0_public_sources = \
+	$(libxfce4windowing_0_headers) \
+	libxfce4windowing-config.c \
+	xfw-application.c \
+	xfw-monitor.c \
+	xfw-screen.c \
+	xfw-util.c \
+	xfw-window.c \
+	xfw-workspace-group.c \
+	xfw-workspace-manager.c \
+	xfw-workspace.c
+
 libxfce4windowing_0_include_HEADERS = \
 	$(libxfce4windowing_0_headers)
 
@@ -63,33 +75,24 @@ libxfce4windowing_0_wayland_sources = \
 	xfw-workspace-wayland.h
 
 libxfce4windowing_0_la_SOURCES = \
-	$(libxfce4windowing_0_headers) \
+	$(libxfce4windowing_0_public_sources) \
 	$(libxfce4windowing_0_built_sources) \
-	libxfce4windowing-config.c \
 	libxfce4windowing-private.c \
 	libxfce4windowing-private.h \
-	xfw-application.c \
 	xfw-application-private.h \
 	xfw-gdk-private.c \
 	xfw-gdk-private.h \
-	xfw-monitor.c \
 	xfw-monitor-private.h \
-	xfw-screen.c \
 	xfw-screen-private.h \
-	xfw-util.c \
-	xfw-window.c \
 	xfw-window-private.h \
 	xfw-workspace-dummy.c \
 	xfw-workspace-dummy.h \
 	xfw-workspace-group-dummy.c \
 	xfw-workspace-group-dummy.h \
 	xfw-workspace-group-private.h \
-	xfw-workspace-group.c \
 	xfw-workspace-manager-dummy.c \
 	xfw-workspace-manager-dummy.h \
-	xfw-workspace-manager.c \
 	xfw-workspace-manager-private.h \
-	xfw-workspace.c \
 	xfw-workspace-private.h
 
 if ENABLE_X11
@@ -190,7 +193,7 @@ INTROSPECTION_COMPILER_ARGS = \
 
 if HAVE_INTROSPECTION
 
-introspection_sources = $(filter-out %private.h %private.c, $(libxfce4windowing_0_la_SOURCES))
+introspection_sources = $(libxfce4windowing_0_public_sources)
 
 Libxfce4windowing-0.0.gir: libxfce4windowing-0.la Makefile
 Libxfce4windowing_0_0_gir_INCLUDES = GObject-2.0 GLib-2.0 Gio-2.0 Gtk-3.0
