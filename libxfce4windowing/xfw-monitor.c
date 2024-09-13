@@ -1003,7 +1003,7 @@ _xfw_monitor_set_physical_size(XfwMonitor *monitor, guint width_mm, guint height
         priv->width_mm = width_mm;
         priv->pending_changes |= MONITOR_PENDING_PHYSICAL_WIDTH;
     }
-    if (priv->width_mm != width_mm) {
+    if (priv->height_mm != height_mm) {
         priv->height_mm = height_mm;
         priv->pending_changes |= MONITOR_PENDING_PHYSICAL_HEIGHT;
     }
