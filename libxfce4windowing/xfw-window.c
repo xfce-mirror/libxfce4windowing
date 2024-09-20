@@ -50,6 +50,7 @@
 #include "xfw-marshal.h"
 #include "xfw-screen.h"
 #include "xfw-window-private.h"
+#include "libxfce4windowing-visibility.h"
 
 #define XFW_WINDOW_GET_PRIVATE(window) ((XfwWindowPrivate *)xfw_window_get_instance_private(window))
 
@@ -896,3 +897,6 @@ _xfw_window_invalidate_icon(XfwWindow *window) {
     priv->icon_size = 0;
     priv->icon_scale = 0;
 }
+
+#define __XFW_WINDOW_C__
+#include <libxfce4windowing-visibility.c>
