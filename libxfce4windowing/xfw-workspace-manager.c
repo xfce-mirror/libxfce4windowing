@@ -39,6 +39,7 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-screen.h"
 #include "xfw-workspace-manager-private.h"
+#include "libxfce4windowing-visibility.h"
 
 G_DEFINE_INTERFACE(XfwWorkspaceManager, xfw_workspace_manager, G_TYPE_OBJECT)
 
@@ -163,3 +164,6 @@ void
 _xfw_workspace_manager_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_MANAGER_PROP_SCREEN, "screen");
 }
+
+#define __XFW_WORKSPACE_MANAGER_C__
+#include <libxfce4windowing-visibility.c>

@@ -50,6 +50,7 @@
 #include "xfw-screen.h"
 #include "xfw-workspace-group-private.h"
 #include "xfw-workspace-manager.h"
+#include "libxfce4windowing-visibility.h"
 
 G_DEFINE_INTERFACE(XfwWorkspaceGroup, xfw_workspace_group, G_TYPE_OBJECT)
 
@@ -432,3 +433,6 @@ _xfw_workspace_group_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_ACTIVE_WORKSPACE, "active-workspace");
     g_object_class_override_property(gklass, WORKSPACE_GROUP_PROP_MONITORS, "monitors");
 }
+
+#define __XFW_WORKSPACE_GROUP_C__
+#include <libxfce4windowing-visibility.c>
