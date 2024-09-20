@@ -41,6 +41,8 @@
 #include "xfw-gdk-private.h"
 #include "xfw-monitor-private.h"
 
+#include "libxfce4windowing-visibility.h"
+
 #define XFW_MONITOR_GET_PRIVATE(monitor) ((XfwMonitorPrivate *)xfw_monitor_get_instance_private(XFW_MONITOR(monitor)))
 
 typedef struct _XfwMonitorPrivate {
@@ -1166,3 +1168,6 @@ _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
 
     return old_pending_changes;
 }
+
+#define __XFW_MONITOR_C__
+#include <libxfce4windowing-visibility.c>

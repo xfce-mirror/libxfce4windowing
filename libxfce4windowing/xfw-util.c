@@ -41,6 +41,8 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
 
+#include "libxfce4windowing-visibility.h"
+
 G_DEFINE_ENUM_TYPE(XfwDirection, xfw_direction,
                    G_DEFINE_ENUM_VALUE(XFW_DIRECTION_UP, "up"),
                    G_DEFINE_ENUM_VALUE(XFW_DIRECTION_DOWN, "down"),
@@ -116,3 +118,6 @@ xfw_error_quark(void) {
     }
     return quark;
 }
+
+#define __XFW_UTIL_C__
+#include <libxfce4windowing-visibility.c>

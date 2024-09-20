@@ -41,6 +41,19 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = \
 	libxfce4windowingui-$(LIBXFCE4WINDOWING_VERSION_API).pc
 
+BUILT_SOURCES = \
+	libxfce4windowingui-visibility.c \
+	libxfce4windowingui-visibility.h
+
+CLEANFILES = \
+	$(libxfce4windowingui_0_built_sources)
+
+libxfce4windowingui-visibility.h: libxfce4windowingui.symbols $(top_srcdir)/scripts/xdt-gen-visibility Makefile
+	$(AM_V_GEN) $(top_srcdir)/scripts/xdt-gen-visibility --kind=header $< $@
+
+libxfce4windowingui-visibility.c: libxfce4windowingui.symbols $(top_srcdir)/scripts/xdt-gen-visibility Makefile
+	$(AM_V_GEN) $(top_srcdir)/scripts/xdt-gen-visibility --kind=source $< $@
+
 # GObject Introspection
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =
