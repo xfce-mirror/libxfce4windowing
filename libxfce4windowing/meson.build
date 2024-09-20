@@ -94,6 +94,29 @@ windowing_config_h = configure_file(
 windowing_public_sources += windowing_config_h
 windowing_sources += windowing_config_h
 
+windowing_sources += custom_target(
+  'libxfce4windowing-visibility.h',
+  input: 'libxfce4windowing.symbols',
+  output: 'libxfce4windowing-visibility.h',
+  command: [
+    meson.project_source_root() / 'scripts' / 'xdt-gen-visibility',
+    '--kind=header',
+    '@INPUT@',
+    '@OUTPUT@'
+  ],
+)
+windowing_sources += custom_target(
+  'libxfce4windowing-visibility.c',
+  input: 'libxfce4windowing.symbols',
+  output: 'libxfce4windowing-visibility.c',
+  command: [
+    meson.project_source_root() / 'scripts' / 'xdt-gen-visibility',
+    '--kind=source',
+    '@INPUT@',
+    '@OUTPUT@'
+  ],
+)
+
 windowing_deps = [
   gio_unix,
   gtk,
@@ -113,6 +136,7 @@ libxfce4windowing = library(
   include_directories: [
     include_directories('..'),
   ],
+  gnu_symbol_visibility: gnu_symbol_visibility,
   dependencies: windowing_deps,
   install: true,
 )
