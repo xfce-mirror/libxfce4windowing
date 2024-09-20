@@ -154,13 +154,13 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = $(pkgconfig_files)
 
 EXTRA_DIST = \
-	xfw-marshal.c \
-	xfw-marshal.h \
 	xfw-marshal.list
 
-CLEANFILES =
+BUILT_SOURCES = \
+	$(libxfce4windowing_0_built_sources)
 
-if MAINTAINER_MODE
+CLEANFILES = \
+	$(libxfce4windowing_0_built_sources)
 
 xfw-marshal.h: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 	$(AM_V_GEN) glib-genmarshal --prefix=xfw_marshal --internal --header $< > $@
@@ -168,14 +168,6 @@ xfw-marshal.h: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 xfw-marshal.c: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 	$(AM_V_GEN) echo '#include "xfw-marshal.h"' > $@
 	$(AM_V_GET) glib-genmarshal --prefix=xfw_marshal --body $< >> $@
-
-CLEANFILES += \
-	$(libxfce4windowing_0_built_sources)
-
-BUILT_SOURCES = \
-	$(libxfce4windowing_0_built_sources)
-
-endif
 
 # GObject Introspection
 -include $(INTROSPECTION_MAKEFILE)
