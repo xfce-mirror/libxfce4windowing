@@ -36,6 +36,7 @@
 #include <glib/gi18n-lib.h>
 
 #include "xfw-window-action-menu.h"
+#include "libxfce4windowingui-visibility.h"
 
 enum {
     PROP0,
@@ -571,3 +572,6 @@ xfw_window_action_menu_new(XfwWindow *window) {
                         "window", window,
                         NULL);
 }
+
+#define __XFW_WINDOW_ACTION_MENU_C__
+#include "libxfce4windowingui-visibility.c"
