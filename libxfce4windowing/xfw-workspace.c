@@ -48,6 +48,7 @@
 #include "xfw-window.h"
 #include "xfw-workspace-group.h"
 #include "xfw-workspace-private.h"
+#include "libxfce4windowing-visibility.h"
 
 G_DEFINE_INTERFACE(XfwWorkspace, xfw_workspace, G_TYPE_OBJECT)
 
@@ -497,3 +498,6 @@ _xfw_workspace_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_PROP_LAYOUT_ROW, "layout-row");
     g_object_class_override_property(gklass, WORKSPACE_PROP_LAYOUT_COLUMN, "layout-column");
 }
+
+#define __XFW_WORKSPACE_C__
+#include <libxfce4windowing-visibility.c>

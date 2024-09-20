@@ -213,7 +213,8 @@ if test "x$enable_visibility" != "xno"; then
   CFLAGS="$saved_CFLAGS"
 fi
 if test "x$have_gnuc_visibility" = "xyes"; then
-  CPPFLAGS="$CPPFLAGS -DHAVE_GNUC_VISIBILITY"
+  CPPFLAGS="$CPPFLAGS -DENABLE_SYMBOL_VISIBILITY=1"
+  CFLAGS="$CFLAGS -fvisibility=hidden"
 fi
 AM_CONDITIONAL([HAVE_GNUC_VISIBILITY], [test "x$have_gnuc_visibility" = "xyes"])
 
@@ -232,6 +233,7 @@ libxfce4windowingui/libxfce4windowingui-0.pc
 libxfce4windowingui/libxfce4windowingui-config.h
 po/Makefile.in
 protocols/Makefile
+scripts/Makefile
 tests/Makefile
 ])
 AC_OUTPUT
