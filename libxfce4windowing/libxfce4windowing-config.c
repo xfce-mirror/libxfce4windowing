@@ -32,6 +32,7 @@
 #endif
 
 #include "libxfce4windowing-config.h"
+#include "libxfce4windowing-visibility.h"
 
 /**
  * libxfce4windowing_major_version:
@@ -101,3 +102,6 @@ libxfce4windowing_check_version(guint required_major,
         return NULL;
     }
 }
+
+#define __LIBXFCE4WINDOWING_CONFIG_C__
+#include <libxfce4windowing-visibility.c>
