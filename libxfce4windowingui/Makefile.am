@@ -29,7 +29,6 @@ libxfce4windowingui_0_la_CFLAGS = \
 
 libxfce4windowingui_0_la_LDFLAGS = \
 	-version-info $(LIBXFCE4WINDOWINGUI_VERINFO) \
-	-export-symbols-regex "^[^_].*" \
 	-no-undefined
 
 libxfce4windowingui_0_la_LIBADD = \
@@ -40,6 +39,23 @@ libxfce4windowingui_0_la_LIBADD = \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = \
 	libxfce4windowingui-$(LIBXFCE4WINDOWING_VERSION_API).pc
+
+EXTRA_DIST = \
+	libxfce4windowingui.symbols
+
+BUILT_SOURCES = \
+	libxfce4windowingui-visibility.c \
+	libxfce4windowingui-visibility.h
+
+CLEANFILES = \
+	libxfce4windowingui-visibility.c \
+	libxfce4windowingui-visibility.h
+
+libxfce4windowingui-visibility.h: libxfce4windowingui.symbols Makefile
+	$(AM_V_GEN) $(XDT_GEN_VISIBILITY) --kind=header $< $@
+
+libxfce4windowingui-visibility.c: libxfce4windowingui.symbols Makefile
+	$(AM_V_GEN) $(XDT_GEN_VISIBILITY) --kind=source $< $@
 
 # GObject Introspection
 -include $(INTROSPECTION_MAKEFILE)
@@ -75,7 +91,7 @@ gir_DATA = $(INTROSPECTION_GIRS)
 typelibdir = $(libdir)/girepository-1.0
 typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 
-CLEANFILES = $(gir_DATA) $(typelib_DATA)
+CLEANFILES += $(gir_DATA) $(typelib_DATA)
 
 endif
 
