@@ -39,6 +39,7 @@
 
 #include "libxfce4windowing-private.h"
 #include "xfw-application-private.h"
+#include "libxfce4windowing-visibility.h"
 
 #define XFW_APPLICATION_GET_PRIVATE(app) ((XfwApplicationPrivate *)xfw_application_get_instance_private(XFW_APPLICATION(app)))
 
@@ -468,3 +469,6 @@ _xfw_application_instance_free(gpointer data) {
     g_list_free(instance->windows);
     g_free(instance);
 }
+
+#define __XFW_APPLICATION_C__
+#include <libxfce4windowing-visibility.c>
