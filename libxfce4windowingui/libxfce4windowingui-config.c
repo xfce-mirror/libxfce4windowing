@@ -32,6 +32,7 @@
 #endif
 
 #include "libxfce4windowingui-config.h"
+#include "libxfce4windowingui-visibility.h"
 
 /**
  * libxfce4windowingui_major_version:
@@ -101,3 +102,6 @@ libxfce4windowingui_check_version(guint required_major,
         return NULL;
     }
 }
+
+#define __LIBXFCE4WINDOWINGUI_CONFIG_C__
+#include "libxfce4windowingui-visibility.c"

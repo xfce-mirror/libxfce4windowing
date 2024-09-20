@@ -25,6 +25,30 @@ windowingui_sources += configure_file(
   install_dir: get_option('prefix') / get_option('includedir') / 'xfce4' / libxfce4windowing_pkgname / 'libxfce4windowingui',
 )
 
+windowingui_link_depends = []
+windowingui_link_depends += custom_target(
+  'libxfce4windowingui-visibility.h',
+  input: 'libxfce4windowingui.symbols',
+  output: 'libxfce4windowingui-visibility.h',
+  command: [
+    meson.project_source_root() / 'scripts' / 'xdt-gen-visibility',
+    '--kind=header',
+    '@INPUT@',
+    '@OUTPUT@'
+  ],
+)
+windowingui_link_depends += custom_target(
+  'libxfce4windowingui-visibility.c',
+  input: 'libxfce4windowingui.symbols',
+  output: 'libxfce4windowingui-visibility.c',
+  command: [
+    meson.project_source_root() / 'scripts' / 'xdt-gen-visibility',
+    '--kind=source',
+    '@INPUT@',
+    '@OUTPUT@'
+  ],
+)
+
 windowingui_deps = [
   gtk
 ]
@@ -40,10 +64,12 @@ libxfce4windowingui = library(
   include_directories: [
     include_directories('..'),
   ],
+  gnu_symbol_visibility: gnu_symbol_visibility,
   dependencies: windowingui_deps,
   link_with: [
     libxfce4windowing,
   ],
+  link_depends: windowingui_link_depends,
   install: true,
 )
 
