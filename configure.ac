@@ -33,7 +33,6 @@ AC_REVISION([xdt_version_build])
 dnl init automake
 AM_INIT_AUTOMAKE([1.11 dist-bzip2 tar-ustar no-dist-gzip foreign])
 AC_CONFIG_HEADERS([config.h])
-AM_MAINTAINER_MODE()
 AM_SILENT_RULES([yes])
 
 dnl check for UNIX variants
@@ -214,7 +213,8 @@ if test "x$enable_visibility" != "xno"; then
   CFLAGS="$saved_CFLAGS"
 fi
 if test "x$have_gnuc_visibility" = "xyes"; then
-  CPPFLAGS="$CPPFLAGS -DHAVE_GNUC_VISIBILITY"
+  CPPFLAGS="$CPPFLAGS -DENABLE_SYMBOL_VISIBILITY=1"
+  CFLAGS="$CFLAGS -fvisibility=hidden"
 fi
 AM_CONDITIONAL([HAVE_GNUC_VISIBILITY], [test "x$have_gnuc_visibility" = "xyes"])
 

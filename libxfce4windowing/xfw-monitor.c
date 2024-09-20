@@ -40,6 +40,7 @@
 #include "libxfce4windowing-private.h"
 #include "xfw-gdk-private.h"
 #include "xfw-monitor-private.h"
+#include "libxfce4windowing-visibility.h"
 
 #define XFW_MONITOR_GET_PRIVATE(monitor) ((XfwMonitorPrivate *)xfw_monitor_get_instance_private(XFW_MONITOR(monitor)))
 
@@ -1064,7 +1065,7 @@ _xfw_monitor_guess_primary_monitor(GList *monitors) {
             return monitor;
         }
 
-        GdkRectangle geom;
+        GdkRectangle geom = {0};
         xfw_monitor_get_logical_geometry(monitor, &geom);
         if (geom.x == 0 && geom.y == 0) {
             // The topmost, leftmost monitor could be considered primary.
@@ -1166,3 +1167,6 @@ _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
 
     return old_pending_changes;
 }
+
+#define __XFW_MONITOR_C__
+#include <libxfce4windowing-visibility.c>
