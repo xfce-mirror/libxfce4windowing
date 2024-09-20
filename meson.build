@@ -1,16 +1,16 @@
 project(
   'libxfce4windowing',
   'c',
-  version: run_command(['./version.sh', 'print-version'], capture: true, check: true).stdout().strip(),
+  version: '4.19.4-dev',
   license: 'GPL-2',
   meson_version: '>= 0.56.0',
   default_options: [
-    'c_std=gnu99',
+    'c_std=gnu11',
     'buildtype=debugoptimized',
     'warning_level=2',
+    'b_ndebug=if-release',
   ]
 )
-meson.add_dist_script('./version.sh', 'rewrite-version', meson.project_version())
 
 project_namespace = 'xfce'
 pkgdatadir = get_option('datadir') / meson.project_name()
@@ -39,6 +39,7 @@ gio_unix = dependency('gio-unix-2.0', version: dependency_versions['glib'])
 gdk = dependency('gdk-3.0', version: dependency_versions['gtk'])
 gdk_pixbuf = dependency('gdk-pixbuf-2.0', version: dependency_versions['gdk-pixbuf'])
 gtk = dependency('gtk+-3.0', version: dependency_versions['gtk'])
+python3 = find_program('python3', required: true)
 
 # Feature: 'x11'
 display_info = dependency('libdisplay-info', version: dependency_versions['display-info'], required: get_option('x11'))
@@ -101,6 +102,12 @@ if not enable_x11 and not enable_wayland
   error('At least one of the X11 and Wayland backends must be enabled')
 endif
 
+gnu_symbol_visibility = 'default'
+if get_option('visibility')
+  gnu_symbol_visibility = 'hidden'
+  feature_cflags += '-DENABLE_SYMBOL_VISIBILITY'
+endif
+
 extra_cflags = []
 extra_cflags_check = [
   '-Wmissing-declarations',
@@ -132,15 +139,12 @@ if buildtype == 'debug' or buildtype == 'debugoptimized'
       '-DDEBUG_TRACE=1',
     ]
   endif
-elif buildtype == 'release' or buildtype == 'minsize' or buildtype == 'plain'
-  extra_cflags += '-DNDEBUG'
-
-  if buildtype == 'minsize'
-    extra_cflags += [
-      '-DG_DISABLE_CAST_CHECKS',
-      '-DG_DISABLE_ASSERT',
-    ]
-  endif
+elif buildtype == 'minsize'
+  extra_cflags += [
+    '-DNDEBUG',
+    '-DG_DISABLE_CAST_CHECKS',
+    '-DG_DISABLE_ASSERT',
+  ]
 endif
 
 if dependency_versions.has_key('glib')
@@ -155,19 +159,20 @@ if dependency_versions.has_key('glib')
   ]
 endif
 
-version_parts = meson.project_version().split('git')[0].split('.')
+version_parts = meson.project_version().split('-dev')[0].split('.')
+version_short = '@0@.@1@'.format(version_parts[0], version_parts[1])
 
 extra_cflags += [
   '-DPACKAGE="@0@"'.format(meson.project_name()),
   '-DPACKAGE_NAME="@0@"'.format(meson.project_name()),
   '-DPACKAGE_VERSION="@0@"'.format(meson.project_version()),
   '-DVERSION="@0@"'.format(meson.project_version()),
+  '-DVERSION_SHORT="@0@"'.format(version_short),
   '-DPACKAGE_STRING="@0@ @1@"'.format(meson.project_name(), meson.project_version()),
   '-DPACKAGE_DATADIR="@0@"'.format(pkgdatadir),
   '-DPACKAGE_LOCALE_DIR="@0@"'.format(get_option('prefix') / get_option('localedir')),
   '-DPACKAGE_BUGREPORT="https://gitlab.xfce.org/@0@/@1@/-/issues"'.format(project_namespace, meson.project_name()),
   '-DGETTEXT_PACKAGE="@0@"'.format(meson.project_name()),
-  '-DSHORT_VERSION="@0@.@1@"'.format(version_parts[0], version_parts[1]),
   '-DPREFIX="@0@"'.format(get_option('prefix')),
   '-DBINDIR="@0@"'.format(get_option('prefix') / get_option('bindir')),
   '-DDATADIR="@0@"'.format(get_option('prefix') / get_option('datadir')),
@@ -178,17 +183,20 @@ extra_cflags += [
   '-DLOCALSTATEDIR="@0@"'.format(get_option('prefix') / get_option('localstatedir')),
   '-DSBINDIR="@0@"'.format(get_option('prefix') / get_option('sbindir')),
   '-DSYSCONFDIR="@0@"'.format(get_option('prefix') / get_option('sysconfdir')),
+  '-DHAVE_XFCE_REVISION_H=1',
 ]
-
-git_rev = run_command('git', 'rev-parse', '--short', 'HEAD', capture: true, check: false).stdout().strip()
-if git_rev == ''
-  git_rev = 'UNKNOWN'
-endif
-extra_cflags += '-DREVISION="@0@"'.format(git_rev)
 
 add_project_arguments(cc.get_supported_arguments(extra_cflags_check), language: 'c')
 add_project_arguments(extra_cflags, language: 'c')
 add_project_arguments(feature_cflags, language: 'c')
+
+xfce_revision_h = vcs_tag(
+  command: ['git', 'rev-parse', '--short', 'HEAD'],
+  fallback: 'UNKNOWN',
+  input: 'xfce-revision.h.in',
+  output: 'xfce-revision.h',
+  replace_string: '@REVISION@',
+)
 
 lib_so_version = '0'
 lib_version = '@0@.0.0'.format(lib_so_version)
