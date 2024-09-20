@@ -96,7 +96,7 @@ static void toplevel_output_leave(void *data, struct zwlr_foreign_toplevel_handl
 static void toplevel_closed(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel);
 static void toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel);
 
-const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_handle_listener = {
+static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_handle_listener = {
     .app_id = toplevel_app_id,
     .title = toplevel_title,
     .state = toplevel_state,
