@@ -39,6 +39,7 @@ gio_unix = dependency('gio-unix-2.0', version: dependency_versions['glib'])
 gdk = dependency('gdk-3.0', version: dependency_versions['gtk'])
 gdk_pixbuf = dependency('gdk-pixbuf-2.0', version: dependency_versions['gdk-pixbuf'])
 gtk = dependency('gtk+-3.0', version: dependency_versions['gtk'])
+python3 = find_program('python3', required: true)
 
 # Feature: 'x11'
 display_info = dependency('libdisplay-info', version: dependency_versions['display-info'], required: get_option('x11'))
@@ -99,6 +100,12 @@ endif
 
 if not enable_x11 and not enable_wayland
   error('At least one of the X11 and Wayland backends must be enabled')
+endif
+
+gnu_symbol_visibility = 'default'
+if get_option('visibility')
+  gnu_symbol_visibility = 'hidden'
+  feature_cflags += '-DENABLE_SYMBOL_VISIBILITY=1'
 endif
 
 extra_cflags = []
