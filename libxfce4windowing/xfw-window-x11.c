@@ -34,6 +34,8 @@
 #include "xfw-workspace-x11.h"
 #include "xfw-x11.h"
 
+#include "libxfce4windowing-visibility.h"
+
 enum {
     PROP0,
     PROP_WNCK_WINDOW,
@@ -843,3 +845,6 @@ WnckWindow *
 _xfw_window_x11_get_wnck_window(XfwWindowX11 *window) {
     return window->priv->wnck_window;
 }
+
+#define __XFW_WINDOW_X11_C__
+#include <libxfce4windowing-visibility.c>
