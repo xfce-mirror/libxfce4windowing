@@ -154,10 +154,13 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = $(pkgconfig_files)
 
 EXTRA_DIST = \
+	libxfce4windowing.symbols \
 	xfw-marshal.list
 
 BUILT_SOURCES = \
-	$(libxfce4windowing_0_built_sources)
+	$(libxfce4windowing_0_built_sources) \
+	libxfce4windowing-visibility.c \
+	libxfce4windowing-visibility.h
 
 CLEANFILES = \
 	$(libxfce4windowing_0_built_sources)
@@ -168,6 +171,12 @@ xfw-marshal.h: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 xfw-marshal.c: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 	$(AM_V_GEN) echo '#include "xfw-marshal.h"' > $@
 	$(AM_V_GET) glib-genmarshal --prefix=xfw_marshal --body $< >> $@
+
+libxfce4windowing-visibility.h: libxfce4windowing.symbols $(top_srcdir)/scripts/xdt-gen-visibility Makefile
+	$(AM_V_GEN) $(top_srcdir)/scripts/xdt-gen-visibility --kind=header $< $@
+
+libxfce4windowing-visibility.c: libxfce4windowing.symbols $(top_srcdir)/scripts/xdt-gen-visibility Makefile
+	$(AM_V_GEN) $(top_srcdir)/scripts/xdt-gen-visibility --kind=source $< $@
 
 # GObject Introspection
 -include $(INTROSPECTION_MAKEFILE)
