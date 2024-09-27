@@ -59,7 +59,9 @@ feature_cflags = []
 enable_x11 = not get_option('x11').disabled() and \
   libx11.found() and \
   gdk_x11.found() and \
-  wnck.found()
+  wnck.found() and \
+  display_info.found() and \
+  xrandr.found()
 x11_deps = []
 if enable_x11
   feature_cflags += '-DENABLE_X11=1'
@@ -75,7 +77,8 @@ endif
 enable_wayland = not get_option('wayland').disabled() and \
   gdk_wayland.found() and \
   wayland_client.found() and \
-  wayland_scanner.found()
+  wayland_scanner.found() and
+  wayland_protocols.found()
 wayland_deps = []
 if enable_wayland
   feature_cflags += '-DENABLE_WAYLAND=1'
