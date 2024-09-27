@@ -5,7 +5,7 @@ project(
   license: 'GPL-2',
   meson_version: '>= 0.56.0',
   default_options: [
-    'c_std=gnu99',
+    'c_std=gnu11',
     'buildtype=debugoptimized',
     'warning_level=2',
   ]
