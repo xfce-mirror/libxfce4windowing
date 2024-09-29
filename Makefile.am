@@ -8,6 +8,7 @@ SUBDIRS = \
 	libxfce4windowingui \
 	docs \
 	po \
+	scripts \
 	tests
 
 EXTRA_DIST = \
