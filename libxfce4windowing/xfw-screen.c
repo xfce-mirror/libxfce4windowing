@@ -59,6 +59,8 @@
 #include "xfw-screen-wayland.h"
 #endif
 
+#include "libxfce4windowing-visibility.h"
+
 #define XFW_SCREEN_GET_PRIVATE(screen) ((XfwScreenPrivate *)xfw_screen_get_instance_private((XfwScreen *)screen))
 #define GDK_SCREEN_XFW_SCREEN_KEY "libxfce4windowing-xfw-screen"
 
@@ -641,3 +643,6 @@ _xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show_desktop) {
         g_object_notify(G_OBJECT(screen), "show-desktop");
     }
 }
+
+#define __XFW_SCREEN_C__
+#include <libxfce4windowing-visibility.c>
