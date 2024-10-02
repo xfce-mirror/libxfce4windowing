@@ -48,7 +48,8 @@ pkgconfig_DATA = \
 	libxfce4windowingui-$(LIBXFCE4WINDOWING_VERSION_API).pc
 
 EXTRA_DIST = \
-	libxfce4windowingui.symbols
+	libxfce4windowingui.symbols \
+	meson.build
 
 BUILT_SOURCES = \
 	$(libxfce4windowingui_0_built_sources)

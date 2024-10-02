@@ -12,7 +12,11 @@ SUBDIRS = \
 
 EXTRA_DIST = \
 	README.md \
-	m4/introspection.m4
+	m4/introspection.m4 \
+	meson.build \
+	meson_options.txt \
+	po/meson.build \
+	xfce-revision.h.in
 
 DISTCLEANFILES =
 

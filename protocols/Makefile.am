@@ -52,6 +52,7 @@ endif
 
 EXTRA_DIST = \
 	ext-workspace-v1-20230427.xml \
+	meson.build \
 	wlr-protocols/unstable/wlr-foreign-toplevel-management-unstable-v1.xml
 
 # required for make distcheck (gtk-doc)

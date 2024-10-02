@@ -26,3 +26,6 @@ xfw_monitor_offon_CFLAGS = $(tests_cflags)
 xfw_monitor_offon_LDADD = $(tests_ldadd)
 
 endif
+
+EXTRA_DIST = \
+	meson.build

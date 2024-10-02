@@ -74,4 +74,8 @@ GTKDOC_LIBS = \
 
 include $(top_srcdir)/gtk-doc.make
 
+EXTRA_DIST += \
+	gtkdocentities.ent.in \
+	meson.build
+
 # vi:set ts=8 sw=8 noet ai nocindent syntax=automake:

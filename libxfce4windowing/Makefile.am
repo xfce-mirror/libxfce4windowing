@@ -158,6 +158,7 @@ pkgconfig_DATA = $(pkgconfig_files)
 
 EXTRA_DIST = \
 	libxfce4windowing.symbols \
+	meson.build \
 	xfw-marshal.list
 
 BUILT_SOURCES = \
