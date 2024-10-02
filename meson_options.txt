@@ -27,6 +27,13 @@ option(
 )
 
 option(
+  'visibility',
+  type: 'boolean',
+  value: true,
+  description: 'Build with GNU symbol visibility',
+)
+
+option(
   'tests',
   type: 'boolean',
   value: false,
