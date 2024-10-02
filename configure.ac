@@ -33,7 +33,6 @@ AC_REVISION([xdt_version_build])
 dnl init automake
 AM_INIT_AUTOMAKE([1.11 dist-bzip2 tar-ustar no-dist-gzip foreign])
 AC_CONFIG_HEADERS([config.h])
-AM_MAINTAINER_MODE()
 AM_SILENT_RULES([yes])
 
 dnl check for UNIX variants
@@ -182,13 +181,19 @@ XDT_FEATURE_LINKER_OPTS()
 dnl ****************************************
 dnl *** Check for ELF visibility support ***
 dnl ****************************************
+AC_PATH_PROG([XDT_GEN_VISIBILITY], [xdt-gen-visibility], [])
+if test x"$XDT_GEN_VISIBILITY" = x""; then
+    AC_MSG_ERROR([Unable to find xdt-gen-visibility in your PATH. Ensure that a recent enough version of xfce4-dev-tools is installed and try again.])
+fi
+AC_SUBST([XDT_GEN_VISIBILITY])
+
 AC_ARG_ENABLE([visibility],
               AS_HELP_STRING([--disable-visibility],
                              [Do not use ELF visibility attributes]),
               [enable_visibility=$enableval], [enable_visibility=yes])
 have_gnuc_visibility=no
 if test "x$enable_visibility" != "xno"; then
-  XDT_SUPPORTED_FLAGS([xdt_vis_test_cflags], [-Wall -Werror -Wno-unused-parameter])
+  XDT_SUPPORTED_FLAGS([xdt_vis_test_cflags], [-Wall -Werror -Wno-unused-parameter -fvisibility=hidden])
   saved_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS $xdt_vis_test_cflags"
   AC_MSG_CHECKING([whether $CC supports the GNUC visibility attribute])
@@ -214,7 +219,8 @@ if test "x$enable_visibility" != "xno"; then
   CFLAGS="$saved_CFLAGS"
 fi
 if test "x$have_gnuc_visibility" = "xyes"; then
-  CPPFLAGS="$CPPFLAGS -DHAVE_GNUC_VISIBILITY"
+  CPPFLAGS="$CPPFLAGS -DENABLE_SYMBOL_VISIBILITY=1"
+  CFLAGS="$CFLAGS -fvisibility=hidden"
 fi
 AM_CONDITIONAL([HAVE_GNUC_VISIBILITY], [test "x$have_gnuc_visibility" = "xyes"])
 
