@@ -14,9 +14,9 @@ XDT_VERSION_INIT([4.19.4], [git])
 
 dnl minimum required versions
 m4_define([libx11_minimum_version], [1.6.7])
-m4_define([glib_minimum_version], [2.68.0])
+m4_define([glib_minimum_version], [2.72.0])
 m4_define([gtk_minimum_version], [3.24.10])
-m4_define([gdk_pixbuf_minimum_version], [2.40.0])
+m4_define([gdk_pixbuf_minimum_version], [2.42.8])
 m4_define([wnck_minimum_version], [3.14])
 m4_define([wayland_minimum_version], [1.15])
 m4_define([wayland_protocols_minimum_version], [1.18])
@@ -172,7 +172,7 @@ AM_CONDITIONAL([ENABLE_TESTS], [test x"$enable_tests" = x"yes"])
 
 GTK_DOC_CHECK([1.30])
 
-GOBJECT_INTROSPECTION_CHECK([1.66.0])
+GOBJECT_INTROSPECTION_CHECK([1.72.0])
 
 dnl check for debugging support
 XDT_FEATURE_DEBUG([xdt_debug_default])
