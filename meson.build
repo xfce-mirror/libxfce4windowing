@@ -22,8 +22,9 @@ i18n = import('i18n')
 
 dependency_versions = {
   'display-info': '>= 0.1.1',
-  'glib': '>= 2.68.0',
-  'gdk-pixbuf': '>= 2.40.0',
+  'gir': '>= 1.72.0',
+  'glib': '>= 2.72.0',
+  'gdk-pixbuf': '>= 2.42.8',
   'gtk': '>= 3.24.10',
   'libx11': '>= 1.6.7',
   'wayland': '>= 1.15',
@@ -34,6 +35,7 @@ dependency_versions = {
 }
 
 glib = dependency('glib-2.0', version: dependency_versions['glib'])
+gir = dependency('gobject-introspection-1.0', version: dependency_versions['gir'], required: get_option('introspection'))
 gobject = dependency('gobject-2.0', version: dependency_versions['glib'])
 gio_unix = dependency('gio-unix-2.0', version: dependency_versions['glib'])
 gdk = dependency('gdk-3.0', version: dependency_versions['gtk'])
