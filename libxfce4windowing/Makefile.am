@@ -37,6 +37,8 @@ libxfce4windowing_0_include_HEADERS = \
 	$(libxfce4windowing_0_headers)
 
 libxfce4windowing_0_built_sources = \
+	libxfce4windowing-visibility.c \
+	libxfce4windowing-visibility.h \
 	xfw-marshal.c \
 	xfw-marshal.h
 
@@ -76,7 +78,6 @@ libxfce4windowing_0_wayland_sources = \
 
 libxfce4windowing_0_la_SOURCES = \
 	$(libxfce4windowing_0_public_sources) \
-	$(libxfce4windowing_0_built_sources) \
 	libxfce4windowing-private.c \
 	libxfce4windowing-private.h \
 	xfw-application-private.h \
@@ -105,6 +106,9 @@ libxfce4windowing_0_la_SOURCES += \
 	$(libxfce4windowing_0_wayland_sources)
 endif
 
+nodist_libxfce4windowing_0_la_SOURCES = \
+	$(libxfce4windowing_0_built_sources)
+
 libxfce4windowing_0_la_CFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
@@ -124,7 +128,6 @@ libxfce4windowing_0_la_CFLAGS = \
 
 libxfce4windowing_0_la_LDFLAGS = \
 	-version-info $(LIBXFCE4WINDOWING_VERINFO) \
-	-export-symbols-regex "^[^_].*" \
 	-no-undefined \
 	$(LIBX11_LDFLAGS)
 
@@ -154,13 +157,14 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = $(pkgconfig_files)
 
 EXTRA_DIST = \
-	xfw-marshal.c \
-	xfw-marshal.h \
+	libxfce4windowing.symbols \
 	xfw-marshal.list
 
-CLEANFILES =
+BUILT_SOURCES = \
+	$(libxfce4windowing_0_built_sources)
 
-if MAINTAINER_MODE
+CLEANFILES = \
+	$(libxfce4windowing_0_built_sources)
 
 xfw-marshal.h: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 	$(AM_V_GEN) glib-genmarshal --prefix=xfw_marshal --internal --header $< > $@
@@ -169,13 +173,11 @@ xfw-marshal.c: $(top_srcdir)/libxfce4windowing/xfw-marshal.list Makefile
 	$(AM_V_GEN) echo '#include "xfw-marshal.h"' > $@
 	$(AM_V_GET) glib-genmarshal --prefix=xfw_marshal --body $< >> $@
 
-CLEANFILES += \
-	$(libxfce4windowing_0_built_sources)
+libxfce4windowing-visibility.h: libxfce4windowing.symbols Makefile
+	$(AM_V_GEN) $(XDT_GEN_VISIBILITY) --kind=header $< $@
 
-BUILT_SOURCES = \
-	$(libxfce4windowing_0_built_sources)
-
-endif
+libxfce4windowing-visibility.c: libxfce4windowing.symbols Makefile
+	$(AM_V_GEN) $(XDT_GEN_VISIBILITY) --kind=source $< $@
 
 # GObject Introspection
 -include $(INTROSPECTION_MAKEFILE)
