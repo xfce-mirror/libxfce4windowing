@@ -28,6 +28,7 @@
 #include <wayland-client.h>
 
 #include "xfw-screen-private.h"
+#include "xfw-seat-wayland.h"
 #include "xfw-window.h"
 #include "xfw-workspace.h"
 
@@ -39,7 +40,9 @@ G_DECLARE_FINAL_TYPE(XfwScreenWayland, xfw_screen_wayland, XFW, SCREEN_WAYLAND, 
 typedef struct _XfwScreenWaylandPrivate XfwScreenWaylandPrivate;
 
 GdkScreen *_xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen);
-struct wl_seat *_xfw_screen_wayland_get_wl_seat(XfwScreenWayland *screen);
+
+void _xfw_screen_wayland_seat_ready(XfwScreenWayland *screen, XfwSeatWayland *seat);
+
 XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window);
 
 G_END_DECLS
