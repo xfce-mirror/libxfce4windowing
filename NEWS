@@ -1,3 +1,26 @@
+4.19.5 (2024-10-03)
+======
+- Add more compiler flags to the meson build
+- Use physical geometry when comparing X11 window geometry to monitor
+- build: Bump requirements for Xfce 4.20
+- Include meson build files in autotools dist tarball
+- Set up GNU symbol visibility
+- Ditch maintainer mode
+- Suppress spurious uninitialized var warning
+- Make window listener struct static
+- Update meson build
+- Bump C std from gnu99 to gnu11
+- meson: fix missing checks for x11 and wayland feature detection
+- Fix physical monitor height not getting set on X11
+- Ensure private symbols don't end up in the introspection file
+- autotools: don't build tests by default
+- Print monitor ID in xfw-enum-monitors test app
+- Try to make monitor IDs stable between X11 and Wayland
+- Move xrandr event base into XfwMonitorManagerX11
+- Fetch X11 scale factor from XSETTINGS, not GDK
+- Fix monitor workarea setting when monitors appear
+
+
 4.19.4 (2024-08-23)
 ======
 - Add tests/Makefile.am

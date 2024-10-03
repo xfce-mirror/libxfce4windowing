@@ -1,15 +1,10 @@
 project(
   'libxfce4windowing',
   'c',
-  version: '4.19.4-dev',
-  license: 'GPL-2',
-  meson_version: '>= 0.56.0',
-  default_options: [
-    'c_std=gnu11',
-    'buildtype=debugoptimized',
-    'warning_level=2',
-    'b_ndebug=if-release',
-  ]
+version : '4.19.5',
+  license : 'GPL-2',
+  meson_version : '>= 0.56.0',
+  default_options : ['c_std=gnu11', 'buildtype=debugoptimized', 'warning_level=2', 'b_ndebug=if-release']
 )
 
 project_namespace = 'xfce'
