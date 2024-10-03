@@ -182,7 +182,7 @@ xfw_window_x11_constructed(GObject *obj) {
     for (GList *l = xfw_screen_get_monitors(screen); l != NULL; l = l->next) {
         XfwMonitor *monitor = XFW_MONITOR(l->data);
         GdkRectangle geom;
-        xfw_monitor_get_logical_geometry(monitor, &geom);
+        xfw_monitor_get_physical_geometry(monitor, &geom);
         if (gdk_rectangle_intersect(&window->priv->geometry, &geom, NULL)) {
             window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
         }
@@ -658,7 +658,7 @@ geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     for (GList *lp = window->priv->monitors; lp != NULL;) {
         GList *lnext = lp->next;
         GdkRectangle geom;
-        xfw_monitor_get_logical_geometry(XFW_MONITOR(lp->data), &geom);
+        xfw_monitor_get_physical_geometry(XFW_MONITOR(lp->data), &geom);
         if (!gdk_rectangle_intersect(&window->priv->geometry, &geom, NULL)) {
             window->priv->monitors = g_list_delete_link(window->priv->monitors, lp);
             notify = TRUE;
@@ -669,7 +669,7 @@ geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     for (GList *l = xfw_screen_get_monitors(_xfw_window_get_screen(XFW_WINDOW(window))); l != NULL; l = l->next) {
         XfwMonitor *monitor = XFW_MONITOR(l->data);
         GdkRectangle geom;
-        xfw_monitor_get_logical_geometry(monitor, &geom);
+        xfw_monitor_get_physical_geometry(monitor, &geom);
         if (gdk_rectangle_intersect(&window->priv->geometry, &geom, NULL) && !g_list_find(window->priv->monitors, monitor)) {
             window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
             notify = TRUE;
@@ -684,7 +684,7 @@ geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
 static void
 monitor_added(XfwScreen *screen, XfwMonitor *monitor, XfwWindowX11 *window) {
     GdkRectangle geom;
-    xfw_monitor_get_logical_geometry(monitor, &geom);
+    xfw_monitor_get_physical_geometry(monitor, &geom);
     if (gdk_rectangle_intersect(&window->priv->geometry, &geom, NULL)) {
         window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
         g_object_notify(G_OBJECT(window), "monitors");
