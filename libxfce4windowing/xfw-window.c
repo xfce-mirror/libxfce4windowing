@@ -768,11 +768,11 @@ xfw_window_get_application(XfwWindow *window) {
 }
 
 gboolean
-xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error) {
+xfw_window_activate(XfwWindow *window, XfwSeat *seat, guint64 event_timestamp, GError **error) {
     XfwWindowClass *klass;
     g_return_val_if_fail(XFW_IS_WINDOW(window), FALSE);
     klass = XFW_WINDOW_GET_CLASS(window);
-    return (*klass->activate)(window, event_timestamp, error);
+    return (*klass->activate)(window, seat, event_timestamp, error);
 }
 
 gboolean

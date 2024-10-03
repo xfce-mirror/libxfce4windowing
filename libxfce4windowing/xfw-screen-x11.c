@@ -87,6 +87,11 @@ xfw_screen_x11_constructed(GObject *obj) {
 
     G_OBJECT_CLASS(xfw_screen_x11_parent_class)->constructed(obj);
 
+    XfwSeat *default_seat = g_object_new(XFW_TYPE_SEAT,
+                                         "name", "seat0",
+                                         NULL);
+    _xfw_screen_seat_added(screen, default_seat);
+
     _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_x11_new(screen));
 
     G_GNUC_BEGIN_IGNORE_DEPRECATIONS
