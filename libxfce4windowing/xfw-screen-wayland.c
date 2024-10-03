@@ -17,6 +17,7 @@
  * MA 02110-1301 USA
  */
 
+#include "xfw-seat-wayland.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -46,7 +47,7 @@ struct _XfwScreenWayland {
     struct wl_registry *wl_registry;
     GList *async_roundtrips;
 
-    struct wl_seat *wl_seat;
+    GList *pending_seats;
 
     gboolean defer_toplevel_manager;
     uint32_t toplevel_manager_id;
@@ -168,9 +169,7 @@ xfw_screen_wayland_finalize(GObject *obj) {
     if (screen->toplevel_manager != NULL) {
         zwlr_foreign_toplevel_manager_v1_destroy(screen->toplevel_manager);
     }
-    if (screen->wl_seat != NULL) {
-        wl_seat_release(screen->wl_seat);
-    }
+    g_list_free_full(screen->pending_seats, g_object_unref);
     if (screen->wl_registry != NULL) {
         wl_registry_destroy(screen->wl_registry);
     }
@@ -210,7 +209,10 @@ show_desktop_state_changed(XfwWindow *window, XfwWindowState changed_mask, XfwWi
                 _xfw_screen_set_show_desktop(screen, FALSE);
             }
             if (wscreen->show_desktop_data.was_active != NULL) {
-                xfw_window_activate(wscreen->show_desktop_data.was_active, 0, NULL);
+                for (GList *l = xfw_screen_get_seats(XFW_SCREEN(wscreen)); l != NULL; l = l->next) {
+                    XfwSeat *seat = XFW_SEAT(l->data);
+                    xfw_window_activate(wscreen->show_desktop_data.was_active, seat, 0, NULL);
+                }
             }
         }
     }
@@ -314,14 +316,9 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
             init_toplevel_manager(wscreen);
         }
     } else if (strcmp(wl_seat_interface.name, interface) == 0) {
-        if (wscreen->wl_seat != NULL) {
-            g_debug("We already had a wl_seat, but now we're getting a new one");
-            wl_seat_release(wscreen->wl_seat);
-        }
-        wscreen->wl_seat = wl_registry_bind(wscreen->wl_registry,
-                                            id,
-                                            &wl_seat_interface,
-                                            MIN((uint32_t)wl_seat_interface.version, version));
+        struct wl_seat *wl_seat = wl_registry_bind(wscreen->wl_registry, id, &wl_seat_interface, 2);
+        XfwSeatWayland *seat = _xfw_seat_wayland_new(XFW_SCREEN(wscreen), wl_seat);
+        wscreen->pending_seats = g_list_prepend(wscreen->pending_seats, seat);
         add_async_roundtrip(wscreen);
     } else if (strcmp(ext_workspace_manager_v1_interface.name, interface) == 0) {
         XfwScreen *screen = XFW_SCREEN(wscreen);
@@ -352,7 +349,35 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
 static void
 registry_global_remove(void *data, struct wl_registry *registry, uint32_t id) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(data);
-    _xfw_monitor_manager_wayland_global_removed(screen->monitor_manager, id);
+
+    gboolean seat_removed = FALSE;
+
+    for (GList *l = xfw_screen_get_seats(XFW_SCREEN(screen)); l != NULL; l = l->next) {
+        XfwSeatWayland *seat = XFW_SEAT_WAYLAND(l->data);
+        struct wl_seat *wl_seat = _xfw_seat_wayland_get_wl_seat(seat);
+        if (id == wl_proxy_get_id((struct wl_proxy *)wl_seat)) {
+            _xfw_screen_seat_removed(XFW_SCREEN(screen), XFW_SEAT(seat));
+            seat_removed = TRUE;
+            break;
+        }
+    }
+
+    if (!seat_removed) {
+        for (GList *l = screen->pending_seats; l != NULL; l = l->next) {
+            XfwSeatWayland *seat = XFW_SEAT_WAYLAND(l->data);
+            struct wl_seat *wl_seat = _xfw_seat_wayland_get_wl_seat(seat);
+            if (id == wl_proxy_get_id((struct wl_proxy *)wl_seat)) {
+                screen->pending_seats = g_list_delete_link(screen->pending_seats, l);
+                g_object_unref(seat);
+                seat_removed = TRUE;
+                break;
+            }
+        }
+    }
+
+    if (!seat_removed) {
+        _xfw_monitor_manager_wayland_global_removed(screen->monitor_manager, id);
+    }
 }
 
 static void
@@ -391,9 +416,13 @@ toplevel_manager_finished(void *data, struct zwlr_foreign_toplevel_manager_v1 *w
     screen->toplevel_manager = NULL;
 }
 
-struct wl_seat *
-_xfw_screen_wayland_get_wl_seat(XfwScreenWayland *screen) {
-    return screen->wl_seat;
+void
+_xfw_screen_wayland_seat_ready(XfwScreenWayland *screen, XfwSeatWayland *seat) {
+    GList *link = g_list_find(screen->pending_seats, seat);
+    if (link != NULL) {
+        screen->pending_seats = g_list_delete_link(screen->pending_seats, link);
+        _xfw_screen_seat_added(XFW_SCREEN(screen), XFW_SEAT(seat));
+    }
 }
 
 XfwWorkspace *
