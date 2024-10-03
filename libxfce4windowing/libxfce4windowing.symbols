@@ -52,6 +52,10 @@ xfw_screen_get_windows_stacked
 xfw_screen_get_workspace_manager
 xfw_screen_set_show_desktop
 
+# file:xfw-seat
+xfw_seat_get_name
+xfw_seat_get_type
+
 # file:xfw-util
 xfw_direction_get_type attr:G_GNUC_CONST
 xfw_error_quark attr:G_GNUC_CONST
