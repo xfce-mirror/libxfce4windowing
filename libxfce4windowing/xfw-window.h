@@ -26,6 +26,7 @@
 
 #include <gdk/gdk.h>
 #include <libxfce4windowing/xfw-application.h>
+#include <libxfce4windowing/xfw-seat.h>
 #include <libxfce4windowing/xfw-workspace.h>
 
 G_BEGIN_DECLS
@@ -162,7 +163,7 @@ XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);
 GList *xfw_window_get_monitors(XfwWindow *window);
 XfwApplication *xfw_window_get_application(XfwWindow *window);
 
-gboolean xfw_window_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
+gboolean xfw_window_activate(XfwWindow *window, XfwSeat *seat, guint64 event_timestamp, GError **error);
 gboolean xfw_window_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 gboolean xfw_window_start_move(XfwWindow *window, GError **error);
 gboolean xfw_window_start_resize(XfwWindow *window, GError **error);

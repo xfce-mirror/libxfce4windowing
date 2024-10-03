@@ -35,6 +35,8 @@ G_DECLARE_DERIVABLE_TYPE(XfwScreen, xfw_screen, XFW, SCREEN, GObject)
 
 XfwScreen *xfw_screen_get_default(void);
 
+GList *xfw_screen_get_seats(XfwScreen *screen);
+
 XfwWorkspaceManager *xfw_screen_get_workspace_manager(XfwScreen *screen);
 
 GList *xfw_screen_get_windows(XfwScreen *screen);

@@ -34,8 +34,8 @@ xfw_error_quark
 <SECTION>
 <FILE>xfw-screen</FILE>
 XfwScreen
-XfwScreenIface
 xfw_screen_get_default
+xfw_screen_get_seats
 xfw_screen_get_workspace_manager
 xfw_screen_get_windows
 xfw_screen_get_windows_stacked
@@ -45,8 +45,17 @@ xfw_screen_get_primary_monitor
 xfw_screen_get_show_desktop
 xfw_screen_set_show_desktop
 <SUBSECTION Standard>
-XfwScreenInterface
+XfwScreenClass
 XFW_TYPE_SCREEN
+</SECTION>
+
+<SECTION>
+<FILE>xfw-seat</FILE>
+XfwSeat
+xfw_seat_get_name
+<SUBSECTION Standard>
+XfwSeatClass
+XFW_TYPE_SEAT
 </SECTION>
 
 <SECTION>
