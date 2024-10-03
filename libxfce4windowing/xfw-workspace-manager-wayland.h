@@ -26,10 +26,11 @@
 
 #include <gdk/gdk.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/cosmic-workspace-unstable-v1-client.h"
 
 #include "xfw-screen-wayland.h"
 #include "xfw-workspace-manager.h"
+#include "xfw-workspace-wayland.h"
 
 G_BEGIN_DECLS
 
@@ -44,8 +45,12 @@ struct _XfwWorkspaceManagerWayland {
     XfwWorkspaceManagerWaylandPrivate *priv;
 };
 
-XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(XfwScreenWayland *screen, struct ext_workspace_manager_v1 *manager);
+XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(XfwScreenWayland *screen, struct zcosmic_workspace_manager_v1 *manager);
 
+XfwWorkspaceWayland *_xfw_workspace_manager_wayland_workspace_added(XfwWorkspaceManagerWayland *wmanager,
+                                                                    struct zcosmic_workspace_handle_v1 *wl_workspace);
+void _xfw_workspace_manager_wayland_workspace_removed(XfwWorkspaceManagerWayland *manager,
+                                                      XfwWorkspaceWayland *workspace);
 G_END_DECLS
 
 #endif /* __XFW_WORKSPACE_MANAGER_WAYLAND_H__ */
