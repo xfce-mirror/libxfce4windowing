@@ -61,7 +61,7 @@ struct _XfwWindowClass {
     GList *(*get_monitors)(XfwWindow *window);
     XfwApplication *(*get_application)(XfwWindow *window);
 
-    gboolean (*activate)(XfwWindow *window, guint64 event_timestamp, GError **error);
+    gboolean (*activate)(XfwWindow *window, XfwSeat *seat, guint64 event_timestamp, GError **error);
     gboolean (*close)(XfwWindow *window, guint64 event_timestamp, GError **error);
     gboolean (*start_move)(XfwWindow *window, GError **error);
     gboolean (*start_resize)(XfwWindow *window, GError **error);

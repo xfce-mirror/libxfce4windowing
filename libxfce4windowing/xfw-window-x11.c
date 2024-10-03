@@ -68,7 +68,7 @@ static GdkRectangle *xfw_window_x11_get_geometry(XfwWindow *window);
 static XfwWorkspace *xfw_window_x11_get_workspace(XfwWindow *window);
 static GList *xfw_window_x11_get_monitors(XfwWindow *window);
 static XfwApplication *xfw_window_x11_get_application(XfwWindow *window);
-static gboolean xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
+static gboolean xfw_window_x11_activate(XfwWindow *window, XfwSeat *seat, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_x11_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_x11_start_move(XfwWindow *window, GError **error);
 static gboolean xfw_window_x11_start_resize(XfwWindow *window, GError **error);
@@ -309,7 +309,7 @@ xfw_window_x11_get_application(XfwWindow *window) {
 }
 
 static gboolean
-xfw_window_x11_activate(XfwWindow *window, guint64 event_timestamp, GError **error) {
+xfw_window_x11_activate(XfwWindow *window, XfwSeat *seat, guint64 event_timestamp, GError **error) {
     XfwWindowX11Private *priv = XFW_WINDOW_X11(window)->priv;
     wnck_window_activate(priv->wnck_window, (guint32)event_timestamp);
     return TRUE;

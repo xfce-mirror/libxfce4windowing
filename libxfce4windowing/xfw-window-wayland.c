@@ -17,6 +17,7 @@
  * MA 02110-1301 USA
  */
 
+#include "xfw-seat-wayland.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -68,7 +69,7 @@ static GdkRectangle *xfw_window_wayland_get_geometry(XfwWindow *window);
 static XfwWorkspace *xfw_window_wayland_get_workspace(XfwWindow *window);
 static GList *xfw_window_wayland_get_monitors(XfwWindow *window);
 static XfwApplication *xfw_window_wayland_get_application(XfwWindow *window);
-static gboolean xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error);
+static gboolean xfw_window_wayland_activate(XfwWindow *window, XfwSeat *seat, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_wayland_close(XfwWindow *window, guint64 event_timestamp, GError **error);
 static gboolean xfw_window_wayland_start_move(XfwWindow *window, GError **error);
 static gboolean xfw_window_wayland_start_resize(XfwWindow *window, GError **error);
@@ -273,19 +274,30 @@ xfw_window_wayland_get_application(XfwWindow *window) {
 }
 
 static gboolean
-xfw_window_wayland_activate(XfwWindow *window, guint64 event_timestamp, GError **error) {
+xfw_window_wayland_activate(XfwWindow *window, XfwSeat *seat, guint64 event_timestamp, GError **error) {
     XfwWindowWayland *wwindow = XFW_WINDOW_WAYLAND(window);
-    XfwScreen *screen = _xfw_window_get_screen(window);
-    struct wl_seat *wl_seat = _xfw_screen_wayland_get_wl_seat(XFW_SCREEN_WAYLAND(screen));
 
-    if (wl_seat != NULL) {
-        zwlr_foreign_toplevel_handle_v1_activate(wwindow->priv->handle, wl_seat);
-        return TRUE;
+    GList *seats = NULL;
+    if (seat != NULL) {
+        seats = g_list_prepend(seats, seat);
     } else {
+        XfwScreen *screen = _xfw_window_get_screen(window);
+        seats = g_list_copy(xfw_screen_get_seats(screen));
+    }
+
+    if (seats == NULL) {
         if (error != NULL) {
             *error = g_error_new(XFW_ERROR, XFW_ERROR_INTERNAL, "Cannot activate window as we do not have a wl_seat");
         }
         return FALSE;
+    } else {
+        for (GList *l = seats; l != NULL; l = l->next) {
+            XfwSeatWayland *a_seat = XFW_SEAT_WAYLAND(l->data);
+            struct wl_seat *wl_seat = _xfw_seat_wayland_get_wl_seat(a_seat);
+            zwlr_foreign_toplevel_handle_v1_activate(wwindow->priv->handle, wl_seat);
+        }
+        g_list_free(seats);
+        return TRUE;
     }
 }
 
