@@ -10,6 +10,7 @@ libxfce4windowing_0_headers = \
 	xfw-application.h \
 	xfw-monitor.h \
 	xfw-screen.h \
+	xfw-seat.h \
 	xfw-util.h \
 	xfw-window.h \
 	xfw-workspace-group.h \
@@ -27,6 +28,7 @@ libxfce4windowing_0_public_sources = \
 	xfw-application.c \
 	xfw-monitor.c \
 	xfw-screen.c \
+	xfw-seat.c \
 	xfw-util.c \
 	xfw-window.c \
 	xfw-workspace-group.c \
@@ -67,6 +69,8 @@ libxfce4windowing_0_wayland_sources = \
 	xfw-monitor-wayland.h \
 	xfw-screen-wayland.c \
 	xfw-screen-wayland.h \
+	xfw-seat-wayland.c \
+	xfw-seat-wayland.h \
 	xfw-window-wayland.c \
 	xfw-window-wayland.h \
 	xfw-workspace-group-wayland.c \
@@ -85,6 +89,7 @@ libxfce4windowing_0_la_SOURCES = \
 	xfw-gdk-private.h \
 	xfw-monitor-private.h \
 	xfw-screen-private.h \
+	xfw-seat-private.h \
 	xfw-window-private.h \
 	xfw-workspace-dummy.c \
 	xfw-workspace-dummy.h \

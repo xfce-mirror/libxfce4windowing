@@ -66,6 +66,7 @@
 
 typedef struct _XfwXcreenPrivate {
     GdkScreen *gdk_screen;
+    GList *seats;
     XfwWorkspaceManager *workspace_manager;
     GList *monitors;
     XfwMonitor *primary_monitor;
@@ -101,6 +102,42 @@ xfw_screen_class_init(XfwScreenClass *klass) {
     gobject_class->set_property = xfw_screen_set_property;
     gobject_class->get_property = xfw_screen_get_property;
     gobject_class->finalize = xfw_screen_finalize;
+
+    /**
+     * XfwScreen::seat-added:
+     * @screen: the object which received the signal.
+     * @seat: the new #XfwSeat that was added.
+     *
+     * Emitted when @seat has been added to @screen.
+     **/
+    g_signal_new("seat-added",
+                 XFW_TYPE_SCREEN,
+                 G_SIGNAL_RUN_LAST,
+                 0,
+                 NULL,
+                 NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE,
+                 1,
+                 XFW_TYPE_SEAT);
+
+    /**
+     * XfwScreen::seat-removed:
+     * @screen: the object which received the signal.
+     * @seat: the #XfwSeat that was removed.
+     *
+     * Emitted when @seat has been added to @screen.
+     **/
+    g_signal_new("seat-removed",
+                 XFW_TYPE_SCREEN,
+                 G_SIGNAL_RUN_LAST,
+                 0,
+                 NULL,
+                 NULL,
+                 g_cclosure_marshal_VOID__OBJECT,
+                 G_TYPE_NONE,
+                 1,
+                 XFW_TYPE_SEAT);
 
     /**
      * XfwScreen::window-opened:
@@ -370,6 +407,21 @@ xfw_screen_finalize(GObject *object) {
 }
 
 /**
+ * xfw_screen_get_seats:
+ * @screen: an #XfwScreen.
+ *
+ * Returns the list of all #XfwSeat instances available on @screen.
+ *
+ * Return value: (nullable) (element-type XfwSeat) (transfer none): a list of
+ * #XfwSeat.  The list and its contents are owned by @screen.
+ **/
+GList *
+xfw_screen_get_seats(XfwScreen *screen) {
+    g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
+    return XFW_SCREEN_GET_PRIVATE(screen)->seats;
+}
+
+/**
  * xfw_screen_get_workspace_manager:
  * @screen: an #XfwScreen.
  *
@@ -574,6 +626,21 @@ GdkScreen *
 _xfw_screen_get_gdk_screen(XfwScreen *screen) {
     g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
     return XFW_SCREEN_GET_PRIVATE(screen)->gdk_screen;
+}
+
+void
+_xfw_screen_seat_added(XfwScreen *screen, XfwSeat *seat) {
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
+    priv->seats = g_list_append(priv->seats, seat);
+    g_signal_emit_by_name(screen, "seat-added", seat);
+}
+
+void
+_xfw_screen_seat_removed(XfwScreen *screen, XfwSeat *seat) {
+    XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
+    priv->seats = g_list_remove(priv->seats, seat);
+    g_signal_emit_by_name(screen, "seat-removed", seat);
+    g_object_unref(seat);
 }
 
 void
