@@ -558,7 +558,7 @@ xfw_screen_get(GdkScreen *gdk_screen) {
 }
 
 /**
- * xfw_screen_get_default: (constructor)
+ * xfw_screen_get_default:
  *
  * Retrieves the #XfwScreen instance corresponding to the default #GdkScreen.
  *
