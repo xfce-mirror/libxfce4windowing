@@ -45,6 +45,7 @@ xfw_screen_get_active_window
 xfw_screen_get_default
 xfw_screen_get_monitors
 xfw_screen_get_primary_monitor
+xfw_screen_get_seats
 xfw_screen_get_show_desktop
 xfw_screen_get_type attr:G_GNUC_CONST
 xfw_screen_get_windows
