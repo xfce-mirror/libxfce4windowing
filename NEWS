@@ -1,3 +1,10 @@
+4.19.6 (2024-10-06)
+======
+- Actually export xfw_screen_get_seats from the library
+- Add XfwSeat abstraction
+- build: Adjust Wayland requirements for Xfce 4.20
+
+
 4.19.5 (2024-10-03)
 ======
 - Add more compiler flags to the meson build
