@@ -4,11 +4,13 @@ libxfce4windowingui_pkgname = 'lib@0@'.format(libxfce4windowingui_apiname)
 windowingui_headers = [
   'libxfce4windowingui.h',
   'xfw-window-action-menu.h',
+  'xfw-window-list-menu.h',
 ]
 
 windowingui_sources = [
   'libxfce4windowingui-config.c',
   'xfw-window-action-menu.c',
+  'xfw-window-list-menu.c',
 ]
 
 windowingui_config_data = configuration_data({
