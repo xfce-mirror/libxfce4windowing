@@ -344,9 +344,9 @@ xfw_window_action_menu_dispose(GObject *obj) {
     XfwWindowActionMenu *menu = XFW_WINDOW_ACTION_MENU(obj);
 
     if (menu->window != NULL) {
-        g_signal_handlers_disconnect_by_func(menu->window, window_state_changed, menu);
-        g_signal_handlers_disconnect_by_func(menu->window, window_capabilities_changed, menu);
-        g_signal_handlers_disconnect_by_func(menu->window, window_workspace_changed, menu);
+        XfwWorkspaceManager *manager = xfw_screen_get_workspace_manager(xfw_window_get_screen(menu->window));
+        g_signal_handlers_disconnect_by_data(manager, menu);
+        g_signal_handlers_disconnect_by_data(menu->window, menu);
         g_clear_object(&menu->window);
     }
 
