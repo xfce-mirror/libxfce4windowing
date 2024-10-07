@@ -24,7 +24,7 @@
 #include <glib/gi18n-lib.h>
 #include <limits.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/cosmic-workspace-unstable-v1-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-monitor-wayland.h"
@@ -32,7 +32,7 @@
 #include "xfw-util.h"
 #include "xfw-workspace-group-private.h"
 #include "xfw-workspace-group-wayland.h"
-#include "xfw-workspace-manager.h"
+#include "xfw-workspace-manager-wayland.h"
 #include "xfw-workspace-wayland.h"
 #include "xfw-workspace.h"
 
@@ -45,7 +45,7 @@ enum {
 struct _XfwWorkspaceGroupWaylandPrivate {
     XfwScreen *screen;
     XfwWorkspaceManager *workspace_manager;
-    struct ext_workspace_group_handle_v1 *handle;
+    struct zcosmic_workspace_group_handle_v1 *handle;
     XfwWorkspaceGroupCapabilities capabilities;
     GList *workspaces;
     XfwWorkspace *active_workspace;
@@ -69,20 +69,18 @@ static gboolean xfw_workspace_group_wayland_create_workspace(XfwWorkspaceGroup *
 static gboolean xfw_workspace_group_wayland_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
 static gboolean xfw_workspace_group_wayland_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
 
-static void group_capabilities(void *data, struct ext_workspace_group_handle_v1 *group, uint32_t capabilities);
-static void group_output_enter(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_output *output);
-static void group_output_leave(void *data, struct ext_workspace_group_handle_v1 *group, struct wl_output *output);
-static void group_workspace_enter(void *data, struct ext_workspace_group_handle_v1 *group, struct ext_workspace_handle_v1 *workspace);
-static void group_workspace_leave(void *data, struct ext_workspace_group_handle_v1 *group, struct ext_workspace_handle_v1 *workspace);
-static void group_removed(void *data, struct ext_workspace_group_handle_v1 *group);
+static void group_capabilities(void *data, struct zcosmic_workspace_group_handle_v1 *group, struct wl_array *capabilities);
+static void group_output_enter(void *data, struct zcosmic_workspace_group_handle_v1 *group, struct wl_output *output);
+static void group_output_leave(void *data, struct zcosmic_workspace_group_handle_v1 *group, struct wl_output *output);
+static void group_workspace(void *data, struct zcosmic_workspace_group_handle_v1 *group, struct zcosmic_workspace_handle_v1 *workspace);
+static void group_remove(void *data, struct zcosmic_workspace_group_handle_v1 *group);
 
-static const struct ext_workspace_group_handle_v1_listener group_listener = {
+static const struct zcosmic_workspace_group_handle_v1_listener group_listener = {
     .capabilities = group_capabilities,
     .output_enter = group_output_enter,
     .output_leave = group_output_leave,
-    .workspace_enter = group_workspace_enter,
-    .workspace_leave = group_workspace_leave,
-    .removed = group_removed,
+    .workspace = group_workspace,
+    .remove = group_remove,
 };
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceGroupWayland, xfw_workspace_group_wayland, G_TYPE_OBJECT,
@@ -116,7 +114,7 @@ xfw_workspace_group_wayland_init(XfwWorkspaceGroupWayland *group) {
 static void
 xfw_workspace_group_wayland_constructed(GObject *obj) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
-    ext_workspace_group_handle_v1_add_listener(group->priv->handle, &group_listener, group);
+    zcosmic_workspace_group_handle_v1_add_listener(group->priv->handle, &group_listener, group);
 }
 
 static void
@@ -178,7 +176,7 @@ static void
 xfw_workspace_group_wayland_finalize(GObject *obj) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
 
-    ext_workspace_group_handle_v1_destroy(group->priv->handle);
+    zcosmic_workspace_group_handle_v1_destroy(group->priv->handle);
 
     g_list_free(group->priv->workspaces);
     g_list_free(group->priv->monitors);
@@ -233,7 +231,7 @@ static gboolean
 xfw_workspace_group_wayland_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error) {
     XfwWorkspaceGroupWayland *wgroup = XFW_WORKSPACE_GROUP_WAYLAND(group);
     if ((wgroup->priv->capabilities & XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE) != 0) {
-        ext_workspace_group_handle_v1_create_workspace(wgroup->priv->handle, name);
+        zcosmic_workspace_group_handle_v1_create_workspace(wgroup->priv->handle, name);
         return TRUE;
     } else {
         if (error) {
@@ -260,14 +258,17 @@ xfw_workspace_group_wayland_set_layout(XfwWorkspaceGroup *group, gint rows, gint
 }
 
 static void
-group_capabilities(void *data, struct ext_workspace_group_handle_v1 *wl_group, uint32_t wl_capabilities) {
+group_capabilities(void *data, struct zcosmic_workspace_group_handle_v1 *wl_group, struct wl_array *wl_capabilities) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
     XfwWorkspaceGroupCapabilities old_capabilities = group->priv->capabilities;
     XfwWorkspaceGroupCapabilities changed_mask;
     XfwWorkspaceGroupCapabilities new_capabilities = XFW_WORKSPACE_GROUP_CAPABILITIES_NONE;
 
-    if ((wl_capabilities & EXT_WORKSPACE_GROUP_HANDLE_V1_EXT_WORKSPACE_GROUP_CAPABILITIES_V1_CREATE_WORKSPACE) != 0) {
-        new_capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE;
+    enum zcosmic_workspace_group_handle_v1_zcosmic_workspace_group_capabilities_v1 *cap;
+    wl_array_for_each(cap, wl_capabilities) {
+        if ((*cap & ZCOSMIC_WORKSPACE_GROUP_HANDLE_V1_ZCOSMIC_WORKSPACE_GROUP_CAPABILITIES_V1_CREATE_WORKSPACE) != 0) {
+            new_capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE;
+        }
     }
 
     group->priv->capabilities = new_capabilities;
@@ -279,7 +280,7 @@ group_capabilities(void *data, struct ext_workspace_group_handle_v1 *wl_group, u
 }
 
 static void
-group_output_enter(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct wl_output *output) {
+group_output_enter(void *data, struct zcosmic_workspace_group_handle_v1 *wl_group, struct wl_output *output) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
 
     for (GList *l = xfw_screen_get_monitors(group->priv->screen); l != NULL; l = l->next) {
@@ -296,7 +297,7 @@ group_output_enter(void *data, struct ext_workspace_group_handle_v1 *wl_group, s
 }
 
 static void
-group_output_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct wl_output *output) {
+group_output_leave(void *data, struct zcosmic_workspace_group_handle_v1 *wl_group, struct wl_output *output) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
 
     for (GList *l = xfw_screen_get_monitors(group->priv->screen); l != NULL; l = l->next) {
@@ -311,35 +312,39 @@ group_output_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, s
 }
 
 static void
-group_workspace_enter(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct ext_workspace_handle_v1 *wl_workspace) {
-    XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
-    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(wl_proxy_get_user_data((struct wl_proxy *)wl_workspace));
-    if (g_list_find(group->priv->workspaces, workspace) == NULL) {
-        group->priv->workspaces = g_list_append(group->priv->workspaces, workspace);
-        _xfw_workspace_wayland_set_workspace_group(workspace, XFW_WORKSPACE_GROUP(group));
-        g_signal_emit_by_name(group, "workspace-added", workspace);
-    }
-}
+workspace_destroyed(XfwWorkspaceWayland *workspace, XfwWorkspaceGroupWayland *group) {
+    g_signal_handlers_disconnect_by_data(workspace, group);
 
-static void
-group_workspace_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct ext_workspace_handle_v1 *wl_workspace) {
-    XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
-    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(wl_proxy_get_user_data((struct wl_proxy *)wl_workspace));
     GList *link = g_list_find(group->priv->workspaces, workspace);
     if (link != NULL) {
         group->priv->workspaces = g_list_delete_link(group->priv->workspaces, link);
         _xfw_workspace_wayland_set_workspace_group(workspace, NULL);
         g_signal_emit_by_name(group, "workspace-removed", workspace);
     }
+
+    _xfw_workspace_manager_wayland_workspace_removed(XFW_WORKSPACE_MANAGER_WAYLAND(group->priv->workspace_manager),
+                                                     workspace);
+}
+
+
+static void
+group_workspace(void *data, struct zcosmic_workspace_group_handle_v1 *wl_group, struct zcosmic_workspace_handle_v1 *wl_workspace) {
+    XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
+    XfwWorkspaceWayland *workspace = _xfw_workspace_manager_wayland_workspace_added(XFW_WORKSPACE_MANAGER_WAYLAND(group->priv->workspace_manager),
+                                                                                    wl_workspace);
+    g_signal_connect(workspace, "destroyed", G_CALLBACK(workspace_destroyed), group);
+    group->priv->workspaces = g_list_append(group->priv->workspaces, workspace);
+    _xfw_workspace_wayland_set_workspace_group(workspace, XFW_WORKSPACE_GROUP(group));
+    g_signal_emit_by_name(group, "workspace-added", workspace);
 }
 
 static void
-group_removed(void *data, struct ext_workspace_group_handle_v1 *wl_group) {
+group_remove(void *data, struct zcosmic_workspace_group_handle_v1 *wl_group) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
     g_signal_emit(group, group_signals[SIGNAL_DESTROYED], 0);
 }
 
-struct ext_workspace_group_handle_v1 *
+struct zcosmic_workspace_group_handle_v1 *
 _xfw_workspace_group_wayland_get_handle(XfwWorkspaceGroupWayland *group) {
     return group->priv->handle;
 }
