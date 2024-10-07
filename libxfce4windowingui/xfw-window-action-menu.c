@@ -43,7 +43,9 @@ enum {
     PROP_WINDOW,
 };
 
-struct _XfwWindowActionMenuPrivate {
+struct _XfwWindowActionMenu {
+    GtkMenu parent;
+
     XfwWindow *window;
 
     GtkWidget *min_item;
@@ -115,7 +117,7 @@ static void window_capabilities_changed(XfwWindow *window, XfwWindowCapabilities
 static void window_workspace_changed(XfwWindow *window, XfwWindowActionMenu *menu);
 
 
-G_DEFINE_TYPE_WITH_PRIVATE(XfwWindowActionMenu, xfw_window_action_menu, GTK_TYPE_MENU)
+G_DEFINE_TYPE(XfwWindowActionMenu, xfw_window_action_menu, GTK_TYPE_MENU)
 
 
 static void
@@ -143,7 +145,6 @@ xfw_window_action_menu_class_init(XfwWindowActionMenuClass *klass) {
 
 static void
 xfw_window_action_menu_init(XfwWindowActionMenu *menu) {
-    menu->priv = xfw_window_action_menu_get_instance_private(menu);
 }
 
 static void
@@ -194,33 +195,33 @@ create_image_menu_item(const gchar *label_text, const gchar **icon_names) {
 static void
 xfw_window_action_menu_constructed(GObject *obj) {
     XfwWindowActionMenu *menu = XFW_WINDOW_ACTION_MENU(obj);
-    XfwWorkspaceManager *manager = xfw_screen_get_workspace_manager(xfw_window_get_screen(menu->priv->window));
-    XfwWindow *window = menu->priv->window;
+    XfwWorkspaceManager *manager = xfw_screen_get_workspace_manager(xfw_window_get_screen(menu->window));
+    XfwWindow *window = menu->window;
     GtkWidget *item;
     XfwWindowWorkspaceMoveData *mdata;
 
     G_OBJECT_CLASS(xfw_window_action_menu_parent_class)->constructed(obj);
 
-    menu->priv->min_item = item = create_image_menu_item("", minimize_icon_names);
+    menu->min_item = item = create_image_menu_item("", minimize_icon_names);
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_minimize_state), window);
     g_signal_connect(G_OBJECT(item), "notify::scale-factor",
                      G_CALLBACK(update_menu_item_image), minimize_icon_names);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->max_item = item = create_image_menu_item("", maximize_icon_names);
+    menu->max_item = item = create_image_menu_item("", maximize_icon_names);
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_maximize_state), window);
     g_signal_connect(G_OBJECT(item), "notify::scale-factor",
                      G_CALLBACK(update_menu_item_image), maximize_icon_names);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->move_item = item = gtk_menu_item_new_with_mnemonic(_("_Move"));
+    menu->move_item = item = gtk_menu_item_new_with_mnemonic(_("_Move"));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(move_window), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->resize_item = item = gtk_menu_item_new_with_mnemonic(_("_Resize"));
+    menu->resize_item = item = gtk_menu_item_new_with_mnemonic(_("_Resize"));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(resize_window), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -228,67 +229,67 @@ xfw_window_action_menu_constructed(GObject *obj) {
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->above_item = item = gtk_check_menu_item_new_with_mnemonic(_("Always on _Top"));
+    menu->above_item = item = gtk_check_menu_item_new_with_mnemonic(_("Always on _Top"));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_above_state), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->pin_item = item = gtk_radio_menu_item_new_with_mnemonic(NULL, _("_Always on Visible Workspace"));
+    menu->pin_item = item = gtk_radio_menu_item_new_with_mnemonic(NULL, _("_Always on Visible Workspace"));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_pinned_state), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->unpin_item = item = gtk_radio_menu_item_new_with_mnemonic_from_widget(GTK_RADIO_MENU_ITEM(item), _("_Only on This Workspace"));
+    menu->unpin_item = item = gtk_radio_menu_item_new_with_mnemonic_from_widget(GTK_RADIO_MENU_ITEM(item), _("_Only on This Workspace"));
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(toggle_pinned_state), window);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->move_left_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Left"));
+    menu->move_left_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Left"));
     mdata = g_new0(XfwWindowWorkspaceMoveData, 1);
-    mdata->window = menu->priv->window;
+    mdata->window = menu->window;
     mdata->to.direction = XFW_DIRECTION_LEFT;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
                           free_move_data, 0);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->move_right_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace R_ight"));
+    menu->move_right_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace R_ight"));
     mdata = g_new0(XfwWindowWorkspaceMoveData, 1);
-    mdata->window = menu->priv->window;
+    mdata->window = menu->window;
     mdata->to.direction = XFW_DIRECTION_RIGHT;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
                           free_move_data, 0);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->move_up_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Up"));
+    menu->move_up_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Up"));
     mdata = g_new0(XfwWindowWorkspaceMoveData, 1);
-    mdata->window = menu->priv->window;
+    mdata->window = menu->window;
     mdata->to.direction = XFW_DIRECTION_UP;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
                           free_move_data, 0);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->move_down_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Down"));
+    menu->move_down_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Down"));
     mdata = g_new0(XfwWindowWorkspaceMoveData, 1);
-    mdata->window = menu->priv->window;
+    mdata->window = menu->window;
     mdata->to.direction = XFW_DIRECTION_DOWN;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
                           free_move_data, 0);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->move_ws_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Another _Workspace"));
+    menu->move_ws_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Another _Workspace"));
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->move_ws_submenu = gtk_menu_new();
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), menu->priv->move_ws_submenu);
+    menu->move_ws_submenu = gtk_menu_new();
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), menu->move_ws_submenu);
 
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->priv->close_item = item = create_image_menu_item(_("_Close"), close_icon_names);
+    menu->close_item = item = create_image_menu_item(_("_Close"), close_icon_names);
     g_signal_connect(G_OBJECT(item), "activate",
                      G_CALLBACK(close_window), window);
     g_signal_connect(G_OBJECT(item), "notify::scale-factor",
@@ -301,9 +302,9 @@ xfw_window_action_menu_constructed(GObject *obj) {
     g_signal_connect_swapped(manager, "workspace-created", G_CALLBACK(update_move_submenu), menu);
     g_signal_connect_swapped(manager, "workspace-destroyed", G_CALLBACK(update_move_submenu), menu);
 
-    g_signal_connect(menu->priv->window, "state-changed", G_CALLBACK(window_state_changed), menu);
-    g_signal_connect(menu->priv->window, "capabilities-changed", G_CALLBACK(window_capabilities_changed), menu);
-    g_signal_connect(menu->priv->window, "workspace-changed", G_CALLBACK(window_workspace_changed), menu);
+    g_signal_connect(menu->window, "state-changed", G_CALLBACK(window_state_changed), menu);
+    g_signal_connect(menu->window, "capabilities-changed", G_CALLBACK(window_capabilities_changed), menu);
+    g_signal_connect(menu->window, "workspace-changed", G_CALLBACK(window_workspace_changed), menu);
 
     update_menu_items(menu);
 }
@@ -314,7 +315,7 @@ xfw_window_action_menu_set_property(GObject *obj, guint prop_id, const GValue *v
 
     switch (prop_id) {
         case PROP_WINDOW:
-            menu->priv->window = g_object_ref(g_value_get_object(value));
+            menu->window = g_object_ref(g_value_get_object(value));
             break;
 
         default:
@@ -329,7 +330,7 @@ xfw_window_action_menu_get_property(GObject *obj, guint prop_id, GValue *value, 
 
     switch (prop_id) {
         case PROP_WINDOW:
-            g_value_set_object(value, menu->priv->window);
+            g_value_set_object(value, menu->window);
             break;
 
         default:
@@ -342,11 +343,11 @@ static void
 xfw_window_action_menu_dispose(GObject *obj) {
     XfwWindowActionMenu *menu = XFW_WINDOW_ACTION_MENU(obj);
 
-    if (menu->priv->window != NULL) {
-        g_signal_handlers_disconnect_by_func(menu->priv->window, window_state_changed, menu);
-        g_signal_handlers_disconnect_by_func(menu->priv->window, window_capabilities_changed, menu);
-        g_signal_handlers_disconnect_by_func(menu->priv->window, window_workspace_changed, menu);
-        g_clear_object(&menu->priv->window);
+    if (menu->window != NULL) {
+        g_signal_handlers_disconnect_by_func(menu->window, window_state_changed, menu);
+        g_signal_handlers_disconnect_by_func(menu->window, window_capabilities_changed, menu);
+        g_signal_handlers_disconnect_by_func(menu->window, window_workspace_changed, menu);
+        g_clear_object(&menu->window);
     }
 
     G_OBJECT_CLASS(xfw_window_action_menu_parent_class)->dispose(obj);
@@ -431,11 +432,11 @@ set_item_mnemonic(GtkWidget *item, const gchar *text) {
 
 static void
 update_move_submenu(XfwWindowActionMenu *menu) {
-    GtkWidget *submenu = menu->priv->move_ws_submenu, *item;
+    GtkWidget *submenu = menu->move_ws_submenu, *item;
     GList *children;
-    XfwWorkspaceManager *manager = xfw_screen_get_workspace_manager(xfw_window_get_screen(menu->priv->window));
-    XfwWindowCapabilities caps = xfw_window_get_capabilities(menu->priv->window);
-    XfwWorkspace *workspace = xfw_window_get_workspace(menu->priv->window);
+    XfwWorkspaceManager *manager = xfw_screen_get_workspace_manager(xfw_window_get_screen(menu->window));
+    XfwWindowCapabilities caps = xfw_window_get_capabilities(menu->window);
+    XfwWorkspace *workspace = xfw_window_get_workspace(menu->window);
 
     children = gtk_container_get_children(GTK_CONTAINER(submenu));
     for (GList *l = children; l != NULL; l = l->next) {
@@ -453,7 +454,7 @@ update_move_submenu(XfwWindowActionMenu *menu) {
             XfwWorkspace *other_workspace = XFW_WORKSPACE(l->data);
             gchar *label, *free_label = NULL;
             XfwWindowWorkspaceMoveData *mdata = g_new0(XfwWindowWorkspaceMoveData, 1);
-            mdata->window = menu->priv->window;
+            mdata->window = menu->window;
             mdata->to.new_workspace = g_object_ref(other_workspace);
 
             label = (gchar *)xfw_workspace_get_name(other_workspace);
@@ -473,70 +474,70 @@ update_move_submenu(XfwWindowActionMenu *menu) {
             gtk_menu_shell_append(GTK_MENU_SHELL(submenu), item);
         }
 
-        gtk_widget_show(menu->priv->move_ws_item);
-        gtk_widget_show_all(menu->priv->move_ws_submenu);
+        gtk_widget_show(menu->move_ws_item);
+        gtk_widget_show_all(menu->move_ws_submenu);
     } else {
-        gtk_widget_hide(menu->priv->move_ws_item);
+        gtk_widget_hide(menu->move_ws_item);
     }
 }
 
 static void
 update_menu_items(XfwWindowActionMenu *menu) {
-    XfwWindowState state = xfw_window_get_state(menu->priv->window);
-    XfwWindowCapabilities caps = xfw_window_get_capabilities(menu->priv->window);
-    XfwWorkspace *workspace = xfw_window_get_workspace(menu->priv->window);
+    XfwWindowState state = xfw_window_get_state(menu->window);
+    XfwWindowCapabilities caps = xfw_window_get_capabilities(menu->window);
+    XfwWorkspace *workspace = xfw_window_get_workspace(menu->window);
 
-    set_item_mnemonic(menu->priv->min_item, (state & XFW_WINDOW_STATE_MINIMIZED) == 0 ? _("Mi_nimize") : _("Unmi_nimize"));
-    gtk_widget_set_sensitive(menu->priv->min_item,
+    set_item_mnemonic(menu->min_item, (state & XFW_WINDOW_STATE_MINIMIZED) == 0 ? _("Mi_nimize") : _("Unmi_nimize"));
+    gtk_widget_set_sensitive(menu->min_item,
                              ((state & XFW_WINDOW_STATE_MINIMIZED) == 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_MINIMIZE))
                                  || ((state & XFW_WINDOW_STATE_MINIMIZED) != 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_UNMINIMIZE)));
 
-    set_item_mnemonic(menu->priv->max_item, (state & XFW_WINDOW_STATE_MAXIMIZED) == 0 ? _("Ma_ximize") : _("Unma_ximize"));
-    gtk_widget_set_sensitive(menu->priv->max_item,
+    set_item_mnemonic(menu->max_item, (state & XFW_WINDOW_STATE_MAXIMIZED) == 0 ? _("Ma_ximize") : _("Unma_ximize"));
+    gtk_widget_set_sensitive(menu->max_item,
                              ((state & XFW_WINDOW_STATE_MAXIMIZED) == 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_MAXIMIZE))
                                  || ((state & XFW_WINDOW_STATE_MAXIMIZED) != 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_UNMAXIMIZE)));
 
-    gtk_widget_set_sensitive(menu->priv->move_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_MOVE) != 0);
-    gtk_widget_set_sensitive(menu->priv->resize_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_RESIZE) != 0);
+    gtk_widget_set_sensitive(menu->move_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_MOVE) != 0);
+    gtk_widget_set_sensitive(menu->resize_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_RESIZE) != 0);
 
-    g_signal_handlers_block_by_func(menu->priv->above_item, G_CALLBACK(toggle_above_state), menu->priv->window);
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu->priv->above_item), (state & XFW_WINDOW_STATE_ABOVE) != 0);
-    gtk_widget_set_sensitive(menu->priv->above_item,
+    g_signal_handlers_block_by_func(menu->above_item, G_CALLBACK(toggle_above_state), menu->window);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu->above_item), (state & XFW_WINDOW_STATE_ABOVE) != 0);
+    gtk_widget_set_sensitive(menu->above_item,
                              ((state & XFW_WINDOW_STATE_ABOVE) == 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_PLACE_ABOVE))
                                  || ((state & XFW_WINDOW_STATE_ABOVE) != 0 && (caps & XFW_WINDOW_CAPABILITIES_CAN_UNPLACE_ABOVE)));
-    g_signal_handlers_unblock_by_func(menu->priv->above_item, G_CALLBACK(toggle_above_state), menu->priv->window);
+    g_signal_handlers_unblock_by_func(menu->above_item, G_CALLBACK(toggle_above_state), menu->window);
 
-    g_signal_handlers_block_by_func(menu->priv->pin_item, G_CALLBACK(toggle_pinned_state), menu->priv->window);
-    g_signal_handlers_block_by_func(menu->priv->unpin_item, G_CALLBACK(toggle_pinned_state), menu->priv->window);
+    g_signal_handlers_block_by_func(menu->pin_item, G_CALLBACK(toggle_pinned_state), menu->window);
+    g_signal_handlers_block_by_func(menu->unpin_item, G_CALLBACK(toggle_pinned_state), menu->window);
     if ((state & XFW_WINDOW_STATE_PINNED) != 0) {
-        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu->priv->pin_item), TRUE);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu->pin_item), TRUE);
     } else {
-        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu->priv->unpin_item), TRUE);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu->unpin_item), TRUE);
     }
-    gtk_widget_set_sensitive(menu->priv->pin_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0);
-    gtk_widget_set_sensitive(menu->priv->unpin_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0);
-    g_signal_handlers_unblock_by_func(menu->priv->pin_item, G_CALLBACK(toggle_pinned_state), menu->priv->window);
-    g_signal_handlers_unblock_by_func(menu->priv->unpin_item, G_CALLBACK(toggle_pinned_state), menu->priv->window);
+    gtk_widget_set_sensitive(menu->pin_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0);
+    gtk_widget_set_sensitive(menu->unpin_item, (caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0);
+    g_signal_handlers_unblock_by_func(menu->pin_item, G_CALLBACK(toggle_pinned_state), menu->window);
+    g_signal_handlers_unblock_by_func(menu->unpin_item, G_CALLBACK(toggle_pinned_state), menu->window);
 
     if ((caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0 && workspace != NULL && xfw_workspace_get_neighbor(workspace, XFW_DIRECTION_LEFT) != NULL) {
-        gtk_widget_show(menu->priv->move_left_item);
+        gtk_widget_show(menu->move_left_item);
     } else {
-        gtk_widget_hide(menu->priv->move_left_item);
+        gtk_widget_hide(menu->move_left_item);
     }
     if ((caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0 && workspace != NULL && xfw_workspace_get_neighbor(workspace, XFW_DIRECTION_RIGHT) != NULL) {
-        gtk_widget_show(menu->priv->move_right_item);
+        gtk_widget_show(menu->move_right_item);
     } else {
-        gtk_widget_hide(menu->priv->move_right_item);
+        gtk_widget_hide(menu->move_right_item);
     }
     if ((caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0 && workspace != NULL && xfw_workspace_get_neighbor(workspace, XFW_DIRECTION_UP) != NULL) {
-        gtk_widget_show(menu->priv->move_up_item);
+        gtk_widget_show(menu->move_up_item);
     } else {
-        gtk_widget_hide(menu->priv->move_up_item);
+        gtk_widget_hide(menu->move_up_item);
     }
     if ((caps & XFW_WINDOW_CAPABILITIES_CAN_CHANGE_WORKSPACE) != 0 && workspace != NULL && xfw_workspace_get_neighbor(workspace, XFW_DIRECTION_DOWN) != NULL) {
-        gtk_widget_show(menu->priv->move_down_item);
+        gtk_widget_show(menu->move_down_item);
     } else {
-        gtk_widget_hide(menu->priv->move_down_item);
+        gtk_widget_hide(menu->move_down_item);
     }
 
     update_move_submenu(menu);

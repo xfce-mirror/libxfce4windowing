@@ -30,13 +30,6 @@ G_DECLARE_FINAL_TYPE(XfwWindowActionMenu, xfw_window_action_menu, XFW, WINDOW_AC
 
 typedef struct _XfwWindowActionMenuPrivate XfwWindowActionMenuPrivate;
 
-struct _XfwWindowActionMenu {
-    GtkMenu parent;
-
-    /*< private >*/
-    XfwWindowActionMenuPrivate *priv;
-};
-
 GtkWidget *xfw_window_action_menu_new(XfwWindow *window);
 
 G_END_DECLS
