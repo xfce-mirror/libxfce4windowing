@@ -36,6 +36,7 @@
   <part id="libxfce4windowing-widgets">
     <title>Widgets</title>
     <xi:include href="xml/xfw-window-action-menu.xml"/>
+    <xi:include href="xml/xfw-window-list-menu.xml"/>
   </part>
 
   <index id="api-index-full">

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Brian Tarricone <brian@tarricone.org>
+ * Copyright (c) 2024 Brian Tarricone <brian@tarricone.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,15 +17,19 @@
  * MA 02110-1301 USA
  */
 
-#ifndef __LIBXFCE4WINDOWINGUI_H__
-#define __LIBXFCE4WINDOWINGUI_H__
+#ifndef __XFW_WINDOW_LIST_MENU_H__
+#define __XFW_WINDOW_LIST_MENU_H__
 
-#define __LIBXFCE4WINDOWINGUI_H_INSIDE__
+#include <gtk/gtk.h>
+#include <libxfce4windowing/libxfce4windowing.h>
 
-#include <libxfce4windowingui/libxfce4windowingui-config.h>
-#include <libxfce4windowingui/xfw-window-action-menu.h>
-#include <libxfce4windowingui/xfw-window-list-menu.h>
+G_BEGIN_DECLS
 
-#undef __LIBXFCE4WINDOWINGUI_H_INSIDE__
+#define XFW_TYPE_WINDOW_LIST_MENU (xfw_window_list_menu_get_type())
+G_DECLARE_FINAL_TYPE(XfwWindowListMenu, xfw_window_list_menu, XFW, WINDOW_LIST_MENU, GtkMenu)
 
-#endif /* !__LIBXFCE4WINDOWINGUI_H__ */
+GtkWidget *xfw_window_list_menu_new(XfwScreen *screen);
+
+G_END_DECLS
+
+#endif /* __XFW_WINDOW_LIST_MENU_H__ */
