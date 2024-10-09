@@ -1,3 +1,12 @@
+4.19.7 (2024-10-09)
+======
+- Fix missing parent instance in XfwSeatWayland
+- Add XfwWindowListMenu widget
+- Remove the "(constructor)" annotation on xfw_screen_get_default()
+- Fix crash on workspace add/remove after XfwWindowActionMenu destroyed
+- Make XfwWindowAction menu struct private
+
+
 4.19.6 (2024-10-06)
 ======
 - Actually export xfw_screen_get_seats from the library
