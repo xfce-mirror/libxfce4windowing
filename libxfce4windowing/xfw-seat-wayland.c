@@ -27,6 +27,8 @@
 #include "xfw-seat-wayland.h"
 
 struct _XfwSeatWayland {
+    XfwSeat parent;
+
     XfwScreenWayland *screen;
     struct wl_seat *wl_seat;
 };
