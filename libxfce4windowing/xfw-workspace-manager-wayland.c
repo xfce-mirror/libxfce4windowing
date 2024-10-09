@@ -26,7 +26,7 @@
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/cosmic-workspace-unstable-v1-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-screen-private.h"
@@ -42,7 +42,7 @@ enum {
 };
 
 struct _XfwWorkspaceManagerWaylandPrivate {
-    struct ext_workspace_manager_v1 *handle;
+    struct zcosmic_workspace_manager_v1 *handle;
     XfwScreen *screen;
     GList *groups;
     GList *workspaces;
@@ -56,15 +56,13 @@ static void xfw_workspace_manager_wayland_finalize(GObject *obj);
 static GList *xfw_workspace_manager_wayland_list_workspace_groups(XfwWorkspaceManager *manager);
 static GList *xfw_workspace_manager_wayland_list_workspaces(XfwWorkspaceManager *manager);
 
-static void manager_workspace_group(void *data, struct ext_workspace_manager_v1 *manager, struct ext_workspace_group_handle_v1 *group);
-static void manager_workspace(void *data, struct ext_workspace_manager_v1 *manager, struct ext_workspace_handle_v1 *workspace);
-static void manager_done(void *data, struct ext_workspace_manager_v1 *manager);
-static void manager_finished(void *data, struct ext_workspace_manager_v1 *manager);
+static void manager_workspace_group(void *data, struct zcosmic_workspace_manager_v1 *manager, struct zcosmic_workspace_group_handle_v1 *group);
+static void manager_done(void *data, struct zcosmic_workspace_manager_v1 *manager);
+static void manager_finished(void *data, struct zcosmic_workspace_manager_v1 *manager);
 
 
-static const struct ext_workspace_manager_v1_listener manager_listener = {
+static const struct zcosmic_workspace_manager_v1_listener manager_listener = {
     .workspace_group = manager_workspace_group,
-    .workspace = manager_workspace,
     .done = manager_done,
     .finished = manager_finished,
 };
@@ -106,7 +104,7 @@ xfw_workspace_manager_wayland_init(XfwWorkspaceManagerWayland *manager) {
 static void
 xfw_workspace_manager_wayland_constructed(GObject *obj) {
     XfwWorkspaceManagerWayland *manager = XFW_WORKSPACE_MANAGER_WAYLAND(obj);
-    ext_workspace_manager_v1_add_listener(manager->priv->handle, &manager_listener, manager);
+    zcosmic_workspace_manager_v1_add_listener(manager->priv->handle, &manager_listener, manager);
 }
 
 static void
@@ -155,7 +153,7 @@ xfw_workspace_manager_wayland_finalize(GObject *obj) {
     g_list_free_full(priv->workspaces, g_object_unref);
     g_list_free_full(priv->groups, g_object_unref);
 
-    ext_workspace_manager_v1_destroy(priv->handle);
+    zcosmic_workspace_manager_v1_destroy(priv->handle);
 
     G_OBJECT_CLASS(xfw_workspace_manager_wayland_parent_class)->finalize(obj);
 }
@@ -181,7 +179,7 @@ group_destroyed(XfwWorkspaceGroupWayland *group, XfwWorkspaceManagerWayland *man
 }
 
 static void
-manager_workspace_group(void *data, struct ext_workspace_manager_v1 *manager, struct ext_workspace_group_handle_v1 *wl_group) {
+manager_workspace_group(void *data, struct zcosmic_workspace_manager_v1 *manager, struct zcosmic_workspace_group_handle_v1 *wl_group) {
     XfwWorkspaceManagerWayland *wmanager = XFW_WORKSPACE_MANAGER_WAYLAND(data);
     XfwWorkspaceGroupWayland *group = g_object_new(XFW_TYPE_WORKSPACE_GROUP_WAYLAND,
                                                    "screen", wmanager->priv->screen,
@@ -194,12 +192,35 @@ manager_workspace_group(void *data, struct ext_workspace_manager_v1 *manager, st
 }
 
 static void
-workspace_destroyed(XfwWorkspace *workspace, XfwWorkspaceManagerWayland *manager) {
-    GList *cur;
+manager_done(void *data, struct zcosmic_workspace_manager_v1 *manager) {
+}
 
-    g_signal_handlers_disconnect_by_data(workspace, manager);
+static void
+manager_finished(void *data, struct zcosmic_workspace_manager_v1 *manager) {
+}
 
-    cur = g_list_find(manager->priv->workspaces, workspace);
+XfwWorkspaceManager *
+_xfw_workspace_manager_wayland_new(XfwScreenWayland *screen, struct zcosmic_workspace_manager_v1 *manager) {
+    return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_WAYLAND,
+                        "screen", screen,
+                        "wl-manager", manager,
+                        NULL);
+}
+
+XfwWorkspaceWayland *
+_xfw_workspace_manager_wayland_workspace_added(XfwWorkspaceManagerWayland *wmanager, struct zcosmic_workspace_handle_v1 *wl_workspace) {
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_WAYLAND,
+                                                                        "handle", wl_workspace,
+                                                                        NULL));
+    _xfw_workspace_wayland_set_number(workspace, g_list_length(wmanager->priv->workspaces));
+    wmanager->priv->workspaces = g_list_append(wmanager->priv->workspaces, workspace);
+    g_signal_emit_by_name(wmanager, "workspace-created", workspace);
+    return workspace;
+}
+
+void
+_xfw_workspace_manager_wayland_workspace_removed(XfwWorkspaceManagerWayland *manager, XfwWorkspaceWayland *workspace) {
+    GList *cur = g_list_find(manager->priv->workspaces, workspace);
     if (cur != NULL) {
         GList *link = cur;
         cur = cur->next;
@@ -214,32 +235,4 @@ workspace_destroyed(XfwWorkspace *workspace, XfwWorkspaceManagerWayland *manager
 
     g_signal_emit_by_name(manager, "workspace-destroyed", workspace);
     g_object_unref(workspace);
-}
-
-static void
-manager_workspace(void *data, struct ext_workspace_manager_v1 *manager, struct ext_workspace_handle_v1 *wl_workspace) {
-    XfwWorkspaceManagerWayland *wmanager = XFW_WORKSPACE_MANAGER_WAYLAND(data);
-    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_WAYLAND,
-                                                                        "handle", wl_workspace,
-                                                                        NULL));
-    _xfw_workspace_wayland_set_number(workspace, g_list_length(wmanager->priv->workspaces));
-    wmanager->priv->workspaces = g_list_append(wmanager->priv->workspaces, workspace);
-    g_signal_connect(workspace, "destroyed", G_CALLBACK(workspace_destroyed), manager);
-    g_signal_emit_by_name(manager, "workspace-created", workspace);
-}
-
-static void
-manager_done(void *data, struct ext_workspace_manager_v1 *manager) {
-}
-
-static void
-manager_finished(void *data, struct ext_workspace_manager_v1 *manager) {
-}
-
-XfwWorkspaceManager *
-_xfw_workspace_manager_wayland_new(XfwScreenWayland *screen, struct ext_workspace_manager_v1 *manager) {
-    return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_WAYLAND,
-                        "screen", screen,
-                        "wl-manager", manager,
-                        NULL);
 }
