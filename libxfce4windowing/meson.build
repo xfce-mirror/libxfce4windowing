@@ -20,23 +20,24 @@ endif
 
 windowing_public_sources = [
   'libxfce4windowing-config.c',
-  'libxfce4windowing-private.c',
   'xfw-application.c',
-  'xfw-gdk-private.c',
   'xfw-monitor.c',
   'xfw-screen.c',
   'xfw-seat.c',
   'xfw-util.c',
   'xfw-window.c',
-  'xfw-workspace-dummy.c',
-  'xfw-workspace-group-dummy.c',
   'xfw-workspace-group.c',
-  'xfw-workspace-manager-dummy.c',
   'xfw-workspace-manager.c',
   'xfw-workspace.c',
 ]
 
-windowing_sources = []
+windowing_sources = [
+  'libxfce4windowing-private.c',
+  'xfw-gdk-private.c',
+  'xfw-workspace-dummy.c',
+  'xfw-workspace-group-dummy.c',
+  'xfw-workspace-manager-dummy.c',
+]
 windowing_sources += windowing_public_sources
 
 windowing_sources += gnome.genmarshal(
