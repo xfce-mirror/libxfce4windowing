@@ -25,7 +25,7 @@
 #include <string.h>
 #include <wayland-client.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/cosmic-workspace-unstable-v1-client.h"
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 #include "protocols/xdg-output-unstable-v1-client.h"
 
@@ -153,7 +153,7 @@ xfw_screen_wayland_constructed(GObject *obj) {
     }
 
     if (xfw_screen_get_workspace_manager(XFW_SCREEN(screen)) == NULL) {
-        g_message("Your compositor does not support the ext_workspace_manager_v1 protocol");
+        g_message("Your compositor does not support the zcosmic_workspace_manager_v1 protocol");
         _xfw_screen_set_workspace_manager(XFW_SCREEN(screen), _xfw_workspace_manager_dummy_new(screen));
     }
 }
@@ -320,15 +320,15 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
         XfwSeatWayland *seat = _xfw_seat_wayland_new(XFW_SCREEN(wscreen), wl_seat);
         wscreen->pending_seats = g_list_prepend(wscreen->pending_seats, seat);
         add_async_roundtrip(wscreen);
-    } else if (strcmp(ext_workspace_manager_v1_interface.name, interface) == 0) {
+    } else if (strcmp(zcosmic_workspace_manager_v1_interface.name, interface) == 0) {
         XfwScreen *screen = XFW_SCREEN(wscreen);
         if (xfw_screen_get_workspace_manager(screen) != NULL) {
-            g_message("Already have a workspace manager, but got a new ext_workspace_manager_v1 global");
+            g_message("Already have a workspace manager, but got a new zcosmic_workspace_manager_v1 global");
         } else {
-            struct ext_workspace_manager_v1 *wl_workspace_manager = wl_registry_bind(registry,
-                                                                                     id,
-                                                                                     &ext_workspace_manager_v1_interface,
-                                                                                     MIN((uint32_t)ext_workspace_manager_v1_interface.version, version));
+            struct zcosmic_workspace_manager_v1 *wl_workspace_manager = wl_registry_bind(registry,
+                                                                                         id,
+                                                                                         &zcosmic_workspace_manager_v1_interface,
+                                                                                         MIN((uint32_t)zcosmic_workspace_manager_v1_interface.version, version));
             _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_wayland_new(wscreen, wl_workspace_manager));
             add_async_roundtrip(wscreen);
         }
