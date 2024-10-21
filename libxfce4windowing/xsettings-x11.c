@@ -39,7 +39,6 @@ struct _XSettingsX11 {
     GdkDisplay *display;
     GdkWindow *rootwin;
     Atom manager_atom;
-    Window win;
     GdkWindow *gdkwin;
 
     gint scale;
@@ -130,7 +129,7 @@ update_scale_xsetting(XSettingsX11 *xsettings) {
 
     gdk_x11_display_error_trap_push(xsettings->display);
     int ret = XGetWindowProperty(dpy,
-                                 xsettings->win,
+                                 gdk_x11_window_get_xid(xsettings->gdkwin),
                                  xsettings_atom,
                                  0,
                                  LONG_MAX,
@@ -238,19 +237,19 @@ update_scale_xsetting(XSettingsX11 *xsettings) {
 
 static GdkFilterReturn
 xsettings_window_filter(GdkXEvent *gdkxevent, GdkEvent *event, gpointer data) {
+    XSettingsX11 *xsettings = data;
     XEvent *xevent = (XEvent *)gdkxevent;
 
-    if (xevent->type == DestroyNotify) {
-        XSettingsX11 *xsettings = data;
-        gdk_window_remove_filter(xsettings->gdkwin, xsettings_window_filter, xsettings);
-        g_clear_object(&xsettings->gdkwin);
-        xsettings->win = None;
-    } else if (xevent->type == PropertyNotify
-               && xevent->xproperty.atom == XInternAtom(xevent->xproperty.display, "_XSETTINGS_SETTINGS", False))
-    {
-        XSettingsX11 *xsettings = data;
-        if (update_scale_xsetting(xsettings)) {
-            xsettings->scale_factor_changed_func(xsettings->scale, xsettings->user_data);
+    if (xevent->xany.window == gdk_x11_window_get_xid(xsettings->gdkwin)) {
+        if (xevent->type == DestroyNotify) {
+            gdk_window_remove_filter(NULL, xsettings_window_filter, xsettings);
+            g_clear_object(&xsettings->gdkwin);
+        } else if (xevent->type == PropertyNotify
+                   && xevent->xproperty.atom == XInternAtom(xevent->xproperty.display, "_XSETTINGS_SETTINGS", False))
+        {
+            if (update_scale_xsetting(xsettings)) {
+                xsettings->scale_factor_changed_func(xsettings->scale, xsettings->user_data);
+            }
         }
     }
 
@@ -259,34 +258,42 @@ xsettings_window_filter(GdkXEvent *gdkxevent, GdkEvent *event, gpointer data) {
 
 static void
 get_manager_selection(XSettingsX11 *xsettings, gboolean do_notify) {
-    gboolean needs_notify = FALSE;
-
     if (xsettings->gdkwin != NULL) {
-        gdk_window_remove_filter(xsettings->gdkwin, xsettings_window_filter, xsettings);
+        gdk_window_remove_filter(NULL, xsettings_window_filter, xsettings);
         g_clear_object(&xsettings->gdkwin);
     }
-    xsettings->win = None;
+    gdk_x11_display_error_trap_push(xsettings->display);
+    gdk_x11_display_grab(xsettings->display);
 
     Display *dpy = gdk_x11_display_get_xdisplay(xsettings->display);
-    gdk_x11_display_error_trap_push(xsettings->display);
-    XGrabServer(dpy);
-
-    xsettings->win = XGetSelectionOwner(dpy, xsettings->manager_atom);
-    if (xsettings->win != None) {
-        XSelectInput(dpy, xsettings->win, StructureNotifyMask | PropertyChangeMask);
-
-        xsettings->gdkwin = gdk_x11_window_foreign_new_for_display(xsettings->display, xsettings->win);
+    Window win = XGetSelectionOwner(dpy, xsettings->manager_atom);
+    if (win != None) {
+        xsettings->gdkwin = gdk_x11_window_foreign_new_for_display(xsettings->display, win);
         if (xsettings->gdkwin == NULL) {
             g_message("Failed to wrap XSETTINGS window");
         } else {
-            gdk_window_add_filter(xsettings->gdkwin, xsettings_window_filter, xsettings);
+            XSelectInput(dpy, gdk_x11_window_get_xid(xsettings->gdkwin), StructureNotifyMask | PropertyChangeMask);
         }
-
-        needs_notify = update_scale_xsetting(xsettings);
     }
 
-    XUngrabServer(dpy);
-    gdk_x11_display_error_trap_pop_ignored(xsettings->display);
+    gdk_x11_display_ungrab(xsettings->display);
+    gdk_display_flush(xsettings->display);
+    if (gdk_x11_display_error_trap_pop(xsettings->display) != 0) {
+        g_message("Errors encountered while finding XSETTINGS manager");
+    }
+
+    gboolean needs_notify;
+    if (xsettings->gdkwin != NULL) {
+        // GDK annoyingly returns GDK_FILTER_REMOVE when it sees PropertyNotify
+        // on the XSETTINGS window, which causes us to never see changes.  What
+        // we can do instead is add a "global" filter that gets called for all
+        // events, regardless of window.  These filters get called before the
+        // per-window filters.
+        gdk_window_add_filter(NULL, xsettings_window_filter, xsettings);
+        needs_notify = update_scale_xsetting(xsettings);
+    } else {
+        needs_notify = FALSE;
+    }
 
     if (needs_notify && do_notify) {
         xsettings->scale_factor_changed_func(xsettings->scale, xsettings->user_data);
@@ -299,6 +306,7 @@ rootwin_filter(GdkXEvent *gdkxevent, GdkEvent *event, gpointer data) {
     XEvent *xevent = (XEvent *)gdkxevent;
 
     if (xevent->type == ClientMessage
+        && xevent->xclient.window == gdk_x11_window_get_xid(xsettings->rootwin)
         && xevent->xclient.message_type == XInternAtom(xevent->xclient.display, "MANAGER", False)
         && xevent->xclient.format == 32
         && (Atom)xevent->xclient.data.l[1] == xsettings->manager_atom)
@@ -322,7 +330,7 @@ _xsettings_x11_new(GdkScreen *gscreen, ScaleFactorChangedFunc scale_factor_chang
     xsettings->rootwin = gdk_screen_get_root_window(gscreen);
     Window xrootwin = gdk_x11_window_get_xid(xsettings->rootwin);
 
-    int screen_num = XScreenNumberOfScreen(DefaultScreenOfDisplay(dpy));
+    int screen_num = gdk_x11_screen_get_screen_number(gscreen);
     gchar *xsettings_manager_atom_name = g_strdup_printf("_XSETTINGS_S%d", screen_num);
     xsettings->manager_atom = XInternAtom(dpy, xsettings_manager_atom_name, False);
     g_free(xsettings_manager_atom_name);
@@ -333,7 +341,12 @@ _xsettings_x11_new(GdkScreen *gscreen, ScaleFactorChangedFunc scale_factor_chang
     XSelectInput(dpy, xrootwin, attrs.your_event_mask | StructureNotifyMask);
     gdk_x11_display_error_trap_pop_ignored(xsettings->display);
 
-    gdk_window_add_filter(xsettings->rootwin, rootwin_filter, xsettings);
+    // GDK annoyingly returns GDK_FILTER_REMOVE when it sees the ClientMessage
+    // for the XSETTINGS manager, which causes us to never see changes.  What
+    // we can do instead is add a "global" filter that gets called for all
+    // events, regardless of window.  These filters get called before the
+    // per-window filters.
+    gdk_window_add_filter(NULL, rootwin_filter, xsettings);
 
     get_manager_selection(xsettings, FALSE);
 
@@ -348,11 +361,11 @@ _xsettings_x11_get_scale(XSettingsX11 *xsettings) {
 void
 _xsettings_x11_destroy(XSettingsX11 *xsettings) {
     if (xsettings->gdkwin != NULL) {
-        gdk_window_remove_filter(xsettings->gdkwin, xsettings_window_filter, xsettings);
+        gdk_window_remove_filter(NULL, xsettings_window_filter, xsettings);
         g_object_unref(xsettings->gdkwin);
     }
 
-    gdk_window_remove_filter(xsettings->rootwin, rootwin_filter, xsettings);
+    gdk_window_remove_filter(NULL, rootwin_filter, xsettings);
 
     g_free(xsettings);
 }
