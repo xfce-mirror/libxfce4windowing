@@ -1,3 +1,9 @@
+4.19.8 (2024-10-22)
+======
+- Clean up xsettings client & work around GDK swallowing events
+- Remove private sources from the public sources list
+
+
 4.19.7 (2024-10-09)
 ======
 - Fix missing parent instance in XfwSeatWayland
