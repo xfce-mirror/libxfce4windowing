@@ -399,6 +399,7 @@ static void
 xfw_screen_finalize(GObject *object) {
     XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(object);
 
+    g_list_free_full(priv->seats, g_object_unref);
     g_list_free_full(priv->monitors, g_object_unref);
 
     g_object_unref(priv->workspace_manager);
