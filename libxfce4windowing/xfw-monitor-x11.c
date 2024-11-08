@@ -307,7 +307,7 @@ steal_monitor_by_connector(GList **monitors, const char *connector) {
     for (GList *l = *monitors; l != NULL; l = l->next) {
         XfwMonitor *monitor = XFW_MONITOR(l->data);
         if (g_strcmp0(connector, xfw_monitor_get_connector(monitor)) == 0) {
-            *monitors = g_list_remove_link(*monitors, l);
+            *monitors = g_list_delete_link(*monitors, l);
             return monitor;
         }
     }
