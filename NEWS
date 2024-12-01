@@ -1,3 +1,10 @@
+4.19.10 (2024-12-01)
+=======
+- I18n: Update po/LINGUAS list
+- Fix XfwMonitor leak in steal_monitor_by_connector
+- Translation Updates:
+  Czech, Galician
+
 4.19.9 (2024-11-01)
 ======
 - Fix leak of seats GList
