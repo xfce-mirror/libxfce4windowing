@@ -26,7 +26,7 @@
 
 #include <glib-object.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/cosmic-workspace-unstable-v1-client.h"
 
 #include "xfw-workspace-group.h"
 
@@ -43,7 +43,7 @@ struct _XfwWorkspaceWayland {
     XfwWorkspaceWaylandPrivate *priv;
 };
 
-struct ext_workspace_handle_v1 *_xfw_workspace_wayland_get_handle(XfwWorkspaceWayland *workspace);
+struct zcosmic_workspace_handle_v1 *_xfw_workspace_wayland_get_handle(XfwWorkspaceWayland *workspace);
 void _xfw_workspace_wayland_set_number(XfwWorkspaceWayland *workspace, guint number);
 void _xfw_workspace_wayland_set_workspace_group(XfwWorkspaceWayland *workspace, XfwWorkspaceGroup *group);
 

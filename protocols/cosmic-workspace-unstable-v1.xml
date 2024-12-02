@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<protocol name="ext_workspace_v1">
+<protocol name="cosmic_workspace_unstable_v1">
   <copyright>
     Copyright © 2019 Christopher Billington
     Copyright © 2020 Ilia Bozhinov
@@ -27,7 +27,7 @@
     THIS SOFTWARE.
   </copyright>
 
-  <interface name="ext_workspace_manager_v1" version="1">
+  <interface name="zcosmic_workspace_manager_v1" version="1">
     <description summary="list and control workspaces">
       Workspaces, also called virtual desktops, are groups of surfaces. A
       compositor with a concept of workspaces may only show some such groups of
@@ -46,7 +46,7 @@
       docks by providing them with a list of workspaces and their properties,
       and allowing them to activate and deactivate workspaces.
 
-      After a client binds the ext_workspace_manager_v1, each workspace will be
+      After a client binds the zcosmic_workspace_manager_v1, each workspace will be
       sent via the workspace event.
     </description>
 
@@ -54,27 +54,13 @@
       <description summary="a workspace group has been created">
         This event is emitted whenever a new workspace group has been created.
 
-        All initial details of the workspace group (outputs) will be
+        All initial details of the workspace group (workspaces, outputs) will be
         sent immediately after this event via the corresponding events in
-        ext_workspace_group_handle_v1 and ext_workspace_handle_v1.
+        zcosmic_workspace_group_handle_v1.
       </description>
-      <arg name="workspace_group" type="new_id" interface="ext_workspace_group_handle_v1"/>
+      <arg name="workspace_group" type="new_id" interface="zcosmic_workspace_group_handle_v1"/>
     </event>
 
-
-    <event name="workspace">
-      <description summary="workspace has been created">
-        This event is emitted whenever a new workspace has been created.
-
-        All initial details of the workspace (name, coordinates, state) will
-        be sent immediately after this event via the corresponding events in
-        ext_workspace_handle_v1.
-
-        Workspaces start off unassigned to any workspace group.
-      </description>
-      <arg name="workspace" type="new_id" interface="ext_workspace_handle_v1"/>
-    </event>
-  
     <request name="commit">
       <description summary="all requests about the workspaces have been sent">
         The client must send this request after it has finished sending other
@@ -83,22 +69,22 @@
 
         This allows changes to the workspace properties to be seen as atomic,
         even if they happen via multiple events, and even if they involve
-        multiple ext_workspace_handle_v1 objects, for example, deactivating one
+        multiple zcosmic_workspace_handle_v1 objects, for example, deactivating one
         workspace and activating another.
       </description>
     </request>
 
     <event name="done">
-      <description summary="all information about the workspaces and workspace groups has been sent">
-        This event is sent after all changes in all workspaces and workspace groups have been
+      <description summary="all information about the workspace groups has been sent">
+        This event is sent after all changes in all workspace groups have been
         sent.
 
-        This allows changes to one or more ext_workspace_group_handle_v1
-        properties and ext_workspace_handle_v1 properties
-        to be seen as atomic, even if they happen via multiple events.
+        This allows changes to one or more zcosmic_workspace_group_handle_v1
+        properties and zcosmic_workspace_handle_v1 properties to be seen as atomic,
+        even if they happen via multiple events.
         In particular, an output moving from one workspace group to
         another sends an output_enter event and an output_leave event to the two
-        ext_workspace_group_handle_v1 objects in question. The compositor sends
+        zcosmic_workspace_group_handle_v1 objects in question. The compositor sends
         the done event only after updating the output information in both
         workspace groups.
       </description>
@@ -107,7 +93,7 @@
     <event name="finished">
       <description summary="the compositor has finished with the workspace_manager">
         This event indicates that the compositor is done sending events to the
-        ext_workspace_manager_v1. The server will destroy the object
+        zcosmic_workspace_manager_v1. The server will destroy the object
         immediately after sending this request, so it will become invalid and
         the client should free any resources associated with it.
       </description>
@@ -117,17 +103,16 @@
       <description summary="stop sending events">
         Indicates the client no longer wishes to receive events for new
         workspace groups. However the compositor may emit further workspace
-        events, until the finished event is emitted. The compositor is expected
-        to send the finished event eventually once the stop request has been processed.
+        events, until the finished event is emitted.
 
         The client must not send any more requests after this one.
       </description>
     </request>
   </interface>
 
-  <interface name="ext_workspace_group_handle_v1" version="1">
+  <interface name="zcosmic_workspace_group_handle_v1" version="1">
     <description summary="a workspace group assigned to a set of outputs">
-      A ext_workspace_group_handle_v1 object represents a workspace group
+      A zcosmic_workspace_group_handle_v1 object represents a a workspace group
       that is assigned a set of outputs and contains a number of workspaces.
 
       The set of outputs assigned to the workspace group is conveyed to the client via
@@ -140,7 +125,7 @@
       outputs.
     </description>
 
-    <enum name="ext_workspace_group_capabilities_v1" bitfield="true">
+    <enum name="zcosmic_workspace_group_capabilities_v1">
       <entry name="create_workspace" value="1" summary="create_workspace request is available"/>
     </enum>
 
@@ -157,10 +142,13 @@
         create_workspace requests.
 
         Compositors must send this event once after creation of an
-        ext_workspace_group_handle_v1 . When the capabilities change, compositors
+        zcosmic_workspace_group_handle_v1 . When the capabilities change, compositors
         must send this event again.
+
+        The capabilities are sent as an array of 32-bit unsigned integers in
+        native endianness.
       </description>
-      <arg name="capabilities" type="uint" summary="capabilities" enum="ext_workspace_group_capabilities_v1"/>
+      <arg name="capabilities" type="array" summary="array of 32-bit capabilities"/>
     </event>
 
     <event name="output_enter">
@@ -179,37 +167,34 @@
       <arg name="output" type="object" interface="wl_output"/>
     </event>
 
-    <event name="workspace_enter">
+    <event name="workspace">
       <description summary="workspace added to workspace group">
-        This event is emitted whenever a workspace is assigned to this group.
-        A workspace may only ever be assigned to a single group at a single point
-        in time, but can be re-assigned during it's lifetime.
+        This event is emitted whenever a new workspace has been created.
+        A workspace can only be a member of a single workspace group and cannot
+        be re-assigned.
+
+        All initial details of the workspace (name, coordinates, state) will
+        be sent immediately after this event via the corresponding events in
+        zcosmic_workspace_handle_v1.
       </description>
-      <arg name="workspace" type="object" interface="ext_workspace_handle_v1"/>
+      <arg name="workspace" type="new_id" interface="zcosmic_workspace_handle_v1"/>
     </event>
 
-    <event name="workspace_leave">
-      <description summary="workspace removed from workspace group">
-        This event is emitted whenever a workspace is remove from this group.
-      </description>
-      <arg name="workspace" type="object" interface="ext_workspace_handle_v1"/>
-    </event>
-    <event name="removed">
+    <event name="remove">
       <description summary="this workspace group has been destroyed">
-        This event means the ext_workspace_group_handle_v1 has been destroyed.
+        This event means the zcosmic_workspace_group_handle_v1 has been destroyed.
         It is guaranteed there won't be any more events for this
-        ext_workspace_group_handle_v1. The ext_workspace_group_handle_v1 becomes
+        zcosmic_workspace_group_handle_v1. The zext_workspace_group_handle_v1 becomes
         inert so any requests will be ignored except the destroy request.
 
         The compositor must remove all workspaces belonging to a workspace group
-        via a workspace_leave event before removing the workspace group.
+        before removing the workspace group.
       </description>
     </event>
 
     <request name="create_workspace">
       <description summary="create a new workspace">
-        Request that the compositor create a new workspace with the given name
-        and assign it to this group.
+        Request that the compositor create a new workspace with the given name.
 
         There is no guarantee that the compositor will create a new workspace,
         or that the created workspace will have the provided name.
@@ -218,19 +203,19 @@
     </request>
 
     <request name="destroy" type="destructor">
-      <description summary="destroy the ext_workspace_group_handle_v1 object">
-        Destroys the ext_workspace_group_handle_v1 object.
+      <description summary="destroy the zcosmic_workspace_group_handle_v1 object">
+        Destroys the zcosmic_workspace_group_handle_v1 object.
 
         This request should be called either when the client does not want to
-        use the workspace group object any more or after the removed event to finalize
+        use the workspace object any more or after the remove event to finalize
         the destruction of the object.
       </description>
     </request>
   </interface>
 
-  <interface name="ext_workspace_handle_v1" version="1">
+  <interface name="zcosmic_workspace_handle_v1" version="1">
     <description summary="a workspace handing a group of surfaces">
-      A ext_workspace_handle_v1 object represents a workspace that handles a
+      A zcosmic_workspace_handle_v1 object represents a a workspace that handles a
       group of surfaces.
 
       Each workspace has a name, conveyed to the client with the name event; a
@@ -247,7 +232,7 @@
 
     <event name="name">
       <description summary="workspace name changed">
-        This event is emitted immediately after the ext_workspace_handle_v1 is
+        This event is emitted immediately after the zcosmic_workspace_handle_v1 is
         created and whenever the name of the workspace changes.
       </description>
       <arg name="name" type="string"/>
@@ -257,7 +242,7 @@
       <description summary="workspace coordinates changed">
         This event is used to organize workspaces into an N-dimensional grid
         within a workspace group, and if supported, is emitted immediately after
-        the ext_workspace_handle_v1 is created and whenever the coordinates of
+        the zcosmic_workspace_handle_v1 is created and whenever the coordinates of
         the workspace change. Compositors may not send this event if they do not
         conceptually arrange workspaces in this way. If compositors simply
         number workspaces, without any geometric interpretation, they may send
@@ -279,24 +264,21 @@
 
     <event name="state">
       <description summary="the state of the workspace changed">
-        This event is emitted immediately after the ext_workspace_handle_v1 is
+        This event is emitted immediately after the zcosmic_workspace_handle_v1 is
         created and each time the workspace state changes, either because of a
         compositor action or because of a request in this protocol.
-
-        Missing states convey the opposite meaning, e.g. an unset active bit
-        the workspace is currently inactive.
       </description>
-      <arg name="state" type="uint" enum="state"/>
+      <arg name="state" type="array"/>
     </event>
 
-    <enum name="state" bitfield="true">
+    <enum name="state">
       <description summary="types of states on the workspace">
         The different states that a workspace can have.
       </description>
 
-      <entry name="active" value="1" summary="the workspace is active"/>
-      <entry name="urgent" value="2" summary="the workspace requests attention"/>
-      <entry name="hidden" value="4">
+      <entry name="active" value="0" summary="the workspace is active"/>
+      <entry name="urgent" value="1" summary="the workspace requests attention"/>
+      <entry name="hidden" value="2">
         <description summary="the workspace is not visible">
           The workspace is not visible in its workspace group, and clients
           attempting to visualize the compositor workspace state should not
@@ -305,11 +287,10 @@
       </entry>
     </enum>
 
-   <enum name="ext_workspace_capabilities_v1" bitfield="true">
+    <enum name="zcosmic_workspace_capabilities_v1">
       <entry name="activate" value="1" summary="activate request is available"/>
       <entry name="deactivate" value="2" summary="deactivate request is available"/>
-      <entry name="remove" value="4" summary="remove request is available"/>
-      <entry name="assign" value="8" summary="assign request is available"/>
+      <entry name="remove" value="3" summary="remove request is available"/>
     </enum>
 
     <event name="capabilities">
@@ -325,24 +306,27 @@
         remove requests.
 
         Compositors must send this event once after creation of an
-        ext_workspace_handle_v1 . When the capabilities change, compositors
+        zcosmic_workspace_handle_v1 . When the capabilities change, compositors
         must send this event again.
+
+        The capabilities are sent as an array of 32-bit unsigned integers in
+        native endianness.
       </description>
-      <arg name="capabilities" type="uint" summary="capabilities" enum="ext_workspace_capabilities_v1"/>
+      <arg name="capabilities" type="array" summary="array of 32-bit capabilities"/>
     </event>
 
-    <event name="removed">
+    <event name="remove">
       <description summary="this workspace has been destroyed">
-        This event means the ext_workspace_handle_v1 has been destroyed. It is
+        This event means the zcosmic_workspace_handle_v1 has been destroyed. It is
         guaranteed there won't be any more events for this
-        ext_workspace_handle_v1. The ext_workspace_handle_v1 becomes inert so
+        zcosmic_workspace_handle_v1. The zext_workspace_handle_v1 becomes inert so
         any requests will be ignored except the destroy request.
       </description>
     </event>
 
     <request name="destroy" type="destructor">
-      <description summary="destroy the ext_workspace_handle_v1 object">
-        Destroys the ext_workspace_handle_v1 object.
+      <description summary="destroy the zcosmic_workspace_handle_v1 object">
+        Destroys the zcosmic_workspace_handle_v1 object.
 
         This request should be called either when the client does not want to
         use the workspace object any more or after the remove event to finalize
@@ -367,15 +351,6 @@
 
         There is no guarantee the workspace will be actually deactivated.
       </description>
-    </request>
-
-    <request name="assign">
-      <description summary="assign workspace to group">
-        Requests that this workspace is assigned to the given workspace group.
-
-        There is no guarantee the workspace will be assigned.
-      </description>
-      <arg name="workspace_group" type="object" interface="ext_workspace_group_handle_v1"/>
     </request>
 
     <request name="remove">

@@ -4,8 +4,8 @@ noinst_LTLIBRARIES = \
 	libwayland-protocols.la
 
 libwayland_protocols_built_sources = \
-	ext-workspace-v1-20230427.c \
-	ext-workspace-v1-20230427-client.h \
+	cosmic-workspace-unstable-v1.c \
+	cosmic-workspace-unstable-v1-client.h \
 	wlr-foreign-toplevel-management-unstable-v1.c \
 	wlr-foreign-toplevel-management-unstable-v1-client.h \
 	xdg-output-unstable-v1.c \
@@ -51,7 +51,7 @@ BUILT_SOURCES = \
 endif
 
 EXTRA_DIST = \
-	ext-workspace-v1-20230427.xml \
+	cosmic-workspace-unstable-v1.xml \
 	meson.build \
 	wlr-protocols/unstable/wlr-foreign-toplevel-management-unstable-v1.xml
 
