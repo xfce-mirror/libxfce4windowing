@@ -23,7 +23,7 @@ msgstr ""
 
 #: libxfce4windowing/xfw-wnck-icon.c:257
 msgid "The provided window does not have a _NET_WM_ICON or WMHints icon"
-msgstr ""
+msgstr "Az ellátott ablak nem tartalmaz _NET_WM_ICON vagy WMHints ikont"
 
 #: libxfce4windowing/xfw-wnck-icon.c:630
 msgid "Failed to find or load an icon for the window"
@@ -55,19 +55,19 @@ msgstr "_Csak ezen a munkaasztalon"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:244
 msgid "Move to Workspace _Left"
-msgstr ""
+msgstr "Mozgatás a munkaasztalon _Balra"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:253
 msgid "Move to Workspace R_ight"
-msgstr ""
+msgstr "Mozgatás a munkaasztalon J_obra"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:262
 msgid "Move to Workspace _Up"
-msgstr ""
+msgstr "Mozgatás a munkaasztalon _Fel"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:271
 msgid "Move to Workspace _Down"
-msgstr ""
+msgstr "Mozgatás a munkaasztalon _Le"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:280
 msgid "Move to Another _Workspace"
@@ -88,12 +88,12 @@ msgstr "Ki_csinyités"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Unmi_nimize"
-msgstr ""
+msgstr "Mini_manizálás"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:495
 msgid "Ma_ximize"
-msgstr ""
+msgstr "Max_imalizálás"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:495
 msgid "Unma_ximize"
-msgstr ""
+msgstr "Max_imalizálás"
