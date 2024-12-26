@@ -26,7 +26,7 @@
 
 #include <gdk/gdk.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/ext-workspace-v1-client.h"
 
 #include "xfw-screen-wayland.h"
 #include "xfw-workspace-manager.h"

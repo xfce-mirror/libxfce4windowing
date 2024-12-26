@@ -26,7 +26,7 @@
 
 #include <glib-object.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/ext-workspace-v1-client.h"
 
 #include "xfw-workspace-group.h"
 
