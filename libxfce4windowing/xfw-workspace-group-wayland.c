@@ -42,6 +42,11 @@ enum {
     N_SIGNALS,
 };
 
+enum {
+    PROP0,
+    PROP_HANDLE,
+};
+
 struct _XfwWorkspaceGroupWaylandPrivate {
     XfwScreen *screen;
     XfwWorkspaceManager *workspace_manager;
@@ -86,6 +91,7 @@ static const struct ext_workspace_group_handle_v1_listener group_listener = {
 };
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceGroupWayland, xfw_workspace_group_wayland, G_TYPE_OBJECT,
+                        G_ADD_PRIVATE(XfwWorkspaceGroupWayland)
                         G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_GROUP,
                                               xfw_workspace_group_wayland_workspace_group_init))
 
@@ -105,6 +111,12 @@ xfw_workspace_group_wayland_class_init(XfwWorkspaceGroupWaylandClass *klass) {
                                                    g_cclosure_marshal_VOID__VOID,
                                                    G_TYPE_NONE, 0);
 
+    g_object_class_install_property(gklass,
+                                    PROP_HANDLE,
+                                    g_param_spec_pointer("handle",
+                                                         "handle",
+                                                         "handle",
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
     _xfw_workspace_group_install_properties(gklass);
 }
 
@@ -124,6 +136,10 @@ xfw_workspace_group_wayland_set_property(GObject *obj, guint prop_id, const GVal
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
 
     switch (prop_id) {
+        case PROP_HANDLE:
+            group->priv->handle = g_value_get_pointer(value);
+            break;
+
         case WORKSPACE_GROUP_PROP_SCREEN:
             group->priv->screen = g_value_get_object(value);
             break;
@@ -148,6 +164,10 @@ xfw_workspace_group_wayland_get_property(GObject *obj, guint prop_id, GValue *va
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
 
     switch (prop_id) {
+        case PROP_HANDLE:
+            g_value_set_pointer(value, group->priv->handle);
+            break;
+
         case WORKSPACE_GROUP_PROP_SCREEN:
             g_value_set_object(value, group->priv->screen);
             break;
