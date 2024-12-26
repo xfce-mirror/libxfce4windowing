@@ -26,7 +26,7 @@
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/ext-workspace-v1-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-screen-private.h"

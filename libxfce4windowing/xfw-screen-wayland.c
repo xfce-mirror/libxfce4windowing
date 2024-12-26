@@ -25,7 +25,7 @@
 #include <string.h>
 #include <wayland-client.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/ext-workspace-v1-client.h"
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 #include "protocols/xdg-output-unstable-v1-client.h"
 

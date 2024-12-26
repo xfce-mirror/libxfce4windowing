@@ -23,7 +23,7 @@
 
 #include <limits.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/ext-workspace-v1-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
@@ -424,13 +424,13 @@ workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, uint32
 }
 
 static const struct {
-    enum ext_workspace_handle_v1_ext_workspace_capabilities_v1 wl_capability;
+    enum ext_workspace_handle_v1_workspace_capabilities wl_capability;
     XfwWorkspaceCapabilities capability_bit;
 } capabilities_converters[] = {
-    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_ACTIVATE, XFW_WORKSPACE_CAPABILITIES_ACTIVATE },
-    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_DEACTIVATE, XFW_WORKSPACE_CAPABILITIES_DEACTIVATE },
-    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_REMOVE, XFW_WORKSPACE_CAPABILITIES_REMOVE },
-    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_ASSIGN, XFW_WORKSPACE_CAPABILITIES_ASSIGN },
+    { EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_ACTIVATE, XFW_WORKSPACE_CAPABILITIES_ACTIVATE },
+    { EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_DEACTIVATE, XFW_WORKSPACE_CAPABILITIES_DEACTIVATE },
+    { EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_REMOVE, XFW_WORKSPACE_CAPABILITIES_REMOVE },
+    { EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_ASSIGN, XFW_WORKSPACE_CAPABILITIES_ASSIGN },
 };
 
 static void
