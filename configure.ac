@@ -143,6 +143,9 @@ AS_IF([test x"$ENABLE_WAYLAND" = x"yes"],
 
           WL_PROTOCOLS_PKGDATADIR=`$PKG_CONFIG --variable=pkgdatadir wayland-protocols`
           AC_SUBST([WL_PROTOCOLS_PKGDATADIR])
+          dnl FIXME: Bump wayland_protocols_minimum_version to 1.39 when it is an acceptable requirement,
+          dnl and remove this and protocols/ext-workspace-v1.xml
+          AM_CONDITIONAL([HAVE_WORKSPACE], [test -f "$WL_PROTOCOLS_PKGDATADIR/staging/ext-workspace/ext-workspace-v1.xml"])
 
           WLR_PROTOCOLS_PKGDATADIR=`$PKG_CONFIG --variable=pkgdatadir wlr-protocols 2>/dev/null || true`
           if test x"$WLR_PROTOCOLS_PKGDATADIR" = x""; then

@@ -24,7 +24,7 @@
 #include <glib/gi18n-lib.h>
 #include <limits.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/ext-workspace-v1-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-monitor-wayland.h"
@@ -286,7 +286,7 @@ group_capabilities(void *data, struct ext_workspace_group_handle_v1 *wl_group, u
     XfwWorkspaceGroupCapabilities changed_mask;
     XfwWorkspaceGroupCapabilities new_capabilities = XFW_WORKSPACE_GROUP_CAPABILITIES_NONE;
 
-    if ((wl_capabilities & EXT_WORKSPACE_GROUP_HANDLE_V1_EXT_WORKSPACE_GROUP_CAPABILITIES_V1_CREATE_WORKSPACE) != 0) {
+    if ((wl_capabilities & EXT_WORKSPACE_GROUP_HANDLE_V1_GROUP_CAPABILITIES_CREATE_WORKSPACE) != 0) {
         new_capabilities |= XFW_WORKSPACE_GROUP_CAPABILITIES_CREATE_WORKSPACE;
     }
 
