@@ -23,7 +23,7 @@
 
 #include <limits.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/ext-workspace-v1-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-util.h"
@@ -271,6 +271,8 @@ xfw_workspace_wayland_get_layout_column(XfwWorkspace *workspace) {
 
 static XfwWorkspace *
 xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection direction) {
+    XfwWorkspaceWayland *wworkspace = XFW_WORKSPACE_WAYLAND(workspace);
+
     switch (direction) {
         case XFW_DIRECTION_UP:
         case XFW_DIRECTION_DOWN:
@@ -278,18 +280,22 @@ xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection directi
 
         case XFW_DIRECTION_LEFT: {
             gint num = xfw_workspace_wayland_get_layout_column(workspace);
-            if (num < 1) {
+            if (wworkspace->priv->group == NULL || num < 1) {
                 return NULL;
             } else {
-                GList *workspaces = xfw_workspace_group_list_workspaces(XFW_WORKSPACE_WAYLAND(workspace)->priv->group);
+                GList *workspaces = xfw_workspace_group_list_workspaces(wworkspace->priv->group);
                 return XFW_WORKSPACE(g_list_nth_data(workspaces, num - 1));
             }
         }
 
         case XFW_DIRECTION_RIGHT: {
-            gint num = xfw_workspace_wayland_get_layout_column(workspace);
-            GList *workspaces = xfw_workspace_group_list_workspaces(XFW_WORKSPACE_WAYLAND(workspace)->priv->group);
-            return XFW_WORKSPACE(g_list_nth_data(workspaces, num + 1));
+            if (wworkspace->priv->group == NULL) {
+                return NULL;
+            } else {
+                gint num = xfw_workspace_wayland_get_layout_column(workspace);
+                GList *workspaces = xfw_workspace_group_list_workspaces(wworkspace->priv->group);
+                return XFW_WORKSPACE(g_list_nth_data(workspaces, num + 1));
+            }
         }
     }
 
@@ -403,7 +409,7 @@ workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, uint32
     changed_mask = old_state ^ new_state;
     g_object_notify(G_OBJECT(workspace), "state");
     g_signal_emit_by_name(workspace, "state-changed", changed_mask, new_state);
-    if ((changed_mask & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
+    if (workspace->priv->group != NULL && (changed_mask & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
         if ((new_state & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
             _xfw_workspace_group_wayland_set_active_workspace(XFW_WORKSPACE_GROUP_WAYLAND(workspace->priv->group), XFW_WORKSPACE(workspace));
         } else {
@@ -418,13 +424,13 @@ workspace_state(void *data, struct ext_workspace_handle_v1 *wl_workspace, uint32
 }
 
 static const struct {
-    enum ext_workspace_handle_v1_ext_workspace_capabilities_v1 wl_capability;
+    enum ext_workspace_handle_v1_workspace_capabilities wl_capability;
     XfwWorkspaceCapabilities capability_bit;
 } capabilities_converters[] = {
-    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_ACTIVATE, XFW_WORKSPACE_CAPABILITIES_ACTIVATE },
-    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_DEACTIVATE, XFW_WORKSPACE_CAPABILITIES_DEACTIVATE },
-    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_REMOVE, XFW_WORKSPACE_CAPABILITIES_REMOVE },
-    { EXT_WORKSPACE_HANDLE_V1_EXT_WORKSPACE_CAPABILITIES_V1_ASSIGN, XFW_WORKSPACE_CAPABILITIES_ASSIGN },
+    { EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_ACTIVATE, XFW_WORKSPACE_CAPABILITIES_ACTIVATE },
+    { EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_DEACTIVATE, XFW_WORKSPACE_CAPABILITIES_DEACTIVATE },
+    { EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_REMOVE, XFW_WORKSPACE_CAPABILITIES_REMOVE },
+    { EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_ASSIGN, XFW_WORKSPACE_CAPABILITIES_ASSIGN },
 };
 
 static void

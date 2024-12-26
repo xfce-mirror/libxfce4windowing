@@ -26,7 +26,7 @@
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 
-#include "protocols/ext-workspace-v1-20230427-client.h"
+#include "protocols/ext-workspace-v1-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-screen-private.h"
@@ -225,7 +225,7 @@ manager_workspace(void *data, struct ext_workspace_manager_v1 *manager, struct e
     _xfw_workspace_wayland_set_number(workspace, g_list_length(wmanager->priv->workspaces));
     wmanager->priv->workspaces = g_list_append(wmanager->priv->workspaces, workspace);
     g_signal_connect(workspace, "destroyed", G_CALLBACK(workspace_destroyed), manager);
-    g_signal_emit_by_name(manager, "workspace-created", workspace);
+    g_signal_emit_by_name(wmanager, "workspace-created", workspace);
 }
 
 static void

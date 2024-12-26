@@ -161,6 +161,10 @@ AS_IF([test x"$ENABLE_WAYLAND" = x"yes"],
           LIBXFCE4WINDOWING_HAS_WAYLAND="/* #undef LIBXFCE4WINDOWING_HAS_WAYLAND */"
       ])
 
+dnl FIXME: Bump wayland_protocols_minimum_version to 1.39 when it is an acceptable requirement,
+dnl and remove this and protocols/ext-workspace-v1.xml
+AM_CONDITIONAL([HAVE_WORKSPACE], [test -f "$WL_PROTOCOLS_PKGDATADIR/staging/ext-workspace/ext-workspace-v1.xml"])
+
 AC_SUBST([LIBXFCE4WINDOWING_HAS_X11])
 AC_SUBST([LIBXFCE4WINDOWING_HAS_WAYLAND])
 
