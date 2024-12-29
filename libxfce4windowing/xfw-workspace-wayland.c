@@ -77,6 +77,7 @@ static gboolean xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError *
 static gboolean xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_wayland_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
 
+static void workspace_id(void *data, struct ext_workspace_handle_v1 *workspace, const char *id);
 static void workspace_name(void *data, struct ext_workspace_handle_v1 *workspace, const char *name);
 static void workspace_coordinates(void *data, struct ext_workspace_handle_v1 *workspace, struct wl_array *coordinates);
 static void workspace_state(void *data, struct ext_workspace_handle_v1 *workspace, uint32_t state);
@@ -84,6 +85,7 @@ static void workspace_capabilities(void *data, struct ext_workspace_handle_v1 *w
 static void workspace_removed(void *data, struct ext_workspace_handle_v1 *workspace);
 
 static const struct ext_workspace_handle_v1_listener workspace_listener = {
+    .id = workspace_id,
     .name = workspace_name,
     .coordinates = workspace_coordinates,
     .state = workspace_state,
@@ -131,7 +133,6 @@ xfw_workspace_wayland_init(XfwWorkspaceWayland *workspace) {
 static void
 xfw_workspace_wayland_constructed(GObject *obj) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(obj);
-    workspace->priv->id = g_strdup_printf("%u", wl_proxy_get_id((struct wl_proxy *)workspace->priv->handle));
     ext_workspace_handle_v1_add_listener(workspace->priv->handle, &workspace_listener, workspace);
 }
 
@@ -162,6 +163,9 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
 
         case WORKSPACE_PROP_GROUP:
         case WORKSPACE_PROP_ID:
+            g_free(workspace->priv->id);
+            workspace->priv->id = g_value_dup_string(value);
+            break;
         case WORKSPACE_PROP_NAME:
         case WORKSPACE_PROP_CAPABILITIES:
         case WORKSPACE_PROP_STATE:
@@ -187,7 +191,7 @@ xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, G
             break;
 
         case WORKSPACE_PROP_ID:
-            g_value_set_string(value, workspace->priv->name);
+            g_value_set_string(value, workspace->priv->id);
             break;
 
         case WORKSPACE_PROP_NAME:
@@ -353,6 +357,12 @@ xfw_workspace_wayland_assign_to_workspace_group(XfwWorkspace *workspace, XfwWork
         }
         return FALSE;
     }
+}
+
+static void
+workspace_id(void *data, struct ext_workspace_handle_v1 *wl_workspace, const char *id) {
+    XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
+    g_object_set(workspace, "id", id, NULL);
 }
 
 static void
