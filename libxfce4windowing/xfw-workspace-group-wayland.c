@@ -322,7 +322,7 @@ group_output_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, s
     for (GList *l = xfw_screen_get_monitors(group->priv->screen); l != NULL; l = l->next) {
         XfwMonitorWayland *monitor = XFW_MONITOR_WAYLAND(l->data);
         if (_xfw_monitor_wayland_get_wl_output(monitor) == output) {
-            group->priv->monitors = g_list_delete_link(group->priv->monitors, l);
+            group->priv->monitors = g_list_remove(group->priv->monitors, monitor);
             g_signal_emit_by_name(group, "monitor-removed", monitor);
             g_signal_emit_by_name(group, "monitors-changed");
             break;
