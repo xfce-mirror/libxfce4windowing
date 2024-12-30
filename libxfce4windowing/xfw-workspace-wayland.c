@@ -35,6 +35,7 @@
 struct _XfwWorkspaceWaylandPrivate {
     XfwWorkspaceGroup *group;
     struct ext_workspace_handle_v1 *handle;
+    struct ext_workspace_manager_v1 *manager_handle;
     gchar *id;
     gchar *name;
     XfwWorkspaceCapabilities capabilities;
@@ -322,6 +323,7 @@ xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error) {
 
     if ((wworkspace->priv->capabilities & XFW_WORKSPACE_CAPABILITIES_ACTIVATE) != 0) {
         ext_workspace_handle_v1_activate(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle);
+        ext_workspace_manager_v1_commit(wworkspace->priv->manager_handle);
         return TRUE;
     } else {
         if (error != NULL) {
@@ -337,6 +339,7 @@ xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error) {
 
     if ((wworkspace->priv->capabilities & XFW_WORKSPACE_CAPABILITIES_REMOVE) != 0) {
         ext_workspace_handle_v1_remove(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle);
+        ext_workspace_manager_v1_commit(wworkspace->priv->manager_handle);
         return TRUE;
     } else {
         if (error != NULL) {
@@ -353,6 +356,7 @@ xfw_workspace_wayland_assign_to_workspace_group(XfwWorkspace *workspace, XfwWork
     if ((wworkspace->priv->capabilities & XFW_WORKSPACE_CAPABILITIES_ASSIGN) != 0) {
         ext_workspace_handle_v1_assign(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle,
                                        _xfw_workspace_group_wayland_get_handle(XFW_WORKSPACE_GROUP_WAYLAND(group)));
+        ext_workspace_manager_v1_commit(wworkspace->priv->manager_handle);
         return TRUE;
     } else {
         if (error != NULL) {
@@ -492,4 +496,9 @@ _xfw_workspace_wayland_set_workspace_group(XfwWorkspaceWayland *workspace, XfwWo
         workspace->priv->group = group;
         g_signal_emit_by_name(workspace, "group-changed", previous_group);
     }
+}
+
+void
+_xfw_workspace_wayland_set_workspace_manager_handle(XfwWorkspaceWayland *workspace, struct ext_workspace_manager_v1 *manager_handle) {
+    workspace->priv->manager_handle = manager_handle;
 }

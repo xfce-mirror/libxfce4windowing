@@ -222,6 +222,7 @@ manager_workspace(void *data, struct ext_workspace_manager_v1 *manager, struct e
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(g_object_new(XFW_TYPE_WORKSPACE_WAYLAND,
                                                                         "handle", wl_workspace,
                                                                         NULL));
+    _xfw_workspace_wayland_set_workspace_manager_handle(workspace, wmanager->priv->handle);
     _xfw_workspace_wayland_set_number(workspace, g_list_length(wmanager->priv->workspaces));
     wmanager->priv->workspaces = g_list_append(wmanager->priv->workspaces, workspace);
     g_signal_connect(workspace, "destroyed", G_CALLBACK(workspace_destroyed), manager);
