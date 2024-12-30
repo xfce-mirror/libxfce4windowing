@@ -322,6 +322,7 @@ xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error) {
 
     if ((wworkspace->priv->capabilities & XFW_WORKSPACE_CAPABILITIES_ACTIVATE) != 0) {
         ext_workspace_handle_v1_activate(XFW_WORKSPACE_WAYLAND(workspace)->priv->handle);
+        ext_workspace_manager_v1_commit(XFW_WORKSPACE_WAYLAND(workspace)->manager);
         return TRUE;
     } else {
         if (error != NULL) {

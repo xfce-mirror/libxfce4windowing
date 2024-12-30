@@ -41,6 +41,7 @@ struct _XfwWorkspaceWayland {
     GObject parent;
     /*< private >*/
     XfwWorkspaceWaylandPrivate *priv;
+    struct ext_workspace_manager_v1 *manager;
 };
 
 struct ext_workspace_handle_v1 *_xfw_workspace_wayland_get_handle(XfwWorkspaceWayland *workspace);
