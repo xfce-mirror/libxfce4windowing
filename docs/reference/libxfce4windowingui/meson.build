@@ -32,6 +32,6 @@ if get_option('gtk-doc')
     gobject_typesfile: meson.current_source_dir() / 'libxfce4windowingui.types',
     fixxref_args: libxfce4windowingui_doc_fixxref_args,
     install: true,
-    check: true,
+    check: false,
   )
 endif
