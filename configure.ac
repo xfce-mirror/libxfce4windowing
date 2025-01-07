@@ -203,13 +203,13 @@ if test "x$enable_visibility" != "xno"; then
   AC_MSG_CHECKING([whether $CC supports the GNUC visibility attribute])
   AC_COMPILE_IFELSE([AC_LANG_SOURCE(
   [
-    void test_default (void);
-    void test_hidden (void);
-    void __attribute__ ((visibility("default"))) test_default (void) {}
-    void __attribute__ ((visibility("hidden"))) test_hidden (void) {}
-    int main (int argc, char **argv) {
-      test_default ();
-      test_hidden ();
+    void test_default(void);
+    void test_hidden(void);
+    void __attribute__((visibility("default"))) test_default(void) {}
+    void __attribute__((visibility("hidden"))) test_hidden(void) {}
+    int main(int argc, char **argv) {
+      test_default();
+      test_hidden();
       return 0;
     }
   ])],
@@ -226,7 +226,6 @@ if test "x$have_gnuc_visibility" = "xyes"; then
   CPPFLAGS="$CPPFLAGS -DENABLE_SYMBOL_VISIBILITY=1"
   CFLAGS="$CFLAGS -fvisibility=hidden"
 fi
-AM_CONDITIONAL([HAVE_GNUC_VISIBILITY], [test "x$have_gnuc_visibility" = "xyes"])
 
 AC_CONFIG_FILES([
 Makefile
