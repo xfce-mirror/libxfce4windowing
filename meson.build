@@ -41,45 +41,38 @@ python3 = find_program('python3', required: true)
 xdt_gen_visibility = find_program('xdt-gen-visibility', required: true)
 
 # Feature: 'x11'
-display_info = dependency('libdisplay-info', version: dependency_versions['display-info'], required: get_option('x11'))
-libx11 = dependency('x11', version: dependency_versions['libx11'], required: get_option('x11'))
-gdk_x11 = dependency('gdk-x11-3.0', version: dependency_versions['gtk'], required: get_option('x11'))
-wnck = dependency('libwnck-3.0', version: dependency_versions['wnck'], required: get_option('x11'))
-xrandr = dependency('xrandr', version: dependency_versions['xrandr'], required: get_option('x11'))
+x11_deps = []
+x11_deps += dependency('libdisplay-info', version: dependency_versions['display-info'], required: get_option('x11'))
+x11_deps += dependency('x11', version: dependency_versions['libx11'], required: get_option('x11'))
+x11_deps += dependency('gdk-x11-3.0', version: dependency_versions['gtk'], required: get_option('x11'))
+x11_deps += dependency('libwnck-3.0', version: dependency_versions['wnck'], required: get_option('x11'))
+x11_deps += dependency('xrandr', version: dependency_versions['xrandr'], required: get_option('x11'))
 
 # Feature: 'wayland'
-gdk_wayland = dependency('gdk-wayland-3.0', version: dependency_versions['gtk'], required: get_option('wayland'))
-wayland_client = dependency('wayland-client', version: dependency_versions['wayland'], required: get_option('wayland'))
-wayland_scanner = dependency('wayland-scanner', version: dependency_versions['wayland'], required: get_option('wayland'))
-wayland_protocols = dependency('wayland-protocols', version: dependency_versions['wayland-protocols'], required: get_option('wayland'))
+wayland_deps = []
+wayland_deps += dependency('gdk-wayland-3.0', version: dependency_versions['gtk'], required: get_option('wayland'))
+wayland_deps += dependency('wayland-client', version: dependency_versions['wayland'], required: get_option('wayland'))
+wayland_deps += dependency('wayland-scanner', version: dependency_versions['wayland'], required: get_option('wayland'))
+wayland_scanner = wayland_deps[-1]
+wayland_deps += dependency('wayland-protocols', version: dependency_versions['wayland-protocols'], required: get_option('wayland'))
+wayland_protocols = wayland_deps[-1]
+
 wlr_protocols = dependency('wlr-protocols', version: dependency_versions['wlr-protocols'], required: false)
 
 feature_cflags = []
 
-enable_x11 = not get_option('x11').disabled() and \
-  libx11.found() and \
-  gdk_x11.found() and \
-  wnck.found() and \
-  display_info.found() and \
-  xrandr.found()
-x11_deps = []
+enable_x11 = not get_option('x11').disabled()
+foreach dep : x11_deps
+  enable_x11 = enable_x11 and dep.found()
+endforeach
 if enable_x11
   feature_cflags += '-DENABLE_X11=1'
-  x11_deps += [
-    display_info,
-    libx11,
-    gdk_x11,
-    wnck,
-    xrandr,
-  ]
 endif
 
-enable_wayland = not get_option('wayland').disabled() and \
-  gdk_wayland.found() and \
-  wayland_client.found() and \
-  wayland_scanner.found() and \
-  wayland_protocols.found()
-wayland_deps = []
+enable_wayland = not get_option('wayland').disabled()
+foreach dep : wayland_deps
+  enable_wayland = enable_wayland and dep.found()
+endforeach
 if enable_wayland
   feature_cflags += '-DENABLE_WAYLAND=1'
 
@@ -93,11 +86,6 @@ if enable_wayland
   else
     wlr_protocols_pkgdatadir = meson.project_source_root() / 'protocols' / 'wlr-protocols'
   endif
-
-  wayland_deps += [
-    gdk_wayland,
-    wayland_client,
-  ]
 endif
 
 if not enable_x11 and not enable_wayland
