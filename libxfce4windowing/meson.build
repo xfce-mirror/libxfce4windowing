@@ -177,7 +177,6 @@ if get_option('introspection')
     namespace: 'Libxfce4windowing',
     nsversion: '0.0',
     identifier_prefix: [
-      'libxfce4windowing',
       'Xfw',
     ],
     symbol_prefix: [

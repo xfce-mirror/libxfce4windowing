@@ -50,7 +50,7 @@ if get_option('gtk-doc')
   gnome.gtkdoc(
     libxfce4windowing_doc_name,
     module_version: lib_so_version,
-    src_dir: meson.project_source_root() / 'libxfce4windowing',
+    src_dir: 'libxfce4windowing',
     ignore_headers: libxfce4windowing_doc_private_headers,
     main_xml: 'libxfce4windowing-docs.xml',
     dependencies: libxfce4windowing_dep,
