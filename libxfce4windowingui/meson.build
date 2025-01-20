@@ -76,7 +76,6 @@ pkgconfig.generate(
   name: libxfce4windowingui_pkgname,
   filebase: libxfce4windowingui_pkgname,
   description: 'X11/Wayland windowing utility library for Xfce - extra widgets',
-  requires: ['gtk+-3.0'],
   subdirs: ['xfce4' / libxfce4windowing_pkgname],
   install_dir: get_option('prefix') / get_option('libdir') / 'pkgconfig',
 )

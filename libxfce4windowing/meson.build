@@ -148,7 +148,6 @@ pkgconfig.generate(
   name: libxfce4windowing_pkgname,
   filebase: libxfce4windowing_pkgname,
   description: 'X11/Wayland windowing utility library for Xfce',
-  requires: ['gtk+-3.0'],
   subdirs: ['xfce4' / libxfce4windowing_pkgname],
   install_dir: get_option('prefix') / get_option('libdir') / 'pkgconfig',
 )
@@ -163,7 +162,7 @@ if enable_x11
     name: libxfce4windowing_x11_pkgname,
     filebase: libxfce4windowing_x11_pkgname,
     description: 'X11/Wayland windowing utility library for Xfce (X11 backend)',
-    requires: [libxfce4windowing_pkgname],
+    requires_private: [libxfce4windowing_pkgname],
     install_dir: get_option('prefix') / get_option('libdir') / 'pkgconfig',
   )
 endif
