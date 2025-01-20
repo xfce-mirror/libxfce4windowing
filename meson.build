@@ -8,7 +8,7 @@ version : '4.20.0-dev',
 )
 
 project_namespace = 'xfce'
-pkgdatadir = get_option('datadir') / meson.project_name()
+pkgdatadir = get_option('prefix') / get_option('datadir') / meson.project_name()
 
 cc = meson.get_compiler('c')
 pkgconfig = import('pkgconfig')

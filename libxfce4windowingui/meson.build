@@ -90,7 +90,6 @@ if get_option('introspection')
     namespace: 'Libxfce4windowingui',
     nsversion: '0.0',
     identifier_prefix: [
-      'libxfce4windowingui',
       'Xfw',
     ],
     symbol_prefix: [
