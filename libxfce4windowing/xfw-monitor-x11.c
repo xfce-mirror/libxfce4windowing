@@ -362,7 +362,7 @@ enumerate_monitors(XfwMonitorManagerX11 *manager, GList **new_monitors, GList **
             continue;
         }
 
-        gchar *connector = g_strndup(oinfo->name, oinfo->nameLen);
+        gchar *connector = g_strdup(gdk_x11_get_xatom_name_for_display(display, rrmonitors[i].name));
         XfwMonitor *monitor = steal_monitor_by_connector(previous_monitors, connector);
         if (monitor == NULL) {
             monitor = g_object_new(XFW_TYPE_MONITOR_X11, NULL);
