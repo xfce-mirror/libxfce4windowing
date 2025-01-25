@@ -403,7 +403,10 @@ xfw_wnck_object_get_net_wm_icon(GObject *wnck_object) {
             gint width = cur[0];
             gint height = cur[1];
 
-            if (cur + 2 + (width * height) > data + nitems) {
+            if (width <= 0 || height <= 0) {
+                g_message("Invalid _NET_WM_ICON dimensions %dx%d for icon for window %lu", width, height, xid);
+                break;
+            } else if (cur + 2 + (width * height) > data + nitems) {
                 break;
             }
 
