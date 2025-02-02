@@ -60,12 +60,9 @@ endif
 
 EXTRA_DIST = \
 	meson.build \
-	wlr-protocols/unstable/wlr-foreign-toplevel-management-unstable-v1.xml
-
-if !HAVE_WORKSPACE
-EXTRA_DIST += \
-	ext-workspace-v1.xml
-endif
+	wlr-protocols/unstable/wlr-foreign-toplevel-management-unstable-v1.xml \
+	ext-workspace-v1.xml \
+	$(NULL)
 
 # required for make distcheck (gtk-doc)
 dist-hook: all
