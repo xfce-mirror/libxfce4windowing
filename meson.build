@@ -196,4 +196,6 @@ subdir('libxfce4windowingui')
 subdir('docs' / 'reference' / 'libxfce4windowing')
 subdir('docs' / 'reference' / 'libxfce4windowingui')
 subdir('po')
-subdir('tests')
+if get_option('tests')
+  subdir('tests')
+endif
