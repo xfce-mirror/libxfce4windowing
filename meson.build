@@ -2,7 +2,7 @@ project(
   'libxfce4windowing',
   'c',
 version : '4.20.2-dev',
-  license : 'GPL-2',
+  license : 'GPL-2.0-or-later',
   meson_version : '>= 0.57.0',
   default_options : ['c_std=gnu11', 'buildtype=debugoptimized', 'warning_level=2']
 )
@@ -196,4 +196,6 @@ subdir('libxfce4windowingui')
 subdir('docs' / 'reference' / 'libxfce4windowing')
 subdir('docs' / 'reference' / 'libxfce4windowingui')
 subdir('po')
-subdir('tests')
+if get_option('tests')
+  subdir('tests')
+endif
