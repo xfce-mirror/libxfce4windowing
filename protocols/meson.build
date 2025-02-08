@@ -2,10 +2,15 @@ if enable_wayland
   wayland_protocols_generated_sources = []
 
   protocols = {
-    'ext-workspace-v1': 'ext-workspace-v1.xml',
     'wlr-foreign-toplevel-management-unstable-v1': wlr_protocols_pkgdatadir / 'unstable' / 'wlr-foreign-toplevel-management-unstable-v1.xml',
     'xdg-output-unstable-v1': wl_protocols_pkgdatadir / 'unstable' / 'xdg-output' / 'xdg-output-unstable-v1.xml',
   }
+
+  if have_ext_workspace
+    protocols += {'ext-workspace-v1': wl_protocols_pkgdatadir / 'staging' / 'ext-workspace' / 'ext-workspace-v1.xml'}
+  else
+    protocols += {'ext-workspace-v1': 'ext-workspace-v1.xml'}
+  endif
 
   foreach name, file : protocols
     client_header = custom_target(

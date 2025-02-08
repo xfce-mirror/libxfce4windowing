@@ -14,6 +14,7 @@ cc = meson.get_compiler('c')
 pkgconfig = import('pkgconfig')
 gnome = import('gnome')
 i18n = import('i18n')
+fs = import('fs')
 
 dependency_versions = {
   'display-info': '>= 0.1.1',
@@ -86,6 +87,10 @@ if enable_wayland
   else
     wlr_protocols_pkgdatadir = meson.project_source_root() / 'protocols' / 'wlr-protocols'
   endif
+
+  # FIXME: Bump wayland-protocols to 1.39 when it is an acceptable requirement,
+  # and remove this and protocols/ext-workspace-v1.xml
+  have_ext_workspace = fs.is_file(wl_protocols_pkgdatadir / 'staging' / 'ext-workspace' / 'ext-workspace-v1.xml')
 endif
 
 if not enable_x11 and not enable_wayland
