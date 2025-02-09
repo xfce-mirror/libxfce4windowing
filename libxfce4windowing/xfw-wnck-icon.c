@@ -53,7 +53,7 @@ window_icon_compare(gconstpointer a,
     } else if (wb == NULL) {
         return 1;
     } else {
-        return MAX(wb->width, wb->height) - MAX(wa->width, wb->height);
+        return MAX(wa->width, wa->height) - MAX(wb->width, wb->height);
     }
 }
 
