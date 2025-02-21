@@ -190,6 +190,9 @@ xfw_window_x11_constructed(GObject *obj) {
     window->priv->capabilities = convert_capabilities(window->priv->wnck_window, wnck_window_get_actions(window->priv->wnck_window));
     window->priv->workspace = _xfw_screen_x11_workspace_for_wnck_workspace(XFW_SCREEN_X11(screen),
                                                                            wnck_window_get_workspace(window->priv->wnck_window));
+    if (window->priv->workspace != NULL) {
+        g_object_ref(window->priv->workspace);
+    }
     window->priv->app = XFW_APPLICATION(_xfw_application_x11_get(wnck_window_get_class_group(window->priv->wnck_window), window));
 
     g_signal_connect(window->priv->wnck_window, "class-changed", G_CALLBACK(class_changed), window);
@@ -246,6 +249,9 @@ xfw_window_x11_finalize(GObject *obj) {
     g_free(window->priv->class_ids);
     g_list_free(window->priv->monitors);
     g_object_unref(window->priv->app);
+    if (window->priv->workspace != NULL) {
+        g_object_unref(window->priv->workspace);
+    }
 
     // to be released last
     g_object_unref(window->priv->wnck_window);
@@ -709,6 +715,9 @@ workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
 
     if (old_workspace != new_workspace) {
         window->priv->workspace = new_workspace;
+        if (window->priv->workspace != NULL) {
+            g_object_ref(window->priv->workspace);
+        }
     }
 
     // workspace-changed is also fired when the windows pinned state changes
@@ -717,6 +726,9 @@ workspace_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
     if (old_workspace != new_workspace) {
         g_object_notify(G_OBJECT(window), "workspace");
         g_signal_emit_by_name(window, "workspace-changed");
+        if (old_workspace != NULL) {
+            g_object_unref(old_workspace);
+        }
     }
 }
 
