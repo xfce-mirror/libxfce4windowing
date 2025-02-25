@@ -203,7 +203,9 @@ icon_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app) {
 
 static void
 name_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app) {
-    GDesktopAppInfo *app_info = _xfw_g_desktop_app_info_get(wnck_class_group_get_id(wnck_group));
+    gchar *app_id = g_ascii_strdown(wnck_class_group_get_id(wnck_group), -1);
+    GDesktopAppInfo *app_info = _xfw_g_desktop_app_info_get(app_id);
+    g_free(app_id);
     gchar *icon_name = NULL;
 
     if (app_info != NULL) {
