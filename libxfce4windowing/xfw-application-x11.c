@@ -215,6 +215,8 @@ name_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app) {
         app->priv->icon_name = icon_name;
         _xfw_application_invalidate_icon(XFW_APPLICATION(app));
         g_signal_emit_by_name(app, "icon-changed");
+    } else {
+        g_free(icon_name);
     }
     g_object_notify(G_OBJECT(app), "name");
 }
