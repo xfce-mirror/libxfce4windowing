@@ -27,7 +27,9 @@ HFILE_GLOB = $(top_srcdir)/libxfce4windowingui/*.h
 CFILE_GLOB = $(top_srcdir)/libxfce4windowingui/*.c
 
 # Header files to ignore when scanning
-IGNORE_HFILES =
+IGNORE_HFILES = \
+	libxfce4windowingui-visibility.h \
+	$(NULL)
 
 # Extra files to add when scanning (relative to $srcdir)
 EXTRA_HFILES =

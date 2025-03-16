@@ -13,6 +13,7 @@ if get_option('gtk-doc')
   )
 
   libxfce4windowingui_doc_private_headers = [
+    'libxfce4windowingui-visibility.h',
   ]
 
   libxfce4windowingui_doc_fixxref_args = [

@@ -47,6 +47,7 @@ xfw_screen_set_show_desktop
 <SUBSECTION Standard>
 XfwScreenClass
 XFW_TYPE_SCREEN
+xfw_screen_get_type
 </SECTION>
 
 <SECTION>
@@ -56,6 +57,7 @@ xfw_seat_get_name
 <SUBSECTION Standard>
 XfwSeatClass
 XFW_TYPE_SEAT
+xfw_seat_get_type
 </SECTION>
 
 <SECTION>
@@ -67,6 +69,7 @@ xfw_workspace_manager_list_workspaces
 <SUBSECTION Standard>
 XfwWorkspaceManagerInterface
 XFW_TYPE_WORKSPACE_MANAGER
+xfw_workspace_manager_get_type
 </SECTION>
 
 <SECTION>
@@ -87,6 +90,7 @@ xfw_workspace_group_set_layout
 XfwWorkspaceGroupInterface
 XFW_TYPE_WORKSPACE_GROUP
 XFW_TYPE_WORKSPACE_GROUP_CAPABILITIES
+xfw_workspace_group_get_type
 xfw_workspace_group_capabilities_get_type
 </SECTION>
 
@@ -114,6 +118,7 @@ XfwWorkspaceInterface
 XFW_TYPE_WORKSPACE
 XFW_TYPE_WORKSPACE_CAPABILITIES
 XFW_TYPE_WORKSPACE_STATE
+xfw_workspace_get_type
 xfw_workspace_capabilities_get_type
 xfw_workspace_state_get_type
 </SECTION>
@@ -172,6 +177,7 @@ XFW_TYPE_WINDOW
 XFW_TYPE_WINDOW_CAPABILITIES
 XFW_TYPE_WINDOW_STATE
 XFW_TYPE_WINDOW_TYPE
+xfw_window_get_type
 xfw_window_capabilities_get_type
 xfw_window_state_get_type
 xfw_window_type_get_type
@@ -195,6 +201,7 @@ xfw_application_instance_get_windows
 <SUBSECTION Standard>
 XfwApplicationClass
 XFW_TYPE_APPLICATION
+xfw_application_get_type
 </SECTION>
 
 <SECTION>
