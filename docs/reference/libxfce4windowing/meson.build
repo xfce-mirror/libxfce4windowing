@@ -14,13 +14,21 @@ if get_option('gtk-doc')
 
   libxfce4windowing_doc_private_headers = [
     'libxfce4windowing-private.h',
+    'libxfce4windowing-visibility.h',
     'xfw-application-private.h',
     'xfw-application-wayland.h',
     'xfw-application-x11.h',
+    'xfw-gdk-private.h',
     'xfw-marshal.h',
+    'xfw-monitor-private.h',
+    'xfw-monitor-wayland.h',
+    'xfw-monitor-x11.h',
     'xfw-screen-private.h',
     'xfw-screen-wayland.h',
     'xfw-screen-x11.h',
+    'xfw-seat-private.h',
+    'xfw-seat-wayland.h',
+    'xfw-seat-x11.h',
     'xfw-window-private.h',
     'xfw-window-wayland.h',
     'xfw-window-x11.h',
@@ -36,6 +44,7 @@ if get_option('gtk-doc')
     'xfw-workspace-private.h',
     'xfw-workspace-wayland.h',
     'xfw-workspace-x11.h',
+    'xsettings-x11.h',
   ]
 
   libxfce4windowing_doc_fixxref_args = [

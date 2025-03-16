@@ -36,7 +36,8 @@ G_BEGIN_DECLS
  * @XFW_MONITOR_TRANSFORM_270: rotated counter-clockwise by 270 degrees.
  * @XFW_MONITOR_TRANSFORM_FLIPPED: flipped along a vertical axis.
  * @XFW_MONITOR_TRANSFORM_FLIPPED_90: flipped along a vertical axis and rotated
- * counter-clockwise by 90 degrees. @XFW_MONITOR_TRANSFORM_FLIPPED_180: flipped
+ * counter-clockwise by 90 degrees.
+ * @XFW_MONITOR_TRANSFORM_FLIPPED_180: flipped
  * along a vertical axis and rotated counter-clockwise by 180 degrees.
  * @XFW_MONITOR_TRANSFORM_FLIPPED_270: flipped along a vertical axis and
  * rotated counter-clockwise by 270 degrees.
