@@ -55,13 +55,13 @@ tests/test-ui
 docs/reference/libxfce4windowing/libxfce4windowing*
 docs/reference/libxfce4windowing/html
 docs/reference/libxfce4windowing/xml
-!docs/reference/libxfce4windowing/libxfce4windowing-docs.xml
+!docs/reference/libxfce4windowing/libxfce4windowing-docs.xml.in
 !docs/reference/libxfce4windowing/libxfce4windowing.types
 !docs/reference/libxfce4windowing/libxfce4windowing-sections.txt
 docs/reference/libxfce4windowingui/libxfce4windowingui*
 docs/reference/libxfce4windowingui/html
 docs/reference/libxfce4windowingui/xml
-!docs/reference/libxfce4windowingui/libxfce4windowingui-docs.xml
+!docs/reference/libxfce4windowingui/libxfce4windowingui-docs.xml.in
 !docs/reference/libxfce4windowingui/libxfce4windowingui.types
 !docs/reference/libxfce4windowingui/libxfce4windowingui-sections.txt
 
