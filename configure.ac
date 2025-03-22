@@ -10,6 +10,7 @@ m4_define([libxfce4windowing_verinfo], [0:0:0])
 m4_define([libxfce4windowing_version_api], [0])
 m4_define([libxfce4windowingui_verinfo], [0:0:0])
 m4_define([libxfce4windowingui_version_api], [0])
+m4_define([copyright_year], [2025])
 XDT_VERSION_INIT([4.20.2], [git])
 
 dnl minimum required versions
@@ -24,11 +25,14 @@ m4_define([display_info_minimum_version], [0.1.1])
 m4_define([xrandr_minimum_version], [1.5.0])
 
 dnl init autoconf
-AC_COPYRIGHT([Copyright (c) 2022-2025 The Xfce development team. All rights reserved.])
+AC_COPYRIGHT([Copyright (c) 2022-copyright_year() The Xfce development team. All rights reserved.])
 AC_INIT([libxfce4windowing], [xdt_version], [https://gitlab.xfce.org/xfce/libxfce4windowing])
 AC_PREREQ([2.69])
 AC_CONFIG_MACRO_DIRS([m4])
 AC_REVISION([xdt_version_build])
+COPYRIGHT_YEAR=copyright_year()
+AC_DEFINE_UNQUOTED([COPYRIGHT_YEAR], ["$COPYRIGHT_YEAR"], [Copyright year])
+AC_SUBST([COPYRIGHT_YEAR])
 
 dnl init automake
 AM_INIT_AUTOMAKE([1.11 dist-bzip2 tar-ustar no-dist-gzip foreign])

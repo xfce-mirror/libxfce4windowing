@@ -56,12 +56,21 @@ if get_option('gtk-doc')
     '--extra-dir=@0@/share/doc/libgdk-pixbuf2.0-doc/html/gdk-pixbuf'.format(gdk_pixbuf.get_variable(pkgconfig: 'prefix')),
   ]
 
+  configure_file(
+    configuration: configuration_data({
+      'COPYRIGHT_YEAR': copyright_year,
+    }),
+    input: 'libxfce4windowing-docs.xml.in',
+    output: 'libxfce4windowing-docs.xml',
+    install: false,
+  )
+
   gnome.gtkdoc(
     libxfce4windowing_doc_name,
     module_version: lib_so_version,
     src_dir: 'libxfce4windowing',
     ignore_headers: libxfce4windowing_doc_private_headers,
-    main_xml: 'libxfce4windowing-docs.xml',
+    main_xml: meson.project_build_root() / 'docs' / 'reference' / 'libxfce4windowing-docs.xml',
     dependencies: libxfce4windowing_dep,
     gobject_typesfile: 'libxfce4windowing.types',
     fixxref_args: libxfce4windowing_doc_fixxref_args,
