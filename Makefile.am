@@ -11,6 +11,7 @@ SUBDIRS = \
 	tests
 
 EXTRA_DIST = \
+	$(XDT_GEN_VISIBILITY_DIST) \
 	README.md \
 	m4/introspection.m4 \
 	meson.build \

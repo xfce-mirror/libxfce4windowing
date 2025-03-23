@@ -189,10 +189,15 @@ XDT_FEATURE_LINKER_OPTS()
 dnl ****************************************
 dnl *** Check for ELF visibility support ***
 dnl ****************************************
-AC_PATH_PROG([XDT_GEN_VISIBILITY], [xdt-gen-visibility], [])
+AC_PATH_PROG([XDT_GEN_VISIBILITY], [xdt-gen-visibility], [], [$PWD:$PATH])
 if test x"$XDT_GEN_VISIBILITY" = x""; then
     AC_MSG_ERROR([Unable to find xdt-gen-visibility in your PATH. Ensure that a recent enough version of xfce4-dev-tools is installed and try again.])
+elif test x"$XDT_GEN_VISIBILITY" = x"$PWD/xdt-gen-visibility"; then
+    XDT_GEN_VISIBILITY_DIST="xdt-gen-visibility"
+else
+    XDT_GEN_VISIBILITY_DIST=""
 fi
+AC_SUBST([XDT_GEN_VISIBILITY_DIST])
 AC_SUBST([XDT_GEN_VISIBILITY])
 
 AC_ARG_ENABLE([visibility],
