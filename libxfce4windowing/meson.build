@@ -98,14 +98,13 @@ windowing_config_h = configure_file(
 windowing_public_sources += windowing_config_h
 windowing_sources += windowing_config_h
 
-windowing_link_depends = []
-windowing_link_depends += custom_target(
+windowing_sources += custom_target(
   'libxfce4windowing-visibility.h',
   input: 'libxfce4windowing.symbols',
   output: 'libxfce4windowing-visibility.h',
   command: [xdt_gen_visibility, '--kind=header', '@INPUT@', '@OUTPUT@'],
 )
-windowing_link_depends += custom_target(
+windowing_sources += custom_target(
   'libxfce4windowing-visibility.c',
   input: 'libxfce4windowing.symbols',
   output: 'libxfce4windowing-visibility.c',
@@ -133,7 +132,6 @@ libxfce4windowing = library(
   ],
   gnu_symbol_visibility: gnu_symbol_visibility,
   dependencies: windowing_deps,
-  link_depends: windowing_link_depends,
   install: true,
 )
 
