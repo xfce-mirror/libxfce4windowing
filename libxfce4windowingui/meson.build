@@ -27,14 +27,14 @@ windowingui_sources += configure_file(
   install_dir: get_option('prefix') / get_option('includedir') / 'xfce4' / libxfce4windowing_pkgname / 'libxfce4windowingui',
 )
 
-windowingui_link_depends = []
-windowingui_link_depends += custom_target(
+windowingui_visibility = []
+windowingui_visibility += custom_target(
   'libxfce4windowingui-visibility.h',
   input: 'libxfce4windowingui.symbols',
   output: 'libxfce4windowingui-visibility.h',
   command: [xdt_gen_visibility, '--kind=header', '@INPUT@', '@OUTPUT@'],
 )
-windowingui_link_depends += custom_target(
+windowingui_visibility += custom_target(
   'libxfce4windowingui-visibility.c',
   input: 'libxfce4windowingui.symbols',
   output: 'libxfce4windowingui-visibility.c',
@@ -42,7 +42,8 @@ windowingui_link_depends += custom_target(
 )
 
 windowingui_deps = [
-  gtk
+  gtk,
+  declare_dependency(sources: windowingui_visibility),
 ]
 
 libxfce4windowingui = library(
@@ -61,7 +62,6 @@ libxfce4windowingui = library(
   link_with: [
     libxfce4windowing,
   ],
-  link_depends: windowingui_link_depends,
   install: true,
 )
 
