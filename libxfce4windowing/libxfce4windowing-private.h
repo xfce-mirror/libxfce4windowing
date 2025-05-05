@@ -129,6 +129,7 @@ void _libxfce4windowing_init(void);
 
 GDesktopAppInfo *_xfw_g_desktop_app_info_get(const gchar *app_id);
 GdkPixbuf *_xfw_gicon_load(GIcon *gicon, gint size, gint scale);
+GIcon *_xfw_g_icon_new(const gchar *icon_name);
 
 void _xfw_workspace_manager_install_properties(GObjectClass *gklass);
 void _xfw_workspace_group_install_properties(GObjectClass *gklass);

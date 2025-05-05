@@ -79,24 +79,23 @@ _xfw_wnck_object_get_gicon(GObject *wnck_object,
                            const gchar *primary_icon_name,
                            const gchar *secondary_icon_name,
                            const gchar *fallback_icon_name) {
-    GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
+    GIcon *icon;
 
     g_return_val_if_fail(WNCK_IS_WINDOW(wnck_object) || WNCK_IS_CLASS_GROUP(wnck_object), NULL);
     g_return_val_if_fail(fallback_icon_name != NULL, NULL);
 
-    if (primary_icon_name != NULL && gtk_icon_theme_has_icon(icon_theme, primary_icon_name)) {
-        return g_themed_icon_new(primary_icon_name);
-    } else {
-        XfwWnckIcon *wnck_icon = _xfw_wnck_icon_new(wnck_object);
-
-        if (G_LIKELY(wnck_icon != NULL)) {
-            return G_ICON(wnck_icon);
-        } else if (secondary_icon_name != NULL && gtk_icon_theme_has_icon(icon_theme, secondary_icon_name)) {
-            return g_themed_icon_new(secondary_icon_name);
-        } else {
-            return g_themed_icon_new_with_default_fallbacks(fallback_icon_name);
+    icon = _xfw_g_icon_new(primary_icon_name);
+    if (icon == NULL) {
+        icon = G_ICON(_xfw_wnck_icon_new(wnck_object));
+        if (G_UNLIKELY(icon == NULL)) {
+            icon = _xfw_g_icon_new(secondary_icon_name);
+            if (icon == NULL) {
+                icon = g_themed_icon_new_with_default_fallbacks(fallback_icon_name);
+            }
         }
     }
+
+    return icon;
 }
 #endif
 
@@ -158,4 +157,22 @@ _xfw_gicon_load(GIcon *gicon, gint size, gint scale) {
     }
 
     return icon;
+}
+
+GIcon *
+_xfw_g_icon_new(const gchar *icon_name) {
+    if (icon_name != NULL) {
+        if (gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), icon_name)) {
+            return g_themed_icon_new(icon_name);
+        } else if (g_path_is_absolute(icon_name)
+                   && g_file_test(icon_name, G_FILE_TEST_IS_REGULAR))
+        {
+            GFile *file = g_file_new_for_path(icon_name);
+            GIcon *icon = g_file_icon_new(file);
+            g_object_unref(file);
+            return icon;
+        }
+    }
+
+    return NULL;
 }

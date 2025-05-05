@@ -265,10 +265,5 @@ _xfw_application_wayland_get(XfwWindowWayland *window, const gchar *app_id) {
 GIcon *
 _xfw_application_wayland_get_gicon_no_fallback(XfwApplicationWayland *app) {
     XfwApplicationWaylandPrivate *priv = XFW_APPLICATION_WAYLAND(app)->priv;
-
-    if (priv->icon_name != NULL && gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), priv->icon_name)) {
-        return g_themed_icon_new(priv->icon_name);
-    } else {
-        return NULL;
-    }
+    return _xfw_g_icon_new(priv->icon_name);
 }
