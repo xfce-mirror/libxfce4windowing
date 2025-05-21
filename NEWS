@@ -1,3 +1,24 @@
+4.20.3 (2025-05-21)
+======
+- Support absolute icon paths
+- meson-build: Add GNU visibility files to sources
+- I18n: Update po/LINGUAS list
+- autotools-build: Search for xdt-gen-visibility also in the working 
+tree
+- build: Automate copyright year management
+- docs: Fix warnings
+- XfwWindowX11: Fix memory leak
+- Try to match the app id in lower case to find the .desktop file
+- XfwWindowX11: Keep a ref on workspace
+- XfwWnckIcon: Fix wrong compare func
+- meson-build: Add missing conditional for ext-workspace
+- meson-build: Reintroduce tests option
+- meson-build: Use SPDX license expression
+- meson-build: Specify wayland-scanner as a native dependency
+- meson-build: Update debug/optimization flag management
+- Translation Updates:
+  Georgian
+
 4.20.2 (2025-02-02)
 ======
 - autotools-build: Unconditionally add ext-workspace-v1.xml to 
