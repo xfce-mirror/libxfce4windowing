@@ -193,6 +193,25 @@ if get_option('introspection')
   )
 
   libxfce4windowing_gir_dep = declare_dependency(sources: libxfce4windowing_gir)
+
+  if generate_vala
+    vapi_packages = [
+      'gio-2.0',
+      'gobject-2.0',
+      'gtk+-3.0'
+    ]
+
+    if enable_x11
+      vapi_packages += 'libwnck-3.0'
+    endif
+
+    libxfce4windowing_vapi = gnome.generate_vapi(
+      libxfce4windowing_pkgname,
+      sources: libxfce4windowing_gir[0],
+      packages: vapi_packages,
+      install: true,
+    )
+  endif
 endif
 
 libxfce4windowing_dep = declare_dependency(

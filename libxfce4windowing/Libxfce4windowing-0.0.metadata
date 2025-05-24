@@ -1,0 +1,17 @@
+Application
+    .get_instance.window type="Xfw.Window"
+    .instances type="unowned GLib.List<Xfw.ApplicationInstance>?"
+    .windows type="unowned GLib.List<Xfw.Window>"
+
+Window
+    .get_screen type="Xfw.Screen"
+    .monitors type="unowned GLib.List<Xfw.Monitor>?"
+
+Workspace
+    .assign_to_workspace_group.group type="Xfw.WorkspaceGroup"
+    .get_workspace_group type="unowned Xfw.WorkspaceGroup"
+
+WorkspaceGroup
+    .get_workspace_manager type="unowned Xfw.WorkspaceManager"
+    .monitors type="unowned GLib.List<Xfw.Monitor>?"
+    .workspaces type="unowned GLib.List<Xfw.Workspace>?"
