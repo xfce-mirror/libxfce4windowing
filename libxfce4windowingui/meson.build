@@ -7,10 +7,14 @@ windowingui_headers = [
   'xfw-window-list-menu.h',
 ]
 
-windowingui_public_sources = [
-  'libxfce4windowingui-config.c',
+windowingui_gir_sources = [
   'xfw-window-action-menu.c',
   'xfw-window-list-menu.c',
+]
+
+windowingui_sources = windowingui_gir_sources
+windowingui_sources += [
+  'libxfce4windowingui-config.c',
 ]
 
 windowingui_config_data = configuration_data({
@@ -19,7 +23,7 @@ windowingui_config_data = configuration_data({
   'LIBXFCE4WINDOWINGUI_VERSION_MICRO': version_parts[2],
 })
 
-windowingui_public_sources += configure_file(
+windowingui_sources += configure_file(
   configuration: windowingui_config_data,
   input: 'libxfce4windowingui-config.h.in',
   output: 'libxfce4windowingui-config.h',
@@ -27,7 +31,6 @@ windowingui_public_sources += configure_file(
   install_dir: get_option('prefix') / get_option('includedir') / 'xfce4' / libxfce4windowing_pkgname / 'libxfce4windowingui',
 )
 
-windowingui_sources = windowingui_public_sources
 windowingui_sources += configure_file(
   input: 'libxfce4windowingui.symbols',
   output: 'libxfce4windowingui-visibility.h',
@@ -78,11 +81,9 @@ pkgconfig.generate(
 )
 
 if get_option('introspection')
-  windowingui_gir_sources = windowingui_public_sources + windowingui_headers
-
-  gnome.generate_gir(
+  libxfce4windowingui_gir = gnome.generate_gir(
     libxfce4windowingui,
-    sources: windowingui_gir_sources,
+    sources: windowingui_gir_sources + windowingui_headers,
     namespace: 'Libxfce4windowingui',
     nsversion: '0.0',
     identifier_prefix: [
@@ -107,6 +108,20 @@ if get_option('introspection')
       '-DLIBXFCE4WINDOWINGUI_COMPILATION=1',
     ],
   )
+
+  if generate_vala
+    gnome.generate_vapi(
+      libxfce4windowingui_pkgname,
+      sources: libxfce4windowingui_gir[0],
+      packages: [
+        'gio-2.0',
+        'gobject-2.0',
+        'gtk+-3.0',
+        libxfce4windowing_vapi,
+      ],
+      install: true,
+    )
+  endif
 endif
 
 libxfce4windowingui_dep = declare_dependency(

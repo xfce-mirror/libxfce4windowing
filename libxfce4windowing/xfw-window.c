@@ -380,7 +380,7 @@ xfw_window_class_init(XfwWindowClass *klass) {
                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
-     * XfwWindow:monitors:
+     * XfwWindow:monitors: (type GList(XfwMonitor))
      *
      * The list of #XfwMonitor<!-- -->s (if any) that the window is displayed on.
      **/

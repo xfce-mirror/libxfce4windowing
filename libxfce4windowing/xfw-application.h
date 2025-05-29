@@ -30,7 +30,7 @@
 G_BEGIN_DECLS
 
 /* fwd decl */
-struct _XfwWindow;
+typedef struct _XfwWindow XfwWindow;
 
 #define XFW_TYPE_APPLICATION (xfw_application_get_type())
 G_DECLARE_DERIVABLE_TYPE(XfwApplication, xfw_application, XFW, APPLICATION, GObject)
@@ -49,7 +49,7 @@ GIcon *xfw_application_get_gicon(XfwApplication *app);
 gboolean xfw_application_icon_is_fallback(XfwApplication *app);
 GList *xfw_application_get_windows(XfwApplication *app);
 GList *xfw_application_get_instances(XfwApplication *app);
-XfwApplicationInstance *xfw_application_get_instance(XfwApplication *app, struct _XfwWindow *window);
+XfwApplicationInstance *xfw_application_get_instance(XfwApplication *app, XfwWindow *window);
 
 gint xfw_application_instance_get_pid(XfwApplicationInstance *instance);
 const gchar *xfw_application_instance_get_name(XfwApplicationInstance *instance);

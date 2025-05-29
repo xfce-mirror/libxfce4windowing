@@ -102,6 +102,12 @@ if not enable_x11 and not enable_wayland
   error('At least one of the X11 and Wayland backends must be enabled')
 endif
 
+vapigen = find_program('vapigen', required: get_option('vala'))
+if get_option('vala').enabled()
+  assert(get_option('introspection'), 'Building Vala bindings requires building GObject introspection data')
+endif
+generate_vala = not get_option('vala').disabled() and vapigen.found()
+
 gnu_symbol_visibility = 'default'
 if get_option('visibility')
   gnu_symbol_visibility = 'hidden'
