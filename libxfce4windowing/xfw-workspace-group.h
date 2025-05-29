@@ -28,7 +28,7 @@
 #include <libxfce4windowing/xfw-workspace.h>
 
 /* fwd decl */
-struct _XfwWorkspaceManager;
+typedef struct _XfwWorkspaceManager XfwWorkspaceManager;
 
 G_BEGIN_DECLS
 
@@ -67,7 +67,7 @@ guint xfw_workspace_group_get_workspace_count(XfwWorkspaceGroup *group);
 GList *xfw_workspace_group_list_workspaces(XfwWorkspaceGroup *group);
 XfwWorkspace *xfw_workspace_group_get_active_workspace(XfwWorkspaceGroup *group);
 GList *xfw_workspace_group_get_monitors(XfwWorkspaceGroup *group);
-struct _XfwWorkspaceManager *xfw_workspace_group_get_workspace_manager(XfwWorkspaceGroup *group);
+XfwWorkspaceManager *xfw_workspace_group_get_workspace_manager(XfwWorkspaceGroup *group);
 
 gboolean xfw_workspace_group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 gboolean xfw_workspace_group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);

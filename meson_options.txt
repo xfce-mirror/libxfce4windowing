@@ -27,6 +27,13 @@ option(
 )
 
 option(
+  'vala',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build Vala language bindings',
+)
+
+option(
   'visibility',
   type: 'boolean',
   value: true,

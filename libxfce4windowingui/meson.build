@@ -80,7 +80,7 @@ pkgconfig.generate(
 if get_option('introspection')
   windowingui_gir_sources = windowingui_public_sources + windowingui_headers
 
-  gnome.generate_gir(
+  libxfce4windowingui_gir = gnome.generate_gir(
     libxfce4windowingui,
     sources: windowingui_gir_sources,
     namespace: 'Libxfce4windowingui',
@@ -107,6 +107,20 @@ if get_option('introspection')
       '-DLIBXFCE4WINDOWINGUI_COMPILATION=1',
     ],
   )
+
+  if generate_vala
+    gnome.generate_vapi(
+      libxfce4windowingui_pkgname,
+      sources: libxfce4windowingui_gir[0],
+      packages: [
+        'gio-2.0',
+        'gobject-2.0',
+        'gtk+-3.0',
+        libxfce4windowing_vapi,
+      ],
+      install: true,
+    )
+  endif
 endif
 
 libxfce4windowingui_dep = declare_dependency(
