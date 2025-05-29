@@ -32,7 +32,7 @@
 G_BEGIN_DECLS
 
 /* fwd decl */
-struct _XfwScreen;
+typedef struct _XfwScreen XfwScreen;
 
 #define XFW_TYPE_WINDOW (xfw_window_get_type())
 G_DECLARE_DERIVABLE_TYPE(XfwWindow, xfw_window, XFW, WINDOW, GObject)
@@ -158,7 +158,7 @@ XfwWindowType xfw_window_get_window_type(XfwWindow *window);
 XfwWindowState xfw_window_get_state(XfwWindow *window);
 XfwWindowCapabilities xfw_window_get_capabilities(XfwWindow *window);
 GdkRectangle *xfw_window_get_geometry(XfwWindow *window);
-struct _XfwScreen *xfw_window_get_screen(XfwWindow *window);
+XfwScreen *xfw_window_get_screen(XfwWindow *window);
 XfwWorkspace *xfw_window_get_workspace(XfwWindow *window);
 GList *xfw_window_get_monitors(XfwWindow *window);
 XfwApplication *xfw_window_get_application(XfwWindow *window);
