@@ -126,7 +126,7 @@ xfw_application_class_init(XfwApplicationClass *klass) {
                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
-     * XfwApplication:windows:
+     * XfwApplication:windows: (type GList(XfwWindow))
      *
      * The list of #XfwWindow belonging to the application.
      **/
@@ -138,7 +138,7 @@ xfw_application_class_init(XfwApplicationClass *klass) {
                                                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
-     * XfwApplication:instances:
+     * XfwApplication:instances: (type GList(XfwApplicationInstance))
      *
      * The list of #XfwApplicationInstance belonging to the application.
      **/
