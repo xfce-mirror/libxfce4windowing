@@ -214,9 +214,11 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 
     /**
-     * XfwWorkspaceGroup:workspaces:
+     * XfwWorkspaceGroup:workspaces: (type GList(XfwWorkspace))
      *
      * The list of #XfwWorkspace in this #XfwWorkspaceGroup.
+     *
+     * Return value: (nullable) (transfer none)
      **/
     g_object_interface_install_property(iface,
                                         g_param_spec_pointer("workspaces",
@@ -237,9 +239,11 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                             G_PARAM_READABLE));
 
     /**
-     * XfwWorkspaceGroup:monitors:
+     * XfwWorkspaceGroup:monitors: (type GList(XfwMonitor))
      *
      * The list of #XfwMonitor this #XfwWorkspaceGroup is displayed on.
+     *
+     * Return value: (nullable) (transfer none)
      **/
     g_object_interface_install_property(iface,
                                         g_param_spec_pointer("monitors",
