@@ -348,7 +348,6 @@ xfw_workspace_x11_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspac
 
 static void
 name_changed(WnckWorkspace *wnck_workspace, XfwWorkspaceX11 *workspace) {
-    g_object_notify(G_OBJECT(workspace), "id");
     g_object_notify(G_OBJECT(workspace), "name");
     g_signal_emit_by_name(workspace, "name-changed");
 }
