@@ -162,7 +162,6 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
             workspace->priv->handle = g_value_get_pointer(value);
             break;
 
-        case WORKSPACE_PROP_GROUP:
         case WORKSPACE_PROP_ID:
             g_free(workspace->priv->id);
             workspace->priv->id = g_value_dup_string(value);
@@ -171,6 +170,7 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
             g_free(workspace->priv->name);
             workspace->priv->name = g_value_dup_string(value);
             break;
+        case WORKSPACE_PROP_GROUP:
         case WORKSPACE_PROP_CAPABILITIES:
         case WORKSPACE_PROP_STATE:
         case WORKSPACE_PROP_NUMBER:
