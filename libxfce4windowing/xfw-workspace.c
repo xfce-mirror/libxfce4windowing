@@ -156,7 +156,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                             "id",
                                                             "id",
                                                             "",
-                                                            G_PARAM_READABLE));
+                                                            G_PARAM_READWRITE));
 
     /**
      * XfwWorkspace:name:
