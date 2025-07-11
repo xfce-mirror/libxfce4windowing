@@ -54,6 +54,10 @@ struct _XfwScreenWayland {
     uint32_t toplevel_manager_version;
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
 
+    gboolean defer_workspace_manager;
+    uint32_t workspace_manager_id;
+    uint32_t workspace_manager_version;
+
     GList *windows;
     GList *windows_stacked;
     GHashTable *wl_windows;
@@ -76,6 +80,7 @@ static void show_desktop_disconnect(gpointer object, gpointer data);
 static void async_roundtrip_done(void *data, struct wl_callback *callback, uint32_t callback_id);
 
 static void init_toplevel_manager(XfwScreenWayland *screen);
+static void init_workspace_manager(XfwScreenWayland *screen);
 
 static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
 static void registry_global_remove(void *data, struct wl_registry *registry, uint32_t id);
@@ -114,6 +119,7 @@ xfw_screen_wayland_class_init(XfwScreenWaylandClass *klass) {
 static void
 xfw_screen_wayland_init(XfwScreenWayland *screen) {
     screen->defer_toplevel_manager = TRUE;
+    screen->defer_workspace_manager = TRUE;
     screen->wl_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
 }
 
@@ -136,12 +142,16 @@ xfw_screen_wayland_constructed(GObject *obj) {
         wl_display_dispatch(wscreen->wl_display);
     }
 
-    // We defer binding to the toplevel manager until after we have all
+    // We defer binding to the toplevel and workspace managers until after we have all
     // XfwMonitor instances initialized.  Otherwise, we would get output_enter
-    // events for toplevels, but have no XfwMonitor to match them to.
+    // events for toplevels or workspace groups, but have no XfwMonitor to match them to.
     wscreen->defer_toplevel_manager = FALSE;
     if (wscreen->toplevel_manager_id != 0 && wscreen->toplevel_manager_version != 0) {
         init_toplevel_manager(wscreen);
+    }
+    wscreen->defer_workspace_manager = FALSE;
+    if (wscreen->workspace_manager_id != 0 && wscreen->workspace_manager_version != 0) {
+        init_workspace_manager(wscreen);
     }
 
     if (wscreen->toplevel_manager != NULL) {
@@ -152,7 +162,11 @@ xfw_screen_wayland_constructed(GObject *obj) {
         g_message("Your compositor does not support the wlr_foreign_toplevel_manager_v1 protocol");
     }
 
-    if (xfw_screen_get_workspace_manager(XFW_SCREEN(screen)) == NULL) {
+    if (xfw_screen_get_workspace_manager(XFW_SCREEN(screen)) != NULL) {
+        while (wscreen->async_roundtrips != NULL) {
+            wl_display_dispatch(wscreen->wl_display);
+        }
+    } else {
         g_message("Your compositor does not support the ext_workspace_manager_v1 protocol");
         _xfw_screen_set_workspace_manager(XFW_SCREEN(screen), _xfw_workspace_manager_dummy_new(screen));
     }
@@ -304,6 +318,22 @@ init_toplevel_manager(XfwScreenWayland *screen) {
     add_async_roundtrip(screen);
 }
 
+static void
+init_workspace_manager(XfwScreenWayland *screen) {
+    g_return_if_fail(!screen->defer_workspace_manager);
+    g_return_if_fail(screen->workspace_manager_id != 0);
+    g_return_if_fail(screen->workspace_manager_version != 0);
+    g_return_if_fail(xfw_screen_get_workspace_manager(XFW_SCREEN(screen)) == NULL);
+
+    struct ext_workspace_manager_v1 *wl_workspace_manager = wl_registry_bind(screen->wl_registry,
+                                                                             screen->workspace_manager_id,
+                                                                             &ext_workspace_manager_v1_interface,
+                                                                             MIN((uint32_t)ext_workspace_manager_v1_interface.version,
+                                                                                 screen->workspace_manager_version));
+    _xfw_screen_set_workspace_manager(XFW_SCREEN(screen), _xfw_workspace_manager_wayland_new(screen, wl_workspace_manager));
+    add_async_roundtrip(screen);
+}
+
 
 static void
 registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version) {
@@ -325,12 +355,11 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
         if (xfw_screen_get_workspace_manager(screen) != NULL) {
             g_message("Already have a workspace manager, but got a new ext_workspace_manager_v1 global");
         } else {
-            struct ext_workspace_manager_v1 *wl_workspace_manager = wl_registry_bind(registry,
-                                                                                     id,
-                                                                                     &ext_workspace_manager_v1_interface,
-                                                                                     MIN((uint32_t)ext_workspace_manager_v1_interface.version, version));
-            _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_wayland_new(wscreen, wl_workspace_manager));
-            add_async_roundtrip(wscreen);
+            wscreen->workspace_manager_id = id;
+            wscreen->workspace_manager_version = version;
+            if (!wscreen->defer_workspace_manager) {
+                init_workspace_manager(wscreen);
+            }
         }
     } else if (strcmp(wl_output_interface.name, interface) == 0) {
         struct wl_output *output = wl_registry_bind(registry, id, &wl_output_interface, MIN(version, 4));
