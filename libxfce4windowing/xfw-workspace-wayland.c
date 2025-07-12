@@ -162,15 +162,12 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
             workspace->priv->handle = g_value_get_pointer(value);
             break;
 
-        case WORKSPACE_PROP_GROUP:
-        case WORKSPACE_PROP_ID:
-            g_free(workspace->priv->id);
-            workspace->priv->id = g_value_dup_string(value);
-            break;
         case WORKSPACE_PROP_NAME:
             g_free(workspace->priv->name);
             workspace->priv->name = g_value_dup_string(value);
             break;
+        case WORKSPACE_PROP_GROUP:
+        case WORKSPACE_PROP_ID:
         case WORKSPACE_PROP_CAPABILITIES:
         case WORKSPACE_PROP_STATE:
         case WORKSPACE_PROP_NUMBER:
@@ -369,7 +366,9 @@ xfw_workspace_wayland_assign_to_workspace_group(XfwWorkspace *workspace, XfwWork
 static void
 workspace_id(void *data, struct ext_workspace_handle_v1 *wl_workspace, const char *id) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
-    g_object_set(workspace, "id", id, NULL);
+    g_free(workspace->priv->id);
+    workspace->priv->id = g_strdup(id);
+    g_object_notify(G_OBJECT(workspace), "id");
 }
 
 static void
