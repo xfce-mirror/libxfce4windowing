@@ -614,8 +614,12 @@ _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_ma
         if (wl_proxy_get_id((struct wl_proxy *)output) == id) {
             if (monitor->xdg_output != NULL) {
                 g_hash_table_remove(monitor_manager->xdg_outputs_to_monitors, monitor->xdg_output);
+                g_clear_pointer(&monitor->xdg_output, zxdg_output_v1_destroy);
             }
+
             g_hash_table_remove(monitor_manager->outputs_to_monitors, output);
+            gboolean has_release = wl_proxy_get_version((struct wl_proxy *)monitor->output) >= WL_OUTPUT_RELEASE_SINCE_VERSION;
+            g_clear_pointer(&monitor->output, has_release ? wl_output_release : wl_output_destroy);
 
             GList removed = { NULL, NULL, NULL };
             GList *monitors = _xfw_screen_steal_monitors(monitor_manager->screen);
