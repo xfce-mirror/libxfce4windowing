@@ -73,7 +73,7 @@ static XfwWorkspaceGroup *xfw_workspace_wayland_get_workspace_group(XfwWorkspace
 static gint xfw_workspace_wayland_get_layout_row(XfwWorkspace *workspace);
 static gint xfw_workspace_wayland_get_layout_column(XfwWorkspace *workspace);
 static XfwWorkspace *xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection direction);
-static GdkRectangle *xfw_workspace_x11_get_geometry(XfwWorkspace *workspace);
+static GdkRectangle *xfw_workspace_wayland_get_geometry(XfwWorkspace *workspace);
 static gboolean xfw_workspace_wayland_activate(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_wayland_remove(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_wayland_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
@@ -148,7 +148,7 @@ xfw_workspace_wayland_workspace_init(XfwWorkspaceIface *iface) {
     iface->get_layout_row = xfw_workspace_wayland_get_layout_row;
     iface->get_layout_column = xfw_workspace_wayland_get_layout_column;
     iface->get_neighbor = xfw_workspace_wayland_get_neighbor;
-    iface->get_geometry = xfw_workspace_x11_get_geometry;
+    iface->get_geometry = xfw_workspace_wayland_get_geometry;
     iface->activate = xfw_workspace_wayland_activate;
     iface->remove = xfw_workspace_wayland_remove;
     iface->assign_to_workspace_group = xfw_workspace_wayland_assign_to_workspace_group;
@@ -309,7 +309,7 @@ xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection directi
 }
 
 static GdkRectangle *
-xfw_workspace_x11_get_geometry(XfwWorkspace *workspace) {
+xfw_workspace_wayland_get_geometry(XfwWorkspace *workspace) {
     // probably something to do with coordinates and outputs if needed
     return &XFW_WORKSPACE_WAYLAND(workspace)->priv->geometry;
 }
