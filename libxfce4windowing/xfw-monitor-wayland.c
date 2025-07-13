@@ -85,10 +85,12 @@ xfw_monitor_wayland_finalize(GObject *object) {
     XfwMonitorWayland *monitor = XFW_MONITOR_WAYLAND(object);
 
     if (monitor->xdg_output != NULL) {
+        wl_proxy_set_user_data((struct wl_proxy *)monitor->xdg_output, NULL);
         zxdg_output_v1_destroy(monitor->xdg_output);
     }
 
     if (monitor->output != NULL) {
+        wl_proxy_set_user_data((struct wl_proxy *)monitor->output, NULL);
         if (wl_proxy_get_version((struct wl_proxy *)monitor->output) >= WL_OUTPUT_RELEASE_SINCE_VERSION) {
             wl_output_release(monitor->output);
         } else {
@@ -425,29 +427,35 @@ finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *mo
 
 static void
 output_name(void *data, struct wl_output *output, const char *name) {
-    g_debug("output name for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
-    _xfw_monitor_set_connector(monitor, name);
+    if (data != NULL) {
+        g_debug("output name for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
+        _xfw_monitor_set_connector(monitor, name);
+    }
 }
 
 static void
 output_description(void *data, struct wl_output *output, const char *description) {
-    g_debug("output desc for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
-    _xfw_monitor_set_description(monitor, description);
+    if (data != NULL) {
+        g_debug("output desc for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
+        _xfw_monitor_set_description(monitor, description);
+    }
 }
 
 static void
 output_mode(void *data, struct wl_output *output, uint32_t flags, int32_t width, int32_t height, int32_t refresh) {
-    g_debug("output mode for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
-    if ((flags & WL_OUTPUT_MODE_CURRENT) != 0) {
-        XfwMonitorManagerWayland *monitor_manager = data;
-        XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
-        monitor->physical_geometry.width = width;
-        monitor->physical_geometry.height = height;
-        _xfw_monitor_set_refresh(XFW_MONITOR(monitor), refresh);
+    if (data != NULL) {
+        g_debug("output mode for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
+        if ((flags & WL_OUTPUT_MODE_CURRENT) != 0) {
+            XfwMonitorManagerWayland *monitor_manager = data;
+            XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
+            monitor->physical_geometry.width = width;
+            monitor->physical_geometry.height = height;
+            _xfw_monitor_set_refresh(XFW_MONITOR(monitor), refresh);
+        }
     }
 }
 
@@ -462,45 +470,51 @@ output_geometry(void *data,
                 const char *make,
                 const char *model,
                 int32_t transform) {
-    g_debug("output geom for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
-    XfwMonitorWayland *monitor_wl = XFW_MONITOR_WAYLAND(monitor);
+    if (data != NULL) {
+        g_debug("output geom for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
+        XfwMonitorWayland *monitor_wl = XFW_MONITOR_WAYLAND(monitor);
 
-    monitor_wl->physical_geometry.x = x;
-    monitor_wl->physical_geometry.y = y;
+        monitor_wl->physical_geometry.x = x;
+        monitor_wl->physical_geometry.y = y;
 
-    _xfw_monitor_set_physical_size(monitor, physical_width, physical_height);
-    _xfw_monitor_set_make(monitor, make);
-    _xfw_monitor_set_model(monitor, model);
-    _xfw_monitor_set_subpixel(monitor, xfw_subpixel_from_wayland(subpixel));
-    _xfw_monitor_set_transform(monitor, xfw_transform_from_wayland(transform));
+        _xfw_monitor_set_physical_size(monitor, physical_width, physical_height);
+        _xfw_monitor_set_make(monitor, make);
+        _xfw_monitor_set_model(monitor, model);
+        _xfw_monitor_set_subpixel(monitor, xfw_subpixel_from_wayland(subpixel));
+        _xfw_monitor_set_transform(monitor, xfw_transform_from_wayland(transform));
+    }
 }
 
 static void
 output_scale(void *data, struct wl_output *output, int32_t scale) {
-    g_debug("output scale for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
-    _xfw_monitor_set_scale(monitor, scale);
+    if (data != NULL) {
+        g_debug("output scale for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
+        _xfw_monitor_set_scale(monitor, scale);
+    }
 }
 
 static void
 output_done(void *data, struct wl_output *output) {
-    g_debug("output done for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
-    monitor->output_dones++;
+    if (data != NULL) {
+        g_debug("output done for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
+        monitor->output_dones++;
 
-    if (monitor_manager->xdg_output_manager == NULL
-        || (wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) >= 3 && monitor->output_dones >= 2)
-        || monitor->xdg_output_done)
-    {
-        g_debug("finalizing output because: xdg_op_mgr=%p, xdg_op_mgr_vers=%d, xdg_op_done=%d",
-                monitor_manager->xdg_output_manager,
-                monitor_manager->xdg_output_manager != NULL ? (int)wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) : -1,
-                monitor->xdg_output_done);
-        finalize_output(monitor_manager, monitor);
+        if (monitor_manager->xdg_output_manager == NULL
+            || (wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) >= 3 && monitor->output_dones >= 2)
+            || monitor->xdg_output_done)
+        {
+            g_debug("finalizing output because: xdg_op_mgr=%p, xdg_op_mgr_vers=%d, xdg_op_done=%d",
+                    monitor_manager->xdg_output_manager,
+                    monitor_manager->xdg_output_manager != NULL ? (int)wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) : -1,
+                    monitor->xdg_output_done);
+            finalize_output(monitor_manager, monitor);
+        }
     }
 }
 
@@ -515,47 +529,57 @@ static const struct wl_output_listener output_listener = {
 
 static void
 xdg_output_name(void *data, struct zxdg_output_v1 *xdg_output, const char *name) {
-    g_debug("xdg output name for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
-    _xfw_monitor_set_connector(monitor, name);
+    if (data != NULL) {
+        g_debug("xdg output name for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
+        _xfw_monitor_set_connector(monitor, name);
+    }
 }
 
 static void
 xdg_output_description(void *data, struct zxdg_output_v1 *xdg_output, const char *description) {
-    g_debug("xdg output desc for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
-    _xfw_monitor_set_description(monitor, description);
+    if (data != NULL) {
+        g_debug("xdg output desc for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
+        _xfw_monitor_set_description(monitor, description);
+    }
 }
 
 static void
 xdg_output_logical_position(void *data, struct zxdg_output_v1 *xdg_output, int32_t x, int32_t y) {
-    g_debug("xdg output logpos for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
-    monitor->logical_geometry.x = x;
-    monitor->logical_geometry.y = y;
+    if (data != NULL) {
+        g_debug("xdg output logpos for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
+        monitor->logical_geometry.x = x;
+        monitor->logical_geometry.y = y;
+    }
 }
 
 static void
 xdg_output_logical_size(void *data, struct zxdg_output_v1 *xdg_output, int32_t width, int32_t height) {
-    g_debug("xdg output logsize for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
-    monitor->logical_geometry.width = width;
-    monitor->logical_geometry.height = height;
+    if (data != NULL) {
+        g_debug("xdg output logsize for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
+        monitor->logical_geometry.width = width;
+        monitor->logical_geometry.height = height;
+    }
 }
 
 static void
 xdg_output_done(void *data, struct zxdg_output_v1 *xdg_output) {
-    g_debug("xdg output done for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
-    XfwMonitorManagerWayland *monitor_manager = data;
-    XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
-    monitor->xdg_output_done = TRUE;
+    if (data != NULL) {
+        g_debug("xdg output done for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
+        XfwMonitorManagerWayland *monitor_manager = data;
+        XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
+        monitor->xdg_output_done = TRUE;
 
-    if (monitor->output_dones > 0 && wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) < 3) {
-        finalize_output(monitor_manager, monitor);
+        if (monitor->output_dones > 0 && wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) < 3) {
+            finalize_output(monitor_manager, monitor);
+        }
     }
 }
 
@@ -614,8 +638,12 @@ _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_ma
         if (wl_proxy_get_id((struct wl_proxy *)output) == id) {
             if (monitor->xdg_output != NULL) {
                 g_hash_table_remove(monitor_manager->xdg_outputs_to_monitors, monitor->xdg_output);
+                g_clear_pointer(&monitor->xdg_output, zxdg_output_v1_destroy);
             }
+
             g_hash_table_remove(monitor_manager->outputs_to_monitors, output);
+            gboolean has_release = wl_proxy_get_version((struct wl_proxy *)monitor->output) >= WL_OUTPUT_RELEASE_SINCE_VERSION;
+            g_clear_pointer(&monitor->output, has_release ? wl_output_release : wl_output_destroy);
 
             GList removed = { NULL, NULL, NULL };
             GList *monitors = _xfw_screen_steal_monitors(monitor_manager->screen);
