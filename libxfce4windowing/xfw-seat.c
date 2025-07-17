@@ -29,10 +29,6 @@
  * Mainly it is only needed when activating #XfwWindow instances.
  **/
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "xfw-seat-private.h"
 #include "libxfce4windowing-visibility.h"
 

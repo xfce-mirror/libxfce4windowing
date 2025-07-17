@@ -38,10 +38,6 @@
  * implements this interface will be returned.
  **/
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <gdk/gdk.h>
 
 #include "libxfce4windowing-private.h"
