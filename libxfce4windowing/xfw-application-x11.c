@@ -17,10 +17,6 @@
  * MA 02110-1301 USA
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxfce4windowing-private.h"
 #include "xfw-application-private.h"
 #include "xfw-application-x11.h"
