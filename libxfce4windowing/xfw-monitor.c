@@ -33,10 +33,6 @@
  * Since: 4.19.4
  **/
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxfce4windowing-private.h"
 #include "xfw-gdk-private.h"
 #include "xfw-monitor-private.h"
