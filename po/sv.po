@@ -80,8 +80,8 @@ msgstr "_Stäng"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Arbetsyta %d"
+msgid "Workspace %s%d"
+msgstr "Arbetsyta %s%d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

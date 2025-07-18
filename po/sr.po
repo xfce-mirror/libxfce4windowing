@@ -79,8 +79,8 @@ msgstr "_Затвори"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Радни простор %d"
+msgid "Workspace %s%d"
+msgstr "Радни простор %s%d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

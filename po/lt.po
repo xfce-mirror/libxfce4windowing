@@ -79,8 +79,8 @@ msgstr "_Užverti"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Darbo sritis %d"
+msgid "Workspace %s%d"
+msgstr "Darbo sritis %s%d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

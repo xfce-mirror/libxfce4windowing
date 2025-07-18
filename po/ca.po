@@ -80,8 +80,8 @@ msgstr "Tan_ca"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Espai de treball %d"
+msgid "Workspace %s%d"
+msgstr "Espai de treball %s%d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

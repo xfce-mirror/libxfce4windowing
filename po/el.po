@@ -79,8 +79,8 @@ msgstr "_Κλείσιμο"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Χώρος εργασίας %d"
+msgid "Workspace %s%d"
+msgstr "Χώρος εργασίας %s%d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

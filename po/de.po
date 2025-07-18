@@ -80,8 +80,8 @@ msgstr "S_chließen"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Arbeitsfläche %d"
+msgid "Workspace %s%d"
+msgstr "Arbeitsfläche %s%d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

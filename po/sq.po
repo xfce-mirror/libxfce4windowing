@@ -79,8 +79,8 @@ msgstr "_Mbylle"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Hapësira e punës %d"
+msgid "Workspace %s%d"
+msgstr "Hapësira e punës %s%d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

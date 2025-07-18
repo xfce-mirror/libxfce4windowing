@@ -79,8 +79,8 @@ msgstr "_Жабу"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Жұмыс орны %d"
+msgid "Workspace %s%d"
+msgstr "Жұмыс орны %s%d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

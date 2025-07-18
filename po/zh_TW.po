@@ -80,8 +80,8 @@ msgstr "關閉(_C)"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "工作空間 %d"
+msgid "Workspace %s%d"
+msgstr "工作空間 %s%d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"
