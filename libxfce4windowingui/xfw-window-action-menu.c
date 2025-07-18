@@ -485,6 +485,7 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                                         number < 10 ? "_" : "",
                                         number);
                 free_label = label;
+                item = gtk_menu_item_new_with_mnemonic(label);
 
             } else if ((digit = find_specific_lone_digit(label, number)) != NULL) {
                 // escape mnemonics
@@ -498,6 +499,7 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                     *new_label++ = *label++;
                 }
                 label = free_label;
+                item = gtk_menu_item_new_with_mnemonic(label);
 
             } else if (number < 10) {
                 // escape mnemonics and make space for " (_1)"
@@ -517,9 +519,12 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                 *new_label++ = ')';
                 *new_label++ = '\0';
                 label = free_label;
+                item = gtk_menu_item_new_with_mnemonic(label);
+
+            } else {
+                item = gtk_menu_item_new_with_label(label);
             }
 
-            item = gtk_menu_item_new_with_mnemonic(label);
             g_free(free_label);
             if (other_workspace == workspace) {
                 gtk_widget_set_sensitive(item, FALSE);
