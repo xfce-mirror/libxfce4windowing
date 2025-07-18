@@ -431,7 +431,7 @@ set_item_mnemonic(GtkWidget *item, const gchar *text) {
 }
 
 static gchar *
-find_specific_lone_digit(gchar *string, guint number) {
+find_specific_lone_digit(gchar *string, guint expected_number) {
     gchar *digit = NULL;
     for (gchar c; (c = *string) != '\0'; string++)
     {
@@ -443,7 +443,7 @@ find_specific_lone_digit(gchar *string, guint number) {
             digit = string;
         }
     }
-    if (digit && (guint)(*digit - '0') == number) {
+    if (digit && (guint)(*digit - '0') == expected_number) {
         return digit;
     }
     return NULL;
@@ -471,7 +471,7 @@ update_move_submenu(XfwWindowActionMenu *menu) {
              l = l->next)
         {
             XfwWorkspace *other_workspace = XFW_WORKSPACE(l->data);
-            gchar *label, *free_label = NULL;
+            gchar *label;
             XfwWindowWorkspaceMoveData *mdata = g_new0(XfwWindowWorkspaceMoveData, 1);
             mdata->window = menu->window;
             mdata->to.new_workspace = g_object_ref(other_workspace);
@@ -484,48 +484,33 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                 label = g_strdup_printf(_("Workspace %s%d"),
                                         number < 10 ? "_" : "",
                                         number);
-                free_label = label;
                 item = gtk_menu_item_new_with_mnemonic(label);
+                g_free(label);
+                label = NULL;
 
             } else if ((digit = find_specific_lone_digit(label, number)) != NULL) {
-                // escape mnemonics
-                gchar *new_label = g_malloc0(strlen(label) * 2 + 1);
-                free_label = new_label;
-                while (*label != '\0')
-                {
-                    if (*label == '_' || label == digit) {
-                        *new_label++ = '_';
-                    }
-                    *new_label++ = *label++;
-                }
-                label = free_label;
-                item = gtk_menu_item_new_with_mnemonic(label);
+                gssize insert_pos = digit - label;
+                // escape mnemonics and insert '_' before digit
+                GString *new_label = g_string_new(label);
+                g_string_replace(new_label, "_", "__", 0);
+                // need to find the digit again since replacements shift things around
+                insert_pos = strchr(new_label->str + insert_pos, *digit) - new_label->str;
+                g_string_insert_c(new_label, insert_pos, '_');
+                item = gtk_menu_item_new_with_mnemonic(new_label->str);
+                g_string_free(new_label, TRUE);
 
             } else if (number < 10) {
-                // escape mnemonics and make space for " (_1)"
-                gchar *new_label = g_malloc0(strlen(label) * 2 + 5 + 1);
-                free_label = new_label;
-                while (*label != '\0')
-                {
-                    if (*label == '_') {
-                        *new_label++ = '_';
-                    }
-                    *new_label++ = *label++;
-                }
-                *new_label++ = ' ';
-                *new_label++ = '(';
-                *new_label++ = '_';
-                *new_label++ = '0' + number;
-                *new_label++ = ')';
-                *new_label++ = '\0';
-                label = free_label;
-                item = gtk_menu_item_new_with_mnemonic(label);
+                // escape mnemonics and append " (_1)"
+                GString *new_label = g_string_new(label);
+                g_string_replace(new_label, "_", "__", 0);
+                g_string_append_printf(new_label, " (_%d)", number);
+                item = gtk_menu_item_new_with_mnemonic(new_label->str);
+                g_string_free(new_label, TRUE);
 
             } else {
                 item = gtk_menu_item_new_with_label(label);
             }
 
-            g_free(free_label);
             if (other_workspace == workspace) {
                 gtk_widget_set_sensitive(item, FALSE);
             }
