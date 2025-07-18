@@ -77,10 +77,15 @@ msgstr "Amovese a otra estaya de trabayu"
 msgid "_Close"
 msgstr "Zarrar (_c)"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:462
+#: libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "Estaya de trabayu %s%d"
+msgid "Workspace _%d"
+msgstr "Estaya de trabayu _%d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "Estaya de trabayu %d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

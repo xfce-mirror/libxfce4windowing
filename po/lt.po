@@ -77,10 +77,15 @@ msgstr "Perkelti į ki_tą darbo sritį"
 msgid "_Close"
 msgstr "_Užverti"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "Darbo sritis %s%d"
+msgid "Workspace _%d"
+msgstr "Darbo sritis _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "Darbo sritis %d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

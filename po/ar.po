@@ -77,10 +77,15 @@ msgstr "تحريك إلى مساحة عمل _أخرى"
 msgid "_Close"
 msgstr "_إغلاق"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:462
+#: libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "مساحة عمل %s%d"
+msgid "Workspace _%d"
+msgstr "مساحة عمل _%d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "مساحة عمل %d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

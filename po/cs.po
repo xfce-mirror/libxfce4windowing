@@ -78,10 +78,15 @@ msgstr "Přemístit na jin_ou pracovní plochu"
 msgid "_Close"
 msgstr "_Zavřít"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:462
+#: libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "Pracovní plocha %s%d"
+msgid "Workspace _%d"
+msgstr "Pracovní plocha _%d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "Pracovní plocha %d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

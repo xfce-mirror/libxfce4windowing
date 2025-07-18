@@ -77,10 +77,15 @@ msgstr "Pindah ke Ruang Kerja _Lainnya"
 msgid "_Close"
 msgstr "_Tutup"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "Ruang kerja %s%d"
+msgid "Workspace _%d"
+msgstr "Ruang kerja _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "Ruang kerja %d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

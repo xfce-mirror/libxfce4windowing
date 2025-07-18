@@ -77,10 +77,15 @@ msgstr "Mover a un altri la_bor-spacie"
 msgid "_Close"
 msgstr "_Cluder"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "Labor-spacie %s%d"
+msgid "Workspace _%d"
+msgstr "Labor-spacie _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "Labor-spacie %d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

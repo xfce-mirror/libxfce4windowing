@@ -77,10 +77,15 @@ msgstr "別のワークスペースに移動(_W)"
 msgid "_Close"
 msgstr "閉じる(_C)"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "ワークスペース %s%d"
+msgid "Workspace _%d"
+msgstr "ワークスペース _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "ワークスペース %d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

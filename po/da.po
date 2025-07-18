@@ -77,10 +77,15 @@ msgstr "Flyt til et andet _arbejdsområde"
 msgid "_Close"
 msgstr "_Luk"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:462
+#: libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "Arbejdsområde %s%d"
+msgid "Workspace _%d"
+msgstr "Arbejdsområde _%d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "Arbejdsområde %d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

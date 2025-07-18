@@ -481,8 +481,9 @@ update_move_submenu(XfwWindowActionMenu *menu) {
             gchar *digit;
             number += 1;
             if (label == NULL) {
-                label = g_strdup_printf(_("Workspace %s%d"),
-                                        number < 10 ? "_" : "",
+                label = g_strdup_printf(number < 10
+                                        ? _("Workspace _%d")
+                                        : _("Workspace %d"),
                                         number);
                 item = gtk_menu_item_new_with_mnemonic(label);
                 g_free(label);

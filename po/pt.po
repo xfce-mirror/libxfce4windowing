@@ -77,10 +77,15 @@ msgstr "Mover para outra área de _trabalho"
 msgid "_Close"
 msgstr "_Fechar"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "Área de trabalho %s%d"
+msgid "Workspace _%d"
+msgstr "Área de trabalho _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "Área de trabalho %d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

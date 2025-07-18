@@ -77,10 +77,15 @@ msgstr "Премести на неки други радни простор"
 msgid "_Close"
 msgstr "_Затвори"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "Радни простор %s%d"
+msgid "Workspace _%d"
+msgstr "Радни простор _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "Радни простор %d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

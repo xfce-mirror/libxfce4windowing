@@ -77,10 +77,15 @@ msgstr "Bog go Spás Oibre _Eile"
 msgid "_Close"
 msgstr "_Scoir"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:462
+#: libxfce4windowingui/xfw-window-action-menu.c:485
 #, c-format
-msgid "Workspace %s%d"
-msgstr "Spás Oibre %s%d"
+msgid "Workspace _%d"
+msgstr "Spás Oibre _%d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:486
+#, c-format
+msgid "Workspace %d"
+msgstr "Spás Oibre %d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"
