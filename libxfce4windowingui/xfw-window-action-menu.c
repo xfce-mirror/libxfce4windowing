@@ -431,20 +431,21 @@ set_item_mnemonic(GtkWidget *item, const gchar *text) {
 }
 
 static gchar *
-find_specific_lone_digit(gchar *string, guint number)
-{
+find_specific_lone_digit(gchar *string, guint number) {
     gchar *digit = NULL;
     for (gchar c; (c = *string) != '\0'; string++)
     {
         if (c >= '0' && c <= '9')
         {
-            if (digit)
+            if (digit) {
                 return NULL;
+            }
             digit = string;
         }
     }
-    if (digit && (guint)(*digit - '0') == number)
+    if (digit && (guint)(*digit - '0') == number) {
         return digit;
+    }
     return NULL;
 }
 
@@ -484,29 +485,29 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                                         number < 10 ? "_" : "",
                                         number);
                 free_label = label;
-            }
-            else if ((digit = find_specific_lone_digit(label, number)) != NULL)
-            {
+
+            } else if ((digit = find_specific_lone_digit(label, number)) != NULL) {
                 // escape mnemonics
-                gchar *new_label = g_malloc0(strlen(label)*2 + 1);
+                gchar *new_label = g_malloc0(strlen(label) * 2 + 1);
                 free_label = new_label;
                 while (*label != '\0')
                 {
-                    if (*label == '_' || label == digit)
+                    if (*label == '_' || label == digit) {
                         *new_label++ = '_';
+                    }
                     *new_label++ = *label++;
                 }
                 label = free_label;
-            }
-            else if (number < 10)
-            {
+
+            } else if (number < 10) {
                 // escape mnemonics and make space for " (_1)"
-                gchar *new_label = g_malloc0(strlen(label)*2 + 5 + 1);
+                gchar *new_label = g_malloc0(strlen(label) * 2 + 5 + 1);
                 free_label = new_label;
                 while (*label != '\0')
                 {
-                    if (*label == '_')
+                    if (*label == '_') {
                         *new_label++ = '_';
+                    }
                     *new_label++ = *label++;
                 }
                 *new_label++ = ' ';
