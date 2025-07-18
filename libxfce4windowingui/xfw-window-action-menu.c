@@ -488,7 +488,6 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                 item = gtk_menu_item_new_with_mnemonic(label);
                 g_free(label);
                 label = NULL;
-
             } else if ((digit = find_specific_lone_digit(label, number)) != NULL) {
                 gssize insert_pos = digit - label;
                 // escape mnemonics and insert '_' before digit
@@ -499,7 +498,6 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                 g_string_insert_c(new_label, insert_pos, '_');
                 item = gtk_menu_item_new_with_mnemonic(new_label->str);
                 g_string_free(new_label, TRUE);
-
             } else if (number < 10) {
                 // escape mnemonics and append " (_1)"
                 GString *new_label = g_string_new(label);
