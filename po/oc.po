@@ -79,8 +79,8 @@ msgstr "_Tampar"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Espaci de trabalh %d"
+msgid "Workspace %s%d"
+msgstr "Espaci de trabalh %s%d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

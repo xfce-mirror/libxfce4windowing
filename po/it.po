@@ -82,8 +82,8 @@ msgstr "_Chiudi"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Spazio di lavoro %d"
+msgid "Workspace %s%d"
+msgstr "Spazio di lavoro %s%d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

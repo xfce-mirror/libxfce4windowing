@@ -79,8 +79,8 @@ msgstr "_Tutup"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Ruang kerja %d"
+msgid "Workspace %s%d"
+msgstr "Ruang kerja %s%d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

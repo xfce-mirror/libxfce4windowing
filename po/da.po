@@ -79,8 +79,8 @@ msgstr "_Luk"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Arbejdsområde %d"
+msgid "Workspace %s%d"
+msgstr "Arbejdsområde %s%d"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

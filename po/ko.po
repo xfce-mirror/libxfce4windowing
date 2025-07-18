@@ -79,8 +79,8 @@ msgstr "닫기(_C)"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "작업 공간 %d번"
+msgid "Workspace %s%d"
+msgstr "작업 공간 %s%d번"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"

@@ -79,8 +79,8 @@ msgstr "_Sluiten"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
-msgid "Workspace %d"
-msgstr "Werkblad %d"
+msgid "Workspace %s%d"
+msgstr "Werkblad %s%d"
 
 #: ../libxfce4windowingui/xfw-window-action-menu.c:490
 msgid "Mi_nimize"
