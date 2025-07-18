@@ -79,7 +79,12 @@ msgstr "Переместить на другую рабо_чую область"
 msgid "_Close"
 msgstr "_Закрыть"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
+#, c-format
+msgid "Workspace _%d"
+msgstr "Рабочее место _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
 #, c-format
 msgid "Workspace %d"
 msgstr "Рабочее место %d"

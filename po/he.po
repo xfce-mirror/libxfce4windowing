@@ -77,7 +77,12 @@ msgstr "עבור לחל_ל עבודה אחר"
 msgid "_Close"
 msgstr "_סגור"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
+#, c-format
+msgid "Workspace _%d"
+msgstr "חלל עבודה _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
 #, c-format
 msgid "Workspace %d"
 msgstr "חלל עבודה %d"

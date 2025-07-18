@@ -77,7 +77,12 @@ msgstr "Desplaçar a un autre espaci"
 msgid "_Close"
 msgstr "_Tampar"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:462
+#: libxfce4windowingui/xfw-window-action-menu.c:485
+#, c-format
+msgid "Workspace _%d"
+msgstr "Espaci de trabalh _%d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:486
 #, c-format
 msgid "Workspace %d"
 msgstr "Espaci de trabalh %d"

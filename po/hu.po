@@ -77,7 +77,12 @@ msgstr "Másik munkaasztalra _mozgatás"
 msgid "_Close"
 msgstr "_Bezárás"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:462
+#: libxfce4windowingui/xfw-window-action-menu.c:485
+#, c-format
+msgid "Workspace _%d"
+msgstr "Munkaasztal _%d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:486
 #, c-format
 msgid "Workspace %d"
 msgstr "Munkaasztal %d"

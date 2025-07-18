@@ -78,7 +78,12 @@ msgstr "Flytta till en annan _arbetsyta"
 msgid "_Close"
 msgstr "_Stäng"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
+#, c-format
+msgid "Workspace _%d"
+msgstr "Arbetsyta _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
 #, c-format
 msgid "Workspace %d"
 msgstr "Arbetsyta %d"

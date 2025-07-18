@@ -78,7 +78,12 @@ msgstr "Başka Çalı_şma Alanına Taşı"
 msgid "_Close"
 msgstr "_Kapat"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
+#, c-format
+msgid "Workspace _%d"
+msgstr "Çalışma Alanı _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
 #, c-format
 msgid "Workspace %d"
 msgstr "Çalışma Alanı %d"

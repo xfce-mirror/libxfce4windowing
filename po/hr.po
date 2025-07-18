@@ -77,7 +77,12 @@ msgstr "Premjesti na drugi _radni prostor"
 msgid "_Close"
 msgstr "_Zatvori"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
+#, c-format
+msgid "Workspace _%d"
+msgstr "Radni prostor _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
 #, c-format
 msgid "Workspace %d"
 msgstr "Radni prostor %d"

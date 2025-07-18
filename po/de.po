@@ -78,7 +78,12 @@ msgstr "Auf andere _Arbeitsfläche verschieben"
 msgid "_Close"
 msgstr "S_chließen"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:462
+#: ../libxfce4windowingui/xfw-window-action-menu.c:485
+#, c-format
+msgid "Workspace _%d"
+msgstr "Arbeitsfläche _%d"
+
+#: ../libxfce4windowingui/xfw-window-action-menu.c:486
 #, c-format
 msgid "Workspace %d"
 msgstr "Arbeitsfläche %d"

@@ -77,7 +77,12 @@ msgstr "Μ_ετακίνηση σε άλλο χώρο εργασίας"
 msgid "_Close"
 msgstr "_Κλείσιμο"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:462
+#: libxfce4windowingui/xfw-window-action-menu.c:485
+#, c-format
+msgid "Workspace _%d"
+msgstr "Χώρος εργασίας _%d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:486
 #, c-format
 msgid "Workspace %d"
 msgstr "Χώρος εργασίας %d"
