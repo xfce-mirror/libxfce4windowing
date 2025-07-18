@@ -78,12 +78,7 @@ msgstr "Siirrä toiseen _työtilaan"
 msgid "_Close"
 msgstr "_Sulje"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:485
-#, c-format
-msgid "Workspace _%d"
-msgstr "Työtila _%d"
-
-#: libxfce4windowingui/xfw-window-action-menu.c:486
+#: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
 msgid "Workspace %d"
 msgstr "Työtila %d"

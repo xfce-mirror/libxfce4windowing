@@ -77,12 +77,7 @@ msgstr "Басқа _жұмыс орнына жылжыту"
 msgid "_Close"
 msgstr "_Жабу"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:485
-#, c-format
-msgid "Workspace _%d"
-msgstr "Жұмыс орны _%d"
-
-#: libxfce4windowingui/xfw-window-action-menu.c:486
+#: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
 msgid "Workspace %d"
 msgstr "Жұмыс орны %d"

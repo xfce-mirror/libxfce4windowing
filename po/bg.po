@@ -77,12 +77,7 @@ msgstr "Преместване на друго работно място"
 msgid "_Close"
 msgstr "_Затваряне"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:485
-#, c-format
-msgid "Workspace _%d"
-msgstr "Работно място _%d"
-
-#: ../libxfce4windowingui/xfw-window-action-menu.c:486
+#: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
 msgid "Workspace %d"
 msgstr "Работно място %d"

@@ -77,12 +77,7 @@ msgstr "다른 작업 공간으로 이동(_W)"
 msgid "_Close"
 msgstr "닫기(_C)"
 
-#: ../libxfce4windowingui/xfw-window-action-menu.c:485
-#, c-format
-msgid "Workspace _%d"
-msgstr "작업 공간 _%d번"
-
-#: ../libxfce4windowingui/xfw-window-action-menu.c:486
+#: ../libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
 msgid "Workspace %d"
 msgstr "작업 공간 %d번"

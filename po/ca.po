@@ -78,12 +78,7 @@ msgstr "Mou a un alt_re espai de treball"
 msgid "_Close"
 msgstr "Tan_ca"
 
-#: libxfce4windowingui/xfw-window-action-menu.c:485
-#, c-format
-msgid "Workspace _%d"
-msgstr "Espai de treball _%d"
-
-#: libxfce4windowingui/xfw-window-action-menu.c:486
+#: libxfce4windowingui/xfw-window-action-menu.c:462
 #, c-format
 msgid "Workspace %d"
 msgstr "Espai de treball %d"
