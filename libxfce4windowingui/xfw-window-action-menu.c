@@ -452,19 +452,52 @@ update_move_submenu(XfwWindowActionMenu *menu) {
              l = l->next)
         {
             XfwWorkspace *other_workspace = XFW_WORKSPACE(l->data);
-            gchar *label, *free_label = NULL;
+            gchar *label;
             XfwWindowWorkspaceMoveData *mdata = g_new0(XfwWindowWorkspaceMoveData, 1);
             mdata->window = menu->window;
             mdata->to.new_workspace = g_object_ref(other_workspace);
 
             label = (gchar *)xfw_workspace_get_name(other_workspace);
+            guint number = xfw_workspace_get_number(other_workspace);
+            number += 1;
             if (label == NULL) {
-                label = g_strdup_printf(_("Workspace %d"), xfw_workspace_get_number(other_workspace));
-                free_label = label;
+                label = g_strdup_printf(number < 10
+                                            ? _("Workspace _%d")
+                                            : _("Workspace %d"),
+                                        number);
+                item = gtk_menu_item_new_with_mnemonic(label);
+                g_free(label);
+                label = NULL;
+            } else if (number >= 10) {
+                item = gtk_menu_item_new_with_label(label);
+            } else {
+                // escape mnemonics
+                GString *new_label = g_string_new(label);
+                g_string_replace(new_label, "_", "__", 0);
+
+                // locate number
+                gchar *regex_pattern = g_strdup_printf("(?:^|[^\\d])(%d)(?:[^\\d]|$)", number);
+                GRegex *regex = g_regex_new(regex_pattern, 0 /*G_REGEX_DEFAULT*/, 0 /*G_REGEX_MATCH_DEFAULT*/, NULL);
+                GMatchInfo *match_info = NULL;
+
+                if (g_regex_match(regex, new_label->str, 0 /*G_REGEX_MATCH_DEFAULT*/, &match_info)) {
+                    // insert '_' before digit
+                    gint digit_pos;
+                    g_match_info_fetch_pos(match_info, 1, &digit_pos, NULL);
+                    g_string_insert_c(new_label, digit_pos, '_');
+                } else {
+                    // append " (1)"
+                    g_string_append_printf(new_label, " (_%d)", number);
+                }
+
+                g_match_info_free(match_info);
+                g_regex_unref(regex);
+                g_free(regex_pattern);
+
+                item = gtk_menu_item_new_with_mnemonic(new_label->str);
+                g_string_free(new_label, TRUE);
             }
 
-            item = gtk_menu_item_new_with_label(label);
-            g_free(free_label);
             if (other_workspace == workspace) {
                 gtk_widget_set_sensitive(item, FALSE);
             }
