@@ -604,14 +604,14 @@ _xfw_monitor_manager_wayland_new_output(XfwMonitorManagerWayland *monitor_manage
 }
 
 void
-_xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_manager, uint32_t id) {
+_xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_manager, uint32_t name) {
     GHashTableIter iter;
     g_hash_table_iter_init(&iter, monitor_manager->outputs_to_monitors);
 
     struct wl_output *output;
     XfwMonitorWayland *monitor;
     while (g_hash_table_iter_next(&iter, (gpointer)&output, (gpointer)&monitor)) {
-        if (wl_proxy_get_id((struct wl_proxy *)output) == id) {
+        if (wl_proxy_get_id((struct wl_proxy *)output) == name) {
             if (monitor->xdg_output != NULL) {
                 g_hash_table_remove(monitor_manager->xdg_outputs_to_monitors, monitor->xdg_output);
                 g_clear_pointer(&monitor->xdg_output, zxdg_output_v1_destroy);

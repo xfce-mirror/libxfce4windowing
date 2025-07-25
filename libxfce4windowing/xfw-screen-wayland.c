@@ -50,12 +50,12 @@ struct _XfwScreenWayland {
     GList *pending_seats;
 
     gboolean defer_toplevel_manager;
-    uint32_t toplevel_manager_id;
+    uint32_t toplevel_manager_name;
     uint32_t toplevel_manager_version;
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
 
     gboolean defer_workspace_manager;
-    uint32_t workspace_manager_id;
+    uint32_t workspace_manager_name;
     uint32_t workspace_manager_version;
 
     GList *windows;
@@ -82,8 +82,8 @@ static void async_roundtrip_done(void *data, struct wl_callback *callback, uint3
 static void init_toplevel_manager(XfwScreenWayland *screen);
 static void init_workspace_manager(XfwScreenWayland *screen);
 
-static void registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version);
-static void registry_global_remove(void *data, struct wl_registry *registry, uint32_t id);
+static void registry_global(void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version);
+static void registry_global_remove(void *data, struct wl_registry *registry, uint32_t name);
 
 static void toplevel_manager_toplevel(void *data, struct zwlr_foreign_toplevel_manager_v1 *wl_manager, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel);
 static void toplevel_manager_finished(void *data, struct zwlr_foreign_toplevel_manager_v1 *wl_manager);
@@ -146,11 +146,11 @@ xfw_screen_wayland_constructed(GObject *obj) {
     // XfwMonitor instances initialized.  Otherwise, we would get output_enter
     // events for toplevels or workspace groups, but have no XfwMonitor to match them to.
     wscreen->defer_toplevel_manager = FALSE;
-    if (wscreen->toplevel_manager_id != 0 && wscreen->toplevel_manager_version != 0) {
+    if (wscreen->toplevel_manager_name != 0 && wscreen->toplevel_manager_version != 0) {
         init_toplevel_manager(wscreen);
     }
     wscreen->defer_workspace_manager = FALSE;
-    if (wscreen->workspace_manager_id != 0 && wscreen->workspace_manager_version != 0) {
+    if (wscreen->workspace_manager_name != 0 && wscreen->workspace_manager_version != 0) {
         init_workspace_manager(wscreen);
     }
 
@@ -306,12 +306,12 @@ async_roundtrip_done(void *data, struct wl_callback *callback, uint32_t callback
 static void
 init_toplevel_manager(XfwScreenWayland *screen) {
     g_return_if_fail(!screen->defer_toplevel_manager);
-    g_return_if_fail(screen->toplevel_manager_id != 0);
+    g_return_if_fail(screen->toplevel_manager_name != 0);
     g_return_if_fail(screen->toplevel_manager_version != 0);
     g_return_if_fail(screen->toplevel_manager == NULL);
 
     screen->toplevel_manager = wl_registry_bind(screen->wl_registry,
-                                                screen->toplevel_manager_id,
+                                                screen->toplevel_manager_name,
                                                 &zwlr_foreign_toplevel_manager_v1_interface,
                                                 MIN(screen->toplevel_manager_version, 3));
     zwlr_foreign_toplevel_manager_v1_add_listener(screen->toplevel_manager, &toplevel_manager_listener, screen);
@@ -321,12 +321,12 @@ init_toplevel_manager(XfwScreenWayland *screen) {
 static void
 init_workspace_manager(XfwScreenWayland *screen) {
     g_return_if_fail(!screen->defer_workspace_manager);
-    g_return_if_fail(screen->workspace_manager_id != 0);
+    g_return_if_fail(screen->workspace_manager_name != 0);
     g_return_if_fail(screen->workspace_manager_version != 0);
     g_return_if_fail(xfw_screen_get_workspace_manager(XFW_SCREEN(screen)) == NULL);
 
     struct ext_workspace_manager_v1 *wl_workspace_manager = wl_registry_bind(screen->wl_registry,
-                                                                             screen->workspace_manager_id,
+                                                                             screen->workspace_manager_name,
                                                                              &ext_workspace_manager_v1_interface,
                                                                              MIN((uint32_t)ext_workspace_manager_v1_interface.version,
                                                                                  screen->workspace_manager_version));
@@ -336,17 +336,17 @@ init_workspace_manager(XfwScreenWayland *screen) {
 
 
 static void
-registry_global(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version) {
+registry_global(void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version) {
     XfwScreenWayland *wscreen = XFW_SCREEN_WAYLAND(data);
 
     if (strcmp(zwlr_foreign_toplevel_manager_v1_interface.name, interface) == 0) {
-        wscreen->toplevel_manager_id = id;
+        wscreen->toplevel_manager_name = name;
         wscreen->toplevel_manager_version = version;
         if (!wscreen->defer_toplevel_manager) {
             init_toplevel_manager(wscreen);
         }
     } else if (strcmp(wl_seat_interface.name, interface) == 0) {
-        struct wl_seat *wl_seat = wl_registry_bind(wscreen->wl_registry, id, &wl_seat_interface, 2);
+        struct wl_seat *wl_seat = wl_registry_bind(wscreen->wl_registry, name, &wl_seat_interface, 2);
         XfwSeatWayland *seat = _xfw_seat_wayland_new(XFW_SCREEN(wscreen), wl_seat);
         wscreen->pending_seats = g_list_prepend(wscreen->pending_seats, seat);
         add_async_roundtrip(wscreen);
@@ -355,19 +355,19 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
         if (xfw_screen_get_workspace_manager(screen) != NULL) {
             g_message("Already have a workspace manager, but got a new ext_workspace_manager_v1 global");
         } else {
-            wscreen->workspace_manager_id = id;
+            wscreen->workspace_manager_name = name;
             wscreen->workspace_manager_version = version;
             if (!wscreen->defer_workspace_manager) {
                 init_workspace_manager(wscreen);
             }
         }
     } else if (strcmp(wl_output_interface.name, interface) == 0) {
-        struct wl_output *output = wl_registry_bind(registry, id, &wl_output_interface, MIN(version, 4));
+        struct wl_output *output = wl_registry_bind(registry, name, &wl_output_interface, MIN(version, 4));
         _xfw_monitor_manager_wayland_new_output(wscreen->monitor_manager, output);
         add_async_roundtrip(wscreen);
     } else if (strcmp(zxdg_output_manager_v1_interface.name, interface) == 0) {
         struct zxdg_output_manager_v1 *xdg_output_manager = wl_registry_bind(registry,
-                                                                             id,
+                                                                             name,
                                                                              &zxdg_output_manager_v1_interface,
                                                                              MIN(version, 3));
         _xfw_monitor_manager_wayland_new_xdg_output_manager(wscreen->monitor_manager, xdg_output_manager);
@@ -376,7 +376,7 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id, const cha
 }
 
 static void
-registry_global_remove(void *data, struct wl_registry *registry, uint32_t id) {
+registry_global_remove(void *data, struct wl_registry *registry, uint32_t name) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(data);
 
     gboolean seat_removed = FALSE;
@@ -384,7 +384,7 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t id) {
     for (GList *l = xfw_screen_get_seats(XFW_SCREEN(screen)); l != NULL; l = l->next) {
         XfwSeatWayland *seat = XFW_SEAT_WAYLAND(l->data);
         struct wl_seat *wl_seat = _xfw_seat_wayland_get_wl_seat(seat);
-        if (id == wl_proxy_get_id((struct wl_proxy *)wl_seat)) {
+        if (name == wl_proxy_get_id((struct wl_proxy *)wl_seat)) {
             _xfw_screen_seat_removed(XFW_SCREEN(screen), XFW_SEAT(seat));
             seat_removed = TRUE;
             break;
@@ -395,7 +395,7 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t id) {
         for (GList *l = screen->pending_seats; l != NULL; l = l->next) {
             XfwSeatWayland *seat = XFW_SEAT_WAYLAND(l->data);
             struct wl_seat *wl_seat = _xfw_seat_wayland_get_wl_seat(seat);
-            if (id == wl_proxy_get_id((struct wl_proxy *)wl_seat)) {
+            if (name == wl_proxy_get_id((struct wl_proxy *)wl_seat)) {
                 screen->pending_seats = g_list_delete_link(screen->pending_seats, l);
                 g_object_unref(seat);
                 seat_removed = TRUE;
@@ -405,7 +405,7 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t id) {
     }
 
     if (!seat_removed) {
-        _xfw_monitor_manager_wayland_global_removed(screen->monitor_manager, id);
+        _xfw_monitor_manager_wayland_global_removed(screen->monitor_manager, name);
     }
 }
 
