@@ -359,7 +359,7 @@ registry_global(void *data, struct wl_registry *registry, uint32_t name, const c
         }
     } else if (strcmp(wl_output_interface.name, interface) == 0) {
         struct wl_output *output = wl_registry_bind(registry, name, &wl_output_interface, MIN(version, 4));
-        _xfw_monitor_manager_wayland_new_output(wscreen->monitor_manager, output);
+        _xfw_monitor_manager_wayland_new_output(wscreen->monitor_manager, output, name);
         add_async_roundtrip(wscreen);
     } else if (strcmp(zxdg_output_manager_v1_interface.name, interface) == 0) {
         struct zxdg_output_manager_v1 *xdg_output_manager = wl_registry_bind(registry,
