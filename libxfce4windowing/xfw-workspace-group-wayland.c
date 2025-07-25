@@ -55,6 +55,7 @@ struct _XfwWorkspaceGroupWaylandPrivate {
     GList *workspaces;
     XfwWorkspace *active_workspace;
     GList *monitors;
+    GHashTable *advertised_outputs;
 };
 
 static guint group_signals[N_SIGNALS] = { 0 };
@@ -80,6 +81,9 @@ static void group_output_leave(void *data, struct ext_workspace_group_handle_v1 
 static void group_workspace_enter(void *data, struct ext_workspace_group_handle_v1 *group, struct ext_workspace_handle_v1 *workspace);
 static void group_workspace_leave(void *data, struct ext_workspace_group_handle_v1 *group, struct ext_workspace_handle_v1 *workspace);
 static void group_removed(void *data, struct ext_workspace_group_handle_v1 *group);
+
+static void screen_monitor_added(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupWayland *group);
+static void screen_monitor_removed(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupWayland *group);
 
 static const struct ext_workspace_group_handle_v1_listener group_listener = {
     .capabilities = group_capabilities,
@@ -123,12 +127,15 @@ xfw_workspace_group_wayland_class_init(XfwWorkspaceGroupWaylandClass *klass) {
 static void
 xfw_workspace_group_wayland_init(XfwWorkspaceGroupWayland *group) {
     group->priv = xfw_workspace_group_wayland_get_instance_private(group);
+    group->priv->advertised_outputs = g_hash_table_new(g_direct_hash, g_direct_equal);
 }
 
 static void
 xfw_workspace_group_wayland_constructed(GObject *obj) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
     ext_workspace_group_handle_v1_add_listener(group->priv->handle, &group_listener, group);
+    g_signal_connect(group->priv->screen, "monitor-added", G_CALLBACK(screen_monitor_added), group);
+    g_signal_connect(group->priv->screen, "monitor-removed", G_CALLBACK(screen_monitor_removed), group);
 }
 
 static void
@@ -198,10 +205,14 @@ static void
 xfw_workspace_group_wayland_finalize(GObject *obj) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(obj);
 
+    g_signal_handlers_disconnect_by_func(group->priv->screen, screen_monitor_added, group);
+    g_signal_handlers_disconnect_by_func(group->priv->screen, screen_monitor_removed, group);
+
     ext_workspace_group_handle_v1_destroy(group->priv->handle);
 
     g_list_free(group->priv->workspaces);
     g_list_free(group->priv->monitors);
+    g_hash_table_destroy(group->priv->advertised_outputs);
 
     G_OBJECT_CLASS(xfw_workspace_group_wayland_parent_class)->finalize(obj);
 }
@@ -302,6 +313,8 @@ static void
 group_output_enter(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct wl_output *output) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
 
+    g_hash_table_add(group->priv->advertised_outputs, output);
+
     for (GList *l = xfw_screen_get_monitors(group->priv->screen); l != NULL; l = l->next) {
         XfwMonitorWayland *monitor = XFW_MONITOR_WAYLAND(l->data);
         if (_xfw_monitor_wayland_get_wl_output(monitor) == output
@@ -318,6 +331,8 @@ group_output_enter(void *data, struct ext_workspace_group_handle_v1 *wl_group, s
 static void
 group_output_leave(void *data, struct ext_workspace_group_handle_v1 *wl_group, struct wl_output *output) {
     XfwWorkspaceGroupWayland *group = XFW_WORKSPACE_GROUP_WAYLAND(data);
+
+    g_hash_table_remove(group->priv->advertised_outputs, output);
 
     for (GList *l = xfw_screen_get_monitors(group->priv->screen); l != NULL; l = l->next) {
         XfwMonitorWayland *monitor = XFW_MONITOR_WAYLAND(l->data);
@@ -362,6 +377,19 @@ group_removed(void *data, struct ext_workspace_group_handle_v1 *wl_group) {
 struct ext_workspace_group_handle_v1 *
 _xfw_workspace_group_wayland_get_handle(XfwWorkspaceGroupWayland *group) {
     return group->priv->handle;
+}
+
+static void
+screen_monitor_added(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupWayland *group) {
+    struct wl_output *output = _xfw_monitor_wayland_get_wl_output(XFW_MONITOR_WAYLAND(monitor));
+    if (g_hash_table_contains(group->priv->advertised_outputs, output)) {
+        group_output_enter(group, group->priv->handle, output);
+    }
+}
+
+static void
+screen_monitor_removed(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupWayland *group) {
+    group_output_leave(group, group->priv->handle, _xfw_monitor_wayland_get_wl_output(XFW_MONITOR_WAYLAND(monitor)));
 }
 
 void
