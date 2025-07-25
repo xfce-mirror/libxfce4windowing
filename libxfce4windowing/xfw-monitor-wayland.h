@@ -35,7 +35,7 @@ G_DECLARE_FINAL_TYPE(XfwMonitorWayland, xfw_monitor_wayland, XFW, MONITOR_WAYLAN
 typedef struct _XfwMonitorManagerWayland XfwMonitorManagerWayland;
 
 XfwMonitorManagerWayland *_xfw_monitor_manager_wayland_new(XfwScreenWayland *screen);
-void _xfw_monitor_manager_wayland_new_output(XfwMonitorManagerWayland *monitor_manager, struct wl_output *output);
+void _xfw_monitor_manager_wayland_new_output(XfwMonitorManagerWayland *monitor_manager, struct wl_output *output, uint32_t global_name);
 void _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_manager, uint32_t name);
 void _xfw_monitor_manager_wayland_new_xdg_output_manager(XfwMonitorManagerWayland *monitor_manager, struct zxdg_output_manager_v1 *xdg_output_manager);
 void _xfw_monitor_manager_wayland_destroy(XfwMonitorManagerWayland *monitor_manager);
