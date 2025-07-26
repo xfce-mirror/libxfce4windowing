@@ -620,7 +620,7 @@ _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_ma
                 g_clear_pointer(&monitor->xdg_output, zxdg_output_v1_destroy);
             }
 
-            g_hash_table_remove(monitor_manager->outputs_to_monitors, output);
+            g_hash_table_iter_remove(&iter);
             gboolean has_release = wl_proxy_get_version((struct wl_proxy *)monitor->output) >= WL_OUTPUT_RELEASE_SINCE_VERSION;
             g_clear_pointer(&monitor->output, has_release ? wl_output_release : wl_output_destroy);
 
