@@ -358,11 +358,11 @@ finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *mo
     };
     _xfw_monitor_set_workarea(monitor, &workarea);
 
-    GList added = { NULL, NULL, NULL };
+    GList *added = NULL;
     GList *monitors = _xfw_screen_steal_monitors(monitor_manager->screen);
     if (!g_list_find(monitors, monitor)) {
         monitors = g_list_append(monitors, g_object_ref(monitor));
-        added.data = monitor;
+        added = g_list_append(added, monitor);
     }
 
     // The compositor doesn't appear to tell us the monitor layout coordinates
@@ -420,7 +420,8 @@ finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *mo
         _xfw_monitor_set_is_primary(a_monitor, a_monitor == primary_monitor);
     }
 
-    _xfw_screen_set_monitors(monitor_manager->screen, monitors, &added, NULL);
+    _xfw_screen_set_monitors(monitor_manager->screen, monitors, added, NULL);
+    g_list_free(added);
 }
 
 static void
@@ -621,12 +622,12 @@ _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_ma
             gboolean has_release = wl_proxy_get_version((struct wl_proxy *)monitor->output) >= WL_OUTPUT_RELEASE_SINCE_VERSION;
             g_clear_pointer(&monitor->output, has_release ? wl_output_release : wl_output_destroy);
 
-            GList removed = { NULL, NULL, NULL };
+            GList *removed = NULL;
             GList *monitors = _xfw_screen_steal_monitors(monitor_manager->screen);
             GList *lm = g_list_find(monitors, monitor);
             if (lm != NULL) {
                 monitors = g_list_delete_link(monitors, lm);
-                removed.data = monitor;
+                removed = g_list_append(removed, monitor);
 
                 XfwMonitor *primary_monitor = _xfw_monitor_guess_primary_monitor(monitors);
                 for (GList *l = monitors; l != NULL; l = l->next) {
@@ -635,10 +636,11 @@ _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_ma
                 }
             }
 
-            _xfw_screen_set_monitors(monitor_manager->screen, monitors, NULL, &removed);
+            _xfw_screen_set_monitors(monitor_manager->screen, monitors, NULL, removed);
 
-            if (removed.data != NULL) {
-                g_object_unref(XFW_MONITOR(removed.data));
+            if (removed != NULL) {
+                g_object_unref(XFW_MONITOR(removed->data));
+                g_list_free(removed);
             }
 
             break;
