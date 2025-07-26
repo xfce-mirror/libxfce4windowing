@@ -50,6 +50,7 @@ struct _XfwMonitorWayland {
     XfwMonitor parent;
 
     struct wl_output *output;
+    uint32_t global_name;
     struct zxdg_output_v1 *xdg_output;
 
     GdkRectangle physical_geometry;
@@ -592,9 +593,10 @@ _xfw_monitor_manager_wayland_new(XfwScreenWayland *wscreen) {
 }
 
 void
-_xfw_monitor_manager_wayland_new_output(XfwMonitorManagerWayland *monitor_manager, struct wl_output *output) {
+_xfw_monitor_manager_wayland_new_output(XfwMonitorManagerWayland *monitor_manager, struct wl_output *output, uint32_t global_name) {
     XfwMonitorWayland *monitor = g_object_new(XFW_TYPE_MONITOR_WAYLAND, NULL);
     monitor->output = output;
+    monitor->global_name = global_name;
 
     wl_output_add_listener(output, &output_listener, monitor_manager);
     g_hash_table_insert(monitor_manager->outputs_to_monitors, output, monitor);
@@ -605,14 +607,14 @@ _xfw_monitor_manager_wayland_new_output(XfwMonitorManagerWayland *monitor_manage
 }
 
 void
-_xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_manager, uint32_t id) {
+_xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_manager, uint32_t name) {
     GHashTableIter iter;
     g_hash_table_iter_init(&iter, monitor_manager->outputs_to_monitors);
 
     struct wl_output *output;
     XfwMonitorWayland *monitor;
     while (g_hash_table_iter_next(&iter, (gpointer)&output, (gpointer)&monitor)) {
-        if (wl_proxy_get_id((struct wl_proxy *)output) == id) {
+        if (monitor->global_name == name) {
             if (monitor->xdg_output != NULL) {
                 g_hash_table_remove(monitor_manager->xdg_outputs_to_monitors, monitor->xdg_output);
                 g_clear_pointer(&monitor->xdg_output, zxdg_output_v1_destroy);
