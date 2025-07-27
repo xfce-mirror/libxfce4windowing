@@ -31,6 +31,7 @@ struct _XfwSeatWayland {
 
     XfwScreenWayland *screen;
     struct wl_seat *wl_seat;
+    uint32_t global_name;
 };
 
 static void xfw_seat_wayland_finalize(GObject *object);
@@ -78,13 +79,14 @@ static void
 seat_capabilities(void *data, struct wl_seat *wl_seat, uint32_t capabilities) {}
 
 XfwSeatWayland *
-_xfw_seat_wayland_new(XfwScreen *screen, struct wl_seat *wl_seat) {
+_xfw_seat_wayland_new(XfwScreen *screen, struct wl_seat *wl_seat, uint32_t global_name) {
     g_return_val_if_fail(XFW_IS_SCREEN_WAYLAND(screen), NULL);
     g_return_val_if_fail(wl_seat != NULL, NULL);
 
     XfwSeatWayland *seat = g_object_new(XFW_TYPE_SEAT_WAYLAND, NULL);
     seat->screen = XFW_SCREEN_WAYLAND(screen);
     seat->wl_seat = wl_seat;
+    seat->global_name = global_name;
     wl_seat_add_listener(wl_seat, &seat_listener, seat);
 
     return seat;
@@ -94,4 +96,10 @@ struct wl_seat *
 _xfw_seat_wayland_get_wl_seat(XfwSeatWayland *seat) {
     g_return_val_if_fail(XFW_IS_SEAT_WAYLAND(seat), NULL);
     return seat->wl_seat;
+}
+
+uint32_t
+_xfw_seat_wayland_get_global_name(XfwSeatWayland *seat) {
+    g_return_val_if_fail(XFW_IS_SEAT_WAYLAND(seat), 0);
+    return seat->global_name;
 }

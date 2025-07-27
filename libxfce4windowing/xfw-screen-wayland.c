@@ -347,7 +347,7 @@ registry_global(void *data, struct wl_registry *registry, uint32_t name, const c
         }
     } else if (strcmp(wl_seat_interface.name, interface) == 0) {
         struct wl_seat *wl_seat = wl_registry_bind(wscreen->wl_registry, name, &wl_seat_interface, 2);
-        XfwSeatWayland *seat = _xfw_seat_wayland_new(XFW_SCREEN(wscreen), wl_seat);
+        XfwSeatWayland *seat = _xfw_seat_wayland_new(XFW_SCREEN(wscreen), wl_seat, name);
         wscreen->pending_seats = g_list_prepend(wscreen->pending_seats, seat);
         add_async_roundtrip(wscreen);
     } else if (strcmp(ext_workspace_manager_v1_interface.name, interface) == 0) {
@@ -383,8 +383,8 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t name) 
 
     for (GList *l = xfw_screen_get_seats(XFW_SCREEN(screen)); l != NULL; l = l->next) {
         XfwSeatWayland *seat = XFW_SEAT_WAYLAND(l->data);
-        struct wl_seat *wl_seat = _xfw_seat_wayland_get_wl_seat(seat);
-        if (name == wl_proxy_get_id((struct wl_proxy *)wl_seat)) {
+        uint32_t global_name = _xfw_seat_wayland_get_global_name(seat);
+        if (name == global_name) {
             _xfw_screen_seat_removed(XFW_SCREEN(screen), XFW_SEAT(seat));
             seat_removed = TRUE;
             break;
@@ -394,8 +394,8 @@ registry_global_remove(void *data, struct wl_registry *registry, uint32_t name) 
     if (!seat_removed) {
         for (GList *l = screen->pending_seats; l != NULL; l = l->next) {
             XfwSeatWayland *seat = XFW_SEAT_WAYLAND(l->data);
-            struct wl_seat *wl_seat = _xfw_seat_wayland_get_wl_seat(seat);
-            if (name == wl_proxy_get_id((struct wl_proxy *)wl_seat)) {
+            uint32_t global_name = _xfw_seat_wayland_get_global_name(seat);
+            if (name == global_name) {
                 screen->pending_seats = g_list_delete_link(screen->pending_seats, l);
                 g_object_unref(seat);
                 seat_removed = TRUE;
