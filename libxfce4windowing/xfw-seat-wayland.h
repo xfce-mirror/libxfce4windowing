@@ -31,8 +31,9 @@ G_BEGIN_DECLS
 #define XFW_TYPE_SEAT_WAYLAND (xfw_seat_wayland_get_type())
 G_DECLARE_FINAL_TYPE(XfwSeatWayland, xfw_seat_wayland, XFW, SEAT_WAYLAND, XfwSeat)
 
-XfwSeatWayland *_xfw_seat_wayland_new(XfwScreen *screen, struct wl_seat *wl_seat);
+XfwSeatWayland *_xfw_seat_wayland_new(XfwScreen *screen, struct wl_seat *wl_seat, uint32_t global_name);
 struct wl_seat *_xfw_seat_wayland_get_wl_seat(XfwSeatWayland *seat);
+uint32_t _xfw_seat_wayland_get_global_name(XfwSeatWayland *seat);
 
 G_END_DECLS
 
