@@ -615,15 +615,6 @@ _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_ma
     XfwMonitorWayland *monitor;
     while (g_hash_table_iter_next(&iter, (gpointer)&output, (gpointer)&monitor)) {
         if (monitor->global_name == name) {
-            if (monitor->xdg_output != NULL) {
-                g_hash_table_remove(monitor_manager->xdg_outputs_to_monitors, monitor->xdg_output);
-                g_clear_pointer(&monitor->xdg_output, zxdg_output_v1_destroy);
-            }
-
-            g_hash_table_iter_remove(&iter);
-            gboolean has_release = wl_proxy_get_version((struct wl_proxy *)monitor->output) >= WL_OUTPUT_RELEASE_SINCE_VERSION;
-            g_clear_pointer(&monitor->output, has_release ? wl_output_release : wl_output_destroy);
-
             GList *removed = NULL;
             GList *monitors = _xfw_screen_steal_monitors(monitor_manager->screen);
             GList *lm = g_list_find(monitors, monitor);
@@ -645,6 +636,14 @@ _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_ma
                 g_list_free(removed);
             }
 
+            if (monitor->xdg_output != NULL) {
+                g_hash_table_remove(monitor_manager->xdg_outputs_to_monitors, monitor->xdg_output);
+                g_clear_pointer(&monitor->xdg_output, zxdg_output_v1_destroy);
+            }
+
+            gboolean has_release = wl_proxy_get_version((struct wl_proxy *)monitor->output) >= WL_OUTPUT_RELEASE_SINCE_VERSION;
+            g_clear_pointer(&monitor->output, has_release ? wl_output_release : wl_output_destroy);
+            g_hash_table_iter_remove(&iter);
             break;
         }
     }
