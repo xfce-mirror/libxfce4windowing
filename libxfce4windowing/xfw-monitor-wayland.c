@@ -30,6 +30,7 @@
 #include "protocols/xdg-output-unstable-v1-client.h"
 
 #include "libxfce4windowing-private.h"
+#include "xfw-gdk-private.h"
 #include "xfw-monitor-private.h"
 #include "xfw-monitor-wayland.h"
 #include "xfw-monitor.h"
@@ -58,6 +59,10 @@ struct _XfwMonitorWayland {
 
     guint32 output_dones : 4,
         xdg_output_done : 1;
+
+    XfwScreen *screen;
+    guint finalize_output_id;
+    guint finalize_output_count;
 };
 
 typedef struct {
@@ -95,6 +100,10 @@ xfw_monitor_wayland_finalize(GObject *object) {
         } else {
             wl_output_destroy(monitor->output);
         }
+    }
+
+    if (monitor->finalize_output_id != 0) {
+        g_source_remove(monitor->finalize_output_id);
     }
 
     G_OBJECT_CLASS(xfw_monitor_wayland_parent_class)->finalize(object);
@@ -306,9 +315,33 @@ unscale_monitor_coordinates(GList *monitors, XfwMonitor *monitor) {
     g_array_free(found_y_segments, TRUE);
 }
 
-static void
-finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *monitor_wl) {
-    g_debug("finalizing for output ID %d", wl_proxy_get_id((struct wl_proxy *)monitor_wl->output));
+static gboolean
+finalize_output(gpointer data) {
+    XfwMonitorWayland *monitor_wl = data;
+    GdkDisplay *display = gdk_display_get_default();
+    gint n_monitors = gdk_display_get_n_monitors(display);
+    gboolean connectors_set = TRUE;
+    for (gint i = 0; i < n_monitors; i++) {
+        GdkMonitor *gdkmonitor = gdk_display_get_monitor(display, i);
+        if (xfw_gdk_monitor_get_connector(gdkmonitor) == NULL) {
+            connectors_set = FALSE;
+            break;
+        }
+    }
+    if (connectors_set) {
+        g_debug("finalizing for output ID %d", wl_proxy_get_id((struct wl_proxy *)monitor_wl->output));
+    } else {
+        if (monitor_wl->finalize_output_count++ < 10) {
+            g_debug("delaying finalization of output ID %d because of missing gdk data", wl_proxy_get_id((struct wl_proxy *)monitor_wl->output));
+            if (monitor_wl->finalize_output_id != 0) {
+                g_source_remove(monitor_wl->finalize_output_id);
+            }
+            monitor_wl->finalize_output_id = g_timeout_add(100, finalize_output, monitor_wl);
+            return FALSE;
+        } else {
+            g_debug("can't wait for gdk data any longer, finalizing for output ID %d", wl_proxy_get_id((struct wl_proxy *)monitor_wl->output));
+        }
+    }
 
     XfwMonitor *monitor = XFW_MONITOR(monitor_wl);
 
@@ -360,7 +393,7 @@ finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *mo
     _xfw_monitor_set_workarea(monitor, &workarea);
 
     GList *added = NULL;
-    GList *monitors = _xfw_screen_steal_monitors(monitor_manager->screen);
+    GList *monitors = _xfw_screen_steal_monitors(monitor_wl->screen);
     if (!g_list_find(monitors, monitor)) {
         monitors = g_list_append(monitors, g_object_ref(monitor));
         added = g_list_append(added, monitor);
@@ -421,8 +454,12 @@ finalize_output(XfwMonitorManagerWayland *monitor_manager, XfwMonitorWayland *mo
         _xfw_monitor_set_is_primary(a_monitor, a_monitor == primary_monitor);
     }
 
-    _xfw_screen_set_monitors(monitor_manager->screen, monitors, added, NULL);
+    _xfw_screen_set_monitors(monitor_wl->screen, monitors, added, NULL);
     g_list_free(added);
+
+    monitor_wl->finalize_output_count = 0;
+    monitor_wl->finalize_output_id = 0;
+    return FALSE;
 }
 
 static void
@@ -492,17 +529,20 @@ output_done(void *data, struct wl_output *output) {
     g_debug("output done for ID %d", wl_proxy_get_id((struct wl_proxy *)output));
     XfwMonitorManagerWayland *monitor_manager = data;
     XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
+    monitor->screen = monitor_manager->screen;
     monitor->output_dones++;
 
-    if (monitor_manager->xdg_output_manager == NULL
-        || (wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) >= 3 && monitor->output_dones >= 2)
-        || monitor->xdg_output_done)
+    if (monitor->finalize_output_id == 0
+        && (monitor_manager->xdg_output_manager == NULL
+            || monitor->xdg_output_done
+            || (wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) >= 3
+                && monitor->output_dones >= 2)))
     {
         g_debug("finalizing output because: xdg_op_mgr=%p, xdg_op_mgr_vers=%d, xdg_op_done=%d",
                 monitor_manager->xdg_output_manager,
                 monitor_manager->xdg_output_manager != NULL ? (int)wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) : -1,
                 monitor->xdg_output_done);
-        finalize_output(monitor_manager, monitor);
+        finalize_output(monitor);
     }
 }
 
@@ -554,10 +594,14 @@ xdg_output_done(void *data, struct zxdg_output_v1 *xdg_output) {
     g_debug("xdg output done for ID %d", wl_proxy_get_id((struct wl_proxy *)xdg_output));
     XfwMonitorManagerWayland *monitor_manager = data;
     XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->xdg_outputs_to_monitors, xdg_output);
+    monitor->screen = monitor_manager->screen;
     monitor->xdg_output_done = TRUE;
 
-    if (monitor->output_dones > 0 && wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) < 3) {
-        finalize_output(monitor_manager, monitor);
+    if (monitor->finalize_output_id == 0
+        && monitor->output_dones > 0
+        && wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) < 3)
+    {
+        finalize_output(monitor);
     }
 }
 
