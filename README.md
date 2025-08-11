@@ -57,6 +57,10 @@ From release tarball:
     % make
     % make install
 
+### Uninstallation
+
+    % ninja uninstall -C build
+
 ### Reporting Bugs
 
 Visit the [reporting
