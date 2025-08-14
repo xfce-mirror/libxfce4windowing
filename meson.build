@@ -1,7 +1,7 @@
 project(
   'libxfce4windowing',
   'c',
-version : '4.20.4',
+version : '4.20.4-dev',
   license : 'GPL-2.0-or-later',
   meson_version : '>= 0.57.0',
   default_options : ['c_std=gnu11', 'buildtype=debugoptimized', 'warning_level=2']
