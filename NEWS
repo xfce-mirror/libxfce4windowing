@@ -1,3 +1,30 @@
+4.20.4 (2025-08-14)
+======
+- XfwMonitorWayland: Delay monitor finalization until gdk data are set
+- XfwSeatWayland: Store global name for matching when seat is removed
+- XfwMonitorWayland: Fix release order in _global_removed()
+- XfwMonitorManagerWayland: Use g_hash_table_iter_remove when iterating
+- XfwMonitorWayland: Store global name for matching when output is 
+removed
+- XfwScreenWayland: Rename id to name in registry_global(_remove)?
+- XfwMonitorWayland: Don't make XfwScreen emit signal with null monitor
+- XfwWorkspaceGroupWayland: Connect to 
+XfwScreen::monitor-(added|removed)
+- Add mnemonics for workspace names in workspace menu
+- Revert "Update README after switchover to meson"
+- Update README after switchover to meson
+- Destroy wl_output & xdg_output together when wl_output global removed
+- XfwWorkspaceWayland: Fix typo
+- XfwWorkspace: Fix id property management
+- Defer binding to the workspace manager until after we have the outputs
+- I18n: Update po/LINGUAS list
+- meson-build: Add Vala language bindings option
+- Translation Updates:
+  Arabic, Bulgarian, Catalan, Chinese (China), Dutch, English (United
+  Kingdom), Estonian, French, German, Greek, Japanese, Lithuanian,
+  Polish, Portuguese, Portuguese (Brazil), Romanian, Serbian, Spanish,
+  Ukrainian
+
 4.20.3 (2025-05-21)
 ======
 - Support absolute icon paths
