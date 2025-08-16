@@ -93,6 +93,7 @@ $(top_builddir)/docs/reference/$(DOC_MODULE)-docs.xml: $(DOC_MODULE)-docs.xml.in
 
 EXTRA_DIST += \
 	gtkdocentities.ent.in \
+	$(DOC_MODULE)-docs.xml.in \
 	meson.build
 
 DISTCLEANFILES = \
