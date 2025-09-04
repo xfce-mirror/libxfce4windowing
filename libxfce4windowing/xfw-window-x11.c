@@ -689,21 +689,21 @@ geometry_changed(WnckWindow *wnck_window, XfwWindowX11 *window) {
 
 static void
 monitor_added(XfwScreen *screen, XfwMonitor *monitor, XfwWindowX11 *window) {
-    GdkRectangle geom;
-    xfw_monitor_get_physical_geometry(monitor, &geom);
-    if (gdk_rectangle_intersect(&window->priv->geometry, &geom, NULL)) {
-        window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
-        g_object_notify(G_OBJECT(window), "monitors");
-    }
+    geometry_changed(window->priv->wnck_window, window);
 }
 
 static void
 monitor_removed(XfwScreen *screen, XfwMonitor *monitor, XfwWindowX11 *window) {
+    g_object_freeze_notify(G_OBJECT(window));
+
     GList *lp = g_list_find(window->priv->monitors, monitor);
     if (lp != NULL) {
         window->priv->monitors = g_list_delete_link(window->priv->monitors, lp);
         g_object_notify(G_OBJECT(window), "monitors");
     }
+    geometry_changed(window->priv->wnck_window, window);
+
+    g_object_thaw_notify(G_OBJECT(window));
 }
 
 static void
