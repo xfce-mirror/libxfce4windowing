@@ -495,7 +495,7 @@ _xfw_workspace_wayland_set_workspace_group(XfwWorkspaceWayland *workspace, XfwWo
         workspace->priv->group = group;
         // ensure active workspace is initialized, since workspace state can be sent before
         // workspace enters the group
-        if ((workspace->priv->state & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
+        if (group != NULL && (workspace->priv->state & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
             _xfw_workspace_group_wayland_set_active_workspace(XFW_WORKSPACE_GROUP_WAYLAND(group), XFW_WORKSPACE(workspace));
         }
         g_signal_emit_by_name(workspace, "group-changed", previous_group);
