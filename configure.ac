@@ -11,7 +11,7 @@ m4_define([libxfce4windowing_version_api], [0])
 m4_define([libxfce4windowingui_verinfo], [0:0:0])
 m4_define([libxfce4windowingui_version_api], [0])
 m4_define([copyright_year], [2025])
-XDT_VERSION_INIT([4.20.4], [git])
+XDT_VERSION_INIT([4.20.5])
 
 dnl minimum required versions
 m4_define([libx11_minimum_version], [1.6.7])
