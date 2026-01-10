@@ -28,6 +28,7 @@
 #include <X11/extensions/randr.h>
 #include <X11/extensions/render.h>
 #include <gdk/gdkx.h>
+#include <glib/gi18n-lib.h>
 #include <libdisplay-info/info.h>
 #include <stdlib.h>
 
@@ -314,6 +315,43 @@ steal_monitor_by_connector(GList **monitors, const char *connector) {
     return NULL;
 }
 
+static XfwMonitor *
+create_fallback_monitor(Display *dpy, XfwScreenX11 *screen, gint cur_workspace_num) {
+    XfwMonitor *monitor = g_object_new(XFW_TYPE_MONITOR_X11, NULL);
+
+    _xfw_monitor_set_connector(monitor, "default");
+    _xfw_monitor_set_scale(monitor, 1);
+    _xfw_monitor_set_fractional_scale(monitor, 1.0);
+    _xfw_monitor_set_physical_size(monitor, DisplayWidthMM(dpy, 0), DisplayHeightMM(dpy, 0));
+
+    GdkRectangle geometry = {
+        .x = 0,
+        .y = 0,
+        .width = DisplayWidth(dpy, 0),
+        .height = DisplayHeight(dpy, 0),
+    };
+    _xfw_monitor_set_physical_geometry(monitor, &geometry);
+    _xfw_monitor_set_logical_geometry(monitor, &geometry);
+
+    update_monitor_workarea(screen, monitor, cur_workspace_num);
+
+    _xfw_monitor_set_make(monitor, _("Unknown"));
+    _xfw_monitor_set_model(monitor, _("Unknown"));
+
+    const char *make = xfw_monitor_get_make(monitor);
+    const char *model = xfw_monitor_get_model(monitor);
+    const char *serial = xfw_monitor_get_serial(monitor);
+    const char *connector = xfw_monitor_get_connector(monitor);
+
+    gchar *identifier = _xfw_monitor_build_identifier(make, model, serial, connector);
+    _xfw_monitor_set_identifier(monitor, identifier);
+    g_free(identifier);
+
+    _xfw_monitor_set_description(monitor, _("Default Monitor"));
+
+    return monitor;
+}
+
 static GList *
 enumerate_monitors(XfwMonitorManagerX11 *manager, GList **new_monitors, GList **previous_monitors) {
     GdkScreen *gscreen = _xfw_screen_get_gdk_screen(XFW_SCREEN(manager->screen));
@@ -492,6 +530,10 @@ enumerate_monitors(XfwMonitorManagerX11 *manager, GList **new_monitors, GList **
     XRRFreeScreenResources(resources);
     if (rrmonitors != NULL) {
         XRRFreeMonitors(rrmonitors);
+    }
+
+    if (monitors == NULL) {
+        monitors = g_list_append(monitors, create_fallback_monitor(dpy, manager->screen, cur_workspace_num));
     }
 
     if (primary_monitor == NULL) {
