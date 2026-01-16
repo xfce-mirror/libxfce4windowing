@@ -97,6 +97,8 @@ static void toplevel_output_leave(void *data, struct zwlr_foreign_toplevel_handl
 static void toplevel_closed(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel);
 static void toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel);
 
+static void monitor_removed(XfwScreen *screen, XfwMonitor *monitor, XfwWindowWayland *window);
+
 static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_handle_listener = {
     .app_id = toplevel_app_id,
     .title = toplevel_title,
@@ -167,6 +169,9 @@ static void
 xfw_window_wayland_constructed(GObject *obj) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
     zwlr_foreign_toplevel_handle_v1_add_listener(window->priv->handle, &toplevel_handle_listener, window);
+
+    XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
+    g_signal_connect(screen, "monitor-removed", G_CALLBACK(monitor_removed), window);
 }
 
 static void
@@ -202,6 +207,8 @@ xfw_window_wayland_get_property(GObject *obj, guint prop_id, GValue *value, GPar
 static void
 xfw_window_wayland_finalize(GObject *obj) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(obj);
+
+    g_signal_handlers_disconnect_by_data(_xfw_window_get_screen(XFW_WINDOW(window)), window);
 
     zwlr_foreign_toplevel_handle_v1_destroy(window->priv->handle);
     g_free(window->priv->class_ids);
@@ -656,6 +663,15 @@ toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel) {
         if (window->priv->state & XFW_WINDOW_STATE_ACTIVE) {
             _xfw_screen_set_active_window(screen, XFW_WINDOW(window));
         }
+    }
+}
+
+static void
+monitor_removed(XfwScreen *screen, XfwMonitor *monitor, XfwWindowWayland *window) {
+    GList *lm = g_list_find(window->priv->monitors, monitor);
+    if (lm != NULL) {
+        window->priv->monitors = g_list_delete_link(window->priv->monitors, lm);
+        g_object_notify(G_OBJECT(window), "monitors");
     }
 }
 
