@@ -51,6 +51,8 @@ struct _XfwWindowWaylandPrivate {
     XfwWindowCapabilities capabilities;
     GdkRectangle geometry;  // unfortunately unsupported
     GList *monitors;
+    GList *pending_outputs;
+    guint pending_outputs_id;
     XfwApplication *app;
 };
 
@@ -97,6 +99,7 @@ static void toplevel_output_leave(void *data, struct zwlr_foreign_toplevel_handl
 static void toplevel_closed(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel);
 static void toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel);
 
+static void monitor_added(XfwScreen *screen, XfwMonitor *monitor, XfwWindowWayland *window);
 static void monitor_removed(XfwScreen *screen, XfwMonitor *monitor, XfwWindowWayland *window);
 
 static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_handle_listener = {
@@ -171,6 +174,7 @@ xfw_window_wayland_constructed(GObject *obj) {
     zwlr_foreign_toplevel_handle_v1_add_listener(window->priv->handle, &toplevel_handle_listener, window);
 
     XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
+    g_signal_connect(screen, "monitor-added", G_CALLBACK(monitor_added), window);
     g_signal_connect(screen, "monitor-removed", G_CALLBACK(monitor_removed), window);
 }
 
@@ -215,6 +219,10 @@ xfw_window_wayland_finalize(GObject *obj) {
     g_free(window->priv->app_id);
     g_free(window->priv->name);
     g_list_free(window->priv->monitors);
+    g_list_free(window->priv->pending_outputs);
+    if (window->priv->pending_outputs_id != 0) {
+        g_source_remove(window->priv->pending_outputs_id);
+    }
     g_object_unref(window->priv->app);
 
     G_OBJECT_CLASS(xfw_window_wayland_parent_class)->finalize(obj);
@@ -599,6 +607,15 @@ static void
 toplevel_parent(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct zwlr_foreign_toplevel_handle_v1 *wl_parent) {
 }
 
+static gboolean
+free_pending_outputs(gpointer data) {
+    XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
+    g_list_free(window->priv->pending_outputs);
+    window->priv->pending_outputs = NULL;
+    window->priv->pending_outputs_id = 0;
+    return FALSE;
+}
+
 static void
 toplevel_output_enter(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct wl_output *output) {
     g_debug("toplevel %u output_enter", wl_proxy_get_id((struct wl_proxy *)wl_toplevel));
@@ -606,8 +623,9 @@ toplevel_output_enter(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_top
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
     XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
     GList *monitors = xfw_screen_get_monitors(screen);
+    GList *l = monitors;
 
-    for (GList *l = monitors; l != NULL; l = l->next) {
+    for (; l != NULL; l = l->next) {
         XfwMonitorWayland *monitor = XFW_MONITOR_WAYLAND(l->data);
         if (output == _xfw_monitor_wayland_get_wl_output(monitor)
             && g_list_find(window->priv->monitors, monitor) == NULL)
@@ -616,6 +634,22 @@ toplevel_output_enter(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_top
             g_object_notify(G_OBJECT(window), "monitors");
             break;
         }
+    }
+
+    // Sometimes the output_enter event is emitted before the XfwScreen monitor list has
+    // been updated, so you have to wait for the XfwScreen::monitor-added signal to update
+    // the window's monitor list. However, output_enter is emitted for two wl_outputs, only
+    // one of which is of interest to us, and there is no guarantee that output_leave will
+    // always be emitted when the output is destroyed. Pending wl_outputs can therefore
+    // accumulate, without any criteria or good time to clean up the list (we may still
+    // need them when XfwScreen::monitor-{added,removed} are emitted). The only solution
+    // therefore seems to be to clean up the list a few seconds after a series of changes.
+    if (l == NULL) {
+        window->priv->pending_outputs = g_list_prepend(window->priv->pending_outputs, output);
+        if (window->priv->pending_outputs_id != 0) {
+            g_source_remove(window->priv->pending_outputs_id);
+        }
+        window->priv->pending_outputs_id = g_timeout_add_seconds(10, free_pending_outputs, window);
     }
 }
 
@@ -662,6 +696,17 @@ toplevel_done(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel) {
         g_signal_emit_by_name(screen, "window-opened", window);
         if (window->priv->state & XFW_WINDOW_STATE_ACTIVE) {
             _xfw_screen_set_active_window(screen, XFW_WINDOW(window));
+        }
+    }
+}
+
+static void
+monitor_added(XfwScreen *screen, XfwMonitor *monitor, XfwWindowWayland *window) {
+    for (GList *l = window->priv->pending_outputs; l != NULL; l = l->next) {
+        if (l->data == _xfw_monitor_wayland_get_wl_output(XFW_MONITOR_WAYLAND(monitor))) {
+            window->priv->monitors = g_list_prepend(window->priv->monitors, monitor);
+            g_object_notify(G_OBJECT(window), "monitors");
+            break;
         }
     }
 }
