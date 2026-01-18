@@ -54,10 +54,8 @@ x11_deps += dependency('xrandr', version: dependency_versions['xrandr'], require
 wayland_deps = []
 wayland_deps += dependency('gdk-wayland-3.0', version: dependency_versions['gtk'], required: get_option('wayland'))
 wayland_deps += dependency('wayland-client', version: dependency_versions['wayland'], required: get_option('wayland'))
-wayland_deps += dependency('wayland-scanner', version: dependency_versions['wayland'], required: get_option('wayland'), native: true)
-wayland_scanner = wayland_deps[-1]
-wayland_deps += dependency('wayland-protocols', version: dependency_versions['wayland-protocols'], required: get_option('wayland'))
-wayland_protocols = wayland_deps[-1]
+wayland_scanner = dependency('wayland-scanner', version: dependency_versions['wayland'], required: get_option('wayland'), native: true)
+wayland_protocols = dependency('wayland-protocols', version: dependency_versions['wayland-protocols'], required: get_option('wayland'))
 
 wlr_protocols = dependency('wlr-protocols', version: dependency_versions['wlr-protocols'], required: false)
 
@@ -75,6 +73,7 @@ enable_wayland = not get_option('wayland').disabled()
 foreach dep : wayland_deps
   enable_wayland = enable_wayland and dep.found()
 endforeach
+enable_wayland = enable_wayland and wayland_scanner.found() and wayland_protocols.found()
 if enable_wayland
   feature_cflags += '-DENABLE_WAYLAND=1'
 
