@@ -39,6 +39,8 @@ struct _XfwWorkspaceX11Private {
     XfwWorkspaceGroup *group;
     WnckWorkspace *wnck_workspace;
     GdkRectangle geometry;
+    gint layout_column;
+    gint layout_row;
 };
 
 static void xfw_workspace_x11_workspace_init(XfwWorkspaceIface *iface);
@@ -94,7 +96,11 @@ xfw_workspace_x11_init(XfwWorkspaceX11 *workspace) {
 static void
 xfw_workspace_x11_constructed(GObject *obj) {
     XfwWorkspaceX11 *workspace = XFW_WORKSPACE_X11(obj);
+
     g_signal_connect(workspace->priv->wnck_workspace, "name-changed", G_CALLBACK(name_changed), workspace);
+
+    workspace->priv->layout_column = wnck_workspace_get_layout_column(workspace->priv->wnck_workspace);
+    workspace->priv->layout_row = wnck_workspace_get_layout_row(workspace->priv->wnck_workspace);
 }
 
 static void
@@ -264,12 +270,16 @@ xfw_workspace_x11_get_workspace_group(XfwWorkspace *workspace) {
 
 static gint
 xfw_workspace_x11_get_layout_row(XfwWorkspace *workspace) {
-    return wnck_workspace_get_layout_row(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
+    XfwWorkspaceX11Private *priv = XFW_WORKSPACE_X11(workspace)->priv;
+    priv->layout_row = wnck_workspace_get_layout_row(priv->wnck_workspace);
+    return priv->layout_row;
 }
 
 static gint
 xfw_workspace_x11_get_layout_column(XfwWorkspace *workspace) {
-    return wnck_workspace_get_layout_column(XFW_WORKSPACE_X11(workspace)->priv->wnck_workspace);
+    XfwWorkspaceX11Private *priv = XFW_WORKSPACE_X11(workspace)->priv;
+    priv->layout_column = wnck_workspace_get_layout_column(priv->wnck_workspace);
+    return priv->layout_column;
 }
 
 static XfwWorkspace *
@@ -363,5 +373,29 @@ _xfw_workspace_x11_set_workspace_group(XfwWorkspaceX11 *workspace, XfwWorkspaceG
         XfwWorkspaceGroup *previous_group = workspace->priv->group;
         workspace->priv->group = group;
         g_signal_emit_by_name(workspace, "group-changed", previous_group);
+    }
+}
+
+void
+_xfw_workspace_x11_check_properties_changed(XfwWorkspaceX11 *workspace) {
+    GdkRectangle old_geometry = workspace->priv->geometry;
+    GdkRectangle *new_geometry = xfw_workspace_x11_get_geometry(XFW_WORKSPACE(workspace));
+
+    gint old_layout_row = workspace->priv->layout_row;
+    gint new_layout_row = xfw_workspace_x11_get_layout_row(XFW_WORKSPACE(workspace));
+
+    gint old_layout_column = workspace->priv->layout_column;
+    gint new_layout_column = xfw_workspace_x11_get_layout_column(XFW_WORKSPACE(workspace));
+
+    if (!gdk_rectangle_equal(&old_geometry, new_geometry)) {
+        g_object_notify(G_OBJECT(workspace), "geometry");
+    }
+
+    if (old_layout_row != new_layout_row) {
+        g_object_notify(G_OBJECT(workspace), "layout-row");
+    }
+
+    if (old_layout_column != new_layout_column) {
+        g_object_notify(G_OBJECT(workspace), "layout-column");
     }
 }

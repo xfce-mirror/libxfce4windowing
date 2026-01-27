@@ -38,6 +38,7 @@ struct _XfwWorkspaceManagerX11Private {
     GList *workspaces;
     GHashTable *wnck_workspaces;
     GHashTable *pending_workspace_names;
+    guint workspace_prop_changed_timeout_id;
 };
 
 static void xfw_workspace_manager_x11_manager_init(XfwWorkspaceManagerIface *iface);
@@ -56,6 +57,8 @@ static void viewports_changed(WnckScreen *screen, XfwWorkspaceManagerX11 *manage
 static gboolean group_create_workspace(XfwWorkspaceGroup *group, const gchar *name, GError **error);
 static gboolean group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error);
 static gboolean group_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error);
+
+static gboolean check_workspace_properties_changed(XfwWorkspaceManager *manager);
 
 G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerX11, xfw_workspace_manager_x11, G_TYPE_OBJECT,
                         G_ADD_PRIVATE(XfwWorkspaceManagerX11)
@@ -129,6 +132,8 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
     _xfw_workspace_group_dummy_set_workspaces(group, priv->workspaces);
 
     manager->priv->pending_workspace_names = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+
+    manager->priv->workspace_prop_changed_timeout_id = g_timeout_add_seconds(10, (GSourceFunc)check_workspace_properties_changed, manager);
 }
 
 static void
@@ -165,6 +170,10 @@ static void
 xfw_workspace_manager_x11_finalize(GObject *obj) {
     XfwWorkspaceManagerX11 *manager = XFW_WORKSPACE_MANAGER_X11(obj);
     XfwWorkspaceManagerX11Private *priv = manager->priv;
+
+    if (priv->workspace_prop_changed_timeout_id != 0) {
+        g_source_remove(priv->workspace_prop_changed_timeout_id);
+    }
 
     g_signal_handlers_disconnect_by_data(priv->wnck_screen, manager);
     g_list_free(priv->workspaces);
@@ -288,6 +297,15 @@ group_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **err
         }
         return FALSE;
     }
+    return TRUE;
+}
+
+static gboolean
+check_workspace_properties_changed(XfwWorkspaceManager *manager) {
+    for (GList *l = xfw_workspace_manager_list_workspaces(manager); l != NULL; l = l->next) {
+        _xfw_workspace_x11_check_properties_changed(XFW_WORKSPACE_X11(l->data));
+    }
+
     return TRUE;
 }
 
