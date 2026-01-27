@@ -12,6 +12,7 @@ test_bins = [
 test_gui_bins = [
   'xfw-enum-monitors',
   'xfw-enum-windows',
+  'xfw-enum-workspaces',
   'xfw-monitor-offon',
 ]
 

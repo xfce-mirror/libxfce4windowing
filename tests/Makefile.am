@@ -3,6 +3,7 @@ if ENABLE_TESTS
 noinst_PROGRAMS = \
 	xfw-enum-monitors \
 	xfw-enum-windows \
+	xfw-enum-workspaces \
 	xfw-monitor-offon
 
 tests_cflags = \
@@ -20,6 +21,10 @@ xfw_enum_monitors_LDADD = $(tests_ldadd)
 xfw_enum_windows_SOURCES = xfw-enum-windows.c
 xfw_enum_windows_CFLAGS = $(tests_cflags)
 xfw_enum_windows_LDADD = $(tests_ldadd)
+
+xfw_enum_workspaces_SOURCES = xfw-enum-workspaces.c
+xfw_enum_workspaces_CFLAGS = $(tests_cflags)
+xfw_enum_workspaces_LDADD = $(tests_ldadd)
 
 xfw_monitor_offon_SOURCES = xfw-monitor-offon.c
 xfw_monitor_offon_CFLAGS = $(tests_cflags)
