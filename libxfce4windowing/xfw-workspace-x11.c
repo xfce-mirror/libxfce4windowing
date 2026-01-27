@@ -312,7 +312,7 @@ xfw_workspace_x11_get_geometry(XfwWorkspace *workspace) {
     priv->geometry.x = virtual ? wnck_workspace_get_viewport_x(priv->wnck_workspace) : 0;
     priv->geometry.y = virtual ? wnck_workspace_get_viewport_y(priv->wnck_workspace) : 0;
     priv->geometry.width = wnck_workspace_get_width(priv->wnck_workspace);
-    priv->geometry.height = wnck_workspace_get_width(priv->wnck_workspace);
+    priv->geometry.height = wnck_workspace_get_height(priv->wnck_workspace);
     return &priv->geometry;
 }
 
