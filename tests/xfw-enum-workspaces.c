@@ -46,9 +46,7 @@ workspace_changed(XfwWorkspace *workspace) {
 }
 
 static void
-workspace_created(XfwWorkspaceManager *manager, XfwWorkspace *workspace) {
-    g_print("New workspace:\n");
-    print_workspace(workspace);
+connect_workspace_signals(XfwWorkspace *workspace) {
     g_signal_connect(workspace, "name-changed", G_CALLBACK(workspace_changed), NULL);
     g_signal_connect(workspace, "capabilities-changed", G_CALLBACK(workspace_changed), NULL);
     g_signal_connect(workspace, "state-changed", G_CALLBACK(workspace_changed), NULL);
@@ -56,6 +54,13 @@ workspace_created(XfwWorkspaceManager *manager, XfwWorkspace *workspace) {
     g_signal_connect(workspace, "notify::layout-col", G_CALLBACK(workspace_changed), NULL);
     g_signal_connect(workspace, "notify::layout-row", G_CALLBACK(workspace_changed), NULL);
     g_signal_connect(workspace, "notify::geometry", G_CALLBACK(workspace_changed), NULL);
+}
+
+static void
+workspace_created(XfwWorkspaceManager *manager, XfwWorkspace *workspace) {
+    g_print("New workspace:\n");
+    print_workspace(workspace);
+    connect_workspace_signals(workspace);
 }
 
 int
@@ -78,6 +83,7 @@ main(int argc, char **argv) {
     for (GList *w = workspaces; w != NULL; w = w->next) {
         XfwWorkspace *workspace = XFW_WORKSPACE(w->data);
         print_workspace(workspace);
+        connect_workspace_signals(workspace);
     }
     g_print("(end of workspaces on startup)\n");
 
