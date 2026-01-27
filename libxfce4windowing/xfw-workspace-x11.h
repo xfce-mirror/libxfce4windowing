@@ -44,6 +44,7 @@ struct _XfwWorkspaceX11 {
 
 void _xfw_workspace_x11_set_workspace_group(XfwWorkspaceX11 *workspace, XfwWorkspaceGroup *group);
 WnckWorkspace *_xfw_workspace_x11_get_wnck_workspace(XfwWorkspaceX11 *workspace);
+void _xfw_workspace_x11_check_properties_changed(XfwWorkspaceX11 *workspace);
 
 G_END_DECLS
 
