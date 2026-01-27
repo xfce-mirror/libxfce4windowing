@@ -386,13 +386,13 @@ workspace_coordinates(void *data, struct ext_workspace_handle_v1 *wl_workspace, 
 
     g_object_freeze_notify(G_OBJECT(workspace));
 
-    if (coordinates->size >= 1 && (int32_t)array_start[0] != workspace->priv->row) {
-        workspace->priv->row = array_start[0];
-        g_object_notify(G_OBJECT(workspace), "layout-row");
-    }
-    if (coordinates->size >= 2 && (int32_t)array_start[1] != workspace->priv->column) {
-        workspace->priv->column = array_start[1];
+    if (coordinates->size >= 1 && (int32_t)array_start[0] != workspace->priv->column) {
+        workspace->priv->column = array_start[0];
         g_object_notify(G_OBJECT(workspace), "layout-column");
+    }
+    if (coordinates->size >= 2 && (int32_t)array_start[1] != workspace->priv->row) {
+        workspace->priv->row = array_start[1];
+        g_object_notify(G_OBJECT(workspace), "layout-row");
     }
 
     g_object_thaw_notify(G_OBJECT(workspace));
