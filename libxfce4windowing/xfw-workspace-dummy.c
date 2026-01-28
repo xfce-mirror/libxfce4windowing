@@ -77,6 +77,7 @@ xfw_workspace_dummy_set_property(GObject *obj, guint prop_id, const GValue *valu
         case WORKSPACE_PROP_CAPABILITIES:
         case WORKSPACE_PROP_STATE:
         case WORKSPACE_PROP_NUMBER:
+        case WORKSPACE_PROP_GEOMETRY:
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -111,6 +112,10 @@ xfw_workspace_dummy_get_property(GObject *obj, guint prop_id, GValue *value, GPa
 
         case WORKSPACE_PROP_NUMBER:
             g_value_set_uint(value, xfw_workspace_dummy_get_number(workspace));
+            break;
+
+        case WORKSPACE_PROP_GEOMETRY:
+            g_value_take_boxed(value, g_memdup2(xfw_workspace_dummy_get_geometry(workspace), sizeof(GdkRectangle)));
             break;
 
         default:

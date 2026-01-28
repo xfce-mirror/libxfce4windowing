@@ -231,6 +231,21 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                          "layout-column",
                                                          -1, G_MAXINT, -1,
                                                          G_PARAM_READABLE));
+
+    /**
+     * XfwWorkspace:geometry:
+     *
+     * The position and size of the workspace on the desktop, in screen
+     * coordinates.
+     *
+     * Since: 4.20.6
+     */
+    g_object_interface_install_property(iface,
+                                        g_param_spec_boxed("geometry",
+                                                           "geometry",
+                                                           "geometry",
+                                                           GDK_TYPE_RECTANGLE,
+                                                           G_PARAM_READABLE));
 }
 
 /**
@@ -497,6 +512,7 @@ _xfw_workspace_install_properties(GObjectClass *gklass) {
     g_object_class_override_property(gklass, WORKSPACE_PROP_NUMBER, "number");
     g_object_class_override_property(gklass, WORKSPACE_PROP_LAYOUT_ROW, "layout-row");
     g_object_class_override_property(gklass, WORKSPACE_PROP_LAYOUT_COLUMN, "layout-column");
+    g_object_class_override_property(gklass, WORKSPACE_PROP_GEOMETRY, "geometry");
 }
 
 #define __XFW_WORKSPACE_C__

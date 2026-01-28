@@ -171,6 +171,7 @@ xfw_workspace_wayland_set_property(GObject *obj, guint prop_id, const GValue *va
         case WORKSPACE_PROP_CAPABILITIES:
         case WORKSPACE_PROP_STATE:
         case WORKSPACE_PROP_NUMBER:
+        case WORKSPACE_PROP_GEOMETRY:
             break;
 
         default:
@@ -213,6 +214,10 @@ xfw_workspace_wayland_get_property(GObject *obj, guint prop_id, GValue *value, G
 
         case WORKSPACE_PROP_LAYOUT_COLUMN:
             g_value_set_int(value, workspace->priv->column);
+            break;
+
+        case WORKSPACE_PROP_GEOMETRY:
+            g_value_take_boxed(value, g_memdup2(&workspace->priv->geometry, sizeof(GdkRectangle)));
             break;
 
         default:

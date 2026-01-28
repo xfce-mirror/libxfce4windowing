@@ -123,6 +123,7 @@ enum {
     WORKSPACE_PROP_NUMBER,
     WORKSPACE_PROP_LAYOUT_ROW,
     WORKSPACE_PROP_LAYOUT_COLUMN,
+    WORKSPACE_PROP_GEOMETRY,
 };
 
 void _libxfce4windowing_init(void);

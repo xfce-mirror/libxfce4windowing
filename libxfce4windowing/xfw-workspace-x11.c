@@ -118,6 +118,7 @@ xfw_workspace_x11_set_property(GObject *obj, guint prop_id, const GValue *value,
         case WORKSPACE_PROP_CAPABILITIES:
         case WORKSPACE_PROP_STATE:
         case WORKSPACE_PROP_NUMBER:
+        case WORKSPACE_PROP_GEOMETRY:
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -164,6 +165,10 @@ xfw_workspace_x11_get_property(GObject *obj, guint prop_id, GValue *value, GPara
 
         case WORKSPACE_PROP_LAYOUT_COLUMN:
             g_value_set_int(value, xfw_workspace_x11_get_layout_column(workspace));
+            break;
+
+        case WORKSPACE_PROP_GEOMETRY:
+            g_value_take_boxed(value, g_memdup2(xfw_workspace_x11_get_geometry(workspace), sizeof(GdkRectangle)));
             break;
 
         default:
