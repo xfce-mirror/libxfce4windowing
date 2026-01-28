@@ -26,6 +26,7 @@
 #include "protocols/ext-workspace-v1-client.h"
 
 #include "libxfce4windowing-private.h"
+#include "xfw-monitor.h"
 #include "xfw-util.h"
 #include "xfw-workspace-group-wayland.h"
 #include "xfw-workspace-group.h"
@@ -230,6 +231,10 @@ static void
 xfw_workspace_wayland_finalize(GObject *obj) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(obj);
 
+    if (workspace->priv->group != NULL) {
+        g_signal_handlers_disconnect_by_data(workspace->priv->group, workspace);
+    }
+
     ext_workspace_handle_v1_destroy(workspace->priv->handle);
     g_free(workspace->priv->id);
     g_free(workspace->priv->name);
@@ -315,7 +320,6 @@ xfw_workspace_wayland_get_neighbor(XfwWorkspace *workspace, XfwDirection directi
 
 static GdkRectangle *
 xfw_workspace_wayland_get_geometry(XfwWorkspace *workspace) {
-    // probably something to do with coordinates and outputs if needed
     return &XFW_WORKSPACE_WAYLAND(workspace)->priv->geometry;
 }
 
@@ -480,6 +484,30 @@ workspace_removed(void *data, struct ext_workspace_handle_v1 *wl_workspace) {
     g_signal_emit(workspace, workspace_signals[SIGNAL_DESTROYED], 0);
 }
 
+static void
+group_monitors_changed(XfwWorkspaceGroup *group, XfwWorkspaceWayland *workspace) {
+    GdkRectangle new_geom = { 0 };
+
+    GList *monitors = xfw_workspace_group_get_monitors(group);
+    if (monitors != NULL) {
+        XfwMonitor *monitor = XFW_MONITOR(monitors->data);
+        xfw_monitor_get_physical_geometry(monitor, &new_geom);
+        monitors = monitors->next;
+    }
+
+    for (GList *l = monitors; l != NULL; l = l->next) {
+        XfwMonitor *monitor = XFW_MONITOR(l->data);
+        GdkRectangle geom;
+        xfw_monitor_get_physical_geometry(monitor, &geom);
+        gdk_rectangle_union(&new_geom, &geom, &new_geom);
+    }
+
+    if (!gdk_rectangle_equal(&new_geom, &workspace->priv->geometry)) {
+        workspace->priv->geometry = new_geom;
+        g_object_notify(G_OBJECT(workspace), "geometry");
+    }
+}
+
 struct ext_workspace_handle_v1 *
 _xfw_workspace_wayland_get_handle(XfwWorkspaceWayland *workspace) {
     return workspace->priv->handle;
@@ -496,13 +524,24 @@ _xfw_workspace_wayland_set_number(XfwWorkspaceWayland *workspace, guint number) 
 void
 _xfw_workspace_wayland_set_workspace_group(XfwWorkspaceWayland *workspace, XfwWorkspaceGroup *group) {
     if (group != workspace->priv->group) {
+        if (workspace->priv->group != NULL) {
+            g_signal_handlers_disconnect_by_data(workspace->priv->group, workspace);
+        }
+
         XfwWorkspaceGroup *previous_group = workspace->priv->group;
         workspace->priv->group = group;
-        // ensure active workspace is initialized, since workspace state can be sent before
-        // workspace enters the group
-        if (group != NULL && (workspace->priv->state & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
-            _xfw_workspace_group_wayland_set_active_workspace(XFW_WORKSPACE_GROUP_WAYLAND(group), XFW_WORKSPACE(workspace));
+
+        if (group != NULL) {
+            g_signal_connect(group, "monitors-changed", G_CALLBACK(group_monitors_changed), workspace);
+            group_monitors_changed(group, workspace);
+
+            if ((workspace->priv->state & XFW_WORKSPACE_STATE_ACTIVE) != 0) {
+                // ensure active workspace is initialized, since workspace
+                // state can be sent before workspace enters the group
+                _xfw_workspace_group_wayland_set_active_workspace(XFW_WORKSPACE_GROUP_WAYLAND(group), XFW_WORKSPACE(workspace));
+            }
         }
+
         g_signal_emit_by_name(workspace, "group-changed", previous_group);
     }
 }
