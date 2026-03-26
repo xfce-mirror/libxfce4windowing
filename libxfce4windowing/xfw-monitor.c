@@ -404,6 +404,7 @@ xfw_monitor_init(XfwMonitor *monitor) {
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
     priv->refresh = 60000;
     priv->scale = 1;
+    priv->fractional_scale = 1;
 }
 
 static void
@@ -449,7 +450,7 @@ xfw_monitor_get_property(GObject *object, guint property_id, GValue *value, GPar
             break;
 
         case PROP_FRACTIONAL_SCALE:
-            g_value_set_double(value, priv->scale);
+            g_value_set_double(value, priv->fractional_scale);
             break;
 
         case PROP_PHYSICAL_GEOMETRY:
