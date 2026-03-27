@@ -174,7 +174,7 @@ update_monitor_workarea(XfwScreenX11 *screen, XfwMonitor *monitor, gint cur_work
     g_return_if_fail(workareas != NULL);
     g_return_if_fail(workareas->len > 0);
 
-    guint workarea_num = CLAMP(cur_workspace_num, 0, (gint64)workareas->len);
+    guint workarea_num = CLAMP(cur_workspace_num, 0, (gint64)workareas->len - 1);
     if (cur_workspace_num != (gint64)workarea_num) {
         g_message("Bad current workspace (%d), should be between 0 and %u",
                   cur_workspace_num,
