@@ -171,21 +171,18 @@ get_cardinal_prop(GdkDisplay *display, Window xroot, const char *prop_name, gint
 static void
 update_monitor_workarea(XfwScreenX11 *screen, XfwMonitor *monitor, gint cur_workspace_num) {
     GArray *workareas = _xfw_screen_x11_get_workareas(screen);
-    g_return_if_fail(workareas != NULL);
-    g_return_if_fail(workareas->len > 0);
+    if (workareas != NULL && cur_workspace_num <= (gint)workareas->len - 1) {
+        GdkRectangle geom;
+        xfw_monitor_get_logical_geometry(monitor, &geom);
 
-    guint workarea_num = CLAMP(cur_workspace_num, 0, (gint64)workareas->len - 1);
-    if (cur_workspace_num != (gint64)workarea_num) {
-        g_message("Bad current workspace (%d), should be between 0 and %u",
-                  cur_workspace_num,
-                  workareas->len - 1);
-    }
-
-    GdkRectangle geom;
-    xfw_monitor_get_logical_geometry(monitor, &geom);
-    GdkRectangle *workarea = &g_array_index(workareas, GdkRectangle, workarea_num);
-    if (gdk_rectangle_intersect(&geom, workarea, &geom)) {
-        _xfw_monitor_set_workarea(monitor, &geom);
+        GdkRectangle *workarea = &g_array_index(workareas, GdkRectangle, cur_workspace_num);
+        if (gdk_rectangle_intersect(&geom, workarea, &geom)) {
+            _xfw_monitor_set_workarea(monitor, &geom);
+        }
+    } else {
+        g_debug("We're on workspace %d, but only have %u workareas",
+                cur_workspace_num,
+                workareas != NULL ? workareas->len : 0);
     }
 }
 
