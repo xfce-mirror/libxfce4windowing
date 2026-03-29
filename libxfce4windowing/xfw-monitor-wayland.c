@@ -57,7 +57,7 @@ struct _XfwMonitorWayland {
     GdkRectangle physical_geometry;
     GdkRectangle logical_geometry;
 
-    guint32 output_dones : 4,
+    guint32 output_done : 1,
         xdg_output_done : 1;
 
     XfwScreen *screen;
@@ -345,7 +345,7 @@ finalize_output(gpointer data) {
 
     XfwMonitor *monitor = XFW_MONITOR(monitor_wl);
 
-    monitor_wl->output_dones = 0;
+    monitor_wl->output_done = FALSE;
     monitor_wl->xdg_output_done = FALSE;
 
     const char *make = xfw_monitor_get_make(monitor);
@@ -530,13 +530,12 @@ output_done(void *data, struct wl_output *output) {
     XfwMonitorManagerWayland *monitor_manager = data;
     XfwMonitorWayland *monitor = g_hash_table_lookup(monitor_manager->outputs_to_monitors, output);
     monitor->screen = monitor_manager->screen;
-    monitor->output_dones++;
+    monitor->output_done = TRUE;
 
     if (monitor->finalize_output_id == 0
         && (monitor_manager->xdg_output_manager == NULL
             || monitor->xdg_output_done
-            || (wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) >= 3
-                && monitor->output_dones >= 2)))
+            || wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) >= 3))
     {
         g_debug("finalizing output because: xdg_op_mgr=%p, xdg_op_mgr_vers=%d, xdg_op_done=%d",
                 monitor_manager->xdg_output_manager,
@@ -598,7 +597,7 @@ xdg_output_done(void *data, struct zxdg_output_v1 *xdg_output) {
     monitor->xdg_output_done = TRUE;
 
     if (monitor->finalize_output_id == 0
-        && monitor->output_dones > 0
+        && monitor->output_done
         && wl_proxy_get_version((struct wl_proxy *)monitor_manager->xdg_output_manager) < 3)
     {
         finalize_output(monitor);
