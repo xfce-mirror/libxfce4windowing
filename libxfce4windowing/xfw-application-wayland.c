@@ -116,6 +116,8 @@ xfw_application_wayland_constructed(GObject *obj) {
         priv->name = g_strdup_printf("%c%s", g_unichar_totitle(*priv->app_id), priv->app_id + 1);
         g_object_notify(obj, "name");
     }
+
+    G_OBJECT_CLASS(xfw_application_wayland_parent_class)->constructed(obj);
 }
 
 static void

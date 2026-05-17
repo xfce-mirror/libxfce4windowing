@@ -107,6 +107,8 @@ static void
 xfw_workspace_manager_wayland_constructed(GObject *obj) {
     XfwWorkspaceManagerWayland *manager = XFW_WORKSPACE_MANAGER_WAYLAND(obj);
     ext_workspace_manager_v1_add_listener(manager->priv->handle, &manager_listener, manager);
+
+    G_OBJECT_CLASS(xfw_workspace_manager_wayland_parent_class)->constructed(obj);
 }
 
 static void

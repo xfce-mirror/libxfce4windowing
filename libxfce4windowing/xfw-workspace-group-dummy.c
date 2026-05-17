@@ -111,6 +111,8 @@ xfw_workspace_group_dummy_constructed(GObject *obj) {
     XfwWorkspaceGroupDummy *group = XFW_WORKSPACE_GROUP_DUMMY(obj);
     g_signal_connect(group->priv->screen, "monitor-added", G_CALLBACK(monitor_added), group);
     g_signal_connect(group->priv->screen, "monitor-removed", G_CALLBACK(monitor_removed), group);
+
+    G_OBJECT_CLASS(xfw_workspace_group_dummy_parent_class)->constructed(obj);
 }
 
 static void

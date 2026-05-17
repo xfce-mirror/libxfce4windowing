@@ -134,6 +134,8 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
     manager->priv->pending_workspace_names = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
 
     manager->priv->workspace_prop_changed_timeout_id = g_timeout_add_seconds(10, (GSourceFunc)check_workspace_properties_changed, manager);
+
+    G_OBJECT_CLASS(xfw_workspace_manager_x11_parent_class)->constructed(obj);
 }
 
 static void

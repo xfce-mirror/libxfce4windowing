@@ -136,6 +136,8 @@ static void
 xfw_workspace_wayland_constructed(GObject *obj) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(obj);
     ext_workspace_handle_v1_add_listener(workspace->priv->handle, &workspace_listener, workspace);
+
+    G_OBJECT_CLASS(xfw_workspace_wayland_parent_class)->constructed(obj);
 }
 
 static void

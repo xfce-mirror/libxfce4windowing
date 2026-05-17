@@ -101,6 +101,8 @@ xfw_workspace_x11_constructed(GObject *obj) {
 
     workspace->priv->layout_column = wnck_workspace_get_layout_column(workspace->priv->wnck_workspace);
     workspace->priv->layout_row = wnck_workspace_get_layout_row(workspace->priv->wnck_workspace);
+
+    G_OBJECT_CLASS(xfw_workspace_x11_parent_class)->constructed(obj);
 }
 
 static void

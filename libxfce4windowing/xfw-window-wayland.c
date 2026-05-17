@@ -176,6 +176,8 @@ xfw_window_wayland_constructed(GObject *obj) {
     XfwScreen *screen = _xfw_window_get_screen(XFW_WINDOW(window));
     g_signal_connect(screen, "monitor-added", G_CALLBACK(monitor_added), window);
     g_signal_connect(screen, "monitor-removed", G_CALLBACK(monitor_removed), window);
+
+    G_OBJECT_CLASS(xfw_window_wayland_parent_class)->constructed(obj);
 }
 
 static void

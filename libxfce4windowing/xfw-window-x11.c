@@ -206,6 +206,8 @@ xfw_window_x11_constructed(GObject *obj) {
     g_signal_connect(window->priv->wnck_window, "workspace-changed", G_CALLBACK(workspace_changed), window);
     g_signal_connect(screen, "monitor-added", G_CALLBACK(monitor_added), window);
     g_signal_connect(screen, "monitor-removed", G_CALLBACK(monitor_removed), window);
+
+    G_OBJECT_CLASS(xfw_window_x11_parent_class)->constructed(obj);
 }
 
 static void

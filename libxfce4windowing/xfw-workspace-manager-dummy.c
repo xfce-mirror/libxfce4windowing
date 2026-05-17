@@ -87,6 +87,8 @@ xfw_workspace_manager_dummy_constructed(GObject *obj) {
     _xfw_workspace_dummy_set_workspace_group(XFW_WORKSPACE_DUMMY(manager->priv->workspaces->data), XFW_WORKSPACE_GROUP(group));
     _xfw_workspace_group_dummy_set_workspaces(group, manager->priv->workspaces);
     _xfw_workspace_group_dummy_set_active_workspace(group, XFW_WORKSPACE(manager->priv->workspaces->data));
+
+    G_OBJECT_CLASS(xfw_workspace_manager_dummy_parent_class)->constructed(obj);
 }
 
 static void

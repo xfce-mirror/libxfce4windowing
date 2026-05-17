@@ -103,6 +103,8 @@ xfw_application_x11_constructed(GObject *obj) {
     g_signal_connect(priv->wnck_group, "icon-changed", G_CALLBACK(icon_changed), obj);
     name_changed(priv->wnck_group, XFW_APPLICATION_X11(obj));
     g_signal_connect(priv->wnck_group, "name-changed", G_CALLBACK(name_changed), obj);
+
+    G_OBJECT_CLASS(xfw_application_x11_parent_class)->constructed(obj);
 }
 
 static void

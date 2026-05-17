@@ -136,6 +136,8 @@ xfw_workspace_group_wayland_constructed(GObject *obj) {
     ext_workspace_group_handle_v1_add_listener(group->priv->handle, &group_listener, group);
     g_signal_connect(group->priv->screen, "monitor-added", G_CALLBACK(screen_monitor_added), group);
     g_signal_connect(group->priv->screen, "monitor-removed", G_CALLBACK(screen_monitor_removed), group);
+
+    G_OBJECT_CLASS(xfw_workspace_group_wayland_parent_class)->constructed(obj);
 }
 
 static void
