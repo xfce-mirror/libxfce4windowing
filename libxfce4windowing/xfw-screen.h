@@ -45,6 +45,8 @@ XfwWindow *xfw_screen_get_active_window(XfwScreen *screen);
 
 GList *xfw_screen_get_monitors(XfwScreen *screen);
 XfwMonitor *xfw_screen_get_primary_monitor(XfwScreen *screen);
+XfwMonitor *xfw_screen_get_monitor_from_gdk_monitor(XfwScreen *screen,
+                                                    GdkMonitor *monitor);
 
 gboolean xfw_screen_get_show_desktop(XfwScreen *screen);
 void xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show);

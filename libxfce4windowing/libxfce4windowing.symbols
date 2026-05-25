@@ -43,6 +43,7 @@ xfw_monitor_transform_get_type attr:G_GNUC_CONST
 # file:xfw-screen
 xfw_screen_get_active_window
 xfw_screen_get_default
+xfw_screen_get_monitor_from_gdk_monitor
 xfw_screen_get_monitors
 xfw_screen_get_primary_monitor
 xfw_screen_get_seats

@@ -42,6 +42,7 @@ xfw_screen_get_windows_stacked
 xfw_screen_get_active_window
 xfw_screen_get_monitors
 xfw_screen_get_primary_monitor
+xfw_screen_get_monitor_from_gdk_monitor
 xfw_screen_get_show_desktop
 xfw_screen_set_show_desktop
 <SUBSECTION Standard>
