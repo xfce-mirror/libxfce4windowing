@@ -533,6 +533,25 @@ xfw_screen_get_primary_monitor(XfwScreen *screen) {
 }
 
 /**
+ * xfw_screen_get_monitor_from_gdk_monitor:
+ * @screen: an #XfwScreen.
+ * @monitor: a #GdkMonitor.
+ *
+ * Attempts to find the #XfwMonitor corresponding to @monitor.
+ *
+ * Return value: (nullable) (transfer none): An #XfwMonitor.
+ *
+ * Since: 4.20.7
+ **/
+XfwMonitor *
+xfw_screen_get_monitor_from_gdk_monitor(XfwScreen *screen, GdkMonitor *monitor) {
+    g_return_val_if_fail(XFW_IS_SCREEN(screen), NULL);
+    g_return_val_if_fail(GDK_IS_MONITOR(monitor), NULL);
+
+    return _xfw_monitor_from_gdk_monitor(XFW_SCREEN_GET_PRIVATE(screen)->monitors, monitor);
+}
+
+/**
  * xfw_screen_get_show_desktop:
  * @screen: an #XfwScreen.
  *

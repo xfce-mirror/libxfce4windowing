@@ -20,6 +20,8 @@
 #ifndef __XFW_MONITOR_PRIVATE_H__
 #define __XFW_MONITOR_PRIVATE_H__
 
+#include <gdk/gdk.h>
+
 #include "xfw-monitor.h"
 
 #define MONITORS_CHANGED_MASK ( \
@@ -92,6 +94,8 @@ void _xfw_monitor_set_is_primary(XfwMonitor *monitor,
                                  gboolean is_primary);
 
 XfwMonitor *_xfw_monitor_guess_primary_monitor(GList *monitors);
+XfwMonitor *_xfw_monitor_from_gdk_monitor(GList *xfwmonitors,
+                                          GdkMonitor *gdkmonitor);
 
 gchar *_xfw_monitor_build_identifier(const gchar *make,
                                      const gchar *model,

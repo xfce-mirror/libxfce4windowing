@@ -1084,6 +1084,35 @@ _xfw_monitor_guess_primary_monitor(GList *monitors) {
     return maybe_primary;
 }
 
+XfwMonitor *
+_xfw_monitor_from_gdk_monitor(GList *xfwmonitors, GdkMonitor *gdkmonitor) {
+    for (GList *l = xfwmonitors; l != NULL; l = l->next) {
+        XfwMonitor *xfwmonitor = XFW_MONITOR(l->data);
+        XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(xfwmonitor);
+        if (priv->gdkmonitor == gdkmonitor) {
+            return xfwmonitor;
+        } else {
+            const gchar *connector = xfw_gdk_monitor_get_connector(gdkmonitor);
+            if (g_strcmp0(priv->connector, connector) == 0) {
+                priv->gdkmonitor = gdkmonitor;
+                g_object_add_weak_pointer(G_OBJECT(priv->gdkmonitor), (gpointer)&priv->gdkmonitor);
+                return xfwmonitor;
+            }
+        }
+    }
+
+    if (g_list_length(xfwmonitors) == 1) {
+        XfwMonitor *xfwmonitor = XFW_MONITOR(xfwmonitors->data);
+        XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(xfwmonitor);
+        priv->gdkmonitor = gdkmonitor;
+        g_object_add_weak_pointer(G_OBJECT(priv->gdkmonitor), (gpointer)&priv->gdkmonitor);
+        return xfwmonitor;
+    }
+
+    g_warning("Unable to match GdkMonitor '%s' to a XfwMonitor", gdk_monitor_get_model(gdkmonitor));
+    return NULL;
+}
+
 /* The idea here is to base the identifier off make+model+serial: this should
  * ensure the ID is specific to a particular piece of monitor hardware, and it
  * should be stable between X11 and Wayland.  If we don't have a serial number,
