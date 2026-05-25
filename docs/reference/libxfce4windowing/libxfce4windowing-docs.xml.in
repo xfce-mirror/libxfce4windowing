@@ -67,6 +67,10 @@
     <title>Index of new symbols in 4.19.4</title>
     <xi:include href="xml/api-index-4.19.4.xml"><xi:fallback /></xi:include>
   </index>
+  <index id="api-index-4-20-6">
+    <title>Index of new symbols in 4.20.6</title>
+    <xi:include href="xml/api-index-4.20.6.xml"><xi:fallback /></xi:include>
+  </index>
   <!--
   <index id="api-index-deprecated">
     <title>Index of deprecated symbols</title>
