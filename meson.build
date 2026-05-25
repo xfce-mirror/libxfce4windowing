@@ -1,7 +1,7 @@
 project(
   'libxfce4windowing',
   'c',
-version : '4.20.5-dev',
+version : '4.20.6',
   license : 'GPL-2.0-or-later',
   meson_version : '>= 0.57.0',
   default_options : ['c_std=gnu11', 'buildtype=debugoptimized', 'warning_level=2']
@@ -9,7 +9,7 @@ version : '4.20.5-dev',
 
 project_namespace = 'xfce'
 pkgdatadir = get_option('prefix') / get_option('datadir') / meson.project_name()
-copyright_year = '2025'
+copyright_year = '2026'
 
 cc = meson.get_compiler('c')
 pkgconfig = import('pkgconfig')

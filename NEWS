@@ -1,3 +1,27 @@
+4.20.6 (2026-05-24)
+======
+- Add xfw_screen_get_monitor_for_gdk_monitor()
+- Add missing "New in 4.20.6" docs section
+- Add missing chain up to parent class
+- I18n: Update po/LINGUAS list
+- XfwMonitor: Fix (xdg_)output_done event handling
+- XfwMonitor: Fix typo and initialize class member
+- Ignore workarea/workspace count mismatches
+- Fix incorrect max to clamp workspace number to
+- Implement workspace geometry for wayland
+- Add XfwWorkspace:geometry property
+- Fix missing workspace signal connections in test program
+- Add test program to enumerate workspaces
+- Fix X11 workspace geometry and layout getting out of date
+- Fix incorrect col & row ordering for Wayland workspace coordinates
+- Fix width -> height typo for XfwWorkspaceX11 geometry
+- Add fallback monitor on X11 if XRandR doesn't report anything
+- Don't depend on wayland-scanner and wayland-protocols
+- XfwWindowWayland: Connect to XfwScreen::monitor-added
+- XfwWindowWayland: Connect to XfwScreen::monitor-removed
+- Translation Updates:
+  Georgian, Kazakh, Korean, Lao, Russian, Turkish
+
 4.20.5 (2025-12-29)
 ======
 - I18n: Update po/LINGUAS list
