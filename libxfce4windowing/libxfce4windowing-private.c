@@ -171,6 +171,16 @@ _xfw_g_icon_new(const gchar *icon_name) {
             GIcon *icon = g_file_icon_new(file);
             g_object_unref(file);
             return icon;
+        } else {
+            GtkIconInfo *icon_info = gtk_icon_theme_lookup_icon(gtk_icon_theme_get_default(),
+                                                                icon_name,
+                                                                16,
+                                                                0);
+            if (G_LIKELY(icon_info != NULL)) {
+                GIcon *icon = g_themed_icon_new(icon_name);
+                g_object_unref(icon_info);
+                return icon;
+            }
         }
     }
 
