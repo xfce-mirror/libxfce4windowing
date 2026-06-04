@@ -476,7 +476,7 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                 g_string_replace(new_label, "_", "__", 0);
 
                 // locate number
-                gchar *regex_pattern = g_strdup_printf("(?:^|[^\\d])(%d)(?:[^\\d]|$)", number);
+                gchar *regex_pattern = g_strdup_printf("(?:^|[^\\d])(%u)(?:[^\\d]|$)", number);
                 GRegex *regex = g_regex_new(regex_pattern, 0 /*G_REGEX_DEFAULT*/, 0 /*G_REGEX_MATCH_DEFAULT*/, NULL);
                 GMatchInfo *match_info = NULL;
 
@@ -487,7 +487,7 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                     g_string_insert_c(new_label, digit_pos, '_');
                 } else {
                     // append " (1)"
-                    g_string_append_printf(new_label, " (_%d)", number);
+                    g_string_append_printf(new_label, " (_%u)", number);
                 }
 
                 g_match_info_free(match_info);
