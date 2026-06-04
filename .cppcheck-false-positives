@@ -1,1 +1,3 @@
 unreadVariable:libxfce4windowing/xfw-util.c:63
+knownConditionTrueFalse:libxfce4windowing/xfw-util.c:62
+knownConditionTrueFalse:libxfce4windowing/xfw-screen.c:622
