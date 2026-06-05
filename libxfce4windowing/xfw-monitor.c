@@ -1198,4 +1198,4 @@ _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
 }
 
 #define __XFW_MONITOR_C__
-#include <libxfce4windowing-visibility.c>
+#include "libxfce4windowing-visibility.c"

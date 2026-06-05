@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
-#include <libxfce4windowing/libxfce4windowing.h>
+
+#include "libxfce4windowing/libxfce4windowing.h"
 
 int
 main(int argc, char **argv) {

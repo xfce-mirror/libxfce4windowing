@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
-#include <libxfce4windowing/libxfce4windowing.h>
+
+#include "libxfce4windowing/libxfce4windowing.h"
 
 static void
 print_window_monitors(XfwWindow *window) {

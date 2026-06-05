@@ -912,4 +912,4 @@ xfw_window_list_menu_new(XfwScreen *screen) {
 }
 
 #define __XFW_WINDOW_LIST_MENU_C__
-#include <libxfce4windowingui-visibility.c>
+#include "libxfce4windowingui-visibility.c"

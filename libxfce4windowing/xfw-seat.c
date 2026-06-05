@@ -149,4 +149,4 @@ _xfw_seat_set_name(XfwSeat *seat, const gchar *name) {
 }
 
 #define __XFW_SEAT_C__
-#include <libxfce4windowing-visibility.c>
+#include "libxfce4windowing-visibility.c"

@@ -733,4 +733,4 @@ _xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show_desktop) {
 }
 
 #define __XFW_SCREEN_C__
-#include <libxfce4windowing-visibility.c>
+#include "libxfce4windowing-visibility.c"

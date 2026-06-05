@@ -860,4 +860,4 @@ _xfw_window_x11_get_wnck_window(XfwWindowX11 *window) {
 }
 
 #define __XFW_WINDOW_X11_C__
-#include <libxfce4windowing-visibility.c>
+#include "libxfce4windowing-visibility.c"

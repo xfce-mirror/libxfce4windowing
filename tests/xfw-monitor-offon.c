@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
-#include <libxfce4windowing/libxfce4windowing.h>
 #include <stdio.h>
+
+#include "libxfce4windowing/libxfce4windowing.h"
 
 static gint64 start_time = 0;
 

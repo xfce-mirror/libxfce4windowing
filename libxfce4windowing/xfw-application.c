@@ -471,4 +471,4 @@ _xfw_application_instance_free(gpointer data) {
 }
 
 #define __XFW_APPLICATION_C__
-#include <libxfce4windowing-visibility.c>
+#include "libxfce4windowing-visibility.c"

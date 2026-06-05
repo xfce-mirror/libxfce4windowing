@@ -119,4 +119,4 @@ xfw_error_quark(void) {
 }
 
 #define __XFW_UTIL_C__
-#include <libxfce4windowing-visibility.c>
+#include "libxfce4windowing-visibility.c"

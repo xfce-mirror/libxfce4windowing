@@ -104,4 +104,4 @@ libxfce4windowing_check_version(guint required_major,
 }
 
 #define __LIBXFCE4WINDOWING_CONFIG_C__
-#include <libxfce4windowing-visibility.c>
+#include "libxfce4windowing-visibility.c"

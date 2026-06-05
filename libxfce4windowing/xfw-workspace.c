@@ -516,4 +516,4 @@ _xfw_workspace_install_properties(GObjectClass *gklass) {
 }
 
 #define __XFW_WORKSPACE_C__
-#include <libxfce4windowing-visibility.c>
+#include "libxfce4windowing-visibility.c"

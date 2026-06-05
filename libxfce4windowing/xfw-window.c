@@ -899,4 +899,4 @@ _xfw_window_invalidate_icon(XfwWindow *window) {
 }
 
 #define __XFW_WINDOW_C__
-#include <libxfce4windowing-visibility.c>
+#include "libxfce4windowing-visibility.c"
