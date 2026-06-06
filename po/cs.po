@@ -5,8 +5,8 @@
 # 
 # Translators:
 # Martin Šiška <martin-siska@email.cz>, 2024
-# Michal Várady <miko.vaji@gmail.com>, 2024
 # Pavel Borecki <pavel.borecki@gmail.com>, 2025
+# Michal Várady <miko.vaji@gmail.com>, 2026
 # 
 #, fuzzy
 msgid ""
@@ -15,7 +15,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://gitlab.xfce.org/\n"
 "POT-Creation-Date: 2025-07-19 12:45+0200\n"
 "PO-Revision-Date: 2022-12-22 11:42+0000\n"
-"Last-Translator: Pavel Borecki <pavel.borecki@gmail.com>, 2025\n"
+"Last-Translator: Michal Várady <miko.vaji@gmail.com>, 2026\n"
 "Language-Team: Czech (https://app.transifex.com/xfce/teams/16840/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,11 +25,11 @@ msgstr ""
 
 #: libxfce4windowing/xfw-wnck-icon.c:248
 msgid "The provided window does not have a _NET_WM_ICON or WMHints icon"
-msgstr "Zvolené okno nemá _NET_WM_ICON ani WMHints ikonu"
+msgstr "Předané okno nemá ikonu _NET_WM_ICON ani WMHints"
 
 #: libxfce4windowing/xfw-wnck-icon.c:621
 msgid "Failed to find or load an icon for the window"
-msgstr "Nepodařilo se najít ani načíst ikonu pro toto okno"
+msgstr "Nepodařilo se najít nebo načíst ikonu okna"
 
 #: libxfce4windowing/xfw-workspace-dummy.c:146
 msgid "Workspace 0"
@@ -45,7 +45,7 @@ msgstr "Změnit _velikost"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:232
 msgid "Always on _Top"
-msgstr "Vždy _nahoře"
+msgstr "Vždy _navrchu"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:237
 msgid "_Always on Visible Workspace"
@@ -57,23 +57,23 @@ msgstr "_Pouze na této pracovní ploše"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:247
 msgid "Move to Workspace _Left"
-msgstr "Umístit na pracovní p_lochu nalevo"
+msgstr "Přesunout na pracovní plochu v_levo"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:256
 msgid "Move to Workspace R_ight"
-msgstr "Umístit na p_racovní plochu napravo"
+msgstr "Přesunout na pracovní plochu vp_ravo"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:265
 msgid "Move to Workspace _Up"
-msgstr "Umístit o pracovní plochu _výše"
+msgstr "Přesunout na pracovní plochu _nahoru"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:274
 msgid "Move to Workspace _Down"
-msgstr "Umístit o pracovní plochu _níže"
+msgstr "Přesunout na pracovní plochu _dolů"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:283
 msgid "Move to Another _Workspace"
-msgstr "Přemístit na jin_ou pracovní plochu"
+msgstr "Přesunout na jin_ou pracovní plochu"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:292
 msgid "_Close"
@@ -95,7 +95,7 @@ msgstr "Mi_nimalizovat"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:523
 msgid "Unmi_nimize"
-msgstr "Ob_novit z minima"
+msgstr "Zrušit mi_nimalizaci"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:528
 msgid "Ma_ximize"
@@ -103,4 +103,4 @@ msgstr "Ma_ximalizovat"
 
 #: libxfce4windowingui/xfw-window-action-menu.c:528
 msgid "Unma_ximize"
-msgstr "Obnovit z ma_xima"
+msgstr "Zrušit ma_ximalizaci"
