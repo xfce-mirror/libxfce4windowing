@@ -120,7 +120,7 @@ xfw_workspace_manager_default_init(XfwWorkspaceManagerIface *iface) {
                                                             "screen",
                                                             "screen",
                                                             XFW_TYPE_SCREEN,
-                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 }
 
 /**

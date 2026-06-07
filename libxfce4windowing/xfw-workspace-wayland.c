@@ -121,7 +121,7 @@ xfw_workspace_wayland_class_init(XfwWorkspaceWaylandClass *klass) {
                                     g_param_spec_pointer("handle",
                                                          "handle",
                                                          "handle",
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
     _xfw_workspace_install_properties(gklass);
 }
 

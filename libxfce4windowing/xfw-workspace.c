@@ -144,7 +144,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                             "group",
                                                             "group",
                                                             XFW_TYPE_WORKSPACE_GROUP,
-                                                            G_PARAM_READABLE));
+                                                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspace:id:
@@ -156,7 +156,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                             "id",
                                                             "id",
                                                             "",
-                                                            G_PARAM_READABLE));
+                                                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspace:name:
@@ -168,7 +168,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                             "name",
                                                             "name",
                                                             "",
-                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspace:capabilities:
@@ -181,7 +181,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                            "capabilities",
                                                            XFW_TYPE_WORKSPACE_CAPABILITIES,
                                                            XFW_WORKSPACE_CAPABILITIES_NONE,
-                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspace:state:
@@ -194,7 +194,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                            "state",
                                                            XFW_TYPE_WORKSPACE_STATE,
                                                            XFW_WORKSPACE_STATE_NONE,
-                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspace:number:
@@ -206,7 +206,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                           "number",
                                                           "number",
                                                           0, UINT_MAX, 0,
-                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspace:layout-row:
@@ -218,7 +218,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                          "layout-row",
                                                          "layout-row",
                                                          -1, G_MAXINT, -1,
-                                                         G_PARAM_READABLE));
+                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspace:layout-column:
@@ -230,7 +230,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                          "layout-column",
                                                          "layout-column",
                                                          -1, G_MAXINT, -1,
-                                                         G_PARAM_READABLE));
+                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspace:geometry:
@@ -245,7 +245,7 @@ xfw_workspace_default_init(XfwWorkspaceIface *iface) {
                                                            "geometry",
                                                            "geometry",
                                                            GDK_TYPE_RECTANGLE,
-                                                           G_PARAM_READABLE));
+                                                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 }
 
 /**

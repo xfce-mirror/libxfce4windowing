@@ -83,7 +83,7 @@ xfw_application_wayland_class_init(XfwApplicationWaylandClass *klass) {
                                                         "app-id",
                                                         "app-id",
                                                         NULL,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 }
 
 static void

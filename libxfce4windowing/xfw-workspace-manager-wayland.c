@@ -88,7 +88,7 @@ xfw_workspace_manager_wayland_class_init(XfwWorkspaceManagerWaylandClass *klass)
                                     g_param_spec_pointer("wl-manager",
                                                          "wl-manager",
                                                          "wl-manager",
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
     _xfw_workspace_manager_install_properties(gklass);
 }
 

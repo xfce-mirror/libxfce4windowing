@@ -199,7 +199,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                             "screen",
                                                             "screen",
                                                             XFW_TYPE_SCREEN,
-                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspaceGroup:workspace-manager:
@@ -211,7 +211,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                             "workspace-manager",
                                                             "workspace-manager",
                                                             XFW_TYPE_WORKSPACE_MANAGER,
-                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspaceGroup:workspaces: (type GList(XfwWorkspace))
@@ -222,7 +222,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                         g_param_spec_pointer("workspaces",
                                                              "workspaces",
                                                              "workspaces",
-                                                             G_PARAM_READABLE));
+                                                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspaceGroup:active-workspace:
@@ -234,7 +234,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                                             "active-workspace",
                                                             "active-workspace",
                                                             XFW_TYPE_WORKSPACE,
-                                                            G_PARAM_READABLE));
+                                                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwWorkspaceGroup:monitors: (type GList(XfwMonitor))
@@ -245,7 +245,7 @@ xfw_workspace_group_default_init(XfwWorkspaceGroupIface *iface) {
                                         g_param_spec_pointer("monitors",
                                                              "monitors",
                                                              "monitors",
-                                                             G_PARAM_READABLE));
+                                                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 }
 
 /**

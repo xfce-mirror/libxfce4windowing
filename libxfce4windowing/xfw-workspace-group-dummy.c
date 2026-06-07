@@ -85,19 +85,19 @@ xfw_workspace_group_dummy_class_init(XfwWorkspaceGroupDummyClass *klass) {
                                     g_param_spec_pointer("create-workspace-func",
                                                          "create-workspace-func",
                                                          "create-workspace-func",
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
     g_object_class_install_property(gklass,
                                     PROP_MOVE_VIEWPORT_FUNC,
                                     g_param_spec_pointer("move-viewport-func",
                                                          "move-viewport-func",
                                                          "move-viewport-func",
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
     g_object_class_install_property(gklass,
                                     PROP_SET_LAYOUT_FUNC,
                                     g_param_spec_pointer("set-layout-func",
                                                          "set-layout-func",
                                                          "set-layout-func",
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
     _xfw_workspace_group_install_properties(gklass);
 }
 

@@ -140,7 +140,7 @@ xfw_window_action_menu_class_init(XfwWindowActionMenuClass *klass) {
                                                         "window",
                                                         "window",
                                                         XFW_TYPE_WINDOW,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 }
 
 static void

@@ -84,7 +84,7 @@ xfw_workspace_x11_class_init(XfwWorkspaceX11Class *klass) {
                                                         "wnck-workspace",
                                                         "wnck-workspace",
                                                         WNCK_TYPE_WORKSPACE,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
     _xfw_workspace_install_properties(gklass);
 }
 

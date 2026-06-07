@@ -85,7 +85,7 @@ xfw_application_x11_class_init(XfwApplicationX11Class *klass) {
                                                         "wnck-group",
                                                         "wnck-group",
                                                         WNCK_TYPE_CLASS_GROUP,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 }
 
 static void

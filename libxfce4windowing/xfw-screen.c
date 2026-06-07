@@ -299,7 +299,7 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                                                         "gdk-screen",
                                                         "GdkScreen",
                                                         GDK_TYPE_SCREEN,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwScreen:workspace-manager:
@@ -313,7 +313,7 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                                                         "workspace-manager",
                                                         "workspace-manager",
                                                         XFW_TYPE_WORKSPACE_MANAGER,
-                                                        G_PARAM_READABLE));
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwScreen:active-window:
@@ -326,7 +326,7 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                                                         "active-window",
                                                         "active-window",
                                                         XFW_TYPE_WINDOW,
-                                                        G_PARAM_READABLE));
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
      * XfwScreen:show-desktop:
@@ -339,7 +339,7 @@ xfw_screen_class_init(XfwScreenClass *klass) {
                                                          "show-desktop",
                                                          "show-desktop",
                                                          FALSE,
-                                                         G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY));
+                                                         G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS));
 }
 
 static void
