@@ -672,9 +672,7 @@ _xfw_screen_set_workspace_manager(XfwScreen *screen, XfwWorkspaceManager *worksp
 GList *
 _xfw_screen_steal_monitors(XfwScreen *screen) {
     XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
-    GList *monitors = priv->monitors;
-    priv->monitors = NULL;
-    return monitors;
+    return g_steal_pointer(&priv->monitors);
 }
 
 void
