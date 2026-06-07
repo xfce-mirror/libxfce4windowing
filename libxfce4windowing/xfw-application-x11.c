@@ -59,7 +59,7 @@ static void name_changed(WnckClassGroup *wnck_group, XfwApplicationX11 *app);
 static void toggle_notify(gpointer app, GObject *window, gboolean is_last_ref);
 
 
-G_DEFINE_TYPE_WITH_PRIVATE(XfwApplicationX11, xfw_application_x11, XFW_TYPE_APPLICATION)
+G_DEFINE_FINAL_TYPE_WITH_PRIVATE(XfwApplicationX11, xfw_application_x11, XFW_TYPE_APPLICATION)
 
 
 static void

@@ -66,10 +66,10 @@ static gboolean xfw_workspace_group_dummy_set_layout(XfwWorkspaceGroup *group, g
 static void monitor_added(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupDummy *group);
 static void monitor_removed(XfwScreen *screen, XfwMonitor *monitor, XfwWorkspaceGroupDummy *group);
 
-G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceGroupDummy, xfw_workspace_group_dummy, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwWorkspaceGroupDummy)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_GROUP,
-                                              xfw_workspace_group_dummy_workspace_group_init))
+G_DEFINE_FINAL_TYPE_WITH_CODE(XfwWorkspaceGroupDummy, xfw_workspace_group_dummy, G_TYPE_OBJECT,
+                              G_ADD_PRIVATE(XfwWorkspaceGroupDummy)
+                              G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_GROUP,
+                                                    xfw_workspace_group_dummy_workspace_group_init))
 
 static void
 xfw_workspace_group_dummy_class_init(XfwWorkspaceGroupDummyClass *klass) {

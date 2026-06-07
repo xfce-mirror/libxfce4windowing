@@ -50,10 +50,10 @@ static gboolean xfw_workspace_dummy_activate(XfwWorkspace *workspace, GError **e
 static gboolean xfw_workspace_dummy_remove(XfwWorkspace *workspace, GError **error);
 static gboolean xfw_workspace_dummy_assign_to_workspace_group(XfwWorkspace *workspace, XfwWorkspaceGroup *group, GError **error);
 
-G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceDummy, xfw_workspace_dummy, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwWorkspaceDummy)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
-                                              xfw_workspace_dummy_workspace_init))
+G_DEFINE_FINAL_TYPE_WITH_CODE(XfwWorkspaceDummy, xfw_workspace_dummy, G_TYPE_OBJECT,
+                              G_ADD_PRIVATE(XfwWorkspaceDummy)
+                              G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
+                                                    xfw_workspace_dummy_workspace_init))
 
 static void
 xfw_workspace_dummy_class_init(XfwWorkspaceDummyClass *klass) {

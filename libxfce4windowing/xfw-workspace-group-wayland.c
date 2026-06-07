@@ -94,10 +94,10 @@ static const struct ext_workspace_group_handle_v1_listener group_listener = {
     .removed = group_removed,
 };
 
-G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceGroupWayland, xfw_workspace_group_wayland, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwWorkspaceGroupWayland)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_GROUP,
-                                              xfw_workspace_group_wayland_workspace_group_init))
+G_DEFINE_FINAL_TYPE_WITH_CODE(XfwWorkspaceGroupWayland, xfw_workspace_group_wayland, G_TYPE_OBJECT,
+                              G_ADD_PRIVATE(XfwWorkspaceGroupWayland)
+                              G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_GROUP,
+                                                    xfw_workspace_group_wayland_workspace_group_init))
 
 static void
 xfw_workspace_group_wayland_class_init(XfwWorkspaceGroupWaylandClass *klass) {

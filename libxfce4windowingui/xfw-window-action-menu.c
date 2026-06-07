@@ -117,7 +117,7 @@ static void window_capabilities_changed(XfwWindow *window, XfwWindowCapabilities
 static void window_workspace_changed(XfwWindow *window, XfwWindowActionMenu *menu);
 
 
-G_DEFINE_TYPE(XfwWindowActionMenu, xfw_window_action_menu, GTK_TYPE_MENU)
+G_DEFINE_FINAL_TYPE(XfwWindowActionMenu, xfw_window_action_menu, GTK_TYPE_MENU)
 
 
 static void

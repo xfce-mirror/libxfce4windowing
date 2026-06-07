@@ -74,7 +74,7 @@ typedef struct {
 static void xfw_monitor_wayland_finalize(GObject *object);
 
 
-G_DEFINE_TYPE(XfwMonitorWayland, xfw_monitor_wayland, XFW_TYPE_MONITOR)
+G_DEFINE_FINAL_TYPE(XfwMonitorWayland, xfw_monitor_wayland, XFW_TYPE_MONITOR)
 
 
 static void

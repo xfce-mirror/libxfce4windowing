@@ -42,10 +42,10 @@ static void xfw_workspace_manager_dummy_finalize(GObject *obj);
 static GList *xfw_workspace_manager_dummy_list_workspace_groups(XfwWorkspaceManager *manager);
 static GList *xfw_workspace_manager_dummy_list_workspaces(XfwWorkspaceManager *manager);
 
-G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerDummy, xfw_workspace_manager_dummy, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwWorkspaceManagerDummy)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_MANAGER,
-                                              xfw_workspace_manager_dummy_manager_init))
+G_DEFINE_FINAL_TYPE_WITH_CODE(XfwWorkspaceManagerDummy, xfw_workspace_manager_dummy, G_TYPE_OBJECT,
+                              G_ADD_PRIVATE(XfwWorkspaceManagerDummy)
+                              G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_MANAGER,
+                                                    xfw_workspace_manager_dummy_manager_init))
 
 static void
 xfw_workspace_manager_dummy_class_init(XfwWorkspaceManagerDummyClass *klass) {

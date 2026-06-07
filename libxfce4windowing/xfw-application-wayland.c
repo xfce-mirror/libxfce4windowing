@@ -57,7 +57,7 @@ static XfwApplicationInstance *xfw_application_wayland_get_instance(XfwApplicati
 static void toggle_notify(gpointer app, GObject *window, gboolean is_last_ref);
 
 
-G_DEFINE_TYPE_WITH_PRIVATE(XfwApplicationWayland, xfw_application_wayland, XFW_TYPE_APPLICATION)
+G_DEFINE_FINAL_TYPE_WITH_PRIVATE(XfwApplicationWayland, xfw_application_wayland, XFW_TYPE_APPLICATION)
 
 
 static void

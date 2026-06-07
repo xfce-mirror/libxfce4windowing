@@ -113,7 +113,7 @@ static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_handle_lis
     .done = toplevel_done,
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE(XfwWindowWayland, xfw_window_wayland, XFW_TYPE_WINDOW)
+G_DEFINE_FINAL_TYPE_WITH_PRIVATE(XfwWindowWayland, xfw_window_wayland, XFW_TYPE_WINDOW)
 
 static void
 xfw_window_wayland_class_init(XfwWindowWaylandClass *klass) {

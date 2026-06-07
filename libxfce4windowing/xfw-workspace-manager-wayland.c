@@ -69,10 +69,10 @@ static const struct ext_workspace_manager_v1_listener manager_listener = {
     .finished = manager_finished,
 };
 
-G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerWayland, xfw_workspace_manager_wayland, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwWorkspaceManagerWayland)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_MANAGER,
-                                              xfw_workspace_manager_wayland_manager_init))
+G_DEFINE_FINAL_TYPE_WITH_CODE(XfwWorkspaceManagerWayland, xfw_workspace_manager_wayland, G_TYPE_OBJECT,
+                              G_ADD_PRIVATE(XfwWorkspaceManagerWayland)
+                              G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_MANAGER,
+                                                    xfw_workspace_manager_wayland_manager_init))
 
 static void
 xfw_workspace_manager_wayland_class_init(XfwWorkspaceManagerWaylandClass *klass) {

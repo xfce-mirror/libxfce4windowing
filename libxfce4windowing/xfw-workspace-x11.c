@@ -64,10 +64,10 @@ static gboolean xfw_workspace_x11_assign_to_workspace_group(XfwWorkspace *worksp
 
 static void name_changed(WnckWorkspace *wnck_workspace, XfwWorkspaceX11 *workspace);
 
-G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceX11, xfw_workspace_x11, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwWorkspaceX11)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
-                                              xfw_workspace_x11_workspace_init))
+G_DEFINE_FINAL_TYPE_WITH_CODE(XfwWorkspaceX11, xfw_workspace_x11, G_TYPE_OBJECT,
+                              G_ADD_PRIVATE(XfwWorkspaceX11)
+                              G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
+                                                    xfw_workspace_x11_workspace_init))
 
 static void
 xfw_workspace_x11_class_init(XfwWorkspaceX11Class *klass) {

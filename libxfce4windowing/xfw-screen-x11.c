@@ -62,7 +62,7 @@ static void window_manager_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen
 static void active_workspace_changed(WnckScreen *wnck_screen, WnckWorkspace *previous_workspace, XfwScreenX11 *screen);
 
 
-G_DEFINE_TYPE(XfwScreenX11, xfw_screen_x11, XFW_TYPE_SCREEN)
+G_DEFINE_FINAL_TYPE(XfwScreenX11, xfw_screen_x11, XFW_TYPE_SCREEN)
 
 
 static void

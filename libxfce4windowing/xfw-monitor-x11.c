@@ -52,7 +52,7 @@ struct _XfwMonitorX11 {
 };
 
 
-G_DEFINE_TYPE(XfwMonitorX11, xfw_monitor_x11, XFW_TYPE_MONITOR)
+G_DEFINE_FINAL_TYPE(XfwMonitorX11, xfw_monitor_x11, XFW_TYPE_MONITOR)
 
 
 static void

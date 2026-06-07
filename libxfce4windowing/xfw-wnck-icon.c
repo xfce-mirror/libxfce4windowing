@@ -122,12 +122,12 @@ static GInputStream *xfw_wnck_icon_load_finish(GLoadableIcon *icon,
 static GList *xfw_wnck_object_get_net_wm_icon(GObject *wnck_object);
 static WindowIcon *xfw_wnck_object_get_wmhints_icon(GObject *wnck_object);
 
-G_DEFINE_TYPE_WITH_CODE(XfwWnckIcon,
-                        xfw_wnck_icon,
-                        G_TYPE_OBJECT,
-                        G_IMPLEMENT_INTERFACE(G_TYPE_INITABLE, xfw_wnck_icon_initable_init)
-                        G_IMPLEMENT_INTERFACE(G_TYPE_ICON, xfw_wnck_icon_gicon_init)
-                        G_IMPLEMENT_INTERFACE(G_TYPE_LOADABLE_ICON, xfw_wnck_icon_loadable_icon_init))
+G_DEFINE_FINAL_TYPE_WITH_CODE(XfwWnckIcon,
+                              xfw_wnck_icon,
+                              G_TYPE_OBJECT,
+                              G_IMPLEMENT_INTERFACE(G_TYPE_INITABLE, xfw_wnck_icon_initable_init)
+                              G_IMPLEMENT_INTERFACE(G_TYPE_ICON, xfw_wnck_icon_gicon_init)
+                              G_IMPLEMENT_INTERFACE(G_TYPE_LOADABLE_ICON, xfw_wnck_icon_loadable_icon_init))
 
 static void
 xfw_wnck_icon_class_init(XfwWnckIconClass *klass) {

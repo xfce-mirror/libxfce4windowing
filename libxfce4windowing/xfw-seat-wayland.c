@@ -40,7 +40,7 @@ static void seat_name(void *data, struct wl_seat *wl_seat, const char *name);
 static void seat_capabilities(void *data, struct wl_seat *wl_seat, uint32_t capabilities);
 
 
-G_DEFINE_TYPE(XfwSeatWayland, xfw_seat_wayland, XFW_TYPE_SEAT)
+G_DEFINE_FINAL_TYPE(XfwSeatWayland, xfw_seat_wayland, XFW_TYPE_SEAT)
 
 
 static const struct wl_seat_listener seat_listener = {

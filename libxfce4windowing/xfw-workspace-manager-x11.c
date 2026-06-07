@@ -60,10 +60,10 @@ static gboolean group_set_layout(XfwWorkspaceGroup *group, gint rows, gint colum
 
 static gboolean check_workspace_properties_changed(XfwWorkspaceManager *manager);
 
-G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceManagerX11, xfw_workspace_manager_x11, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwWorkspaceManagerX11)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_MANAGER,
-                                              xfw_workspace_manager_x11_manager_init))
+G_DEFINE_FINAL_TYPE_WITH_CODE(XfwWorkspaceManagerX11, xfw_workspace_manager_x11, G_TYPE_OBJECT,
+                              G_ADD_PRIVATE(XfwWorkspaceManagerX11)
+                              G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE_MANAGER,
+                                                    xfw_workspace_manager_x11_manager_init))
 
 static void
 xfw_workspace_manager_x11_class_init(XfwWorkspaceManagerX11Class *klass) {

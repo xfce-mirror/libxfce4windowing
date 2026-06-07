@@ -99,7 +99,7 @@ static void xfw_window_list_menu_show(GtkWidget *widget);
 static void populate_window_list_menu(XfwWindowListMenu *menu);
 
 
-G_DEFINE_TYPE(XfwWindowListMenu, xfw_window_list_menu, GTK_TYPE_MENU)
+G_DEFINE_FINAL_TYPE(XfwWindowListMenu, xfw_window_list_menu, GTK_TYPE_MENU)
 
 
 static void

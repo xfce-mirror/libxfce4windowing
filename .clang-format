@@ -47,4 +47,5 @@ SpacesBeforeTrailingComments: 2
 WhitespaceSensitiveMacros:
   # Avoid breaking formatting in the code parameter
   - G_DEFINE_TYPE_WITH_CODE
+  - G_DEFINE_FINAL_TYPE_WITH_CODE
 ...

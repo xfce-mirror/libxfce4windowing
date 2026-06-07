@@ -104,7 +104,7 @@ static XfwWindowState convert_state(WnckWindow *wnck_window, WnckWindowState wnc
 static XfwWindowCapabilities convert_capabilities(WnckWindow *wnck_window, WnckWindowActions wnck_actions);
 
 
-G_DEFINE_TYPE_WITH_PRIVATE(XfwWindowX11, xfw_window_x11, XFW_TYPE_WINDOW)
+G_DEFINE_FINAL_TYPE_WITH_PRIVATE(XfwWindowX11, xfw_window_x11, XFW_TYPE_WINDOW)
 
 
 static void

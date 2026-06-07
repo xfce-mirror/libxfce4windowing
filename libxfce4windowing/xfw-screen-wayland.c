@@ -101,7 +101,7 @@ static const struct zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_l
 };
 
 
-G_DEFINE_TYPE(XfwScreenWayland, xfw_screen_wayland, XFW_TYPE_SCREEN)
+G_DEFINE_FINAL_TYPE(XfwScreenWayland, xfw_screen_wayland, XFW_TYPE_SCREEN)
 
 
 static void

@@ -95,10 +95,10 @@ static const struct ext_workspace_handle_v1_listener workspace_listener = {
     .removed = workspace_removed,
 };
 
-G_DEFINE_TYPE_WITH_CODE(XfwWorkspaceWayland, xfw_workspace_wayland, G_TYPE_OBJECT,
-                        G_ADD_PRIVATE(XfwWorkspaceWayland)
-                        G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
-                                              xfw_workspace_wayland_workspace_init))
+G_DEFINE_FINAL_TYPE_WITH_CODE(XfwWorkspaceWayland, xfw_workspace_wayland, G_TYPE_OBJECT,
+                              G_ADD_PRIVATE(XfwWorkspaceWayland)
+                              G_IMPLEMENT_INTERFACE(XFW_TYPE_WORKSPACE,
+                                                    xfw_workspace_wayland_workspace_init))
 
 static void
 xfw_workspace_wayland_class_init(XfwWorkspaceWaylandClass *klass) {
