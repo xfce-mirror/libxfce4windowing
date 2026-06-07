@@ -612,8 +612,7 @@ toplevel_parent(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel,
 static gboolean
 free_pending_outputs(gpointer data) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
-    g_list_free(window->priv->pending_outputs);
-    window->priv->pending_outputs = NULL;
+    g_clear_list(&window->priv->pending_outputs, NULL);
     window->priv->pending_outputs_id = 0;
     return FALSE;
 }

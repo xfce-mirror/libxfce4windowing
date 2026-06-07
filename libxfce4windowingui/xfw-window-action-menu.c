@@ -466,8 +466,7 @@ update_move_submenu(XfwWindowActionMenu *menu) {
                                             : _("Workspace %d"),
                                         number);
                 item = gtk_menu_item_new_with_mnemonic(label);
-                g_free(label);
-                label = NULL;
+                g_clear_pointer(&label, g_free);
             } else if (number >= 10) {
                 item = gtk_menu_item_new_with_label(label);
             } else {

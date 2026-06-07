@@ -218,8 +218,7 @@ active_window_changed(WnckScreen *wnck_screen, WnckWindow *previous_wnck_window,
 
 static void
 window_stacking_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen) {
-    g_list_free(screen->windows_stacked);
-    screen->windows_stacked = NULL;
+    g_clear_list(&screen->windows_stacked, NULL);
 
     for (GList *l = wnck_screen_get_windows_stacked(screen->wnck_screen); l != NULL; l = l->next) {
         XfwWindowX11 *window = g_hash_table_lookup(screen->wnck_windows, l->data);

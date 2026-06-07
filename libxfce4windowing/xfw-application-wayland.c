@@ -156,8 +156,7 @@ xfw_application_wayland_finalize(GObject *obj) {
 
     g_hash_table_remove(app_ids, priv->app_id);
     if (g_hash_table_size(app_ids) == 0) {
-        g_hash_table_destroy(app_ids);
-        app_ids = NULL;
+        g_clear_pointer(&app_ids, g_hash_table_destroy);
     }
 
     g_free(priv->app_id);

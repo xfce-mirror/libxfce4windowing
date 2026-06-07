@@ -259,8 +259,7 @@ xfw_screen_wayland_set_show_desktop(XfwScreen *screen, gboolean show) {
     // remove and disconnect from any previously minimized window: probably there is none,
     // but it is asynchronous and the compositor might have failed to unminimize some of them
     g_list_foreach(wscreen->show_desktop_data.minimized, show_desktop_disconnect, wscreen);
-    g_list_free(wscreen->show_desktop_data.minimized);
-    wscreen->show_desktop_data.minimized = NULL;
+    g_clear_list(&wscreen->show_desktop_data.minimized, NULL);
     wscreen->show_desktop_data.was_active = NULL;
 
     // request for showing the desktop and prepare reverse process

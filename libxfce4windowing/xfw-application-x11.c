@@ -143,8 +143,7 @@ xfw_application_x11_finalize(GObject *obj) {
 
     g_hash_table_remove(wnck_groups, priv->wnck_group);
     if (g_hash_table_size(wnck_groups) == 0) {
-        g_hash_table_destroy(wnck_groups);
-        wnck_groups = NULL;
+        g_clear_pointer(&wnck_groups, g_hash_table_destroy);
     }
 
     g_signal_handlers_disconnect_by_func(priv->wnck_group, icon_changed, obj);
