@@ -75,7 +75,7 @@ typedef struct _XfwXcreenPrivate {
 } XfwScreenPrivate;
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_SCREEN,
     PROP_WORKSPACE_MANAGER,
     PROP_ACTIVE_WINDOW,

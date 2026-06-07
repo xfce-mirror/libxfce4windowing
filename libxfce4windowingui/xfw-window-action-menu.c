@@ -39,7 +39,7 @@
 #include "libxfce4windowingui-visibility.h"
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_WINDOW,
 };
 

@@ -37,7 +37,7 @@
 #include "xfw-workspace-wayland.h"
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_WL_MANAGER,
 };
 

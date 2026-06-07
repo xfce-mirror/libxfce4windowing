@@ -65,7 +65,7 @@ window_icon_free(WindowIcon *window_icon) {
 
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_WNCK_OBJECT,
 };
 

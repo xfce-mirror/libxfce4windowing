@@ -55,7 +55,7 @@
 #define XFW_WINDOW_GET_PRIVATE(window) ((XfwWindowPrivate *)xfw_window_get_instance_private(window))
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_SCREEN,
     PROP_CLASS_IDS,
     PROP_NAME,

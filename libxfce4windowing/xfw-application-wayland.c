@@ -29,7 +29,7 @@
 #include "xfw-screen-wayland.h"
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_APP_ID,
 };
 

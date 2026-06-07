@@ -29,7 +29,7 @@
 #include "xfw-wnck-icon.h"
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_WNCK_GROUP,
 };
 

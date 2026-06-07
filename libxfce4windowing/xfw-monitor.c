@@ -69,7 +69,7 @@ typedef struct _XfwMonitorPrivate {
 } XfwMonitorPrivate;
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_IDENTIFIER,
     PROP_DESCRIPTION,
     PROP_CONNECTOR,

@@ -43,7 +43,7 @@ typedef struct _XfwSeatPrivate {
 } XfwSeatPrivate;
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_NAME,
 };
 

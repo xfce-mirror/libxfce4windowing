@@ -44,7 +44,7 @@
 #define XFW_APPLICATION_GET_PRIVATE(app) ((XfwApplicationPrivate *)xfw_application_get_instance_private(XFW_APPLICATION(app)))
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_CLASS_ID,
     PROP_NAME,
     PROP_WINDOWS,
@@ -196,6 +196,10 @@ xfw_application_get_property(GObject *object,
 
         case PROP_INSTANCES:
             g_value_set_pointer(value, xfw_application_get_instances(app));
+            break;
+
+        case PROP_GICON:
+            g_value_set_object(value, xfw_application_get_gicon(app));
             break;
 
         default:

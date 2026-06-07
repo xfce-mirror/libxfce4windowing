@@ -32,7 +32,7 @@
 #include "xfw-workspace.h"
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_CREATE_WORKSPACE_FUNC,
     PROP_MOVE_VIEWPORT_FUNC,
     PROP_SET_LAYOUT_FUNC,

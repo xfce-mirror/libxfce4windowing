@@ -36,7 +36,7 @@
 #include "libxfce4windowing-visibility.h"
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_WNCK_WINDOW,
 };
 

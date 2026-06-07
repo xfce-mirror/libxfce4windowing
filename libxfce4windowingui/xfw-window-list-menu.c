@@ -70,7 +70,7 @@ struct _XfwWindowListMenu {
 };
 
 enum {
-    PROP0,
+    PROP_0,
     PROP_SCREEN,
     PROP_SHOW_ICONS,
     PROP_SHOW_WORKSPACE_NAMES,
