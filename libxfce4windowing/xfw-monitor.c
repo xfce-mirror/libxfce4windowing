@@ -254,7 +254,7 @@ xfw_monitor_class_init(XfwMonitorClass *klass) {
      * Since: 4.19.4
      **/
     g_object_class_install_property(gobject_class,
-                                    PROP_SCALE,
+                                    PROP_FRACTIONAL_SCALE,
                                     g_param_spec_double("fractional-scale",
                                                         "fractional-scale",
                                                         "UI fractional scaling factor",
