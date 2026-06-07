@@ -39,8 +39,6 @@ G_DECLARE_FINAL_TYPE(XfwScreenWayland, xfw_screen_wayland, XFW, SCREEN_WAYLAND, 
 
 typedef struct _XfwScreenWaylandPrivate XfwScreenWaylandPrivate;
 
-GdkScreen *_xfw_screen_wayland_get_gdk_screen(XfwScreenWayland *screen);
-
 void _xfw_screen_wayland_seat_ready(XfwScreenWayland *screen, XfwSeatWayland *seat);
 
 XfwWorkspace *_xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *window);
