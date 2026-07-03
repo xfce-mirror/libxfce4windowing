@@ -5,6 +5,7 @@ if enable_wayland
     'ext-workspace-v1': ext_workspace_xml,
     'wlr-foreign-toplevel-management-unstable-v1': wlr_protocols_pkgdatadir / 'unstable' / 'wlr-foreign-toplevel-management-unstable-v1.xml',
     'xdg-output-unstable-v1': wl_protocols_pkgdatadir / 'unstable' / 'xdg-output' / 'xdg-output-unstable-v1.xml',
+    'xfce-foreign-toplevel-management-private-v1': 'xfce-wayland-protocols' / 'xfce-foreign-toplevel-management-private-v1.xml',
   }
 
   foreach name, file : protocols

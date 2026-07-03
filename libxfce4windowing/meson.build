@@ -33,6 +33,7 @@ windowing_public_sources = [
 
 windowing_sources = [
   'libxfce4windowing-private.c',
+  'window-icon-utils.c',
   'xfw-gdk-private.c',
   'xfw-workspace-dummy.c',
   'xfw-workspace-group-dummy.c',
@@ -80,6 +81,7 @@ if enable_wayland
     'xfw-screen-wayland.c',
     'xfw-seat-wayland.c',
     'xfw-window-wayland.c',
+    'xfw-wl-raster-icon.c',
     'xfw-workspace-group-wayland.c',
     'xfw-workspace-manager-wayland.c',
     'xfw-workspace-wayland.c',
