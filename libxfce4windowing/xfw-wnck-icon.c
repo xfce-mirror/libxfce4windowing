@@ -27,42 +27,9 @@
 #include <glib/gi18n-lib.h>
 
 #include "libxfce4windowing-private.h"
+#include "window-icon-utils.h"
 #include "xfw-util.h"
 #include "xfw-wnck-icon.h"
-
-#define IMGDATA_TYPE "bmp"
-
-typedef struct
-{
-    gint width;
-    gint height;
-    guchar *bmp;
-    gsize bmp_len;
-} WindowIcon;
-
-static gint
-window_icon_compare(gconstpointer a,
-                    gconstpointer b) {
-    const WindowIcon *wa = a;
-    const WindowIcon *wb = b;
-
-    if (wa == NULL && wb == NULL) {
-        return 0;
-    } else if (wa == NULL) {
-        return -1;
-    } else if (wb == NULL) {
-        return 1;
-    } else {
-        return MAX(wa->width, wa->height) - MAX(wb->width, wb->height);
-    }
-}
-
-static void
-window_icon_free(WindowIcon *window_icon) {
-    g_free(window_icon->bmp);
-    g_slice_free(WindowIcon, window_icon);
-}
-
 
 enum {
     PROP_0,
@@ -196,7 +163,7 @@ static void
 xfw_wnck_icon_finalize(GObject *object) {
     XfwWnckIcon *icon = XFW_WNCK_ICON(object);
 
-    g_list_free_full(icon->window_icons, (GDestroyNotify)window_icon_free);
+    g_list_free_full(icon->window_icons, (GDestroyNotify)_window_icon_free);
 
     G_OBJECT_CLASS(xfw_wnck_icon_parent_class)->finalize(object);
 }
@@ -286,80 +253,6 @@ xfw_wnck_icon_hash(GIcon *icon) {
     }
 }
 
-// gdk-pixbuf's BMP writer does not write with the header type that supports
-// an alpha channel, so we have to do it ourselves here.
-static guchar *
-xfw_wnck_icon_argb_to_bmp(const gulong *image_data,
-                          gint width,
-                          gint height,
-                          gsize *bmp_len) {
-    guint image_data_len;
-    guchar *data;
-    const guint32 header_bytes = 108;
-    const guint32 pixel_data_start = 14 + header_bytes;
-    guint32 data_size;
-    guchar *cp;
-    gulong *lp;
-
-    g_return_val_if_fail(image_data != NULL, NULL);
-    g_return_val_if_fail(width > 0 && height > 0, NULL);
-    g_return_val_if_fail(bmp_len != NULL, NULL);
-
-    image_data_len = width * 4 * height;
-    data_size = pixel_data_start + image_data_len;
-
-#define PACK_U16(off, val) \
-    G_STMT_START { \
-        data[(off)] = (val) & 0xff; \
-        data[(off) + 1] = ((val) >> 8) & 0xff; \
-    } \
-    G_STMT_END
-#define PACK_U32(off, val) \
-    G_STMT_START { \
-        data[(off)] = (val) & 0xff; \
-        data[(off) + 1] = ((val) >> 8) & 0xff; \
-        data[(off) + 2] = ((val) >> 16) & 0xff; \
-        data[(off) + 3] = ((val) >> 24) & 0xff; \
-    } \
-    G_STMT_END
-
-    data = g_malloc(data_size);
-    memset(data, 0, pixel_data_start);
-    // BMP header
-    data[0] = 'B';
-    data[1] = 'M';
-    PACK_U32(2, data_size);
-    PACK_U32(10, pixel_data_start);
-    // DIB header (BITMAPV4HEADER)
-    PACK_U32(14, header_bytes);
-    PACK_U32(18, width);
-    PACK_U32(22, -height);  // negative for top-to-bottom data
-    PACK_U16(26, 1);  // number of color planes
-    PACK_U16(28, 32);  // bpp
-    PACK_U16(30, 3);  // BI_BITFIELDS
-    PACK_U32(34, data_size);
-    PACK_U32(54, 0x000000ff);  // red mask
-    PACK_U32(58, 0x0000ff00);  // green mask
-    PACK_U32(62, 0x00ff0000);  // blue mask
-    PACK_U32(66, 0xff000000);  // alpha mask
-    // image data
-    for (cp = data + pixel_data_start, lp = (gulong *)image_data; cp < data + data_size; cp += 4, ++lp) {
-        guint argb = *lp;
-        guint rgba = (argb << 8) | (argb >> 24);
-
-        cp[0] = rgba >> 24;
-        cp[1] = (rgba >> 16) & 0xff;
-        cp[2] = (rgba >> 8) & 0xff;
-        cp[3] = rgba & 0xff;
-    }
-
-    *bmp_len = data_size;
-    return data;
-
-#undef PACK_U16
-#undef PACK_U32
-}
-
 static GList *
 xfw_wnck_object_get_net_wm_icon(GObject *wnck_object) {
     GdkDisplay *display;
@@ -410,15 +303,9 @@ xfw_wnck_object_get_net_wm_icon(GObject *wnck_object) {
                 break;
             }
 
-            window_icon = g_slice_new0(WindowIcon);
-            window_icon->width = width;
-            window_icon->height = height;
-            window_icon->bmp = xfw_wnck_icon_argb_to_bmp(cur + 2, width, height, &window_icon->bmp_len);
-
-            if (G_LIKELY(window_icon->bmp != NULL)) {
+            window_icon = _window_icon_new(cur + 2, width, height, FALSE);
+            if (G_LIKELY(window_icon != NULL)) {
                 window_icons = g_list_prepend(window_icons, window_icon);
-            } else {
-                window_icon_free(window_icon);
             }
 
             cur += 2 + (width * height);
@@ -429,7 +316,7 @@ xfw_wnck_object_get_net_wm_icon(GObject *wnck_object) {
         XFree(data);
     }
 
-    return g_list_sort(window_icons, window_icon_compare);
+    return g_list_sort(window_icons, _window_icon_compare);
 }
 
 static cairo_surface_t *
@@ -561,19 +448,10 @@ xfw_wnck_object_get_wmhints_icon(GObject *wnck_object) {
             cairo_surface_t *surface = xfw_cairo_surface_from_pixmap_and_mask(hints->icon_pixmap, mask);
 
             if (surface != NULL) {
-                window_icon = g_slice_new0(WindowIcon);
-                window_icon->width = cairo_image_surface_get_width(surface);
-                window_icon->height = cairo_image_surface_get_height(surface);
-                window_icon->bmp = xfw_wnck_icon_argb_to_bmp((gulong *)(gpointer)cairo_image_surface_get_data(surface),
-                                                             window_icon->width,
-                                                             window_icon->height,
-                                                             &window_icon->bmp_len);
-
-                if (G_UNLIKELY(window_icon->bmp == NULL)) {
-                    window_icon_free(window_icon);
-                    window_icon = NULL;
-                }
-
+                window_icon = _window_icon_new((gulong *)(gpointer)cairo_image_surface_get_data(surface),
+                                               cairo_image_surface_get_width(surface),
+                                               cairo_image_surface_get_height(surface),
+                                               FALSE);
                 cairo_surface_destroy(surface);
             }
         }

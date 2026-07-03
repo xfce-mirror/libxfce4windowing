@@ -45,6 +45,7 @@ struct _XfwWorkspaceManagerWayland {
 };
 
 XfwWorkspaceManager *_xfw_workspace_manager_wayland_new(XfwScreenWayland *screen, struct ext_workspace_manager_v1 *manager);
+XfwWorkspace *_xfw_workspace_manager_wayland_workspace_for_handle(XfwWorkspaceManagerWayland *manager, struct ext_workspace_handle_v1 *ext_workspace);
 
 G_END_DECLS
 
