@@ -73,6 +73,8 @@ libxfce4windowing_0_wayland_sources = \
 	xfw-seat-wayland.h \
 	xfw-window-wayland.c \
 	xfw-window-wayland.h \
+	xfw-wl-raster-icon.c \
+	xfw-wl-raster-icon.h \
 	xfw-workspace-group-wayland.c \
 	xfw-workspace-group-wayland.h \
 	xfw-workspace-manager-wayland.c \
@@ -84,6 +86,8 @@ libxfce4windowing_0_la_SOURCES = \
 	$(libxfce4windowing_0_public_sources) \
 	libxfce4windowing-private.c \
 	libxfce4windowing-private.h \
+	window-icon-utils.c \
+	window-icon-utils.h \
 	xfw-application-private.h \
 	xfw-gdk-private.c \
 	xfw-gdk-private.h \
