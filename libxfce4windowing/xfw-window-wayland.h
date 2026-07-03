@@ -25,8 +25,10 @@
 #endif
 
 #include <glib-object.h>
+#include <stdint.h>
 
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
+#include "protocols/xfce-foreign-toplevel-management-private-v1-client.h"
 
 #include "xfw-window-private.h"
 
@@ -43,7 +45,14 @@ struct _XfwWindowWayland {
     XfwWindowWaylandPrivate *priv;
 };
 
-struct zwlr_foreign_toplevel_handle_v1 *_xfw_window_wayland_get_handle(XfwWindowWayland *window);
+typedef struct _IconSize {
+    uint32_t size;
+    uint32_t scale;
+} IconSize;
+
+struct zwlr_foreign_toplevel_handle_v1 *_xfw_window_wayland_get_wlr_handle(XfwWindowWayland *window);
+struct xfce_foreign_toplevel_handle_v1 *_xfw_window_wayland_get_xfce_handle(XfwWindowWayland *window);
+GList *_xfw_window_wayland_get_icon_sizes(XfwWindowWayland *window);
 
 G_END_DECLS
 
