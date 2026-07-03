@@ -246,3 +246,14 @@ _xfw_workspace_manager_wayland_new(XfwScreenWayland *screen, struct ext_workspac
                         "wl-manager", manager,
                         NULL);
 }
+
+XfwWorkspace *
+_xfw_workspace_manager_wayland_workspace_for_handle(XfwWorkspaceManagerWayland *manager, struct ext_workspace_handle_v1 *ext_workspace) {
+    for (GList *l = manager->priv->workspaces; l != NULL; l = l->next) {
+        XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(l->data);
+        if (_xfw_workspace_wayland_get_handle(workspace) == ext_workspace) {
+            return XFW_WORKSPACE(workspace);
+        }
+    }
+    return NULL;
+}
