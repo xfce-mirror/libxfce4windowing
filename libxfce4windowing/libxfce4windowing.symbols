@@ -11,7 +11,7 @@ xfw_application_get_icon
 xfw_application_get_instance
 xfw_application_get_instances
 xfw_application_get_name
-xfw_application_get_type attr:G_GNUC_CONST
+xfw_application_get_type
 xfw_application_get_windows
 xfw_application_icon_is_fallback
 xfw_application_instance_get_name
@@ -34,11 +34,11 @@ xfw_monitor_get_scale
 xfw_monitor_get_serial
 xfw_monitor_get_subpixel
 xfw_monitor_get_transform
-xfw_monitor_get_type attr:G_GNUC_CONST
+xfw_monitor_get_type
 xfw_monitor_get_workarea
 xfw_monitor_is_primary
-xfw_monitor_subpixel_get_type attr:G_GNUC_CONST
-xfw_monitor_transform_get_type attr:G_GNUC_CONST
+xfw_monitor_subpixel_get_type
+xfw_monitor_transform_get_type
 
 # file:xfw-screen
 xfw_screen_get_active_window
@@ -48,7 +48,7 @@ xfw_screen_get_monitors
 xfw_screen_get_primary_monitor
 xfw_screen_get_seats
 xfw_screen_get_show_desktop
-xfw_screen_get_type attr:G_GNUC_CONST
+xfw_screen_get_type
 xfw_screen_get_windows
 xfw_screen_get_windows_stacked
 xfw_screen_get_workspace_manager
@@ -59,14 +59,14 @@ xfw_seat_get_name
 xfw_seat_get_type
 
 # file:xfw-util
-xfw_direction_get_type attr:G_GNUC_CONST
-xfw_error_quark attr:G_GNUC_CONST
+xfw_direction_get_type
+xfw_error_quark
 xfw_set_client_type
 xfw_windowing_get
 
 # file:xfw-window
 xfw_window_activate
-xfw_window_capabilities_get_type attr:G_GNUC_CONST
+xfw_window_capabilities_get_type
 xfw_window_close
 xfw_window_get_application
 xfw_window_get_capabilities
@@ -78,7 +78,7 @@ xfw_window_get_monitors
 xfw_window_get_name
 xfw_window_get_screen
 xfw_window_get_state
-xfw_window_get_type attr:G_GNUC_CONST
+xfw_window_get_type
 xfw_window_get_window_type
 xfw_window_get_workspace
 xfw_window_icon_is_fallback
@@ -109,8 +109,8 @@ xfw_window_set_skip_pager
 xfw_window_set_skip_tasklist
 xfw_window_start_move
 xfw_window_start_resize
-xfw_window_state_get_type attr:G_GNUC_CONST
-xfw_window_type_get_type attr:G_GNUC_CONST
+xfw_window_state_get_type
+xfw_window_type_get_type
 
 # file:xfw-window-x11
 xfw_window_x11_get_xid
@@ -118,7 +118,7 @@ xfw_window_x11_get_xid
 # file:xfw-workspace
 xfw_workspace_activate
 xfw_workspace_assign_to_workspace_group
-xfw_workspace_capabilities_get_type attr:G_GNUC_CONST
+xfw_workspace_capabilities_get_type
 xfw_workspace_get_capabilities
 xfw_workspace_get_geometry
 xfw_workspace_get_id
@@ -128,18 +128,18 @@ xfw_workspace_get_name
 xfw_workspace_get_neighbor
 xfw_workspace_get_number
 xfw_workspace_get_state
-xfw_workspace_get_type attr:G_GNUC_CONST
+xfw_workspace_get_type
 xfw_workspace_get_workspace_group
 xfw_workspace_remove
-xfw_workspace_state_get_type attr:G_GNUC_CONST
+xfw_workspace_state_get_type
 
 # file:xfw-workspace-group
-xfw_workspace_group_capabilities_get_type attr:G_GNUC_CONST
+xfw_workspace_group_capabilities_get_type
 xfw_workspace_group_create_workspace
 xfw_workspace_group_get_active_workspace
 xfw_workspace_group_get_capabilities
 xfw_workspace_group_get_monitors
-xfw_workspace_group_get_type attr:G_GNUC_CONST
+xfw_workspace_group_get_type
 xfw_workspace_group_get_workspace_count
 xfw_workspace_group_get_workspace_manager
 xfw_workspace_group_list_workspaces
@@ -147,6 +147,6 @@ xfw_workspace_group_move_viewport
 xfw_workspace_group_set_layout
 
 # file:xfw-workspace-manager
-xfw_workspace_manager_get_type attr:G_GNUC_CONST
+xfw_workspace_manager_get_type
 xfw_workspace_manager_list_workspace_groups
 xfw_workspace_manager_list_workspaces

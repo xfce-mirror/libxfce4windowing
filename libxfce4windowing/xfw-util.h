@@ -101,8 +101,8 @@ typedef enum {
     XFW_CLIENT_TYPE_PAGER = 2,
 } XfwClientType;
 
-GQuark xfw_error_quark(void) G_GNUC_CONST;
-GType xfw_direction_get_type(void) G_GNUC_CONST;
+GQuark xfw_error_quark(void);
+GType xfw_direction_get_type(void);
 
 XfwWindowing xfw_windowing_get(void);
 

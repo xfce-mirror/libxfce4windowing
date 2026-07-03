@@ -86,8 +86,8 @@ typedef enum _XfwMonitorSubpixel {
 #define XFW_TYPE_MONITOR (xfw_monitor_get_type())
 G_DECLARE_DERIVABLE_TYPE(XfwMonitor, xfw_monitor, XFW, MONITOR, GObject)
 
-GType xfw_monitor_transform_get_type(void) G_GNUC_CONST;
-GType xfw_monitor_subpixel_get_type(void) G_GNUC_CONST;
+GType xfw_monitor_transform_get_type(void);
+GType xfw_monitor_subpixel_get_type(void);
 
 const char *xfw_monitor_get_identifier(XfwMonitor *monitor);
 const char *xfw_monitor_get_description(XfwMonitor *monitor);

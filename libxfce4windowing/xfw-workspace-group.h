@@ -60,7 +60,7 @@ typedef enum {
     XFW_WORKSPACE_GROUP_CAPABILITIES_SET_LAYOUT = (1 << 2),
 } XfwWorkspaceGroupCapabilities;
 
-GType xfw_workspace_group_capabilities_get_type(void) G_GNUC_CONST;
+GType xfw_workspace_group_capabilities_get_type(void);
 
 XfwWorkspaceGroupCapabilities xfw_workspace_group_get_capabilities(XfwWorkspaceGroup *group);
 guint xfw_workspace_group_get_workspace_count(XfwWorkspaceGroup *group);

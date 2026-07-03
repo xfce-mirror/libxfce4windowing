@@ -145,9 +145,9 @@ typedef enum {
     XFW_WINDOW_TYPE_SPLASHSCREEN = 7,
 } XfwWindowType;
 
-GType xfw_window_type_get_type(void) G_GNUC_CONST;
-GType xfw_window_state_get_type(void) G_GNUC_CONST;
-GType xfw_window_capabilities_get_type(void) G_GNUC_CONST;
+GType xfw_window_type_get_type(void);
+GType xfw_window_state_get_type(void);
+GType xfw_window_capabilities_get_type(void);
 
 const gchar *const *xfw_window_get_class_ids(XfwWindow *window);
 const gchar *xfw_window_get_name(XfwWindow *window);

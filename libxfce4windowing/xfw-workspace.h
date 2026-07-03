@@ -79,8 +79,8 @@ typedef enum {
     XFW_WORKSPACE_STATE_VIRTUAL = (1 << 3),
 } XfwWorkspaceState;
 
-GType xfw_workspace_capabilities_get_type(void) G_GNUC_CONST;
-GType xfw_workspace_state_get_type(void) G_GNUC_CONST;
+GType xfw_workspace_capabilities_get_type(void);
+GType xfw_workspace_state_get_type(void);
 
 const gchar *xfw_workspace_get_id(XfwWorkspace *workspace);
 const gchar *xfw_workspace_get_name(XfwWorkspace *workspace);
