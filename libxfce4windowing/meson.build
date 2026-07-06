@@ -80,12 +80,17 @@ if enable_wayland
     'xfw-screen-wayland.c',
     'xfw-seat-wayland.c',
     'xfw-window-wayland.c',
+    'xfw-wl-raster-icon.c',
     'xfw-workspace-group-wayland.c',
     'xfw-workspace-manager-wayland.c',
     'xfw-workspace-wayland.c',
   ]
 else
   windowing_config_data.set('LIBXFCE4WINDOWING_HAS_WAYLAND', '/* #undef LIBXFCE4WINDOWING_HAS_WAYLAND */')
+endif
+
+if enable_x11 or enable_wayland
+  windowing_sources += 'window-icon-utils.c'
 endif
 
 windowing_config_h = configure_file(

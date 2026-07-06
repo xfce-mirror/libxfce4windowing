@@ -28,9 +28,9 @@
 #include "protocols/ext-workspace-v1-client.h"
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 #include "protocols/xdg-output-unstable-v1-client.h"
+#include "protocols/xfce-foreign-toplevel-management-private-v1-client.h"
 
 #include "libxfce4windowing-private.h"
-#include "xfw-monitor-private.h"
 #include "xfw-monitor-wayland.h"
 #include "xfw-screen-private.h"
 #include "xfw-screen-wayland.h"
@@ -49,10 +49,12 @@ struct _XfwScreenWayland {
 
     GList *pending_seats;
 
-    gboolean defer_toplevel_manager;
-    uint32_t toplevel_manager_name;
-    uint32_t toplevel_manager_version;
-    struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
+    gboolean defer_wlr_toplevel_manager;
+    uint32_t wlr_toplevel_manager_name;
+    uint32_t wlr_toplevel_manager_version;
+    struct zwlr_foreign_toplevel_manager_v1 *wlr_toplevel_manager;
+
+    struct xfce_foreign_toplevel_manager_private_v1 *xfce_toplevel_manager;
 
     gboolean defer_workspace_manager;
     uint32_t workspace_manager_name;
@@ -60,7 +62,7 @@ struct _XfwScreenWayland {
 
     GList *windows;
     GList *windows_stacked;
-    GHashTable *wl_windows;
+    GHashTable *wlr_windows;
     struct {
         GList *minimized;
         XfwWindow *was_active;
@@ -77,6 +79,7 @@ static void xfw_screen_wayland_set_show_desktop(XfwScreen *screen, gboolean show
 
 static void show_desktop_disconnect(gpointer object, gpointer data);
 
+static void add_async_roundtrip(XfwScreenWayland *screen);
 static void async_roundtrip_done(void *data, struct wl_callback *callback, uint32_t callback_id);
 
 static void init_toplevel_manager(XfwScreenWayland *screen);
@@ -118,9 +121,9 @@ xfw_screen_wayland_class_init(XfwScreenWaylandClass *klass) {
 
 static void
 xfw_screen_wayland_init(XfwScreenWayland *screen) {
-    screen->defer_toplevel_manager = TRUE;
+    screen->defer_wlr_toplevel_manager = TRUE;
     screen->defer_workspace_manager = TRUE;
-    screen->wl_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
+    screen->wlr_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
 }
 
 static void
@@ -145,18 +148,36 @@ xfw_screen_wayland_constructed(GObject *obj) {
     // We defer binding to the toplevel and workspace managers until after we have all
     // XfwMonitor instances initialized.  Otherwise, we would get output_enter
     // events for toplevels or workspace groups, but have no XfwMonitor to match them to.
-    wscreen->defer_toplevel_manager = FALSE;
-    if (wscreen->toplevel_manager_name != 0 && wscreen->toplevel_manager_version != 0) {
-        init_toplevel_manager(wscreen);
-    }
+    //
+    // We also need to bind the workspage manager before the toplevel manager,
+    // because the xfce extension protocol for the toplevel manager will need
+    // workspaces available.
     wscreen->defer_workspace_manager = FALSE;
     if (wscreen->workspace_manager_name != 0 && wscreen->workspace_manager_version != 0) {
         init_workspace_manager(wscreen);
     }
-
-    if (wscreen->toplevel_manager != NULL) {
+    wscreen->defer_wlr_toplevel_manager = FALSE;
+    if (wscreen->wlr_toplevel_manager_name != 0 && wscreen->wlr_toplevel_manager_version != 0) {
+        init_toplevel_manager(wscreen);
+    }
+    if (wscreen->wlr_toplevel_manager != NULL) {
         while (wscreen->async_roundtrips != NULL) {
             wl_display_dispatch(wscreen->wl_display);
+        }
+
+        if (wscreen->xfce_toplevel_manager != NULL) {
+            if (wscreen->windows != NULL) {
+                // If we have the xfce toplevel manager and at least one window,
+                // then one of the previous roundtrips will have caused us to
+                // request xfce toplevel handles.  All that should take one more
+                // roundtrip to come back to us, so add another.
+                add_async_roundtrip(wscreen);
+                while (wscreen->async_roundtrips != NULL) {
+                    wl_display_dispatch(wscreen->wl_display);
+                }
+            }
+        } else {
+            g_message("Window<->Workspace association is not available on your compositor");
         }
     } else {
         g_message("Your compositor does not support the wlr_foreign_toplevel_manager_v1 protocol");
@@ -180,8 +201,11 @@ xfw_screen_wayland_finalize(GObject *obj) {
 
     _xfw_monitor_manager_wayland_destroy(screen->monitor_manager);
 
-    if (screen->toplevel_manager != NULL) {
-        zwlr_foreign_toplevel_manager_v1_destroy(screen->toplevel_manager);
+    if (screen->xfce_toplevel_manager != NULL) {
+        xfce_foreign_toplevel_manager_private_v1_destroy(screen->xfce_toplevel_manager);
+    }
+    if (screen->wlr_toplevel_manager != NULL) {
+        zwlr_foreign_toplevel_manager_v1_destroy(screen->wlr_toplevel_manager);
     }
     g_list_free_full(screen->pending_seats, g_object_unref);
     if (screen->wl_registry != NULL) {
@@ -189,7 +213,7 @@ xfw_screen_wayland_finalize(GObject *obj) {
     }
     g_list_free(screen->windows);
     g_list_free(screen->windows_stacked);
-    g_hash_table_destroy(screen->wl_windows);
+    g_hash_table_destroy(screen->wlr_windows);
     g_list_free(screen->show_desktop_data.minimized);
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->finalize(obj);
@@ -304,16 +328,16 @@ async_roundtrip_done(void *data, struct wl_callback *callback, uint32_t callback
 
 static void
 init_toplevel_manager(XfwScreenWayland *screen) {
-    g_return_if_fail(!screen->defer_toplevel_manager);
-    g_return_if_fail(screen->toplevel_manager_name != 0);
-    g_return_if_fail(screen->toplevel_manager_version != 0);
-    g_return_if_fail(screen->toplevel_manager == NULL);
+    g_return_if_fail(!screen->defer_wlr_toplevel_manager);
+    g_return_if_fail(screen->wlr_toplevel_manager_name != 0);
+    g_return_if_fail(screen->wlr_toplevel_manager_version != 0);
+    g_return_if_fail(screen->wlr_toplevel_manager == NULL);
 
-    screen->toplevel_manager = wl_registry_bind(screen->wl_registry,
-                                                screen->toplevel_manager_name,
-                                                &zwlr_foreign_toplevel_manager_v1_interface,
-                                                MIN(screen->toplevel_manager_version, 3));
-    zwlr_foreign_toplevel_manager_v1_add_listener(screen->toplevel_manager, &toplevel_manager_listener, screen);
+    screen->wlr_toplevel_manager = wl_registry_bind(screen->wl_registry,
+                                                    screen->wlr_toplevel_manager_name,
+                                                    &zwlr_foreign_toplevel_manager_v1_interface,
+                                                    MIN(screen->wlr_toplevel_manager_version, 3));
+    zwlr_foreign_toplevel_manager_v1_add_listener(screen->wlr_toplevel_manager, &toplevel_manager_listener, screen);
     add_async_roundtrip(screen);
 }
 
@@ -339,11 +363,17 @@ registry_global(void *data, struct wl_registry *registry, uint32_t name, const c
     XfwScreenWayland *wscreen = XFW_SCREEN_WAYLAND(data);
 
     if (strcmp(zwlr_foreign_toplevel_manager_v1_interface.name, interface) == 0) {
-        wscreen->toplevel_manager_name = name;
-        wscreen->toplevel_manager_version = version;
-        if (!wscreen->defer_toplevel_manager) {
+        wscreen->wlr_toplevel_manager_name = name;
+        wscreen->wlr_toplevel_manager_version = version;
+        if (!wscreen->defer_wlr_toplevel_manager) {
             init_toplevel_manager(wscreen);
         }
+    } else if (strcmp(xfce_foreign_toplevel_manager_private_v1_interface.name, interface) == 0) {
+        // The xfce toplevel manager doesn't emit any events until we get the
+        // corresponding xfce handle for each wlr handle, so we don't need to
+        // defer binding to the xfce manager like we need to do for the wlr
+        // manager.
+        wscreen->xfce_toplevel_manager = wl_registry_bind(registry, name, &xfce_foreign_toplevel_manager_private_v1_interface, MIN(version, 1));
     } else if (strcmp(wl_seat_interface.name, interface) == 0) {
         struct wl_seat *wl_seat = wl_registry_bind(wscreen->wl_registry, name, &wl_seat_interface, 2);
         XfwSeatWayland *seat = _xfw_seat_wayland_new(XFW_SCREEN(wscreen), wl_seat, name);
@@ -414,7 +444,7 @@ window_closed(XfwWindowWayland *window, XfwScreenWayland *wscreen) {
     g_signal_handlers_disconnect_by_func(window, window_closed, wscreen);
     wscreen->windows = g_list_remove(wscreen->windows, window);
     wscreen->windows_stacked = g_list_remove(wscreen->windows_stacked, window);
-    g_hash_table_remove(wscreen->wl_windows, _xfw_window_wayland_get_handle(window));
+    g_hash_table_remove(wscreen->wlr_windows, _xfw_window_wayland_get_wlr_handle(window));
     g_signal_emit_by_name(wscreen, "window-closed", window);
 
     XfwScreen *screen = XFW_SCREEN(wscreen);
@@ -425,23 +455,32 @@ window_closed(XfwWindowWayland *window, XfwScreenWayland *wscreen) {
 }
 
 static void
-toplevel_manager_toplevel(void *data, struct zwlr_foreign_toplevel_manager_v1 *wl_manager, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel) {
+toplevel_manager_toplevel(void *data, struct zwlr_foreign_toplevel_manager_v1 *wl_manager, struct zwlr_foreign_toplevel_handle_v1 *wlr_toplevel) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(data);
+
+    struct xfce_foreign_toplevel_handle_v1 *xfce_toplevel;
+    if (screen->xfce_toplevel_manager != NULL) {
+        xfce_toplevel = xfce_foreign_toplevel_manager_private_v1_get_xfce_foreign_toplevel_handle(screen->xfce_toplevel_manager, wlr_toplevel);
+    } else {
+        xfce_toplevel = NULL;
+    }
+
     XfwWindowWayland *window = g_object_new(XFW_TYPE_WINDOW_WAYLAND,
                                             "screen", screen,
-                                            "handle", wl_toplevel,
+                                            "wlr-handle", wlr_toplevel,
+                                            "xfce-handle", xfce_toplevel,
                                             NULL);
     screen->windows = g_list_prepend(screen->windows, window);
     screen->windows_stacked = g_list_prepend(screen->windows_stacked, window);
-    g_hash_table_insert(screen->wl_windows, wl_toplevel, window);
+    g_hash_table_insert(screen->wlr_windows, wlr_toplevel, window);
     g_signal_connect(window, "closed", G_CALLBACK(window_closed), screen);
 }
 
 static void
 toplevel_manager_finished(void *data, struct zwlr_foreign_toplevel_manager_v1 *wl_manager) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(data);
-    zwlr_foreign_toplevel_manager_v1_destroy(screen->toplevel_manager);
-    screen->toplevel_manager = NULL;
+    zwlr_foreign_toplevel_manager_v1_destroy(screen->wlr_toplevel_manager);
+    screen->wlr_toplevel_manager = NULL;
 }
 
 void
@@ -460,7 +499,6 @@ _xfw_screen_wayland_get_window_workspace(XfwScreenWayland *screen, XfwWindow *wi
         XfwWorkspaceGroup *group = XFW_WORKSPACE_GROUP(xfw_workspace_manager_list_workspace_groups(workspace_manager)->data);
         return XFW_WORKSPACE(xfw_workspace_group_list_workspaces(group)->data);
     } else {
-        _xfw_g_message_once("Window<->Workspace association is not available on Wayland");
         return NULL;
     }
 }
