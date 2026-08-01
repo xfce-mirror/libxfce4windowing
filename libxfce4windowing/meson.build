@@ -114,6 +114,7 @@ windowing_sources += configure_file(
 windowing_deps = [
   gio_unix,
   gtk,
+  libintl,
   x11_deps,
   wayland_deps,
 ]

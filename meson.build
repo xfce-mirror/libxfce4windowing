@@ -118,6 +118,16 @@ if get_option('visibility')
   feature_cflags += '-DENABLE_SYMBOL_VISIBILITY=1'
 endif
 
+if cc.has_function('bind_textdomain_codeset')
+  feature_cflags += '-DHAVE_BIND_TEXTDOMAIN_CODESET=1'
+  libintl = dependency('', required: false)
+else
+  libintl = cc.find_library('intl', required: false)
+  if libintl.found() and cc.has_function('bind_textdomain_codeset', dependencies: libintl)
+    feature_cflags += '-DHAVE_BIND_TEXTDOMAIN_CODESET=1'
+  endif
+endif
+
 extra_cflags = []
 extra_cflags_check = [
   '-Wmissing-declarations',

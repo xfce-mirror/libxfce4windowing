@@ -43,7 +43,8 @@ windowingui_sources += configure_file(
 )
 
 windowingui_deps = [
-  gtk
+  gtk,
+  libintl,
 ]
 
 libxfce4windowingui = library(
