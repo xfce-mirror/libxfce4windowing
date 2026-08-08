@@ -37,6 +37,8 @@
 #include "config.h"
 #endif
 
+#include <string.h>
+
 #include "libxfce4windowing-private.h"
 #include "xfw-gdk-private.h"
 #include "xfw-monitor-private.h"
@@ -51,6 +53,8 @@ typedef struct _XfwMonitorPrivate {
     char *make;
     char *model;
     char *serial;
+    unsigned char *edid;
+    gsize edid_len;
     guint refresh;
     guint scale;
     gdouble fractional_scale;
@@ -76,6 +80,8 @@ enum {
     PROP_MAKE,
     PROP_MODEL,
     PROP_SERIAL,
+    PROP_EDID,
+    PROP_EDID_LEN,
     PROP_REFRESH,
     PROP_SCALE,
     PROP_FRACTIONAL_SCALE,
@@ -214,6 +220,37 @@ xfw_monitor_class_init(XfwMonitorClass *klass) {
                                                         "serial",
                                                         "Product serial number",
                                                         NULL,
+                                                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:edid:
+     *
+     * Raw EDID bytes.
+     *
+     * Since: 4.20.7
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_EDID,
+                                    g_param_spec_pointer("edid",
+                                                         "edid",
+                                                         "EDID bytes",
+                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+    /**
+     * XfwMonitor:edid-len:
+     *
+     * Length of data in the @XfwMonitor:edid property.
+     *
+     * Since: 4.20.7
+     **/
+    g_object_class_install_property(gobject_class,
+                                    PROP_EDID_LEN,
+                                    g_param_spec_uint64("edid-len",
+                                                        "edid-len",
+                                                        "Number of bytes in the edid property",
+                                                        0,
+                                                        G_MAXUINT64,
+                                                        0,
                                                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     /**
@@ -441,6 +478,14 @@ xfw_monitor_get_property(GObject *object, guint property_id, GValue *value, GPar
             g_value_set_string(value, priv->serial);
             break;
 
+        case PROP_EDID:
+            g_value_set_pointer(value, priv->edid);
+            break;
+
+        case PROP_EDID_LEN:
+            g_value_set_uint64(value, priv->edid_len);
+            break;
+
         case PROP_REFRESH:
             g_value_set_uint(value, priv->refresh);
             break;
@@ -509,6 +554,7 @@ xfw_monitor_finalize(GObject *object) {
     g_free(priv->make);
     g_free(priv->model);
     g_free(priv->serial);
+    g_free(priv->edid);
 
     G_OBJECT_CLASS(xfw_monitor_parent_class)->finalize(object);
 }
@@ -626,6 +672,29 @@ const char *
 xfw_monitor_get_serial(XfwMonitor *monitor) {
     g_return_val_if_fail(XFW_IS_MONITOR(monitor), NULL);
     return XFW_MONITOR_GET_PRIVATE(monitor)->serial;
+}
+
+/**
+ * xfw_monitor_get_edid:
+ * @monitor: a #XfwMonitor.
+ * @len: (out caller-allocates) (nullable): Location for the length (in bytes)
+ *                                          of the EDID data.
+ *
+ * Returns the monitor's raw EDID number, if available.
+ *
+ * Return value: (nullable) (transfer none): A byte array owned by @monitor, or
+ * %NULL.  The number of bytes is returned in @len.
+ *
+ * Since: 4.20.7
+ **/
+const unsigned char *
+xfw_monitor_get_edid(XfwMonitor *monitor, gsize *len) {
+    g_return_val_if_fail(XFW_IS_MONITOR(monitor), NULL);
+    XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
+    if (len != NULL) {
+        *len = priv->edid_len;
+    }
+    return priv->edid;
 }
 
 /**
@@ -928,6 +997,21 @@ _xfw_monitor_set_serial(XfwMonitor *monitor, const char *serial) {
 }
 
 void
+_xfw_monitor_set_edid(XfwMonitor *monitor, const unsigned char *edid, gsize len) {
+    g_return_if_fail(XFW_IS_MONITOR(monitor));
+    g_return_if_fail(edid != NULL || len == 0);
+
+    XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
+
+    if (priv->edid_len != len || (len > 0 && memcmp(edid, priv->edid, len) != 0)) {
+        g_free(priv->edid);
+        priv->edid = g_memdup2(edid, len);
+        priv->edid_len = len;
+        priv->pending_changes |= MONITOR_PENDING_EDID;
+    }
+}
+
+void
 _xfw_monitor_set_refresh(XfwMonitor *monitor, guint refresh_millihertz) {
     g_return_if_fail(XFW_IS_MONITOR(monitor));
 
@@ -1178,6 +1262,7 @@ _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
         { MONITOR_PENDING_SUBPIXEL, "subpixel" },
         { MONITOR_PENDING_TRANSFORM, "transform" },
         { MONITOR_PENDING_IS_PRIMARY, "is-primary" },
+        { MONITOR_PENDING_EDID, "edid" },
     };
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
 
@@ -1186,6 +1271,9 @@ _xfw_monitor_notify_pending_changes(XfwMonitor *monitor) {
     for (gsize i = 0; i < G_N_ELEMENTS(change_map); ++i) {
         if ((priv->pending_changes & change_map[i].bit) != 0) {
             g_object_notify(G_OBJECT(monitor), change_map[i].property);
+            if (change_map[i].bit == MONITOR_PENDING_EDID) {
+                g_object_notify(G_OBJECT(monitor), "edid-len");
+            }
         }
     }
 

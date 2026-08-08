@@ -56,6 +56,7 @@ typedef enum {
     MONITOR_PENDING_IS_PRIMARY = (1 << 14),
     MONITOR_PENDING_WORKAREA = (1 << 15),
     MONITOR_PENDING_FRACTIONAL_SCALE = (1 << 16),
+    MONITOR_PENDING_EDID = (1 << 17),
 } MonitorPendingChanges;
 
 void _xfw_monitor_set_identifier(XfwMonitor *monitor,
@@ -70,6 +71,9 @@ void _xfw_monitor_set_model(XfwMonitor *monitor,
                             const char *model);
 void _xfw_monitor_set_serial(XfwMonitor *monitor,
                              const char *serial);
+void _xfw_monitor_set_edid(XfwMonitor *monitor,
+                           const unsigned char *edid,
+                           gsize edid_len);
 void _xfw_monitor_set_refresh(XfwMonitor *monitor,
                               guint refresh_millihertz);
 void _xfw_monitor_set_scale(XfwMonitor *monitor,

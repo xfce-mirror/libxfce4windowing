@@ -23,6 +23,7 @@
 
 #include <gdk/gdkwayland.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <unistd.h>
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
@@ -712,6 +713,15 @@ xfce_output_serial(void *data, struct xfce_output_v1 *xfce_output, const char *s
 static void
 xfce_output_edid(void *data, struct xfce_output_v1 *xfce_output, int32_t fd, uint32_t size) {
     g_debug("xfce output edid for ID %d", wl_proxy_get_id((struct wl_proxy *)xfce_output));
+    XfwMonitorManagerWayland *monitor_manager = data;
+    XfwMonitor *monitor = g_hash_table_lookup(monitor_manager->xfce_outputs_to_monitors, xfce_output);
+
+    void *edid = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (edid != MAP_FAILED) {
+        _xfw_monitor_set_edid(monitor, edid, size);
+        munmap(edid, size);
+    }
+
     close(fd);
 }
 
