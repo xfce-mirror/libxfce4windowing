@@ -64,6 +64,7 @@ void _xfw_screen_set_active_window(XfwScreen *screen, XfwWindow *window);
 
 GList *_xfw_screen_steal_monitors(XfwScreen *screen);
 void _xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, GList *added, GList *removed);
+void _xfw_screen_set_primary_monitor(XfwScreen *screen, XfwMonitor *primary_monitor);
 
 void _xfw_screen_set_show_desktop(XfwScreen *screen, gboolean show_desktop);
 

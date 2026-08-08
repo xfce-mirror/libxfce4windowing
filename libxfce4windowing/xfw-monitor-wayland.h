@@ -23,6 +23,7 @@
 #include <wayland-client-protocol.h>
 
 #include "protocols/xdg-output-unstable-v1-client.h"
+#include "protocols/xfce-output-private-v1-client.h"
 
 #include "xfw-monitor-private.h"
 #include "xfw-screen-wayland.h"
@@ -34,10 +35,14 @@ G_DECLARE_FINAL_TYPE(XfwMonitorWayland, xfw_monitor_wayland, XFW, MONITOR_WAYLAN
 
 typedef struct _XfwMonitorManagerWayland XfwMonitorManagerWayland;
 
-XfwMonitorManagerWayland *_xfw_monitor_manager_wayland_new(XfwScreenWayland *screen);
-void _xfw_monitor_manager_wayland_new_output(XfwMonitorManagerWayland *monitor_manager, struct wl_output *output, uint32_t global_name);
+XfwMonitorManagerWayland *_xfw_monitor_manager_wayland_new(XfwScreenWayland *screen,
+                                                           struct wl_registry *registry);
+void _xfw_monitor_manager_wayland_new_output(XfwMonitorManagerWayland *monitor_manager, uint32_t global_name, uint32_t version);
 void _xfw_monitor_manager_wayland_global_removed(XfwMonitorManagerWayland *monitor_manager, uint32_t name);
 void _xfw_monitor_manager_wayland_new_xdg_output_manager(XfwMonitorManagerWayland *monitor_manager, struct zxdg_output_manager_v1 *xdg_output_manager);
+void _xfw_monitor_manager_wayland_new_xfce_output_manager(XfwMonitorManagerWayland *monitor_manager,
+                                                          struct xfce_output_manager_private_v1 *xfce_output_manager);
+void _xfw_monitor_manager_wayland_start(XfwMonitorManagerWayland *monitor_manager);
 void _xfw_monitor_manager_wayland_destroy(XfwMonitorManagerWayland *monitor_manager);
 
 struct wl_output *_xfw_monitor_wayland_get_wl_output(XfwMonitorWayland *monitor);
