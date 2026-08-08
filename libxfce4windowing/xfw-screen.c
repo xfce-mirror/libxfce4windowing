@@ -710,6 +710,11 @@ _xfw_screen_set_monitors(XfwScreen *screen, GList *monitors, GList *added, GList
 }
 
 void
+_xfw_screen_set_primary_monitor(XfwScreen *screen, XfwMonitor *primary_monitor) {
+    XFW_SCREEN_GET_PRIVATE(screen)->primary_monitor = primary_monitor;
+}
+
+void
 _xfw_screen_set_active_window(XfwScreen *screen, XfwWindow *window) {
     XfwScreenPrivate *priv = XFW_SCREEN_GET_PRIVATE(screen);
     if (priv->active_window != window) {
