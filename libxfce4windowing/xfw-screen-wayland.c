@@ -29,6 +29,7 @@
 #include "protocols/wlr-foreign-toplevel-management-unstable-v1-client.h"
 #include "protocols/xdg-output-unstable-v1-client.h"
 #include "protocols/xfce-foreign-toplevel-management-private-v1-client.h"
+#include "protocols/xfce-output-private-v1-client.h"
 
 #include "libxfce4windowing-private.h"
 #include "xfw-monitor-wayland.h"
@@ -133,17 +134,23 @@ xfw_screen_wayland_constructed(GObject *obj) {
 
     G_OBJECT_CLASS(xfw_screen_wayland_parent_class)->constructed(obj);
 
-    wscreen->monitor_manager = _xfw_monitor_manager_wayland_new(wscreen);
-
     GdkDisplay *gdk_display = gdk_screen_get_display(_xfw_screen_get_gdk_screen(screen));
     wscreen->wl_display = gdk_wayland_display_get_wl_display(gdk_display);
     wscreen->wl_registry = wl_display_get_registry(wscreen->wl_display);
     wl_registry_add_listener(wscreen->wl_registry, &registry_listener, wscreen);
 
+    wscreen->monitor_manager = _xfw_monitor_manager_wayland_new(wscreen, wscreen->wl_registry);
+
     wl_display_roundtrip(wscreen->wl_display);
     while (wscreen->async_roundtrips != NULL) {
         wl_display_dispatch(wscreen->wl_display);
     }
+
+    // We defer binding outputs until after we have the wl_seat instances so
+    // that xfce_output_manager's pointer_enter will work.
+    _xfw_monitor_manager_wayland_start(wscreen->monitor_manager);
+    // FIXME: one per output?  one per output & per xdg_output & per xfce_output?
+    add_async_roundtrip(wscreen);
 
     // We defer binding to the toplevel and workspace managers until after we have all
     // XfwMonitor instances initialized.  Otherwise, we would get output_enter
@@ -391,16 +398,19 @@ registry_global(void *data, struct wl_registry *registry, uint32_t name, const c
             }
         }
     } else if (strcmp(wl_output_interface.name, interface) == 0) {
-        struct wl_output *output = wl_registry_bind(registry, name, &wl_output_interface, MIN(version, 4));
-        _xfw_monitor_manager_wayland_new_output(wscreen->monitor_manager, output, name);
-        add_async_roundtrip(wscreen);
+        _xfw_monitor_manager_wayland_new_output(wscreen->monitor_manager, name, version);
     } else if (strcmp(zxdg_output_manager_v1_interface.name, interface) == 0) {
         struct zxdg_output_manager_v1 *xdg_output_manager = wl_registry_bind(registry,
                                                                              name,
                                                                              &zxdg_output_manager_v1_interface,
                                                                              MIN(version, 3));
         _xfw_monitor_manager_wayland_new_xdg_output_manager(wscreen->monitor_manager, xdg_output_manager);
-        add_async_roundtrip(wscreen);
+    } else if (strcmp(xfce_output_manager_private_v1_interface.name, interface) == 0) {
+        struct xfce_output_manager_private_v1 *xfce_output_manager = wl_registry_bind(registry,
+                                                                                      name,
+                                                                                      &xfce_output_manager_private_v1_interface,
+                                                                                      MIN(version, 1));
+        _xfw_monitor_manager_wayland_new_xfce_output_manager(wscreen->monitor_manager, xfce_output_manager);
     }
 }
 
