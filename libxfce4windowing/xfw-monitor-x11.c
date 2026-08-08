@@ -486,6 +486,8 @@ enumerate_monitors(XfwMonitorManagerX11 *manager, GList **new_monitors, GList **
 
                 di_info_destroy(edid_info);
             }
+
+            _xfw_monitor_set_edid(monitor, edid_data, nbytes);
         }
         if (edid_data != NULL) {
             XFree(edid_data);
