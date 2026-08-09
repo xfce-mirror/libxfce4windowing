@@ -95,6 +95,7 @@ const char *xfw_monitor_get_connector(XfwMonitor *monitor);
 const char *xfw_monitor_get_make(XfwMonitor *monitor);
 const char *xfw_monitor_get_model(XfwMonitor *monitor);
 const char *xfw_monitor_get_serial(XfwMonitor *monitor);
+const unsigned char *xfw_monitor_get_edid(XfwMonitor *monitor, gsize *len);
 guint xfw_monitor_get_refresh(XfwMonitor *monitor);
 guint xfw_monitor_get_scale(XfwMonitor *monitor);
 gdouble xfw_monitor_get_fractional_scale(XfwMonitor *monitor);

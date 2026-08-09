@@ -21,6 +21,7 @@ xfw_application_instance_get_windows
 # file:xfw-monitor
 xfw_monitor_get_connector
 xfw_monitor_get_description
+xfw_monitor_get_edid
 xfw_monitor_get_fractional_scale
 xfw_monitor_get_gdk_monitor
 xfw_monitor_get_identifier
