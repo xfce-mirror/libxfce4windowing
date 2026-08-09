@@ -17,10 +17,6 @@
  * MA 02110-1301 USA
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "window-icon-utils.h"
 
 // gdk-pixbuf's BMP writer does not write with the header type that supports
