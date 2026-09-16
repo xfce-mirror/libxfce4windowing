@@ -15,6 +15,9 @@
  * MA 02110-1301 USA
  */
 
+/* Tests must keep GLib assertions enabled in release builds. */
+#undef G_DISABLE_ASSERT
+
 #include "libxfce4windowing/xfw-workarea-x11.h"
 
 static void
