@@ -43,7 +43,7 @@ endforeach
 
 if enable_x11
   workarea_test = executable('xfw-workarea-x11',
-    sources: ['xfw-workarea-x11.c', '../libxfce4windowing/xfw-workarea-x11.c'],
+    sources: ['test-xfw-workarea-x11.c', '../libxfce4windowing/xfw-workarea-x11.c'],
     include_directories: include_directories('..'),
     dependencies: gdk,
     install: false,

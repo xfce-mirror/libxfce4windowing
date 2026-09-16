@@ -222,12 +222,12 @@ update_struts(XfwMonitorManagerX11 *manager, gint cur_workspace_num) {
         gulong partial_length, legacy_length = 0;
         gboolean partial_absent, legacy_absent;
         gulong *partial = read_cardinals(display, xid, "_NET_WM_STRUT_PARTIAL", 12,
-                                          &partial_length, &partial_absent);
+                                         &partial_length, &partial_absent);
         gulong *legacy = NULL;
         /* A rejected or failed PARTIAL read must not broaden into a legacy strut. */
         if (partial_absent) {
             legacy = read_cardinals(display, xid, "_NET_WM_STRUT", 4,
-                                     &legacy_length, &legacy_absent);
+                                    &legacy_length, &legacy_absent);
         }
         gboolean valid = _xfw_workarea_x11_select_strut(!partial_absent,
                                                         partial, partial_length,
@@ -266,13 +266,18 @@ update_monitor_workarea(XfwMonitorManagerX11 *manager, XfwMonitor *monitor, gint
     result = logical;
 
     if (manager->have_active_struts) {
-        _xfw_workarea_x11_apply(&geometry, (GdkRectangle *)manager->reservations->data, manager->reservations->len, &result);
+        const GdkRectangle *reservations = &g_array_index(manager->reservations, GdkRectangle, 0);
+        _xfw_workarea_x11_apply(&geometry, reservations, manager->reservations->len, &result);
         _xfw_workarea_x11_to_logical(&geometry, &logical, xfw_monitor_get_scale(monitor), &result);
     } else {
         /* WMs with only global margins cannot supply exact local exclusions. */
         GArray *workareas = _xfw_screen_x11_get_workareas(screen);
+        const GdkRectangle *global_workareas =
+            workareas != NULL && workareas->len > 0
+                ? &g_array_index(workareas, GdkRectangle, 0)
+                : NULL;
         _xfw_workarea_x11_fallback(&logical,
-                                   workareas != NULL ? (GdkRectangle *)workareas->data : NULL,
+                                   global_workareas,
                                    workareas != NULL ? workareas->len : 0,
                                    cur_workspace_num, &result);
     }
