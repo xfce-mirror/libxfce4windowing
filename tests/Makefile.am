@@ -30,6 +30,14 @@ xfw_monitor_offon_SOURCES = xfw-monitor-offon.c
 xfw_monitor_offon_CFLAGS = $(tests_cflags)
 xfw_monitor_offon_LDADD = $(tests_ldadd)
 
+if ENABLE_X11
+check_PROGRAMS = xfw-workarea-x11
+TESTS = $(check_PROGRAMS)
+xfw_workarea_x11_SOURCES = xfw-workarea-x11.c ../libxfce4windowing/xfw-workarea-x11.c
+xfw_workarea_x11_CFLAGS = $(tests_cflags)
+xfw_workarea_x11_LDADD = $(GTK_LIBS)
+endif
+
 endif
 
 EXTRA_DIST = \

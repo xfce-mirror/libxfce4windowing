@@ -99,6 +99,9 @@ xfw_screen_x11_constructed(GObject *obj) {
     G_GNUC_END_IGNORE_DEPRECATIONS
     xscreen->wnck_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
 
+    /* Initial monitor workareas need the managed clients, including docks. */
+    wnck_screen_force_update(xscreen->wnck_screen);
+
     for (GList *l = wnck_screen_get_windows(xscreen->wnck_screen); l != NULL; l = l->next) {
         XfwWindowX11 *window = g_object_new(XFW_TYPE_WINDOW_X11,
                                             "screen", screen,
@@ -243,11 +246,7 @@ showing_desktop_changed(WnckScreen *wnck_screen, XfwScreenX11 *screen) {
 
 static void
 active_workspace_changed(WnckScreen *wnck_screen, WnckWorkspace *previous_workspace, XfwScreenX11 *screen) {
-    WnckWorkspace *cur_workspace = wnck_screen_get_active_workspace(screen->wnck_screen);
-    gint cur_workspace_num = cur_workspace != NULL
-                                 ? wnck_workspace_get_number(cur_workspace)
-                                 : 0;
-    _xfw_monitor_x11_workspace_changed(screen, cur_workspace_num);
+    _xfw_monitor_manager_x11_queue_workareas(screen->monitor_manager);
 }
 
 XfwWorkspace *
