@@ -17,10 +17,6 @@
  * MA 02110-1301 USA
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <limits.h>
 
 #include "protocols/ext-workspace-v1-client.h"
