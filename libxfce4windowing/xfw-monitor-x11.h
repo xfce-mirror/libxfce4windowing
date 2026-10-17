@@ -33,7 +33,7 @@ typedef struct _XfwMonitorManagerX11 XfwMonitorManagerX11;
 XfwMonitorManagerX11 *_xfw_monitor_manager_x11_new(XfwScreenX11 *screen);
 void _xfw_monitor_manager_x11_destroy(XfwMonitorManagerX11 *manager);
 
-void _xfw_monitor_x11_workspace_changed(XfwScreenX11 *screen, gint new_workspace_num);
+void _xfw_monitor_manager_x11_queue_workareas(XfwMonitorManagerX11 *manager);
 
 G_END_DECLS
 
