@@ -161,19 +161,18 @@ update_menu_item_image(GtkWidget *item,
 
     icon_info = gtk_icon_theme_choose_icon_for_scale(itheme, icon_names, icon_size, scale_factor, GTK_ICON_LOOKUP_FORCE_SIZE);
     if (G_LIKELY(icon_info != NULL)) {
-        GdkPixbuf *icon = gtk_icon_info_load_icon(icon_info, NULL);
+        GtkWidget *img = gtk_image_new();
+        G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+        gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), img);
+        G_GNUC_END_IGNORE_DEPRECATIONS
+        gtk_widget_show(img);
 
+        GdkPixbuf *icon = gtk_icon_info_load_symbolic_for_context(icon_info, gtk_widget_get_style_context(img), NULL, NULL);
         if (G_LIKELY(icon != NULL)) {
             cairo_surface_t *surface = gdk_cairo_surface_create_from_pixbuf(icon, scale_factor, NULL);
-            GtkWidget *img = gtk_image_new_from_surface(surface);
-
-            gtk_widget_show(img);
-            G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-            gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), img);
-            G_GNUC_END_IGNORE_DEPRECATIONS
-
-            g_object_unref(icon);
+            gtk_image_set_from_surface(GTK_IMAGE(img), surface);
             cairo_surface_destroy(surface);
+            g_object_unref(icon);
         }
 
         g_object_unref(icon_info);
@@ -181,12 +180,16 @@ update_menu_item_image(GtkWidget *item,
 }
 
 static GtkWidget *
-create_image_menu_item(const gchar *label_text, const gchar **icon_names) {
+add_image_menu_item(XfwWindowActionMenu *menu, const gchar *label_text, const gchar **icon_names, GCallback callback, XfwWindow *window) {
     GtkWidget *item;
 
     G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     item = gtk_image_menu_item_new_with_mnemonic(label_text);
     G_GNUC_END_IGNORE_DEPRECATIONS
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    g_signal_connect(G_OBJECT(item), "activate", callback, window);
+    g_signal_connect(G_OBJECT(item), "notify::scale-factor",
+                     G_CALLBACK(update_menu_item_image), icon_names);
     update_menu_item_image(item, NULL, icon_names);
 
     return item;
@@ -202,19 +205,8 @@ xfw_window_action_menu_constructed(GObject *obj) {
 
     G_OBJECT_CLASS(xfw_window_action_menu_parent_class)->constructed(obj);
 
-    menu->min_item = item = create_image_menu_item("", minimize_icon_names);
-    g_signal_connect(G_OBJECT(item), "activate",
-                     G_CALLBACK(toggle_minimize_state), window);
-    g_signal_connect(G_OBJECT(item), "notify::scale-factor",
-                     G_CALLBACK(update_menu_item_image), minimize_icon_names);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
-
-    menu->max_item = item = create_image_menu_item("", maximize_icon_names);
-    g_signal_connect(G_OBJECT(item), "activate",
-                     G_CALLBACK(toggle_maximize_state), window);
-    g_signal_connect(G_OBJECT(item), "notify::scale-factor",
-                     G_CALLBACK(update_menu_item_image), maximize_icon_names);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    menu->min_item = add_image_menu_item(menu, "", minimize_icon_names, G_CALLBACK(toggle_minimize_state), window);
+    menu->max_item = add_image_menu_item(menu, "", maximize_icon_names, G_CALLBACK(toggle_maximize_state), window);
 
     menu->move_item = item = gtk_menu_item_new_with_mnemonic(_("_Move"));
     g_signal_connect(G_OBJECT(item), "activate",
@@ -289,12 +281,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    menu->close_item = item = create_image_menu_item(_("_Close"), close_icon_names);
-    g_signal_connect(G_OBJECT(item), "activate",
-                     G_CALLBACK(close_window), window);
-    g_signal_connect(G_OBJECT(item), "notify::scale-factor",
-                     G_CALLBACK(update_menu_item_image), close_icon_names);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    menu->close_item = add_image_menu_item(menu, _("_Close"), close_icon_names, G_CALLBACK(close_window), window);
 
     gtk_widget_show_all(GTK_WIDGET(menu));
     gtk_widget_hide(GTK_WIDGET(menu));
