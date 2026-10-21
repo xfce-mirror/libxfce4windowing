@@ -60,6 +60,7 @@ if enable_x11
   windowing_sources += [
     'xfw-application-x11.c',
     'xfw-monitor-x11.c',
+    'xfw-workarea-x11.c',
     'xfw-screen-x11.c',
     'xfw-window-x11.c',
     'xfw-wnck-icon.c',
