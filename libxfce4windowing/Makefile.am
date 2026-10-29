@@ -49,6 +49,8 @@ libxfce4windowing_0_x11_sources = \
 	xfw-application-x11.h \
 	xfw-monitor-x11.c \
 	xfw-monitor-x11.h \
+	xfw-workarea-x11.c \
+	xfw-workarea-x11.h \
 	xfw-screen-x11.c \
 	xfw-screen-x11.h \
 	xfw-window-x11.c \

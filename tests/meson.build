@@ -40,3 +40,13 @@ foreach bin : test_bins + test_gui_bins
     test(bin, e)
   endif
 endforeach
+
+if enable_x11
+  workarea_test = executable('xfw-workarea-x11',
+    sources: ['test-xfw-workarea-x11.c', '../libxfce4windowing/xfw-workarea-x11.c'],
+    include_directories: include_directories('..'),
+    dependencies: gdk,
+    install: false,
+  )
+  test('xfw-workarea-x11', workarea_test)
+endif
