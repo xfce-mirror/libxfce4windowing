@@ -28,6 +28,8 @@
 #include <gio/gdesktopappinfo.h>
 #include <glib-object.h>
 
+#include "xfw-util.h"
+
 /* copied and adapted from g_warning_once (GLib 2.78) */
 #if defined(G_HAVE_ISO_VARARGS) && !G_ANALYZER_ANALYZING
 #define _xfw_g_message_once(...) \
@@ -98,6 +100,8 @@ GIcon *_xfw_wnck_object_get_gicon(GObject *wnck_object,
                                   const gchar *secondary_icon_name,
                                   const gchar *fallback_icon_name);
 #endif
+
+XfwClientType _xfw_get_client_type(void);
 
 G_END_DECLS
 

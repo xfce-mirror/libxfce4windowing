@@ -27,8 +27,14 @@
 #include "xfw-workspace-manager-x11.h"
 #include "xfw-workspace-x11.h"
 
+enum {
+    PROP_0,
+    PROP_WNCK_HANDLE,
+};
+
 struct _XfwWorkspaceManagerX11Private {
     XfwScreen *screen;
+    WnckHandle *wnck_handle;
     WnckScreen *wnck_screen;
     GList *groups;
     GList *workspaces;
@@ -71,6 +77,14 @@ xfw_workspace_manager_x11_class_init(XfwWorkspaceManagerX11Class *klass) {
     gklass->finalize = xfw_workspace_manager_x11_finalize;
 
     _xfw_workspace_manager_install_properties(gklass);
+
+    g_object_class_install_property(gklass,
+                                    PROP_WNCK_HANDLE,
+                                    g_param_spec_object("wnck-handle",
+                                                        "wnck-handle",
+                                                        "wnck-handle",
+                                                        WNCK_TYPE_HANDLE,
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 }
 
 static void
@@ -93,10 +107,8 @@ xfw_workspace_manager_x11_constructed(GObject *obj) {
     WnckWorkspace *active_wnck_workspace;
 
     GdkScreen *gdkscreen = _xfw_screen_get_gdk_screen(priv->screen);
-    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     gint screen_number = gdk_x11_screen_get_screen_number(gdkscreen);
-    priv->wnck_screen = g_object_ref(wnck_screen_get(screen_number));
-    G_GNUC_END_IGNORE_DEPRECATIONS
+    priv->wnck_screen = wnck_handle_get_screen(priv->wnck_handle, screen_number);
     g_signal_connect(priv->wnck_screen, "active-workspace-changed", G_CALLBACK(active_workspace_changed), manager);
     g_signal_connect(priv->wnck_screen, "workspace-created", G_CALLBACK(workspace_created), manager);
     g_signal_connect(priv->wnck_screen, "workspace-destroyed", G_CALLBACK(workspace_destroyed), manager);
@@ -143,6 +155,10 @@ xfw_workspace_manager_x11_set_property(GObject *obj, guint prop_id, const GValue
             manager->priv->screen = XFW_SCREEN(g_value_get_object(value));
             break;
 
+        case PROP_WNCK_HANDLE:
+            manager->priv->wnck_handle = WNCK_HANDLE(g_value_dup_object(value));
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
             break;
@@ -156,6 +172,10 @@ xfw_workspace_manager_x11_get_property(GObject *obj, guint prop_id, GValue *valu
     switch (prop_id) {
         case WORKSPACE_MANAGER_PROP_SCREEN:
             g_value_set_object(value, manager->priv->screen);
+            break;
+
+        case PROP_WNCK_HANDLE:
+            g_value_set_object(value, manager->priv->wnck_handle);
             break;
 
         default:
@@ -181,7 +201,7 @@ xfw_workspace_manager_x11_finalize(GObject *obj) {
     g_list_free_full(priv->groups, g_object_unref);
 
     // to be released last
-    g_object_unref(priv->wnck_screen);
+    g_object_unref(priv->wnck_handle);
 
     G_OBJECT_CLASS(xfw_workspace_manager_x11_parent_class)->finalize(obj);
 }
@@ -308,9 +328,10 @@ check_workspace_properties_changed(XfwWorkspaceManager *manager) {
 }
 
 XfwWorkspaceManager *
-_xfw_workspace_manager_x11_new(XfwScreen *screen) {
+_xfw_workspace_manager_x11_new(XfwScreen *screen, WnckHandle *wnck_handle) {
     return g_object_new(XFW_TYPE_WORKSPACE_MANAGER_X11,
                         "screen", screen,
+                        "wnck-handle", wnck_handle,
                         NULL);
 }
 
