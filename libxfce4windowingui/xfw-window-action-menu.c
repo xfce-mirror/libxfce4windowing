@@ -238,7 +238,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     mdata->to.direction = XFW_DIRECTION_LEFT;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
-                          free_move_data, 0);
+                          free_move_data, G_CONNECT_DEFAULT);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     menu->move_right_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace R_ight"));
@@ -247,7 +247,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     mdata->to.direction = XFW_DIRECTION_RIGHT;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
-                          free_move_data, 0);
+                          free_move_data, G_CONNECT_DEFAULT);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     menu->move_up_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Up"));
@@ -256,7 +256,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     mdata->to.direction = XFW_DIRECTION_UP;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
-                          free_move_data, 0);
+                          free_move_data, G_CONNECT_DEFAULT);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     menu->move_down_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Workspace _Down"));
@@ -265,7 +265,7 @@ xfw_window_action_menu_constructed(GObject *obj) {
     mdata->to.direction = XFW_DIRECTION_DOWN;
     g_signal_connect_data(G_OBJECT(item), "activate",
                           G_CALLBACK(move_window_workspace), mdata,
-                          free_move_data, 0);
+                          free_move_data, G_CONNECT_DEFAULT);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     menu->move_ws_item = item = gtk_menu_item_new_with_mnemonic(_("Move to Another _Workspace"));
@@ -485,7 +485,7 @@ update_move_submenu(XfwWindowActionMenu *menu) {
             }
             g_signal_connect_data(G_OBJECT(item), "activate",
                                   G_CALLBACK(move_window_workspace), mdata,
-                                  free_move_data, 0);
+                                  free_move_data, G_CONNECT_DEFAULT);
             gtk_menu_shell_append(GTK_MENU_SHELL(submenu), item);
         }
 
