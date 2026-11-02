@@ -43,7 +43,7 @@ struct _XfwWorkspaceManagerX11 {
     XfwWorkspaceManagerX11Private *priv;
 };
 
-XfwWorkspaceManager *_xfw_workspace_manager_x11_new(XfwScreen *screen);
+XfwWorkspaceManager *_xfw_workspace_manager_x11_new(XfwScreen *screen, WnckHandle *wnck_handle);
 XfwWorkspace *_xfw_workspace_manager_x11_workspace_for_wnck_workspace(XfwWorkspaceManagerX11 *manager, WnckWorkspace *wnck_workspace);
 
 G_END_DECLS
