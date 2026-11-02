@@ -2,7 +2,7 @@ if enable_wayland
   wayland_protocols_generated_sources = []
 
   protocols = {
-    'ext-workspace-v1': ext_workspace_xml,
+    'ext-workspace-v1': wl_protocols_pkgdatadir / 'staging' / 'ext-workspace' / 'ext-workspace-v1.xml',
     'wlr-foreign-toplevel-management-unstable-v1': wlr_protocols_pkgdatadir / 'unstable' / 'wlr-foreign-toplevel-management-unstable-v1.xml',
     'xdg-output-unstable-v1': wl_protocols_pkgdatadir / 'unstable' / 'xdg-output' / 'xdg-output-unstable-v1.xml',
     'xfce-foreign-toplevel-management-private-v1': 'xfce-wayland-protocols' / 'xfce-foreign-toplevel-management-private-v1.xml',

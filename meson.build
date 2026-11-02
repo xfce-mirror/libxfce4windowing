@@ -19,16 +19,16 @@ fs = import('fs')
 
 dependency_versions = {
   'display-info': '>= 0.1.1',
-  'gir': '>= 1.72.0',
-  'glib': '>= 2.72.0',
-  'gdk-pixbuf': '>= 2.42.8',
-  'gtk': '>= 3.24.10',
-  'libx11': '>= 1.6.7',
-  'wayland': '>= 1.20',
-  'wayland-protocols': '>= 1.25',
+  'gir': '>= 1.80.1',
+  'glib': '>= 2.80.0',
+  'gdk-pixbuf': '>= 2.42.10',
+  'gtk': '>= 3.24.41',
+  'libx11': '>= 1.8.7',
+  'wayland': '>= 1.22',
+  'wayland-protocols': '>= 1.45',
   'wlr-protocols': '>= 0',
-  'wnck': '>= 3.14',
-  'xrandr': '>= 1.5.0',
+  'wnck': '>= 43.0',
+  'xrandr': '>= 1.5.2',
 }
 
 glib = dependency('glib-2.0', version: dependency_versions['glib'])
@@ -91,14 +91,6 @@ if enable_wayland
     wlr_protocols_pkgdatadir = wlr_protocols.get_variable(pkgconfig: 'pkgdatadir')
   else
     wlr_protocols_pkgdatadir = meson.project_source_root() / 'protocols' / 'wlr-protocols'
-  endif
-
-  # FIXME: Bump wayland-protocols to 1.39 when it is an acceptable requirement,
-  # and remove this and protocols/ext-workspace-v1.xml
-  if fs.is_file(wl_protocols_pkgdatadir / 'staging' / 'ext-workspace' / 'ext-workspace-v1.xml')
-    ext_workspace_xml = wl_protocols_pkgdatadir / 'staging' / 'ext-workspace' / 'ext-workspace-v1.xml'
-  else
-    ext_workspace_xml = 'ext-workspace-v1.xml'
   endif
 endif
 
