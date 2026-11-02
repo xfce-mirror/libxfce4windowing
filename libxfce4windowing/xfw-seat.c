@@ -138,8 +138,7 @@ _xfw_seat_set_name(XfwSeat *seat, const gchar *name) {
 
     XfwSeatPrivate *priv = XFW_SEAT_GET_PRIVATE(seat);
     if (g_strcmp0(priv->name, name) != 0) {
-        g_free(priv->name);
-        priv->name = g_strdup(name);
+        g_set_str(&priv->name, name);
         g_object_notify(G_OBJECT(seat), "name");
     }
 }

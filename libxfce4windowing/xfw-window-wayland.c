@@ -920,16 +920,14 @@ wlr_toplevel_app_id(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_tople
         return;
     }
 
-    g_free(window->priv->pending.new_app_id);
-    window->priv->pending.new_app_id = g_strdup(app_id);
+    g_set_str(&window->priv->pending.new_app_id, app_id);
 }
 
 static void
 wlr_toplevel_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, const char *title) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
 
-    g_free(window->priv->pending.new_name);
-    window->priv->pending.new_name = title != NULL ? g_strdup(title) : g_strdup("");
+    g_set_str(&window->priv->pending.new_name, title != NULL ? title : "");
 }
 
 static void
@@ -1096,8 +1094,7 @@ static void
 xfce_toplevel_icon_name(void *data, struct xfce_foreign_toplevel_handle_v1 *xfce_toplevel, const char *name) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
 
-    g_free(window->priv->pending.new_icon_name);
-    window->priv->pending.new_icon_name = g_strdup(name);
+    g_set_str(&window->priv->pending.new_icon_name, name);
     window->priv->pending.icon_changed = TRUE;
 }
 
