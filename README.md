@@ -45,17 +45,21 @@ tags](https://gitlab.xfce.org/xfce/libxfce4windowing/-/tags)
 From source: 
 
     % cd libxfce4windowing
-    % ./autogen.sh
-    % make
-    % make install
+    % meson setup build
+    % meson compile -C build
+    % meson install -C build
 
 From release tarball:
 
-    % tar xf libxfce4windowing-<version>.tar.bz2
+    % tar xf libxfce4windowing-<version>.tar.xz
     % cd libxfce4windowing-<version>
-    % ./configure
-    % make
-    % make install
+    % meson setup build
+    % meson compile -C build
+    % meson install -C build
+
+### Uninstallation
+
+    % ninja uninstall -C build
 
 ### Reporting Bugs
 

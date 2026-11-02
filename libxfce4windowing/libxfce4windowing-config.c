@@ -27,10 +27,6 @@
  * Variables and functions to check the libxfce4windowing version.
  **/
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxfce4windowing-config.h"
 #include "libxfce4windowing-visibility.h"
 
