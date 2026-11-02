@@ -413,8 +413,7 @@ xfw_cairo_surface_from_pixmap_and_mask(Pixmap pixmap,
 
         err = xfw_windowing_error_trap_pop(display);
         if (err != Success) {
-            cairo_surface_destroy(surface);
-            surface = NULL;
+            g_clear_pointer(&surface, cairo_surface_destroy);
         }
     }
 

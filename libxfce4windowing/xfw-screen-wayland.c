@@ -485,8 +485,7 @@ toplevel_manager_toplevel(void *data, struct zwlr_foreign_toplevel_manager_v1 *w
 static void
 toplevel_manager_finished(void *data, struct zwlr_foreign_toplevel_manager_v1 *wl_manager) {
     XfwScreenWayland *screen = XFW_SCREEN_WAYLAND(data);
-    zwlr_foreign_toplevel_manager_v1_destroy(screen->wlr_toplevel_manager);
-    screen->wlr_toplevel_manager = NULL;
+    g_clear_pointer(&screen->wlr_toplevel_manager, zwlr_foreign_toplevel_manager_v1_destroy);
 }
 
 void
