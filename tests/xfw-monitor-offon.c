@@ -16,7 +16,7 @@ static gint64 start_time = 0;
 #define PRINT(...) g_print(__VA_ARGS__)
 #endif
 
-static gboolean
+static void
 reenable_output(gpointer data) {
     const gchar *output_name = data;
 
@@ -28,11 +28,9 @@ reenable_output(gpointer data) {
         g_error("Failed to enable output: %s", error->message);
     }
     g_free(cmdline);
-
-    return FALSE;
 }
 
-static gboolean
+static void
 disable_output(gpointer data) {
     const gchar *output_name = data;
 
@@ -45,9 +43,7 @@ disable_output(gpointer data) {
     }
     g_free(cmdline);
 
-    g_timeout_add_seconds(2, reenable_output, (gpointer)output_name);
-
-    return FALSE;
+    g_timeout_add_seconds_once(2, reenable_output, (gpointer)output_name);
 }
 
 static void
@@ -102,7 +98,7 @@ main(int argc, char **argv) {
     }
     PRINT("end at startup\n");
 
-    g_timeout_add_seconds(1, disable_output, argv[1]);
+    g_timeout_add_seconds_once(1, disable_output, argv[1]);
 
     gtk_main();
 

@@ -553,12 +553,11 @@ refresh_monitors(XfwMonitorManagerX11 *manager) {
     g_list_free_full(previous_monitors, g_object_unref);
 }
 
-static gboolean
+static void
 refresh_monitors_idled(gpointer data) {
     XfwMonitorManagerX11 *manager = data;
     manager->refresh_idle_id = 0;
     refresh_monitors(manager);
-    return FALSE;
 }
 
 static GdkFilterReturn
@@ -573,7 +572,7 @@ rootwin_event_filter(GdkXEvent *gxevent, GdkEvent *event, gpointer data) {
         if (manager->refresh_idle_id != 0) {
             g_source_remove(manager->refresh_idle_id);
         }
-        manager->refresh_idle_id = g_idle_add(refresh_monitors_idled, manager);
+        manager->refresh_idle_id = g_idle_add_once(refresh_monitors_idled, manager);
     } else if (xevent->type == PropertyNotify
                && xevent->xproperty.atom == XInternAtom(xevent->xproperty.display, "_NET_WORKAREA", False))
     {
@@ -595,7 +594,7 @@ scale_factor_changed(gint scale, gpointer data) {
             if (manager->refresh_idle_id != 0) {
                 g_source_remove(manager->refresh_idle_id);
             }
-            manager->refresh_idle_id = g_idle_add(refresh_monitors_idled, manager);
+            manager->refresh_idle_id = g_idle_add_once(refresh_monitors_idled, manager);
         } else {
             GList *monitors = _xfw_screen_steal_monitors(XFW_SCREEN(manager->screen));
 

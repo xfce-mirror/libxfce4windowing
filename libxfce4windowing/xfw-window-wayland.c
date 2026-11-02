@@ -953,12 +953,11 @@ static void
 wlr_toplevel_parent(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl_toplevel, struct zwlr_foreign_toplevel_handle_v1 *wl_parent) {
 }
 
-static gboolean
+static void
 free_pending_outputs(gpointer data) {
     XfwWindowWayland *window = XFW_WINDOW_WAYLAND(data);
     g_clear_list(&window->priv->pending_outputs, NULL);
     window->priv->pending_outputs_id = 0;
-    return FALSE;
 }
 
 static gint
@@ -1006,7 +1005,7 @@ wlr_toplevel_output_enter(void *data, struct zwlr_foreign_toplevel_handle_v1 *wl
             if (window->priv->pending_outputs_id != 0) {
                 g_source_remove(window->priv->pending_outputs_id);
             }
-            window->priv->pending_outputs_id = g_timeout_add_seconds(10, free_pending_outputs, window);
+            window->priv->pending_outputs_id = g_timeout_add_seconds_once(10, free_pending_outputs, window);
         }
     }
 }
