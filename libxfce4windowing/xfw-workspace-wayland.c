@@ -373,8 +373,7 @@ xfw_workspace_wayland_assign_to_workspace_group(XfwWorkspace *workspace, XfwWork
 static void
 workspace_id(void *data, struct ext_workspace_handle_v1 *wl_workspace, const char *id) {
     XfwWorkspaceWayland *workspace = XFW_WORKSPACE_WAYLAND(data);
-    g_free(workspace->priv->id);
-    workspace->priv->id = g_strdup(id);
+    g_set_str(&workspace->priv->id, id);
     g_object_notify(G_OBJECT(workspace), "id");
 }
 

@@ -916,8 +916,7 @@ _xfw_monitor_set_identifier(XfwMonitor *monitor, const char *identifier) {
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
 
     if (g_strcmp0(identifier, priv->identifier) != 0) {
-        g_free(priv->identifier);
-        priv->identifier = g_strdup(identifier);
+        g_set_str(&priv->identifier, identifier);
         priv->pending_changes |= MONITOR_PENDING_IDENTIFIER;
     }
 }
@@ -930,8 +929,7 @@ _xfw_monitor_set_description(XfwMonitor *monitor, const char *description) {
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
 
     if (g_strcmp0(description, priv->description) != 0) {
-        g_free(priv->description);
-        priv->description = g_strdup(description);
+        g_set_str(&priv->description, description);
         priv->pending_changes |= MONITOR_PENDING_DESCRIPTION;
     }
 }
@@ -944,8 +942,7 @@ _xfw_monitor_set_connector(XfwMonitor *monitor, const char *connector) {
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
 
     if (g_strcmp0(connector, priv->connector) != 0) {
-        g_free(priv->connector);
-        priv->connector = g_strdup(connector);
+        g_set_str(&priv->connector, connector);
         priv->pending_changes |= MONITOR_PENDING_CONNECTOR;
     }
 }
@@ -958,8 +955,7 @@ _xfw_monitor_set_make(XfwMonitor *monitor, const char *make) {
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
 
     if (g_strcmp0(make, priv->make) != 0) {
-        g_free(priv->make);
-        priv->make = g_strdup(make);
+        g_set_str(&priv->make, make);
         priv->pending_changes |= MONITOR_PENDING_MAKE;
     }
 }
@@ -972,8 +968,7 @@ _xfw_monitor_set_model(XfwMonitor *monitor, const char *model) {
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
 
     if (g_strcmp0(model, priv->model) != 0) {
-        g_free(priv->model);
-        priv->model = g_strdup(model);
+        g_set_str(&priv->model, model);
         priv->pending_changes |= MONITOR_PENDING_MODEL;
     }
 }
@@ -986,8 +981,7 @@ _xfw_monitor_set_serial(XfwMonitor *monitor, const char *serial) {
     XfwMonitorPrivate *priv = XFW_MONITOR_GET_PRIVATE(monitor);
 
     if (g_strcmp0(serial, priv->serial) != 0) {
-        g_free(priv->serial);
-        priv->serial = g_strdup(serial);
+        g_set_str(&priv->serial, serial);
         priv->pending_changes |= MONITOR_PENDING_SERIAL;
     }
 }
