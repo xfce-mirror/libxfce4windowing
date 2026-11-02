@@ -32,6 +32,7 @@
 struct _XfwScreenX11 {
     XfwScreen parent;
 
+    WnckHandle *wnck_handle;
     WnckScreen *wnck_screen;
     GList *windows;
     GList *windows_stacked;
@@ -88,12 +89,11 @@ xfw_screen_x11_constructed(GObject *obj) {
                                          NULL);
     _xfw_screen_seat_added(screen, default_seat);
 
-    _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_x11_new(screen));
-
-    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-    xscreen->wnck_screen = g_object_ref(wnck_screen_get(gdk_x11_screen_get_screen_number(_xfw_screen_get_gdk_screen(screen))));
-    G_GNUC_END_IGNORE_DEPRECATIONS
+    xscreen->wnck_handle = wnck_handle_new((WnckClientType)_xfw_get_client_type());
+    xscreen->wnck_screen = wnck_handle_get_screen(xscreen->wnck_handle, gdk_x11_screen_get_screen_number(_xfw_screen_get_gdk_screen(screen)));
     xscreen->wnck_windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_object_unref);
+
+    _xfw_screen_set_workspace_manager(screen, _xfw_workspace_manager_x11_new(screen, xscreen->wnck_handle));
 
     for (GList *l = wnck_screen_get_windows(xscreen->wnck_screen); l != NULL; l = l->next) {
         XfwWindowX11 *window = g_object_new(XFW_TYPE_WINDOW_X11,
@@ -137,7 +137,7 @@ xfw_screen_x11_finalize(GObject *obj) {
     }
 
     // to be released last
-    g_object_unref(screen->wnck_screen);
+    g_object_unref(screen->wnck_handle);
 
     G_OBJECT_CLASS(xfw_screen_x11_parent_class)->finalize(obj);
 }
