@@ -41,6 +41,7 @@ struct _XfwWorkspaceManagerX11Private {
     GHashTable *wnck_workspaces;
     GHashTable *pending_workspace_names;
     guint workspace_prop_changed_timeout_id;
+    gint layout_token;
 };
 
 static void xfw_workspace_manager_x11_manager_init(XfwWorkspaceManagerIface *iface);
@@ -309,7 +310,8 @@ group_move_viewport(XfwWorkspaceGroup *group, gint x, gint y, GError **error) {
 static gboolean
 group_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns, GError **error) {
     XfwWorkspaceManagerX11 *manager = XFW_WORKSPACE_MANAGER_X11(xfw_workspace_group_get_workspace_manager(group));
-    if (wnck_screen_try_set_workspace_layout(manager->priv->wnck_screen, 0, rows, columns) == 0) {
+    manager->priv->layout_token = wnck_screen_try_set_workspace_layout(manager->priv->wnck_screen, manager->priv->layout_token, rows, columns);
+    if (manager->priv->layout_token == 0) {
         if (error) {
             *error = g_error_new(XFW_ERROR, XFW_ERROR_INTERNAL, "Cannot acquire ownership of the layout");
         }
