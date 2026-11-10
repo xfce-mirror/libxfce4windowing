@@ -418,7 +418,7 @@ xfw_workspace_group_set_layout(XfwWorkspaceGroup *group, gint rows, gint columns
     XfwWorkspaceGroupIface *iface;
     g_return_val_if_fail(XFW_IS_WORKSPACE_GROUP(group), FALSE);
     iface = XFW_WORKSPACE_GROUP_GET_IFACE(group);
-    return (*iface->move_viewport)(group, rows, columns, error);
+    return (*iface->set_layout)(group, rows, columns, error);
 }
 
 void
