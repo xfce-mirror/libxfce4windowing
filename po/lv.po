@@ -1,0 +1,104 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Xfce
+# This file is distributed under the same license as the libxfce4windowing.main package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# Rihards Priedītis <rprieditis@gmail.com>, 2026
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: libxfce4windowing.main\n"
+"Report-Msgid-Bugs-To: https://gitlab.xfce.org/\n"
+"POT-Creation-Date: 2025-07-19 12:45+0200\n"
+"PO-Revision-Date: 2022-12-22 11:42+0000\n"
+"Last-Translator: Rihards Priedītis <rprieditis@gmail.com>, 2026\n"
+"Language-Team: Latvian (https://app.transifex.com/xfce/teams/16840/lv/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: lv\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);\n"
+
+#: libxfce4windowing/xfw-wnck-icon.c:248
+msgid "The provided window does not have a _NET_WM_ICON or WMHints icon"
+msgstr "Norādītajam logam nav _NET_WM_ICON vai WMHints ikonas"
+
+#: libxfce4windowing/xfw-wnck-icon.c:621
+msgid "Failed to find or load an icon for the window"
+msgstr "Neizdevās atrast vai ielādēt loga ikonu"
+
+#: libxfce4windowing/xfw-workspace-dummy.c:146
+msgid "Workspace 0"
+msgstr "Darba vieta 0"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:219
+msgid "_Move"
+msgstr "_Pārvietot"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:224
+msgid "_Resize"
+msgstr "_Mainīt izmēru"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:232
+msgid "Always on _Top"
+msgstr "Vienmēr _virspusē"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:237
+msgid "_Always on Visible Workspace"
+msgstr "Vienmēr _redzamajā darba vietā"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:242
+msgid "_Only on This Workspace"
+msgstr "_Tikai šajā darba vietā"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:247
+msgid "Move to Workspace _Left"
+msgstr "Pārvietot uz darba vietu pa _kreisi"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:256
+msgid "Move to Workspace R_ight"
+msgstr "Pārvietot uz darba vietu pa _labi"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:265
+msgid "Move to Workspace _Up"
+msgstr "Pārvietot uz darba vietu a_ugšup"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:274
+msgid "Move to Workspace _Down"
+msgstr "Pārvietot uz darba vietu le_jup"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:283
+msgid "Move to Another _Workspace"
+msgstr "Pārvietot uz citu _darba vietu"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:292
+msgid "_Close"
+msgstr "_Aizvērt"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:465
+#, c-format
+msgid "Workspace _%d"
+msgstr "Darba vieta _%d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:466
+#, c-format
+msgid "Workspace %d"
+msgstr "Darba vieta %d"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:523
+msgid "Mi_nimize"
+msgstr "Mi_nimizēt"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:523
+msgid "Unmi_nimize"
+msgstr "Atjaunot no mi_nimizēta"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:528
+msgid "Ma_ximize"
+msgstr "Mak_simizēt"
+
+#: libxfce4windowingui/xfw-window-action-menu.c:528
+msgid "Unma_ximize"
+msgstr "Atjaunot no mak_simizēta"
