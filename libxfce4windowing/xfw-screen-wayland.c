@@ -376,7 +376,7 @@ registry_global(void *data, struct wl_registry *registry, uint32_t name, const c
         // corresponding xfce handle for each wlr handle, so we don't need to
         // defer binding to the xfce manager like we need to do for the wlr
         // manager.
-        wscreen->xfce_toplevel_manager = wl_registry_bind(registry, name, &xfce_foreign_toplevel_manager_private_v1_interface, MIN(version, 1));
+        wscreen->xfce_toplevel_manager = wl_registry_bind(registry, name, &xfce_foreign_toplevel_manager_private_v1_interface, MIN(version, 2));
     } else if (strcmp(wl_seat_interface.name, interface) == 0) {
         struct wl_seat *wl_seat = wl_registry_bind(wscreen->wl_registry, name, &wl_seat_interface, 2);
         XfwSeatWayland *seat = _xfw_seat_wayland_new(XFW_SCREEN(wscreen), wl_seat, name);
